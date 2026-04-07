@@ -10,7 +10,7 @@ const nohoZips = ["91601", "91602", "91603", "91604", "91605", "91606", "91607",
 function calculatePrice(zip: string, distance: number): { zone: string; price: string; note: string } | null {
   if (!zip) return null;
   if (nohoZips.includes(zip)) {
-    return { zone: "NoHo Zone", price: "$5.00", note: "Flat rate — North Hollywood local delivery via DoorDash" };
+    return { zone: "NoHo Zone", price: "$5.00", note: "Flat rate — North Hollywood local delivery" };
   }
   if (distance <= 0) return null;
   if (distance > 15) {
@@ -19,7 +19,7 @@ function calculatePrice(zip: string, distance: number): { zone: string; price: s
   const base = 9.75;
   const extra = distance > 5 ? (distance - 5) * 0.75 : 0;
   const total = base + extra;
-  return { zone: "Extended Zone", price: `$${total.toFixed(2)}`, note: `Base $9.75${extra > 0 ? ` + $${extra.toFixed(2)} distance` : ""} — Uber package delivery` };
+  return { zone: "Extended Zone", price: `$${total.toFixed(2)}`, note: `Base $9.75${extra > 0 ? ` + $${extra.toFixed(2)} distance` : ""} — extended zone delivery` };
 }
 
 export default function DeliveryPage() {
@@ -101,7 +101,7 @@ export default function DeliveryPage() {
                 <li className="flex items-center gap-2"><span className="text-white">✓</span> Valley Village</li>
                 <li className="flex items-center gap-2"><span className="text-white">✓</span> Toluca Lake</li>
               </ul>
-              <p className="text-[10px] text-white/40 mt-4 uppercase tracking-wider">Powered by DoorDash</p>
+              <p className="text-[10px] text-white/40 mt-4 uppercase tracking-wider">Same-day local delivery</p>
             </div>
 
             {/* Extended Zone */}
@@ -124,7 +124,7 @@ export default function DeliveryPage() {
                 ))}
               </div>
               <p className="text-xs text-[#2D1D0F]/40">Maximum delivery radius: 15 miles</p>
-              <p className="text-[10px] text-[#2D1D0F]/30 mt-2 uppercase tracking-wider">Uber package delivery for extended distances</p>
+              <p className="text-[10px] text-[#2D1D0F]/30 mt-2 uppercase tracking-wider">Courier delivery for extended distances</p>
             </div>
           </div>
         </div>

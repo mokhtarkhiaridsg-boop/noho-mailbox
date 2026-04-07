@@ -67,7 +67,7 @@ model DeliveryOrder {
   price        Float
   itemType     String   // "Letter" | "Package" | "Documents" | "Other"
   instructions String?
-  courier      String?  // "DoorDash" | "Uber"
+  courier      String?  // Courier/driver name
   status       String   @default("Pending") // "Pending" | "In Transit" | "Delivered"
   date         String
   createdAt    DateTime @default(now())

@@ -522,10 +522,10 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
               {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: "TODAY'S DELIVERIES", value: "3", sub: "1 pending" },
-                  { label: "IN TRANSIT", value: "1", sub: "DoorDash" },
-                  { label: "COMPLETED (WEEK)", value: "8", sub: "+3 vs last week" },
-                  { label: "DELIVERY REVENUE (MAR)", value: "$487", sub: "+22% vs Feb" },
+                  { label: "TOTAL DELIVERIES", value: String(deliveryOrders.length), sub: `${deliveryOrders.filter(d => d.status === "Pending").length} pending` },
+                  { label: "IN TRANSIT", value: String(deliveryOrders.filter(d => d.status === "In Transit").length), sub: "Active" },
+                  { label: "COMPLETED", value: String(deliveryOrders.filter(d => d.status === "Delivered").length), sub: "Delivered" },
+                  { label: "DELIVERY REVENUE", value: `$${deliveryOrders.reduce((sum, d) => sum + d.price, 0).toFixed(2)}`, sub: "All time" },
                 ].map((s) => (
                   <div key={s.label} className="bg-white rounded-xl p-5" style={{ boxShadow: "0 2px 8px rgba(45,29,15,0.06)" }}>
                     <p className="text-2xl font-black text-[#2D1D0F]">{s.value}</p>
@@ -583,10 +583,10 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
               {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: "TODAY'S ORDERS", value: "2", sub: "1 pending" },
-                  { label: "PENDING PICKUP", value: "1", sub: "David Kim" },
-                  { label: "COMPLETED (WEEK)", value: "5", sub: "+1 vs last week" },
-                  { label: "SHOP REVENUE (MAR)", value: "$342", sub: "+18% vs Feb" },
+                  { label: "TOTAL ORDERS", value: String(shopOrders.length), sub: `${shopOrders.filter(o => o.status === "Pending").length} pending` },
+                  { label: "PENDING PICKUP", value: String(shopOrders.filter(o => o.status === "Ready").length), sub: "Ready" },
+                  { label: "COMPLETED", value: String(shopOrders.filter(o => o.status === "Completed").length), sub: "Fulfilled" },
+                  { label: "SHOP REVENUE", value: `$${shopOrders.reduce((sum, o) => sum + o.total, 0).toFixed(2)}`, sub: "All time" },
                 ].map((s) => (
                   <div key={s.label} className="bg-white rounded-xl p-5" style={{ boxShadow: "0 2px 8px rgba(45,29,15,0.06)" }}>
                     <p className="text-2xl font-black text-[#2D1D0F]">{s.value}</p>

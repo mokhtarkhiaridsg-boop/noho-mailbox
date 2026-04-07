@@ -17,7 +17,7 @@ export type NotaryStatus = "Pending" | "Confirmed" | "Completed" | "Cancelled";
 
 export type DeliveryZone = "NoHo" | "Extended";
 export type DeliveryItemType = "Letter" | "Package" | "Documents" | "Other";
-export type DeliveryCourier = "DoorDash" | "Uber";
+export type DeliveryCourier = string;
 export type DeliveryStatus = "Pending" | "In Transit" | "Delivered";
 
 export type ShopOrderStatus = "Pending" | "Ready" | "Completed";

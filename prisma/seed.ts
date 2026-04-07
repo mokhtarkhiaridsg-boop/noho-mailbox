@@ -170,11 +170,11 @@ async function main() {
   // Delivery orders
   await prisma.deliveryOrder.createMany({
     data: [
-      { userId: john.id, customerName: "John Doe", phone: "(818) 555-0100", email: "john@example.com", destination: "123 Main St, LA", zip: "91601", zone: "NoHo", price: 5.0, itemType: "Package", status: "Delivered", date: "Mar 31", courier: "DoorDash" },
-      { userId: maria.id, customerName: "Maria Garcia", phone: "(818) 555-0200", email: "maria@garcia.co", destination: "456 Vine St, Hollywood", zip: "90028", zone: "Extended", price: 9.75, itemType: "Package", status: "In Transit", date: "Mar 31", courier: "DoorDash" },
-      { userId: alex.id, customerName: "Alex Chen", phone: "(818) 555-0300", email: "alex@startup.io", destination: "789 Sunset Blvd, LA", zip: "90028", zone: "Extended", price: 13.50, itemType: "Package", status: "Pending", date: "Apr 1", courier: "Uber" },
-      { userId: lisa.id, customerName: "Lisa Wang", phone: "(818) 555-0400", email: "lisa@wang.design", destination: "321 Vineland Ave, NoHo", zip: "91601", zone: "NoHo", price: 5.0, itemType: "Letter", status: "Delivered", date: "Mar 30", courier: "DoorDash" },
-      { userId: david.id, customerName: "David Kim", phone: "(818) 555-0500", email: "david@kimlaw.com", destination: "555 Burbank Blvd, Burbank", zip: "91502", zone: "Extended", price: 11.25, itemType: "Documents", status: "Delivered", date: "Mar 29", courier: "Uber" },
+      { userId: john.id, customerName: "John Doe", phone: "(818) 555-0100", email: "john@example.com", destination: "123 Main St, LA", zip: "91601", zone: "NoHo", price: 5.0, itemType: "Package", status: "Delivered", date: "Mar 31", courier: "NOHO Courier" },
+      { userId: maria.id, customerName: "Maria Garcia", phone: "(818) 555-0200", email: "maria@garcia.co", destination: "456 Vine St, Hollywood", zip: "90028", zone: "Extended", price: 9.75, itemType: "Package", status: "In Transit", date: "Mar 31", courier: "NOHO Courier" },
+      { userId: alex.id, customerName: "Alex Chen", phone: "(818) 555-0300", email: "alex@startup.io", destination: "789 Sunset Blvd, LA", zip: "90028", zone: "Extended", price: 13.50, itemType: "Package", status: "Pending", date: "Apr 1", courier: "NOHO Courier" },
+      { userId: lisa.id, customerName: "Lisa Wang", phone: "(818) 555-0400", email: "lisa@wang.design", destination: "321 Vineland Ave, NoHo", zip: "91601", zone: "NoHo", price: 5.0, itemType: "Letter", status: "Delivered", date: "Mar 30", courier: "NOHO Courier" },
+      { userId: david.id, customerName: "David Kim", phone: "(818) 555-0500", email: "david@kimlaw.com", destination: "555 Burbank Blvd, Burbank", zip: "91502", zone: "Extended", price: 11.25, itemType: "Documents", status: "Delivered", date: "Mar 29", courier: "NOHO Courier" },
     ],
   });
 
