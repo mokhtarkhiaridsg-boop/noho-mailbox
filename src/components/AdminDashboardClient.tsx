@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import {
+  syncSquareCustomers,
+  syncSquarePayments,
+  syncSquareCatalog,
+  syncAll,
+  type SyncResult,
+} from "@/app/actions/square";
 
 type Customer = {
   id: string;
@@ -57,6 +64,36 @@ type ShopOrder = {
   date: string;
 };
 
+type SyncLogEntry = {
+  id: string;
+  syncType: string;
+  status: string;
+  itemsSynced: number;
+  errors: string | null;
+  startedAt: string;
+  completedAt: string | null;
+};
+
+type SquareStatus = {
+  configured: boolean;
+  linkedCustomers: number;
+  totalPayments: number;
+  catalogItems: number;
+  totalRevenue: number;
+  recentLogs: SyncLogEntry[];
+};
+
+type PaymentRow = {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  sourceType: string | null;
+  note: string | null;
+  squareCreatedAt: string;
+  userName: string | null;
+};
+
 type Stats = {
   activeCustomers: number;
   mailToday: number;
@@ -75,6 +112,8 @@ type Props = {
   deliveryOrders: DeliveryOrder[];
   shopOrders: ShopOrder[];
   stats: Stats;
+  squareStatus: SquareStatus;
+  recentPayments: PaymentRow[];
 };
 
 const sideNav = [
@@ -86,6 +125,7 @@ const sideNav = [
   { icon: "✍️", label: "Notary", id: "notary" },
   { icon: "💰", label: "Revenue", id: "revenue" },
   { icon: "🏢", label: "Business Solutions", id: "business" },
+  { icon: "🟪", label: "Square", id: "square" },
   { icon: "⚙️", label: "Settings", id: "settings" },
 ];
 
@@ -113,9 +153,11 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export default function AdminDashboardClient({ customers, recentMail, notaryQueue, deliveryOrders, shopOrders, stats }: Props) {
+export default function AdminDashboardClient({ customers, recentMail, notaryQueue, deliveryOrders, shopOrders, stats, squareStatus, recentPayments }: Props) {
   const [tab, setTab] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const [syncResults, setSyncResults] = useState<SyncResult[] | null>(null);
 
   const filteredCustomers = customers.filter(
     (c) =>
@@ -629,16 +671,16 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             </div>
           )}
 
-          {/* ─── Revenue ─── */}
+          {/* ─── Revenue (Square-powered) ─── */}
           {tab === "revenue" && (
             <div className="space-y-6">
               <h2 className="font-black text-lg uppercase tracking-wide text-[#2D1D0F]">Revenue</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                  { label: "This Month", value: "$12,840", sub: "+14% vs last month" },
-                  { label: "YTD Total", value: "$34,620", sub: "Jan — Mar 2026" },
-                  { label: "Avg Per Customer", value: "$90", sub: "Per month" },
+                  { label: "Total Revenue (Square)", value: `$${(squareStatus.totalRevenue / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`, sub: `${squareStatus.totalPayments} payments synced` },
+                  { label: "Linked Customers", value: String(squareStatus.linkedCustomers), sub: `of ${customers.length} total` },
+                  { label: "Avg Per Payment", value: squareStatus.totalPayments > 0 ? `$${(squareStatus.totalRevenue / squareStatus.totalPayments / 100).toFixed(2)}` : "$0.00", sub: "Per transaction" },
                 ].map((r) => (
                   <div key={r.label} className="rounded-2xl p-6 bg-white" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04), 0 4px 12px rgba(45,29,15,0.05)" }}>
                     <p className="text-xs font-bold uppercase tracking-wider text-[#2D1D0F]/35 mb-2">{r.label}</p>
@@ -648,30 +690,31 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                 ))}
               </div>
 
-              {/* Monthly breakdown */}
-              <div className="rounded-2xl p-6 bg-white" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04), 0 4px 12px rgba(45,29,15,0.05)" }}>
-                <h3 className="font-black text-sm uppercase tracking-wide text-[#2D1D0F] mb-5">Monthly Breakdown</h3>
-                <div className="space-y-3">
-                  {[
-                    { month: "March", subscriptions: "$9,240", notary: "$1,200", packages: "$2,400", total: "$12,840" },
-                    { month: "February", subscriptions: "$8,150", notary: "$980", packages: "$2,100", total: "$11,230" },
-                    { month: "January", subscriptions: "$7,800", notary: "$850", packages: "$1,900", total: "$10,550" },
-                  ].map((m, i) => (
-                    <div
-                      key={m.month}
-                      className="flex items-center justify-between py-3 px-4 rounded-xl"
-                      style={{ background: i === 0 ? "rgba(247,230,194,0.4)" : "rgba(247,230,194,0.15)" }}
-                    >
-                      <span className="text-sm font-bold text-[#2D1D0F]">{m.month}</span>
-                      <div className="flex gap-6 text-xs">
-                        <span className="text-[#2D1D0F]/40">Subs: {m.subscriptions}</span>
-                        <span className="text-[#2D1D0F]/40">Notary: {m.notary}</span>
-                        <span className="text-[#2D1D0F]/40">Pkg: {m.packages}</span>
-                        <span className="font-black text-[#2D1D0F]">{m.total}</span>
-                      </div>
-                    </div>
-                  ))}
+              {/* Recent payments from Square */}
+              <div className="rounded-2xl overflow-hidden bg-white" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04), 0 4px 12px rgba(45,29,15,0.05)" }}>
+                <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(247,230,194,0.5)" }}>
+                  <h3 className="font-black text-sm uppercase tracking-wide text-[#2D1D0F]">Recent Payments</h3>
                 </div>
+                {recentPayments.length === 0 ? (
+                  <div className="px-5 py-12 text-center">
+                    <p className="text-sm text-[#2D1D0F]/40">{squareStatus.configured ? "No payments synced yet. Go to the Square tab to sync." : "Connect Square to see payment data."}</p>
+                  </div>
+                ) : (
+                  <div className="divide-y" style={{ borderColor: "rgba(247,230,194,0.3)" }}>
+                    {recentPayments.map((p) => (
+                      <div key={p.id} className="px-5 py-3 flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-bold text-[#2D1D0F]">{p.userName ?? "Guest"}</p>
+                          <p className="text-[10px] text-[#2D1D0F]/40">{p.sourceType ?? "N/A"} &middot; {new Date(p.squareCreatedAt).toLocaleDateString()}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-black text-[#2D1D0F]">${(p.amount / 100).toFixed(2)}</p>
+                          <StatusBadge status={p.status === "COMPLETED" ? "Completed" : p.status === "PENDING" ? "Pending" : p.status} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -722,6 +765,118 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* ─── Square Integration ─── */}
+          {tab === "square" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="font-black text-lg uppercase tracking-wide text-[#2D1D0F]">Square Integration</h2>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ background: squareStatus.configured ? "#22c55e" : "#ef4444" }}
+                  />
+                  <span className="text-xs font-bold text-[#2D1D0F]/50">
+                    {squareStatus.configured ? "Connected" : "Not Connected"}
+                  </span>
+                </div>
+              </div>
+
+              {!squareStatus.configured && (
+                <div
+                  className="rounded-2xl p-6 bg-white"
+                  style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04), 0 4px 12px rgba(45,29,15,0.05)", border: "2px dashed rgba(239,68,68,0.3)" }}
+                >
+                  <h3 className="font-black text-sm text-[#2D1D0F] mb-2">Setup Required</h3>
+                  <ol className="text-sm text-[#2D1D0F]/60 space-y-1 list-decimal list-inside">
+                    <li>Go to <span className="font-mono text-xs text-[#3374B5]">developer.squareup.com/apps</span></li>
+                    <li>Create or select your application</li>
+                    <li>Copy your Access Token from the Credentials tab</li>
+                    <li>Add it as <span className="font-mono text-xs">SQUARE_ACCESS_TOKEN</span> in your Vercel environment variables</li>
+                  </ol>
+                </div>
+              )}
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: "Linked Customers", value: squareStatus.linkedCustomers },
+                  { label: "Payments Synced", value: squareStatus.totalPayments },
+                  { label: "Catalog Items", value: squareStatus.catalogItems },
+                  { label: "Total Revenue", value: `$${(squareStatus.totalRevenue / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}` },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-2xl p-5 bg-white" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04), 0 4px 12px rgba(45,29,15,0.05)" }}>
+                    <p className="text-2xl font-black text-[#2D1D0F]">{s.value}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#2D1D0F]/35 mt-1">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Sync buttons */}
+              <div className="rounded-2xl p-6 bg-white space-y-4" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04), 0 4px 12px rgba(45,29,15,0.05)" }}>
+                <h3 className="font-black text-sm uppercase tracking-wide text-[#2D1D0F]">Sync Data</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { label: "Customers", action: () => startTransition(async () => { const r = await syncSquareCustomers(); setSyncResults([r]); }) },
+                    { label: "Payments", action: () => startTransition(async () => { const r = await syncSquarePayments(); setSyncResults([r]); }) },
+                    { label: "Catalog", action: () => startTransition(async () => { const r = await syncSquareCatalog(); setSyncResults([r]); }) },
+                    { label: "Sync All", action: () => startTransition(async () => { const r = await syncAll(); setSyncResults(r); }) },
+                  ].map((btn) => (
+                    <button
+                      key={btn.label}
+                      onClick={btn.action}
+                      disabled={isPending || !squareStatus.configured}
+                      className="px-4 py-3 rounded-xl text-sm font-black text-white disabled:opacity-40 transition-opacity"
+                      style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)", boxShadow: "0 2px 10px rgba(51,116,181,0.3)" }}
+                    >
+                      {isPending ? "Syncing..." : btn.label}
+                    </button>
+                  ))}
+                </div>
+
+                {syncResults && (
+                  <div className="mt-4 space-y-2">
+                    {syncResults.map((r, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between py-2.5 px-4 rounded-xl text-sm"
+                        style={{ background: r.success ? "rgba(34,139,34,0.08)" : "rgba(200,50,50,0.08)" }}
+                      >
+                        <span className="font-bold text-[#2D1D0F]">{r.syncType}</span>
+                        <span style={{ color: r.success ? "#1a8a1a" : "#c03030" }}>
+                          {r.success ? `${r.itemsSynced} synced` : r.error}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sync history */}
+              <div className="rounded-2xl overflow-hidden bg-white" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04), 0 4px 12px rgba(45,29,15,0.05)" }}>
+                <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(247,230,194,0.5)" }}>
+                  <h3 className="font-black text-sm uppercase tracking-wide text-[#2D1D0F]">Sync History</h3>
+                </div>
+                {squareStatus.recentLogs.length === 0 ? (
+                  <div className="px-5 py-8 text-center text-sm text-[#2D1D0F]/40">No syncs performed yet</div>
+                ) : (
+                  <div className="divide-y" style={{ borderColor: "rgba(247,230,194,0.3)" }}>
+                    {squareStatus.recentLogs.map((log) => (
+                      <div key={log.id} className="px-5 py-3 flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-bold text-[#2D1D0F] capitalize">{log.syncType}</p>
+                          <p className="text-[10px] text-[#2D1D0F]/40">
+                            {new Date(log.startedAt).toLocaleString()} &middot; {log.itemsSynced} items
+                          </p>
+                        </div>
+                        <StatusBadge status={log.status === "completed" ? "Completed" : log.status === "failed" ? "Expired" : "Pending"} />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}

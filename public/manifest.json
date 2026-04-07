@@ -1,0 +1,16 @@
+{
+  "name": "NOHO Mailbox",
+  "short_name": "NOHO Mail",
+  "description": "Your professional mailbox in North Hollywood. Mail scanning, package management, notary services, and same-day delivery.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7E6C2",
+  "theme_color": "#2D1D0F",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

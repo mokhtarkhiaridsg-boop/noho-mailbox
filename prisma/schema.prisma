@@ -7,24 +7,26 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  phone        String?
-  passwordHash String
-  role         String   @default("USER") // "USER" | "ADMIN"
-  plan         String?  // "Basic" | "Business" | "Premium"
-  planTerm     String?  // "3" | "6" | "14"
-  suiteNumber  String?  @unique
-  status       String   @default("Active") // "Active" | "Expired"
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String   @id @default(cuid())
+  name             String
+  email            String   @unique
+  phone            String?
+  passwordHash     String
+  role             String   @default("USER") // "USER" | "ADMIN"
+  plan             String?  // "Basic" | "Business" | "Premium"
+  planTerm         String?  // "3" | "6" | "14"
+  suiteNumber      String?  @unique
+  status           String   @default("Active") // "Active" | "Expired"
+  squareCustomerId String?  @unique // Linked Square customer ID
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  mailItems          MailItem[]
-  notaryBookings     NotaryBooking[]
-  deliveryOrders     DeliveryOrder[]
-  shopOrders         ShopOrder[]
+  mailItems           MailItem[]
+  notaryBookings      NotaryBooking[]
+  deliveryOrders      DeliveryOrder[]
+  shopOrders          ShopOrder[]
   forwardingAddresses ForwardingAddress[]
+  payments            Payment[]
 }
 
 model MailItem {
@@ -74,13 +76,14 @@ model DeliveryOrder {
 }
 
 model ShopOrder {
-  id        String   @id @default(cuid())
-  userId    String
-  items     String
-  total     Float
-  status    String   @default("Pending") // "Pending" | "Ready" | "Completed"
-  date      String
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  userId        String
+  items         String
+  total         Float
+  status        String   @default("Pending") // "Pending" | "Ready" | "Completed"
+  squareOrderId String?  @unique // Linked Square order ID
+  date          String
+  createdAt     DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -101,4 +104,43 @@ model ContactSubmission {
   service   String?
   message   String
   createdAt DateTime @default(now())
+}
+
+model Payment {
+  id               String   @id @default(cuid())
+  squarePaymentId  String   @unique
+  userId           String?
+  amount           Int      // Amount in cents
+  currency         String   @default("USD")
+  status           String   // "COMPLETED" | "PENDING" | "CANCELLED" | "FAILED"
+  sourceType       String?  // "CARD" | "CASH" | "BANK_ACCOUNT" etc.
+  receiptUrl       String?
+  note             String?
+  squareCreatedAt  String
+  syncedAt         DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model CatalogItem {
+  id              String   @id @default(cuid())
+  squareCatalogId String   @unique
+  name            String
+  description     String?
+  price           Int      // Price in cents
+  currency        String   @default("USD")
+  category        String?
+  inStock         Boolean  @default(true)
+  imageUrl        String?
+  syncedAt        DateTime @default(now())
+}
+
+model SquareSyncLog {
+  id          String   @id @default(cuid())
+  syncType    String   // "customers" | "payments" | "catalog" | "all"
+  status      String   // "running" | "completed" | "failed"
+  itemsSynced Int      @default(0)
+  errors      String?  // JSON string of errors
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
 }

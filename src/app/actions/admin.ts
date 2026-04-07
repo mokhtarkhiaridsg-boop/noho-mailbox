@@ -12,6 +12,7 @@ export async function createCustomer(formData: FormData) {
   const email = formData.get("email") as string;
   const plan = formData.get("plan") as string;
   const suiteNumber = formData.get("suite") as string;
+  const password = formData.get("password") as string;
 
   if (!name || !email || !plan || !suiteNumber) {
     return { error: "All fields are required" };
@@ -23,8 +24,9 @@ export async function createCustomer(formData: FormData) {
   const existingSuite = await prisma.user.findUnique({ where: { suiteNumber } });
   if (existingSuite) return { error: "Suite number already taken" };
 
-  // Default password for admin-created accounts
-  const passwordHash = await bcrypt.hash("changeme123", 12);
+  // Use provided password or generate a random temporary one
+  const tempPassword = password || Math.random().toString(36).slice(-10) + "A1!";
+  const passwordHash = await bcrypt.hash(tempPassword, 12);
 
   await prisma.user.create({
     data: {

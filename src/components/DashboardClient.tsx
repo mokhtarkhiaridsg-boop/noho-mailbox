@@ -37,6 +37,7 @@ type DashboardProps = {
     plan: string | null;
     planTerm: string | null;
     suiteNumber: string | null;
+    role: string;
   };
   mailItems: MailItem[];
   addresses: ForwardingAddress[];
@@ -88,6 +89,15 @@ export default function DashboardClient({ user, mailItems, addresses, bookings, 
           <Logo className="h-9 w-auto" />
         </Link>
         <div className="flex items-center gap-4">
+          {user.role === "ADMIN" && (
+            <Link
+              href="/admin"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white"
+              style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)" }}
+            >
+              🛡️ Admin Panel
+            </Link>
+          )}
           <div className="hidden sm:block text-right">
             <p className="text-xs font-bold text-[#F7E6C2]">{user.name}</p>
             <p className="text-[10px] text-[#F7E6C2]/40">{planLabel} &middot; Suite #{user.suiteNumber}</p>

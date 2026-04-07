@@ -94,11 +94,18 @@ export async function login(
     return { error: "Email and password are required" };
   }
 
+  // Look up user role to determine redirect destination
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { role: true },
+  });
+  const redirectTo = user?.role === "ADMIN" ? "/admin" : "/dashboard";
+
   try {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/dashboard",
+      redirectTo,
     });
   } catch (error) {
     if (error instanceof AuthError) {
