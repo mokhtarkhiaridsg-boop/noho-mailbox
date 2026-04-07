@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { logout } from "@/app/actions/auth";
 import { updateMailStatus, requestForward } from "@/app/actions/mail";
+import { updateProfile, addForwardingAddress, deleteForwardingAddress } from "@/app/actions/user";
 
 type MailItem = {
   id: string;
@@ -13,6 +15,8 @@ type MailItem = {
   type: string;
   status: string;
   scanned: boolean;
+  scanImageUrl: string | null;
+  label: string | null;
 };
 
 type ForwardingAddress = {
@@ -60,6 +64,12 @@ const sideNav = [
 
 export default function DashboardClient({ user, mailItems, addresses, bookings, stats }: DashboardProps) {
   const [activeTab, setActiveTab] = useState("mail");
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [showAddAddress, setShowAddAddress] = useState(false);
+  const [scanPreview, setScanPreview] = useState<string | null>(null);
 
   const initials = user.name
     .split(" ")
@@ -326,19 +336,52 @@ export default function DashboardClient({ user, mailItems, addresses, bookings, 
                       <p className="text-sm font-bold text-[#2D1D0F]">{addr.label}</p>
                       <p className="text-xs text-[#2D1D0F]/45">{addr.address}</p>
                     </div>
-                    <button className="text-xs font-bold text-[#3374B5] hover:underline">Edit</button>
+                    <button
+                      onClick={() => startTransition(async () => { await deleteForwardingAddress(addr.id); router.refresh(); })}
+                      disabled={isPending}
+                      className="text-xs font-bold text-red-400 hover:text-red-600 disabled:opacity-40"
+                    >
+                      ✕ Remove
+                    </button>
                   </div>
                 ))}
                 {addresses.length === 0 && (
                   <p className="text-sm text-[#2D1D0F]/40 text-center py-4">No saved addresses yet.</p>
                 )}
               </div>
-              <button
-                className="w-full font-bold py-3 rounded-2xl text-sm text-[#3374B5] transition-colors hover:bg-[#F7E6C2]/30"
-                style={{ border: "1px dashed rgba(51,116,181,0.3)" }}
-              >
-                + Add New Address
-              </button>
+
+              {showAddAddress ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const form = new FormData(e.currentTarget);
+                    startTransition(async () => {
+                      await addForwardingAddress({}, form);
+                      setShowAddAddress(false);
+                      router.refresh();
+                    });
+                  }}
+                  className="space-y-3 p-4 rounded-2xl"
+                  style={{ border: "1px solid rgba(247,230,194,0.6)", background: "rgba(247,230,194,0.15)" }}
+                >
+                  <input name="label" required placeholder="Label (e.g. Home, Office)" className="w-full rounded-xl border border-[#F7E6C2] px-4 py-2.5 text-sm" />
+                  <input name="address" required placeholder="Full address" className="w-full rounded-xl border border-[#F7E6C2] px-4 py-2.5 text-sm" />
+                  <div className="flex gap-2">
+                    <button type="submit" disabled={isPending} className="flex-1 py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-40" style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)" }}>
+                      {isPending ? "Adding..." : "Add Address"}
+                    </button>
+                    <button type="button" onClick={() => setShowAddAddress(false)} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-[#2D1D0F]" style={{ border: "1px solid rgba(247,230,194,0.7)" }}>Cancel</button>
+                  </div>
+                </form>
+              ) : (
+                <button
+                  onClick={() => setShowAddAddress(true)}
+                  className="w-full font-bold py-3 rounded-2xl text-sm text-[#3374B5] transition-colors hover:bg-[#F7E6C2]/30"
+                  style={{ border: "1px dashed rgba(51,116,181,0.3)" }}
+                >
+                  + Add New Address
+                </button>
+              )}
             </div>
           )}
 
@@ -382,21 +425,53 @@ export default function DashboardClient({ user, mailItems, addresses, bookings, 
               <h3 className="font-black text-sm uppercase tracking-wide text-[#2D1D0F] mb-5">Account Settings</h3>
               <div className="space-y-4">
                 {[
-                  { label: "Name", value: user.name },
-                  { label: "Email", value: user.email },
-                  { label: "Phone", value: user.phone || "Not set" },
-                  { label: "Plan", value: planLabel },
+                  { label: "Name", key: "name", value: user.name, editable: true },
+                  { label: "Email", key: "email", value: user.email, editable: true },
+                  { label: "Phone", key: "phone", value: user.phone || "Not set", editable: true },
+                  { label: "Plan", key: "plan", value: planLabel, editable: false },
                 ].map((field) => (
                   <div
                     key={field.label}
                     className="flex items-center justify-between p-4 rounded-2xl"
                     style={{ background: "rgba(247,230,194,0.25)", border: "1px solid rgba(247,230,194,0.5)" }}
                   >
-                    <div>
+                    <div className="flex-1">
                       <p className="text-xs text-[#2D1D0F]/40 font-bold uppercase tracking-wider">{field.label}</p>
-                      <p className="text-sm font-semibold text-[#2D1D0F]">{field.value}</p>
+                      {editingField === field.key ? (
+                        <div className="flex items-center gap-2 mt-1">
+                          <input
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            className="rounded-xl border border-[#F7E6C2] px-3 py-1.5 text-sm flex-1"
+                            autoFocus
+                          />
+                          <button
+                            disabled={isPending}
+                            onClick={() => {
+                              const form = new FormData();
+                              form.set("name", field.key === "name" ? editValue : user.name);
+                              form.set("email", field.key === "email" ? editValue : user.email);
+                              form.set("phone", field.key === "phone" ? editValue : user.phone || "");
+                              startTransition(async () => {
+                                await updateProfile({}, form);
+                                setEditingField(null);
+                                router.refresh();
+                              });
+                            }}
+                            className="text-xs font-bold text-white px-3 py-1.5 rounded-lg disabled:opacity-40"
+                            style={{ background: "#3374B5" }}
+                          >
+                            {isPending ? "..." : "Save"}
+                          </button>
+                          <button onClick={() => setEditingField(null)} className="text-xs font-bold text-[#2D1D0F]/40">Cancel</button>
+                        </div>
+                      ) : (
+                        <p className="text-sm font-semibold text-[#2D1D0F]">{field.value}</p>
+                      )}
                     </div>
-                    <button className="text-xs font-bold text-[#3374B5] hover:underline">Edit</button>
+                    {field.editable && editingField !== field.key && (
+                      <button onClick={() => { setEditingField(field.key); setEditValue(field.key === "phone" ? user.phone || "" : field.value); }} className="text-xs font-bold text-[#3374B5] hover:underline">Edit</button>
+                    )}
                   </div>
                 ))}
               </div>

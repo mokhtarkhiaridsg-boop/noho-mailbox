@@ -48,13 +48,16 @@ export default async function AdminPage() {
     // Recent mail
     prisma.mailItem.findMany({
       orderBy: { createdAt: "desc" },
-      take: 20,
+      take: 50,
       select: {
         id: true,
         from: true,
         type: true,
         date: true,
         status: true,
+        scanned: true,
+        scanImageUrl: true,
+        label: true,
         user: { select: { name: true, suiteNumber: true } },
       },
     }),
@@ -165,6 +168,9 @@ export default async function AdminPage() {
     type: m.type,
     date: m.date,
     status: m.status,
+    scanned: m.scanned,
+    scanImageUrl: m.scanImageUrl,
+    label: m.label,
   }));
 
   const notaryQueue = rawNotary.map((n) => ({

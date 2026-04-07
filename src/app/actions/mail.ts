@@ -34,6 +34,7 @@ export async function logMail(formData: FormData) {
   const suiteNumber = formData.get("suite") as string;
   const from = formData.get("from") as string;
   const type = formData.get("type") as string;
+  const label = (formData.get("label") as string) || null;
 
   if (!suiteNumber || !from || !type) {
     return { error: "All fields are required" };
@@ -52,6 +53,7 @@ export async function logMail(formData: FormData) {
       type,
       status: "Received",
       scanned: false,
+      label,
       date: dateStr,
     },
   });
@@ -74,6 +76,46 @@ export async function requestForward(mailItemId: string) {
     data: { status: "Forwarded" },
   });
 
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function updateMailLabel(mailItemId: string, label: string | null) {
+  const user = await verifySession();
+
+  const item = await prisma.mailItem.findUnique({ where: { id: mailItemId } });
+  if (!item) return { error: "Mail item not found" };
+
+  if (item.userId !== user.id && user.role !== "ADMIN") {
+    return { error: "Not authorized" };
+  }
+
+  await prisma.mailItem.update({
+    where: { id: mailItemId },
+    data: { label },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+export async function setScanImage(mailItemId: string, scanImageUrl: string) {
+  await verifyAdmin();
+
+  const item = await prisma.mailItem.findUnique({ where: { id: mailItemId } });
+  if (!item) return { error: "Mail item not found" };
+
+  await prisma.mailItem.update({
+    where: { id: mailItemId },
+    data: {
+      scanImageUrl,
+      scanned: true,
+      status: item.status === "Received" ? "Scanned" : item.status,
+    },
+  });
+
+  revalidatePath("/admin");
   revalidatePath("/dashboard");
   return { success: true };
 }

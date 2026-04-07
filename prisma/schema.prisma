@@ -30,14 +30,16 @@ model User {
 }
 
 model MailItem {
-  id        String   @id @default(cuid())
-  userId    String
-  from      String
-  type      String   // "Letter" | "Package"
-  status    String   @default("Received") // "Received" | "Scanned" | "Awaiting Pickup" | "Forwarded" | "Picked Up" | "Held"
-  scanned   Boolean  @default(false)
-  date      String
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  userId       String
+  from         String
+  type         String   // "Letter" | "Package"
+  status       String   @default("Received") // "Received" | "Scanned" | "Awaiting Pickup" | "Forwarded" | "Picked Up" | "Held"
+  scanned      Boolean  @default(false)
+  scanImageUrl String?  // URL to scanned document image
+  label        String?  // Custom label (e.g. "Tax Documents", "Legal", "Personal")
+  date         String
+  createdAt    DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

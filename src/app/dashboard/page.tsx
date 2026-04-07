@@ -23,7 +23,7 @@ export default async function DashboardPage() {
       prisma.mailItem.findMany({
         where: { userId: sessionUser.id },
         orderBy: { createdAt: "desc" },
-        take: 20,
+        take: 50,
         select: {
           id: true,
           from: true,
@@ -31,6 +31,8 @@ export default async function DashboardPage() {
           type: true,
           status: true,
           scanned: true,
+          scanImageUrl: true,
+          label: true,
         },
       }),
       prisma.forwardingAddress.findMany({

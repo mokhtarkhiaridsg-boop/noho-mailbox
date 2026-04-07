@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   syncSquareCustomers,
   syncSquarePayments,
@@ -10,6 +11,9 @@ import {
   syncAll,
   type SyncResult,
 } from "@/app/actions/square";
+import { updateMailStatus, logMail } from "@/app/actions/mail";
+import { updateNotaryStatus } from "@/app/actions/notary";
+import { createCustomer } from "@/app/actions/admin";
 
 type Customer = {
   id: string;
@@ -31,6 +35,9 @@ type MailItem = {
   type: string;
   date: string;
   status: string;
+  scanned: boolean;
+  scanImageUrl: string | null;
+  label: string | null;
 };
 
 type NotaryItem = {
@@ -158,6 +165,53 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   const [searchQuery, setSearchQuery] = useState("");
   const [isPending, startTransition] = useTransition();
   const [syncResults, setSyncResults] = useState<SyncResult[] | null>(null);
+  const [mailFilter, setMailFilter] = useState("All");
+  const [showLogMailModal, setShowLogMailModal] = useState(false);
+  const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
+  const [logMailType, setLogMailType] = useState("Letter");
+  const router = useRouter();
+
+  const filteredMail = mailFilter === "All"
+    ? recentMail
+    : recentMail.filter((m) => m.status === mailFilter);
+
+  async function handleMailAction(id: string, status: string) {
+    startTransition(async () => {
+      await updateMailStatus(id, status);
+      router.refresh();
+    });
+  }
+
+  async function handleLogMail(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    startTransition(async () => {
+      const result = await logMail(form);
+      if (result.success) {
+        setShowLogMailModal(false);
+        router.refresh();
+      }
+    });
+  }
+
+  async function handleAddCustomer(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    startTransition(async () => {
+      const result = await createCustomer(form);
+      if (result.success) {
+        setShowAddCustomerModal(false);
+        router.refresh();
+      }
+    });
+  }
+
+  async function handleNotaryAction(id: string, status: string) {
+    startTransition(async () => {
+      await updateNotaryStatus(id, status);
+      router.refresh();
+    });
+  }
 
   const filteredCustomers = customers.filter(
     (c) =>
@@ -389,6 +443,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                     style={{ borderColor: "rgba(247,230,194,0.7)" }}
                   />
                   <button
+                    onClick={() => setShowAddCustomerModal(true)}
                     className="px-4 py-2.5 rounded-xl text-sm font-black text-white"
                     style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)", boxShadow: "0 2px 10px rgba(51,116,181,0.3)" }}
                   >
@@ -452,12 +507,14 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                 <h2 className="font-black text-lg uppercase tracking-wide text-[#2D1D0F]">Mail & Packages</h2>
                 <div className="flex gap-2">
                   <button
+                    onClick={() => { setLogMailType("Letter"); setShowLogMailModal(true); }}
                     className="px-4 py-2.5 rounded-xl text-sm font-black text-white"
                     style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)", boxShadow: "0 2px 10px rgba(51,116,181,0.3)" }}
                   >
                     + Log Mail
                   </button>
                   <button
+                    onClick={() => { setLogMailType("Package"); setShowLogMailModal(true); }}
                     className="px-4 py-2.5 rounded-xl text-sm font-bold text-[#2D1D0F] bg-white"
                     style={{ border: "1px solid rgba(247,230,194,0.7)" }}
                   >
@@ -468,13 +525,14 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
 
               {/* Filter chips */}
               <div className="flex gap-2 flex-wrap">
-                {["All", "Awaiting Pickup", "Scanned", "Forwarded", "Held"].map((f, i) => (
+                {["All", "Awaiting Pickup", "Scanned", "Forwarded", "Held"].map((f) => (
                   <button
                     key={f}
+                    onClick={() => setMailFilter(f)}
                     className="px-3.5 py-2 rounded-full text-xs font-bold transition-all"
                     style={{
-                      background: i === 0 ? "#2D1D0F" : "white",
-                      color: i === 0 ? "#F7E6C2" : "rgba(45,29,15,0.6)",
+                      background: mailFilter === f ? "#2D1D0F" : "white",
+                      color: mailFilter === f ? "#F7E6C2" : "rgba(45,29,15,0.6)",
                       boxShadow: "0 1px 3px rgba(45,29,15,0.04)",
                     }}
                   >
@@ -484,11 +542,13 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
               </div>
 
               <div className="rounded-2xl overflow-hidden bg-white" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04), 0 4px 12px rgba(45,29,15,0.05)" }}>
-                {recentMail.map((m, i) => (
+                {filteredMail.length === 0 ? (
+                  <div className="px-5 py-12 text-center text-sm text-[#2D1D0F]/40">No mail items{mailFilter !== "All" ? ` with status "${mailFilter}"` : ""}</div>
+                ) : filteredMail.map((m, i) => (
                   <div
                     key={m.id}
                     className="flex items-center justify-between px-5 py-4 hover:bg-[#F7E6C2]/15 transition-colors"
-                    style={{ borderBottom: i < recentMail.length - 1 ? "1px solid rgba(247,230,194,0.35)" : "none" }}
+                    style={{ borderBottom: i < filteredMail.length - 1 ? "1px solid rgba(247,230,194,0.35)" : "none" }}
                   >
                     <div className="flex items-center gap-4">
                       <div
@@ -499,15 +559,18 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                       </div>
                       <div>
                         <p className="text-sm font-bold text-[#2D1D0F]">{m.from}</p>
-                        <p className="text-xs text-[#2D1D0F]/40">To: {m.customerName} (Suite #{m.suiteNumber}) · {m.date}</p>
+                        <p className="text-xs text-[#2D1D0F]/40">
+                          To: {m.customerName} (Suite #{m.suiteNumber}) · {m.date}
+                          {m.label && <span className="ml-2 px-1.5 py-0.5 rounded bg-[#3374B5]/10 text-[#3374B5] text-[10px] font-bold">{m.label}</span>}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <StatusBadge status={m.status} />
                       <div className="flex gap-1">
-                        <button className="w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-[#F7E6C2]/40 transition-colors" title="Scan">📸</button>
-                        <button className="w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-[#F7E6C2]/40 transition-colors" title="Forward">✈️</button>
-                        <button className="w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-[#F7E6C2]/40 transition-colors" title="Mark Picked Up">✅</button>
+                        <button onClick={() => handleMailAction(m.id, "Scanned")} disabled={isPending} className="w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-[#F7E6C2]/40 transition-colors disabled:opacity-40" title="Mark as Scanned">📸</button>
+                        <button onClick={() => handleMailAction(m.id, "Forwarded")} disabled={isPending} className="w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-[#F7E6C2]/40 transition-colors disabled:opacity-40" title="Forward">✈️</button>
+                        <button onClick={() => handleMailAction(m.id, "Picked Up")} disabled={isPending} className="w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-[#F7E6C2]/40 transition-colors disabled:opacity-40" title="Mark Picked Up">✅</button>
                       </div>
                     </div>
                   </div>
@@ -658,11 +721,11 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                       <p>📋 {n.type}</p>
                     </div>
                     <div className="flex gap-2 mt-4">
-                      <button className="flex-1 text-center text-xs font-bold py-2.5 rounded-xl text-white" style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)" }}>
-                        Complete
+                      <button onClick={() => handleNotaryAction(n.id, "Completed")} disabled={isPending} className="flex-1 text-center text-xs font-bold py-2.5 rounded-xl text-white disabled:opacity-40" style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)" }}>
+                        {isPending ? "..." : "Complete"}
                       </button>
-                      <button className="flex-1 text-center text-xs font-bold py-2.5 rounded-xl text-[#2D1D0F]" style={{ border: "1px solid rgba(247,230,194,0.7)" }}>
-                        Reschedule
+                      <button onClick={() => handleNotaryAction(n.id, "Cancelled")} disabled={isPending} className="flex-1 text-center text-xs font-bold py-2.5 rounded-xl text-[#2D1D0F] disabled:opacity-40" style={{ border: "1px solid rgba(247,230,194,0.7)" }}>
+                        Cancel
                       </button>
                     </div>
                   </div>
@@ -931,6 +994,81 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           )}
         </div>
       </div>
+
+      {/* ─── Log Mail Modal ─── */}
+      {showLogMailModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setShowLogMailModal(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 space-y-4" onClick={(e) => e.stopPropagation()} style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.2)" }}>
+            <h3 className="font-black text-lg text-[#2D1D0F]">Log {logMailType}</h3>
+            <form onSubmit={handleLogMail} className="space-y-3">
+              <input type="hidden" name="type" value={logMailType} />
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#2D1D0F]/40 block mb-1">Suite Number</label>
+                <input name="suite" required className="w-full rounded-xl border border-[#F7E6C2] px-4 py-2.5 text-sm" placeholder="e.g. 247" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#2D1D0F]/40 block mb-1">From (Sender)</label>
+                <input name="from" required className="w-full rounded-xl border border-[#F7E6C2] px-4 py-2.5 text-sm" placeholder="e.g. IRS, Amazon, FedEx" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#2D1D0F]/40 block mb-1">Label (Optional)</label>
+                <input name="label" className="w-full rounded-xl border border-[#F7E6C2] px-4 py-2.5 text-sm" placeholder="e.g. Tax Documents, Legal, Personal" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="submit" disabled={isPending} className="flex-1 py-3 rounded-xl text-sm font-black text-white disabled:opacity-40" style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)" }}>
+                  {isPending ? "Logging..." : `Log ${logMailType}`}
+                </button>
+                <button type="button" onClick={() => setShowLogMailModal(false)} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#2D1D0F]" style={{ border: "1px solid rgba(247,230,194,0.7)" }}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Add Customer Modal ─── */}
+      {showAddCustomerModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setShowAddCustomerModal(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 space-y-4" onClick={(e) => e.stopPropagation()} style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.2)" }}>
+            <h3 className="font-black text-lg text-[#2D1D0F]">Add Customer</h3>
+            <form onSubmit={handleAddCustomer} className="space-y-3">
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#2D1D0F]/40 block mb-1">Full Name</label>
+                <input name="name" required className="w-full rounded-xl border border-[#F7E6C2] px-4 py-2.5 text-sm" placeholder="John Doe" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#2D1D0F]/40 block mb-1">Email</label>
+                <input name="email" type="email" required className="w-full rounded-xl border border-[#F7E6C2] px-4 py-2.5 text-sm" placeholder="john@example.com" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#2D1D0F]/40 block mb-1">Plan</label>
+                <select name="plan" required className="w-full rounded-xl border border-[#F7E6C2] px-4 py-2.5 text-sm">
+                  <option value="Basic">Basic</option>
+                  <option value="Business">Business</option>
+                  <option value="Premium">Premium</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#2D1D0F]/40 block mb-1">Suite Number</label>
+                <input name="suite" required className="w-full rounded-xl border border-[#F7E6C2] px-4 py-2.5 text-sm" placeholder="e.g. 100" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#2D1D0F]/40 block mb-1">Temporary Password</label>
+                <input name="password" type="password" className="w-full rounded-xl border border-[#F7E6C2] px-4 py-2.5 text-sm" placeholder="Leave blank for auto-generated" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="submit" disabled={isPending} className="flex-1 py-3 rounded-xl text-sm font-black text-white disabled:opacity-40" style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)" }}>
+                  {isPending ? "Creating..." : "Add Customer"}
+                </button>
+                <button type="button" onClick={() => setShowAddCustomerModal(false)} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#2D1D0F]" style={{ border: "1px solid rgba(247,230,194,0.7)" }}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
