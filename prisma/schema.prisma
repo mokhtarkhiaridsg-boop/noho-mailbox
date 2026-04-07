@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  role         String   @default("USER") // "USER" | "ADMIN"
+  plan         String?  // "Basic" | "Business" | "Premium"
+  planTerm     String?  // "3" | "6" | "14"
+  suiteNumber  String?  @unique
+  status       String   @default("Active") // "Active" | "Expired"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  mailItems          MailItem[]
+  notaryBookings     NotaryBooking[]
+  deliveryOrders     DeliveryOrder[]
+  shopOrders         ShopOrder[]
+  forwardingAddresses ForwardingAddress[]
+}
+
+model MailItem {
+  id        String   @id @default(cuid())
+  userId    String
+  from      String
+  type      String   // "Letter" | "Package"
+  status    String   @default("Received") // "Received" | "Scanned" | "Awaiting Pickup" | "Forwarded" | "Picked Up" | "Held"
+  scanned   Boolean  @default(false)
+  date      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model NotaryBooking {
+  id        String   @id @default(cuid())
+  userId    String
+  date      String
+  time      String
+  type      String   // "Real Estate" | "Business Agreement" | "Legal Document"
+  status    String   @default("Pending") // "Pending" | "Confirmed" | "Completed" | "Cancelled"
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DeliveryOrder {
+  id           String   @id @default(cuid())
+  userId       String?
+  customerName String
+  phone        String
+  email        String
+  pickupAddr   String   @default("NOHO Mailbox, North Hollywood, CA")
+  destination  String
+  zip          String
+  zone         String   // "NoHo" | "Extended"
+  price        Float
+  itemType     String   // "Letter" | "Package" | "Documents" | "Other"
+  instructions String?
+  courier      String?  // "DoorDash" | "Uber"
+  status       String   @default("Pending") // "Pending" | "In Transit" | "Delivered"
+  date         String
+  createdAt    DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model ShopOrder {
+  id        String   @id @default(cuid())
+  userId    String
+  items     String
+  total     Float
+  status    String   @default("Pending") // "Pending" | "Ready" | "Completed"
+  date      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ForwardingAddress {
+  id      String @id @default(cuid())
+  userId  String
+  label   String
+  address String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  service   String?
+  message   String
+  createdAt DateTime @default(now())
+}

@@ -32,6 +32,18 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env
+
+# sqlite database
+prisma/*.db
+prisma/*.db-journal
+
+# server logs
+server.log
+server-error.log
+
+# claude
+.claude/
 
 # vercel
 .vercel
