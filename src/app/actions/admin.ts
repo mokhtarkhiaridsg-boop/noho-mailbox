@@ -377,3 +377,70 @@ export async function reactivateCustomer(userId: string) {
   revalidatePath("/dashboard");
   return { success: true };
 }
+
+export async function updateCustomerDetails(
+  userId: string,
+  data: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    suiteNumber?: string;
+    plan?: string;
+    planTerm?: string | null;
+    mailboxStatus?: string;
+    planDueDate?: string | null;
+    securityDepositCents?: number;
+    kycStatus?: string;
+  }
+) {
+  const admin = await verifyAdmin();
+
+  // Check suite conflict if changing suite
+  if (data.suiteNumber !== undefined) {
+    const conflict = await prisma.user.findFirst({
+      where: { suiteNumber: data.suiteNumber, id: { not: userId } },
+      select: { id: true },
+    });
+    if (conflict) return { error: `Suite #${data.suiteNumber} is already assigned to another customer` };
+  }
+
+  // Check email conflict if changing email
+  if (data.email) {
+    const conflict = await prisma.user.findFirst({
+      where: { email: data.email, id: { not: userId } },
+      select: { id: true },
+    });
+    if (conflict) return { error: "That email is already used by another account" };
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      ...(data.name ? { name: data.name } : {}),
+      ...(data.email ? { email: data.email } : {}),
+      ...(data.phone !== undefined ? { phone: data.phone || null } : {}),
+      ...(data.suiteNumber !== undefined ? { suiteNumber: data.suiteNumber || null } : {}),
+      ...(data.plan !== undefined ? { plan: data.plan || null } : {}),
+      ...(data.planTerm !== undefined ? { planTerm: data.planTerm || null } : {}),
+      ...(data.mailboxStatus ? { mailboxStatus: data.mailboxStatus } : {}),
+      ...(data.planDueDate !== undefined ? { planDueDate: data.planDueDate || null } : {}),
+      ...(data.securityDepositCents !== undefined ? { securityDepositCents: data.securityDepositCents } : {}),
+      ...(data.kycStatus ? { kycStatus: data.kycStatus } : {}),
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id ?? "",
+      actorRole: "ADMIN",
+      action: "updateCustomerDetails",
+      entityType: "User",
+      entityId: userId,
+      metadata: JSON.stringify(data),
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
