@@ -421,7 +421,7 @@ export default function DashboardClient({
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex gap-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8 flex gap-8 pb-24 md:pb-8">
         {/* Sidebar */}
         <aside className="hidden md:block w-60 shrink-0">
           <nav className="space-y-1.5">
@@ -510,15 +510,15 @@ export default function DashboardClient({
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          {/* Mobile tabs */}
-          <div className="md:hidden flex gap-2 overflow-x-auto pb-4 -mx-1 px-1">
+          {/* Mobile top tab selector — compact row for quick context */}
+          <div className="md:hidden flex gap-1.5 overflow-x-auto pb-3 -mx-1 px-1 scrollbar-none">
             {sideNav.map(({ Icon, label, id }) => {
               const active = activeTab === id;
               return (
                 <button
                   key={id}
                   onClick={() => setActiveTab(id)}
-                  className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-black transition-all"
+                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-black transition-all"
                   style={{
                     background: active
                       ? `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`
@@ -530,7 +530,7 @@ export default function DashboardClient({
                     border: active ? "none" : `1px solid ${BRAND.border}`,
                   }}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                   {label}
                 </button>
               );
@@ -538,21 +538,21 @@ export default function DashboardClient({
           </div>
 
           {/* Welcome line */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: BRAND.blue }}>
               Welcome back
             </p>
-            <h1 className="text-2xl sm:text-3xl font-black mt-1" style={{ color: BRAND.ink }}>
+            <h1 className="text-xl sm:text-3xl font-black mt-1" style={{ color: BRAND.ink }}>
               {user.name.split(" ")[0]}
             </h1>
-            <p className="text-xs mt-1" style={{ color: BRAND.inkSoft }}>
+            <p className="text-[11px] mt-0.5 sm:mt-1" style={{ color: BRAND.inkSoft }}>
               {planLabel}
               {user.suiteNumber ? ` · Suite #${user.suiteNumber}` : ""}
             </p>
           </div>
 
           {/* Cross-sell upsell grid */}
-          <div className="mb-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="mb-6 sm:mb-8 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
             {[
               { title: "LLC Formation", desc: "From $99 + state fee", slug: "llc" },
               { title: "Same-Day Delivery", desc: "From $5 in NoHo", slug: "delivery" },
@@ -562,7 +562,7 @@ export default function DashboardClient({
               <Link
                 key={c.slug}
                 href={`/business-solutions#${c.slug}`}
-                className="group rounded-2xl p-4 transition-all hover:-translate-y-1"
+                className="group rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all hover:-translate-y-1"
                 style={{
                   background: "white",
                   border: `1px solid ${BRAND.border}`,
@@ -570,7 +570,7 @@ export default function DashboardClient({
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-black" style={{ color: BRAND.ink }}>
+                  <p className="text-[11px] sm:text-xs font-black" style={{ color: BRAND.ink }}>
                     {c.title}
                   </p>
                   <IconChevron
@@ -586,7 +586,7 @@ export default function DashboardClient({
           </div>
 
           {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6 sm:mb-8">
             {[
               { label: "Total Mail", value: stats.totalMail, Icon: IconMail, accent: false },
               { label: "Unread", value: stats.unread, Icon: IconBell, accent: true },
@@ -595,7 +595,7 @@ export default function DashboardClient({
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="group rounded-2xl p-5 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-default"
+                className="group rounded-2xl p-4 sm:p-5 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-default"
                 style={{
                   background: stat.accent
                     ? `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`
@@ -616,7 +616,7 @@ export default function DashboardClient({
                   className="w-5 h-5 mb-3"
                   style={{ color: stat.accent ? "white" : BRAND.blue }}
                 />
-                <p className="text-3xl font-black leading-none">{stat.value}</p>
+                <p className="text-2xl sm:text-3xl font-black leading-none">{stat.value}</p>
                 <p
                   className="text-[10px] font-black uppercase tracking-[0.16em] mt-2"
                   style={{
@@ -642,7 +642,7 @@ export default function DashboardClient({
               }}
             >
               <div
-                className="px-6 py-4 flex items-center justify-between"
+                className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between"
                 style={{ borderBottom: `1px solid ${BRAND.border}` }}
               >
                 <div className="flex items-center gap-2.5">
@@ -680,14 +680,14 @@ export default function DashboardClient({
                     return (
                       <div
                         key={item.id}
-                        className="group flex items-center justify-between gap-3 px-6 py-4 transition-colors hover:bg-[#3374B5]/4"
+                        className="group px-4 sm:px-6 py-3 sm:py-4 transition-colors hover:bg-[#3374B5]/4"
                         style={{
                           borderBottom: i < mailItems.length - 1 ? `1px solid ${BRAND.border}` : "none",
                         }}
                       >
-                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                        <div className="flex items-center gap-3 sm:gap-4">
                           <div
-                            className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3"
+                            className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3"
                             style={{
                               background:
                                 item.type === "Package"
@@ -707,18 +707,32 @@ export default function DashboardClient({
                             />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm font-black truncate" style={{ color: BRAND.ink }}>
-                              {item.from}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-black truncate" style={{ color: BRAND.ink }}>
+                                {item.from}
+                              </p>
+                              {/* Mobile status dot */}
+                              <span
+                                className="sm:hidden w-2 h-2 rounded-full shrink-0"
+                                style={{ background: c.dot }}
+                                title={item.status}
+                              />
+                            </div>
                             <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkFaint }}>
                               {item.date} · {item.type}
                               {item.label ? ` · ${item.label}` : ""}
                             </p>
+                            {/* Mobile status text */}
+                            <span
+                              className="sm:hidden inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider mt-1"
+                              style={{ color: c.fg }}
+                            >
+                              {item.status}
+                            </span>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
+                          {/* Desktop status badge */}
                           <span
-                            className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full"
+                            className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shrink-0"
                             style={{ background: c.bg, color: c.fg }}
                           >
                             <span
@@ -727,57 +741,58 @@ export default function DashboardClient({
                             />
                             {item.status}
                           </span>
-                          <div className="flex gap-1">
-                            {item.scanned && item.scanImageUrl && (
-                              <button
-                                onClick={() => setScanPreview(item.scanImageUrl)}
-                                className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5"
-                                style={{
-                                  background: BRAND.blueSoft,
-                                  color: BRAND.blueDeep,
-                                }}
-                                title="View Scan"
-                              >
-                                <IconEye className="w-4 h-4" />
-                              </button>
-                            )}
+                        </div>
+                        {/* Action buttons — grid on mobile for bigger touch targets */}
+                        <div className="flex gap-1.5 mt-2 sm:mt-0 ml-[52px] sm:ml-0">
+                          {item.scanned && item.scanImageUrl && (
                             <button
-                              disabled={isPending}
-                              onClick={() => runAction("Scan requested", () => requestScan(item.id))}
-                              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                              onClick={() => setScanPreview(item.scanImageUrl)}
+                              className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5"
                               style={{
                                 background: BRAND.blueSoft,
                                 color: BRAND.blueDeep,
                               }}
-                              title="Request Scan"
+                              title="View Scan"
                             >
-                              <IconScan className="w-4 h-4" />
+                              <IconEye className="w-4 h-4" />
                             </button>
-                            <button
-                              disabled={isPending}
-                              onClick={() => runAction("Forward requested", () => requestForward(item.id))}
-                              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-50"
-                              style={{
-                                background: BRAND.blueSoft,
-                                color: BRAND.blueDeep,
-                              }}
-                              title="Request Forward"
-                            >
-                              <IconForward className="w-4 h-4" />
-                            </button>
-                            <button
-                              disabled={isPending}
-                              onClick={() => runAction("Discard requested", () => requestDiscard(item.id))}
-                              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-50"
-                              style={{
-                                background: "rgba(200,50,50,0.08)",
-                                color: "#c03030",
-                              }}
-                              title="Request Discard"
-                            >
-                              <IconTrash className="w-4 h-4" />
-                            </button>
-                          </div>
+                          )}
+                          <button
+                            disabled={isPending}
+                            onClick={() => runAction("Scan requested", () => requestScan(item.id))}
+                            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                            style={{
+                              background: BRAND.blueSoft,
+                              color: BRAND.blueDeep,
+                            }}
+                            title="Request Scan"
+                          >
+                            <IconScan className="w-4 h-4" />
+                          </button>
+                          <button
+                            disabled={isPending}
+                            onClick={() => runAction("Forward requested", () => requestForward(item.id))}
+                            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                            style={{
+                              background: BRAND.blueSoft,
+                              color: BRAND.blueDeep,
+                            }}
+                            title="Request Forward"
+                          >
+                            <IconForward className="w-4 h-4" />
+                          </button>
+                          <button
+                            disabled={isPending}
+                            onClick={() => runAction("Discard requested", () => requestDiscard(item.id))}
+                            className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                            style={{
+                              background: "rgba(200,50,50,0.08)",
+                              color: "#c03030",
+                            }}
+                            title="Request Discard"
+                          >
+                            <IconTrash className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     );
@@ -821,21 +836,21 @@ export default function DashboardClient({
                 packages.map((pkg) => (
                   <div
                     key={pkg.id}
-                    className="group flex items-center justify-between p-6 transition-colors hover:bg-[#3374B5]/4"
+                    className="group p-4 sm:p-6 transition-colors hover:bg-[#3374B5]/4"
                     style={{ borderBottom: `1px solid ${BRAND.border}` }}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4">
                       <div
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
                         style={{
                           background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
                           boxShadow: "0 6px 18px rgba(51,116,181,0.32)",
                         }}
                       >
-                        <IconPackage className="w-6 h-6 text-white" />
+                        <IconPackage className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                       </div>
-                      <div>
-                        <p className="text-base font-black" style={{ color: BRAND.ink }}>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm sm:text-base font-black truncate" style={{ color: BRAND.ink }}>
                           {pkg.from}
                         </p>
                         <p className="text-xs mt-0.5" style={{ color: BRAND.inkSoft }}>
@@ -843,11 +858,11 @@ export default function DashboardClient({
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mt-3 ml-[60px] sm:ml-[72px]">
                       <button
                         disabled={isPending}
                         onClick={() => runAction("Pickup requested", () => requestPickup(pkg.id))}
-                        className="px-4 py-2.5 rounded-xl text-xs font-black text-white transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black text-white transition-all hover:-translate-y-0.5 disabled:opacity-50"
                         style={{
                           background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
                           boxShadow: "0 4px 14px rgba(51,116,181,0.32)",
@@ -858,7 +873,7 @@ export default function DashboardClient({
                       <button
                         disabled={isPending}
                         onClick={() => runAction("Forward requested", () => requestForward(pkg.id))}
-                        className="px-4 py-2.5 rounded-xl text-xs font-black transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black transition-all hover:-translate-y-0.5 disabled:opacity-50"
                         style={{
                           background: BRAND.blueSoft,
                           color: BRAND.blueDeep,
@@ -923,7 +938,7 @@ export default function DashboardClient({
           {/* Forwarding tab */}
           {activeTab === "forwarding" && (
             <div
-              className="rounded-3xl p-6"
+              className="rounded-2xl sm:rounded-3xl p-4 sm:p-6"
               style={{
                 background: "white",
                 border: `1px solid ${BRAND.border}`,
@@ -1346,10 +1361,52 @@ export default function DashboardClient({
         </div>
       )}
 
-      {/* Toast */}
+      {/* ─── Mobile Bottom Tab Bar ─── */}
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-stretch justify-around"
+        style={{
+          background: "rgba(255,255,255,0.92)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderTop: `1px solid ${BRAND.border}`,
+          boxShadow: "0 -4px 20px rgba(14,34,64,0.06)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
+        {[
+          { Icon: IconMail, label: "Mail", id: "mail" },
+          { Icon: IconPackage, label: "Pkgs", id: "packages" },
+          { Icon: IconWallet, label: "Wallet", id: "wallet" },
+          { Icon: IconMessage, label: "Msgs", id: "messages" },
+          { Icon: IconSettings, label: "More", id: "settings" },
+        ].map(({ Icon, label, id }) => {
+          const active = activeTab === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className="flex flex-col items-center justify-center gap-0.5 py-2 px-3 min-w-[56px] transition-colors"
+              style={{ color: active ? BRAND.blue : BRAND.inkFaint }}
+            >
+              <Icon className="w-5 h-5" strokeWidth={active ? 2.2 : 1.6} />
+              <span className={`text-[9px] font-bold ${active ? "font-black" : ""}`}>
+                {label}
+              </span>
+              {active && (
+                <span
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+                  style={{ background: BRAND.blue }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Toast — raised above bottom bar on mobile */}
       {toast && (
         <div
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2.5 px-4 py-3 rounded-2xl"
+          className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2.5 px-4 py-3 rounded-2xl"
           style={{
             background: BRAND.ink,
             color: "white",
