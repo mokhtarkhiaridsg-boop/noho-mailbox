@@ -556,6 +556,11 @@ export default function DashboardClient({
             <p className="text-[11px] mt-0.5 sm:mt-1" style={{ color: BRAND.inkSoft }}>
               {planLabel}
               {user.suiteNumber ? ` · Suite #${user.suiteNumber}` : ""}
+              {user.planDueDate && (
+                <span style={{ color: planStatus !== "active" ? (isBlocked ? "#b91c1c" : "#c2410c") : BRAND.inkFaint }}>
+                  {" · Renews "}{user.planDueDate}
+                </span>
+              )}
             </p>
           </div>
 
@@ -1238,6 +1243,14 @@ export default function DashboardClient({
                   { label: "Email", key: "email", value: user.email, editable: true },
                   { label: "Phone", key: "phone", value: user.phone || "Not set", editable: true },
                   { label: "Plan", key: "plan", value: planLabel, editable: false },
+                  {
+                    label: "Renewal Date",
+                    key: "renewalDate",
+                    value: user.planDueDate
+                      ? `${user.planDueDate}${planStatus !== "active" ? (isBlocked ? " — SUSPENDED" : " — renew now") : ""}`
+                      : "Not set",
+                    editable: false,
+                  },
                 ].map((field) => (
                   <div
                     key={field.label}

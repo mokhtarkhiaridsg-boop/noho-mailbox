@@ -718,7 +718,16 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                           <td className="px-4 py-3.5 text-xs text-text-light/50">{c.mailCount} mail · {c.packageCount} pkg</td>
                           <td className="px-4 py-3.5 text-xs text-text-light/40">{new Date(c.createdAt).toLocaleDateString()}</td>
                           <td className="px-4 py-3.5">
-                            <button onClick={() => setViewCustomer(c)} className="text-xs font-bold text-accent hover:underline">View</button>
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => setViewCustomer(c)} className="text-xs font-bold text-accent hover:underline">View</button>
+                              <span className="text-text-light/20">|</span>
+                              <button
+                                onClick={() => setViewCustomer(c)}
+                                className="text-xs font-bold text-white bg-[#3374B5] hover:bg-[#2960a0] px-2.5 py-1 rounded-lg transition-colors"
+                              >
+                                Edit
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
