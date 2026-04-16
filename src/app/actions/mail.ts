@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { verifySession, verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
+import { getPlanStatus } from "@/lib/plan";
 
 export async function updateMailStatus(mailItemId: string, newStatus: string) {
   const user = await verifySession();
@@ -91,6 +92,18 @@ async function authorizeMailItem(mailItemId: string) {
   if (!item || item.userId !== user.id) {
     return { error: "Not authorized" as const };
   }
+
+  // Block requests when the plan is expired past the 10-day grace period
+  if (user.role !== "ADMIN") {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { planDueDate: true },
+    });
+    if (getPlanStatus(dbUser?.planDueDate) === "expired") {
+      return { error: "Your plan has expired. Please renew to continue using mailbox services." as const };
+    }
+  }
+
   return { user, item };
 }
 

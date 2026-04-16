@@ -133,8 +133,8 @@ export default async function PendingPage() {
                 Security deposit required
               </p>
               <p className="mt-1 text-[13px] text-amber-700/80">
-                Visit our store at 5152 Vineland Ave, North Hollywood to pay the $50
-                security deposit. You can also call us at (818) 308-4161 for payment options.
+                Visit our store at 5062 Lankershim Blvd, North Hollywood to pay the $50
+                security deposit. You can also call us at (818) 765-1539 for payment options.
               </p>
             </div>
           )}

@@ -288,3 +288,92 @@ export async function updateCustomerPlanDueDate(userId: string, dueDate: string)
   revalidatePath("/admin");
   return { success: true };
 }
+
+export async function updateMailboxStatus(
+  userId: string,
+  status: "Pending" | "Assigned" | "Active" | "Suspended"
+) {
+  const admin = await verifyAdmin();
+  await prisma.user.update({
+    where: { id: userId },
+    data: { mailboxStatus: status },
+  });
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id ?? "",
+      actorRole: "ADMIN",
+      action: "setMailboxStatus",
+      entityType: "User",
+      entityId: userId,
+      metadata: JSON.stringify({ status }),
+    },
+  });
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function updateCustomerPlan(
+  userId: string,
+  plan: string,
+  planTerm: string | null
+) {
+  const admin = await verifyAdmin();
+  await prisma.user.update({
+    where: { id: userId },
+    data: { plan: plan || null, planTerm: planTerm || null },
+  });
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id ?? "",
+      actorRole: "ADMIN",
+      action: "updatePlan",
+      entityType: "User",
+      entityId: userId,
+      metadata: JSON.stringify({ plan, planTerm }),
+    },
+  });
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function suspendCustomer(userId: string) {
+  const admin = await verifyAdmin();
+  await prisma.user.update({
+    where: { id: userId },
+    data: { status: "Expired", mailboxStatus: "Suspended" },
+  });
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id ?? "",
+      actorRole: "ADMIN",
+      action: "suspendCustomer",
+      entityType: "User",
+      entityId: userId,
+    },
+  });
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function reactivateCustomer(userId: string) {
+  const admin = await verifyAdmin();
+  await prisma.user.update({
+    where: { id: userId },
+    data: { status: "Active", mailboxStatus: "Active" },
+  });
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id ?? "",
+      actorRole: "ADMIN",
+      action: "reactivateCustomer",
+      entityType: "User",
+      entityId: userId,
+    },
+  });
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { success: true };
+}

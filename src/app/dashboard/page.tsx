@@ -39,6 +39,7 @@ export default async function DashboardPage() {
           totpEnabled: true,
           mailboxStatus: true,
           kycStatus: true,
+          planDueDate: true,
         },
       }),
       prisma.mailItem.findMany({
@@ -175,7 +176,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
-      user={user}
+      user={{ ...user, planDueDate: user.planDueDate ?? null }}
       mailItems={mailItems}
       addresses={addresses}
       bookings={bookings}

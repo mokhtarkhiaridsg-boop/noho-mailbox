@@ -56,6 +56,7 @@ import { scheduleDelivery } from "@/app/actions/delivery";
 import { payInvoice } from "@/app/actions/invoices";
 import { requestNewKey } from "@/app/actions/keys";
 import { enable2FA, confirm2FA, disable2FA } from "@/app/actions/security";
+import { getPlanStatus, planStatusMessage } from "@/lib/plan";
 
 type MailItem = {
   id: string;
@@ -153,6 +154,7 @@ type DashboardProps = {
     totpEnabled: boolean;
     mailboxStatus: string;
     kycStatus: string;
+    planDueDate: string | null;
   };
   mailItems: MailItem[];
   addresses: ForwardingAddress[];
@@ -256,6 +258,12 @@ export default function DashboardClient({
   const planLabel = user.plan
     ? `${user.plan} Box${user.planTerm ? ` — ${user.planTerm} Months` : ""}`
     : "Free Member";
+
+  const planStatus = getPlanStatus(user.planDueDate);
+  const planMsg = user.planDueDate && planStatus !== "active"
+    ? planStatusMessage(user.planDueDate, planStatus)
+    : null;
+  const isBlocked = planStatus === "expired";
 
   const packages = mailItems.filter(
     (m) =>
@@ -550,6 +558,51 @@ export default function DashboardClient({
               {user.suiteNumber ? ` · Suite #${user.suiteNumber}` : ""}
             </p>
           </div>
+
+          {/* Plan expiration banner */}
+          {planMsg && (
+            <div
+              className="mb-5 rounded-2xl p-4 flex gap-3 items-start"
+              style={{
+                background: isBlocked
+                  ? "rgba(200,40,40,0.08)"
+                  : planStatus === "grace"
+                  ? "rgba(220,100,0,0.08)"
+                  : "rgba(200,160,0,0.08)",
+                border: `1px solid ${isBlocked ? "rgba(200,40,40,0.22)" : planStatus === "grace" ? "rgba(220,100,0,0.22)" : "rgba(200,160,0,0.22)"}`,
+              }}
+            >
+              <span className="text-lg leading-none mt-0.5">
+                {isBlocked ? "🚫" : planStatus === "grace" ? "⚠️" : "⏰"}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p
+                  className="text-sm font-bold"
+                  style={{
+                    color: isBlocked ? "#b91c1c" : planStatus === "grace" ? "#c2410c" : "#92400e",
+                  }}
+                >
+                  {isBlocked ? "Service suspended" : planStatus === "grace" ? "Grace period active" : "Plan renewing soon"}
+                </p>
+                <p
+                  className="text-[12px] mt-0.5"
+                  style={{
+                    color: isBlocked ? "#b91c1c" : planStatus === "grace" ? "#c2410c" : "#92400e",
+                    opacity: 0.8,
+                  }}
+                >
+                  {planMsg}
+                </p>
+                <Link
+                  href="/contact"
+                  className="inline-block mt-2 text-[11px] font-bold underline underline-offset-2"
+                  style={{ color: isBlocked ? "#b91c1c" : "#c2410c" }}
+                >
+                  Contact us to renew →
+                </Link>
+              </div>
+            </div>
+          )}
 
           {/* Cross-sell upsell grid */}
           <div className="mb-6 sm:mb-8 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">

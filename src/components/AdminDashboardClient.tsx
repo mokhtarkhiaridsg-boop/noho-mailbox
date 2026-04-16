@@ -21,6 +21,10 @@ import {
   updateSecurityDeposit,
   updateCustomerSuite,
   updateCustomerPlanDueDate,
+  updateMailboxStatus,
+  updateCustomerPlan,
+  suspendCustomer,
+  reactivateCustomer,
 } from "@/app/actions/admin";
 import { logout } from "@/app/actions/auth";
 
@@ -28,7 +32,9 @@ type Customer = {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   plan: string;
+  planTerm?: string | null;
   suiteNumber: string;
   status: string;
   createdAt: string;
@@ -36,6 +42,9 @@ type Customer = {
   packageCount: number;
   mailboxStatus?: string;
   kycStatus?: string;
+  kycForm1583Url?: string | null;
+  kycIdImageUrl?: string | null;
+  kycIdImage2Url?: string | null;
   securityDepositCents?: number;
   planDueDate?: string | null;
 };
@@ -1654,60 +1663,190 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
 
       {/* ─── View Customer Modal ─── */}
       {viewCustomer && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setViewCustomer(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 space-y-4 max-h-[90vh] overflow-y-auto" style={{ boxShadow: "0 8px 40px rgba(26,23,20,0.2)" }} onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <h3 className="font-black text-lg uppercase tracking-wide text-text-light">Customer Details</h3>
-              <button onClick={() => setViewCustomer(null)} className="text-text-light/30 hover:text-text-light text-lg">✕</button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.55)" }} onClick={() => setViewCustomer(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-lg mx-4 max-h-[92vh] overflow-y-auto" style={{ boxShadow: "0 8px 40px rgba(26,23,20,0.22)" }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="sticky top-0 bg-white z-10 px-6 pt-5 pb-4 border-b border-[#e8e5e0] flex items-center justify-between">
+              <div>
+                <h3 className="font-black text-base text-text-light">{viewCustomer.name}</h3>
+                <p className="text-[11px] text-text-light/50 mt-0.5">{viewCustomer.email}{viewCustomer.phone ? ` · ${viewCustomer.phone}` : ""}</p>
+              </div>
+              <button onClick={() => setViewCustomer(null)} className="text-text-light/30 hover:text-text-light text-xl leading-none">✕</button>
             </div>
-            <div className="space-y-3">
-              {[
-                { label: "Name", value: viewCustomer.name },
-                { label: "Email", value: viewCustomer.email },
-                { label: "Plan", value: viewCustomer.plan },
-                { label: "Status", value: viewCustomer.status },
-                { label: "Mail Items", value: String(viewCustomer.mailCount) },
-                { label: "Packages", value: String(viewCustomer.packageCount) },
-                { label: "Member Since", value: new Date(viewCustomer.createdAt).toLocaleDateString() },
-              ].map((f) => (
-                <div key={f.label} className="flex justify-between p-3 rounded-xl" style={{ background: "rgba(232,229,224,0.25)" }}>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/40">{f.label}</span>
-                  <span className="text-sm font-semibold text-text-light">{f.value}</span>
+
+            <div className="px-6 py-5 space-y-4">
+              {/* ── Info row ── */}
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "Member Since", value: new Date(viewCustomer.createdAt).toLocaleDateString() },
+                  { label: "Mail Items", value: String(viewCustomer.mailCount) },
+                  { label: "Packages", value: String(viewCustomer.packageCount) },
+                ].map((f) => (
+                  <div key={f.label} className="p-3 rounded-xl text-center" style={{ background: "rgba(232,229,224,0.25)" }}>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-text-light/40 mb-1">{f.label}</p>
+                    <p className="text-sm font-bold text-text-light">{f.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Mailbox Status ── */}
+              <div className="p-3 rounded-xl space-y-2" style={{ background: "rgba(232,229,224,0.25)" }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/40">Mailbox Status</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    viewCustomer.mailboxStatus === "Active" ? "bg-green-50 text-green-700" :
+                    viewCustomer.mailboxStatus === "Suspended" ? "bg-red-50 text-red-700" :
+                    "bg-amber-50 text-amber-700"
+                  }`}>{viewCustomer.mailboxStatus ?? "—"}</span>
                 </div>
-              ))}
+                <div className="flex gap-2 flex-wrap">
+                  {(["Active", "Pending", "Suspended"] as const).map((s) => (
+                    <button
+                      key={s}
+                      disabled={isPending || viewCustomer.mailboxStatus === s}
+                      onClick={() => startTransition(async () => {
+                        await updateMailboxStatus(viewCustomer.id, s);
+                        setViewCustomer((prev) => prev ? { ...prev, mailboxStatus: s } : null);
+                        router.refresh();
+                      })}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-40 ${
+                        viewCustomer.mailboxStatus === s
+                          ? "bg-[#3374B5] text-white cursor-default"
+                          : "bg-white border border-[#e8e5e0] text-text-light hover:border-[#3374B5]"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── Plan / Tier ── */}
+              <div className="p-3 rounded-xl space-y-2" style={{ background: "rgba(232,229,224,0.25)" }}>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/40 block">Plan & Term</span>
+                <div className="flex gap-2 flex-wrap">
+                  {(["Basic", "Business", "Premium"] as const).map((p) => (
+                    <button
+                      key={p}
+                      disabled={isPending || viewCustomer.plan === p}
+                      onClick={() => startTransition(async () => {
+                        await updateCustomerPlan(viewCustomer.id, p, viewCustomer.planTerm ?? null);
+                        setViewCustomer((prev) => prev ? { ...prev, plan: p } : null);
+                        router.refresh();
+                      })}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-40 ${
+                        viewCustomer.plan === p
+                          ? "bg-[#3374B5] text-white cursor-default"
+                          : "bg-white border border-[#e8e5e0] text-text-light hover:border-[#3374B5]"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                  <select
+                    value={viewCustomer.planTerm ?? ""}
+                    onChange={(e) => startTransition(async () => {
+                      await updateCustomerPlan(viewCustomer.id, viewCustomer.plan, e.target.value || null);
+                      setViewCustomer((prev) => prev ? { ...prev, planTerm: e.target.value || null } : null);
+                      router.refresh();
+                    })}
+                    className="px-2 py-1 rounded-lg border border-[#e8e5e0] text-xs font-bold bg-white text-text-light focus:outline-none focus:border-[#3374B5]"
+                  >
+                    <option value="">No term</option>
+                    <option value="3">3 months</option>
+                    <option value="6">6 months</option>
+                    <option value="14">14 months</option>
+                  </select>
+                </div>
+              </div>
 
               {/* ── Box Number ── */}
               <div className="p-3 rounded-xl" style={{ background: "rgba(232,229,224,0.25)" }}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/40">Box Number</span>
-                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/40 block mb-2">Box Number</span>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     defaultValue={viewCustomer.suiteNumber}
                     id="edit-suite-input"
+                    placeholder="e.g. 24"
                     className="flex-1 rounded-lg border border-[#162d3a]/15 px-3 py-1.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#3374B5]/30"
                   />
                   <button
                     onClick={() => {
                       const input = document.getElementById("edit-suite-input") as HTMLInputElement;
-                      if (input && input.value !== viewCustomer.suiteNumber) {
-                        startTransition(async () => {
-                          const result = await updateCustomerSuite(viewCustomer.id, input.value);
-                          if (result.error) alert(result.error);
-                          else { setViewCustomer(null); router.refresh(); }
-                        });
-                      }
+                      startTransition(async () => {
+                        const result = await updateCustomerSuite(viewCustomer.id, input.value);
+                        if (result.error) alert(result.error);
+                        else { setViewCustomer((prev) => prev ? { ...prev, suiteNumber: input.value } : null); router.refresh(); }
+                      });
                     }}
                     disabled={isPending}
-                    className="px-3 py-1.5 rounded-lg bg-[#3374B5] text-white text-xs font-bold disabled:opacity-50 hover:bg-[#2960a0] transition-colors"
-                  >
-                    Save
-                  </button>
+                    className="px-3 py-1.5 rounded-lg bg-[#3374B5] text-white text-xs font-bold disabled:opacity-50 hover:bg-[#2960a0]"
+                  >Save</button>
                 </div>
               </div>
 
-              {/* ── Due Date ── */}
+              {/* ── KYC Status ── */}
+              <div className="p-3 rounded-xl space-y-2" style={{ background: "rgba(232,229,224,0.25)" }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/40">KYC Status</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    viewCustomer.kycStatus === "Approved" ? "bg-green-50 text-green-700" :
+                    viewCustomer.kycStatus === "Submitted" ? "bg-blue-50 text-blue-700" :
+                    viewCustomer.kycStatus === "Rejected" ? "bg-red-50 text-red-700" :
+                    "bg-gray-50 text-gray-500"
+                  }`}>{viewCustomer.kycStatus ?? "Pending"}</span>
+                </div>
+                {(viewCustomer.kycForm1583Url || viewCustomer.kycIdImageUrl || viewCustomer.kycIdImage2Url) && (
+                  <div className="flex gap-2 flex-wrap">
+                    {viewCustomer.kycForm1583Url && (
+                      <a href={viewCustomer.kycForm1583Url} target="_blank" rel="noopener noreferrer"
+                        className="text-[11px] font-bold text-[#3374B5] hover:underline bg-blue-50 px-3 py-1 rounded-lg">
+                        📄 Form 1583
+                      </a>
+                    )}
+                    {viewCustomer.kycIdImageUrl && (
+                      <a href={viewCustomer.kycIdImageUrl} target="_blank" rel="noopener noreferrer"
+                        className="text-[11px] font-bold text-[#3374B5] hover:underline bg-blue-50 px-3 py-1 rounded-lg">
+                        🪪 Primary ID
+                      </a>
+                    )}
+                    {viewCustomer.kycIdImage2Url && (
+                      <a href={viewCustomer.kycIdImage2Url} target="_blank" rel="noopener noreferrer"
+                        className="text-[11px] font-bold text-[#3374B5] hover:underline bg-blue-50 px-3 py-1 rounded-lg">
+                        🪪 Second ID
+                      </a>
+                    )}
+                  </div>
+                )}
+                {viewCustomer.kycStatus === "Submitted" && (
+                  <div className="flex gap-2">
+                    <button
+                      disabled={isPending}
+                      onClick={() => startTransition(async () => {
+                        await reviewKyc(viewCustomer.id, "Approved");
+                        setViewCustomer((prev) => prev ? { ...prev, kycStatus: "Approved" } : null);
+                        router.refresh();
+                      })}
+                      className="flex-1 px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-bold hover:bg-green-700 disabled:opacity-50"
+                    >✓ Approve KYC</button>
+                    <button
+                      disabled={isPending}
+                      onClick={() => {
+                        const note = prompt("Rejection reason (optional):");
+                        startTransition(async () => {
+                          await reviewKyc(viewCustomer.id, "Rejected", note ?? undefined);
+                          setViewCustomer((prev) => prev ? { ...prev, kycStatus: "Rejected" } : null);
+                          router.refresh();
+                        });
+                      }}
+                      className="flex-1 px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700 disabled:opacity-50"
+                    >✗ Reject</button>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Plan Due Date ── */}
               <div className="p-3 rounded-xl" style={{ background: "rgba(232,229,224,0.25)" }}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/40">Plan Due Date</span>
@@ -1727,15 +1866,13 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                       const input = document.getElementById("edit-duedate-input") as HTMLInputElement;
                       startTransition(async () => {
                         await updateCustomerPlanDueDate(viewCustomer.id, input.value);
-                        setViewCustomer(null);
+                        setViewCustomer((prev) => prev ? { ...prev, planDueDate: input.value || null } : null);
                         router.refresh();
                       });
                     }}
                     disabled={isPending}
-                    className="px-3 py-1.5 rounded-lg bg-[#3374B5] text-white text-xs font-bold disabled:opacity-50 hover:bg-[#2960a0] transition-colors"
-                  >
-                    Set
-                  </button>
+                    className="px-3 py-1.5 rounded-lg bg-[#3374B5] text-white text-xs font-bold disabled:opacity-50 hover:bg-[#2960a0]"
+                  >Set</button>
                 </div>
               </div>
 
@@ -1749,24 +1886,53 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                       <button
                         onClick={() => startTransition(async () => {
                           await updateSecurityDeposit(viewCustomer.id, 5000);
-                          setViewCustomer(null);
+                          setViewCustomer((prev) => prev ? { ...prev, securityDepositCents: 5000 } : null);
                           router.refresh();
                         })}
                         disabled={isPending}
                         className="text-[10px] font-bold text-[#3374B5] hover:underline"
-                      >
-                        Mark Paid ($50)
-                      </button>
+                      >Mark Paid ($50)</button>
                     </div>
                   ) : (
                     <span className="text-xs font-semibold text-green-700">${((viewCustomer.securityDepositCents ?? 0) / 100).toFixed(2)} paid</span>
                   )}
                 </div>
               </div>
+
+              {/* ── Danger zone ── */}
+              <div className="p-3 rounded-xl border border-red-200/60 space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-red-400">Account Actions</p>
+                <div className="flex gap-2">
+                  <button
+                    disabled={isPending}
+                    onClick={() => {
+                      if (!confirm(`Suspend ${viewCustomer.name}? They will lose mailbox access.`)) return;
+                      startTransition(async () => {
+                        await suspendCustomer(viewCustomer.id);
+                        setViewCustomer(null);
+                        router.refresh();
+                      });
+                    }}
+                    className="flex-1 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-bold hover:bg-red-100 disabled:opacity-50"
+                  >⛔ Suspend</button>
+                  <button
+                    disabled={isPending}
+                    onClick={() => startTransition(async () => {
+                      await reactivateCustomer(viewCustomer.id);
+                      setViewCustomer(null);
+                      router.refresh();
+                    })}
+                    className="flex-1 px-3 py-1.5 rounded-lg bg-green-50 border border-green-200 text-green-700 text-xs font-bold hover:bg-green-100 disabled:opacity-50"
+                  >✓ Reactivate</button>
+                </div>
+              </div>
             </div>
-            <button onClick={() => setViewCustomer(null)} className="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-text-light" style={{ border: "1px solid rgba(232,229,224,0.7)" }}>
-              Close
-            </button>
+
+            <div className="px-6 pb-5">
+              <button onClick={() => setViewCustomer(null)} className="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-text-light" style={{ border: "1px solid rgba(232,229,224,0.7)" }}>
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
