@@ -315,8 +315,16 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   const [logMailForm, setLogMailForm] = useState({ suite: "", from: "", type: "Letter" });
   const [addCustomerForm, setAddCustomerForm] = useState({ name: "", email: "", plan: "Basic", suite: "" });
 
-  // View Customer modal
+  // View / Edit Customer modal
   const [viewCustomer, setViewCustomer] = useState<Customer | null>(null);
+  const [editSuite, setEditSuite] = useState("");
+  const [editDueDate, setEditDueDate] = useState("");
+
+  function openCustomer(c: Customer) {
+    setViewCustomer(c);
+    setEditSuite(c.suiteNumber ?? "");
+    setEditDueDate(c.planDueDate ?? "");
+  }
 
   // New Appointment modal
   const [showNewApptModal, setShowNewApptModal] = useState(false);
@@ -719,10 +727,10 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                           <td className="px-4 py-3.5 text-xs text-text-light/40">{new Date(c.createdAt).toLocaleDateString()}</td>
                           <td className="px-4 py-3.5">
                             <div className="flex items-center gap-2">
-                              <button onClick={() => setViewCustomer(c)} className="text-xs font-bold text-accent hover:underline">View</button>
+                              <button onClick={() => openCustomer(c)} className="text-xs font-bold text-accent hover:underline">View</button>
                               <span className="text-text-light/20">|</span>
                               <button
-                                onClick={() => setViewCustomer(c)}
+                                onClick={() => openCustomer(c)}
                                 className="text-xs font-bold text-white bg-[#3374B5] hover:bg-[#2960a0] px-2.5 py-1 rounded-lg transition-colors"
                               >
                                 Edit
@@ -1775,21 +1783,18 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    defaultValue={viewCustomer.suiteNumber}
-                    id="edit-suite-input"
+                    value={editSuite}
+                    onChange={(e) => setEditSuite(e.target.value)}
                     placeholder="e.g. 24"
                     className="flex-1 rounded-lg border border-[#162d3a]/15 px-3 py-1.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#3374B5]/30"
                   />
                   <button
-                    onClick={() => {
-                      const input = document.getElementById("edit-suite-input") as HTMLInputElement;
-                      startTransition(async () => {
-                        const result = await updateCustomerSuite(viewCustomer.id, input.value);
-                        if (result.error) alert(result.error);
-                        else { setViewCustomer((prev) => prev ? { ...prev, suiteNumber: input.value } : null); router.refresh(); }
-                      });
-                    }}
-                    disabled={isPending}
+                    onClick={() => startTransition(async () => {
+                      const result = await updateCustomerSuite(viewCustomer.id, editSuite);
+                      if (result.error) alert(result.error);
+                      else { setViewCustomer((prev) => prev ? { ...prev, suiteNumber: editSuite } : null); router.refresh(); }
+                    })}
+                    disabled={isPending || editSuite === viewCustomer.suiteNumber}
                     className="px-3 py-1.5 rounded-lg bg-[#3374B5] text-white text-xs font-bold disabled:opacity-50 hover:bg-[#2960a0]"
                   >Save</button>
                 </div>
@@ -1858,30 +1863,65 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
               {/* ── Plan Due Date ── */}
               <div className="p-3 rounded-xl" style={{ background: "rgba(232,229,224,0.25)" }}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/40">Plan Due Date</span>
-                  {viewCustomer.planDueDate && new Date(viewCustomer.planDueDate) < new Date() && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-light/40">Plan Due / Renewal Date</span>
+                  {editDueDate && new Date(editDueDate) < new Date() && (
                     <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">OVERDUE</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
                   <input
                     type="date"
-                    defaultValue={viewCustomer.planDueDate ?? ""}
-                    id="edit-duedate-input"
+                    value={editDueDate}
+                    onChange={(e) => setEditDueDate(e.target.value)}
                     className="flex-1 rounded-lg border border-[#162d3a]/15 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3374B5]/30"
                   />
                   <button
-                    onClick={() => {
-                      const input = document.getElementById("edit-duedate-input") as HTMLInputElement;
-                      startTransition(async () => {
-                        await updateCustomerPlanDueDate(viewCustomer.id, input.value);
-                        setViewCustomer((prev) => prev ? { ...prev, planDueDate: input.value || null } : null);
-                        router.refresh();
-                      });
-                    }}
+                    onClick={() => startTransition(async () => {
+                      await updateCustomerPlanDueDate(viewCustomer.id, editDueDate);
+                      setViewCustomer((prev) => prev ? { ...prev, planDueDate: editDueDate || null } : null);
+                      router.refresh();
+                    })}
                     disabled={isPending}
                     className="px-3 py-1.5 rounded-lg bg-[#3374B5] text-white text-xs font-bold disabled:opacity-50 hover:bg-[#2960a0]"
-                  >Set</button>
+                  >Save</button>
+                  {editDueDate && (
+                    <button
+                      onClick={() => {
+                        setEditDueDate("");
+                        startTransition(async () => {
+                          await updateCustomerPlanDueDate(viewCustomer.id, "");
+                          setViewCustomer((prev) => prev ? { ...prev, planDueDate: null } : null);
+                          router.refresh();
+                        });
+                      }}
+                      disabled={isPending}
+                      className="px-3 py-1.5 rounded-lg border border-[#e8e5e0] text-xs font-bold text-text-light/50 disabled:opacity-50 hover:border-red-300 hover:text-red-500"
+                    >Clear</button>
+                  )}
+                </div>
+                {/* Quick-set renewal shortcuts */}
+                <div className="flex gap-1.5 mt-2 flex-wrap">
+                  {[
+                    { label: "+1 mo", months: 1 },
+                    { label: "+3 mo", months: 3 },
+                    { label: "+6 mo", months: 6 },
+                    { label: "+1 yr", months: 12 },
+                  ].map(({ label, months }) => (
+                    <button
+                      key={label}
+                      onClick={() => {
+                        const base = editDueDate && new Date(editDueDate) > new Date()
+                          ? new Date(editDueDate)
+                          : new Date();
+                        base.setMonth(base.getMonth() + months);
+                        const newDate = base.toISOString().slice(0, 10);
+                        setEditDueDate(newDate);
+                      }}
+                      className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#3374B5]/10 text-[#3374B5] hover:bg-[#3374B5]/20 transition-colors"
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
