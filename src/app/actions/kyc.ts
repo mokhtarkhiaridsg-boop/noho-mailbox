@@ -4,16 +4,18 @@ import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/dal";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { put } from "@vercel/blob";
 
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB per file
 
-async function fileToDataUrl(file: File): Promise<string> {
+async function uploadToBlob(file: File, prefix: string): Promise<string> {
   if (file.size > MAX_BYTES) {
     throw new Error(`${file.name} is larger than 8 MB`);
   }
-  const buf = Buffer.from(await file.arrayBuffer());
-  const mime = file.type || "application/octet-stream";
-  return `data:${mime};base64,${buf.toString("base64")}`;
+  const ext = file.name.split(".").pop() ?? "bin";
+  const filename = `${prefix}-${Date.now()}.${ext}`;
+  const blob = await put(filename, file, { access: "public" });
+  return blob.url;
 }
 
 export async function submitKyc(formData: FormData) {
@@ -33,12 +35,11 @@ export async function submitKyc(formData: FormData) {
     throw new Error("A second form of ID is required (CMRA compliance)");
   }
 
-  const filesToProcess: Promise<string>[] = [
-    fileToDataUrl(form1583),
-    fileToDataUrl(idImage),
-    fileToDataUrl(idImage2),
-  ];
-  const [form1583Url, idImageUrl, idImage2Url] = await Promise.all(filesToProcess);
+  const [form1583Url, idImageUrl, idImage2Url] = await Promise.all([
+    uploadToBlob(form1583, `kyc/${userId}/form1583`),
+    uploadToBlob(idImage, `kyc/${userId}/id-primary`),
+    uploadToBlob(idImage2, `kyc/${userId}/id-secondary`),
+  ]);
 
   await prisma.user.update({
     where: { id: userId },

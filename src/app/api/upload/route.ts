@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { randomUUID } from "crypto";
 
 export const dynamic = "force-dynamic";
@@ -35,24 +34,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "File too large (max 10MB)" }, { status: 400 });
     }
 
-    // Generate unique filename
     const ext = file.name.split(".").pop() || "jpg";
-    const filename = `${randomUUID()}.${ext}`;
+    const filename = `scans/${randomUUID()}.${ext}`;
 
-    // On Vercel, use /tmp for file storage (ephemeral)
-    // For production, you'd use S3/Cloudflare R2/etc.
-    const uploadDir = path.join("/tmp", "uploads", "scans");
-    await mkdir(uploadDir, { recursive: true });
+    const blob = await put(filename, file, { access: "public" });
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const filePath = path.join(uploadDir, filename);
-    await writeFile(filePath, buffer);
-
-    // Return the URL path — on Vercel this is temporary
-    // In production, upload to cloud storage and return permanent URL
-    const url = `/api/uploads/scans/${filename}`;
-
-    return NextResponse.json({ url, filename });
+    return NextResponse.json({ url: blob.url, filename: blob.pathname });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
