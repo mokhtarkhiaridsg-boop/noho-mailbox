@@ -1,406 +1,314 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { MailboxIcon, HeartBubbleIcon, EnvelopeIcon, DeliveryTruckIcon, ShoppingBagIcon, StarIcon, ShieldIcon } from "@/components/BrandIcons";
+import { HomepageClient } from "./homepage-client";
+
+export const metadata: Metadata = {
+  title: "NOHO Mailbox — Private Mailbox Rental in North Hollywood, CA",
+  description:
+    "Get a real street address with mail scanning, package alerts, same-day delivery, notary services, and business formation. Starting at $50 for 3 months in North Hollywood, CA.",
+  openGraph: {
+    title: "NOHO Mailbox — Private Mailbox Rental in North Hollywood, CA",
+    description:
+      "A real street address, digital mail scanning, forwarding, package alerts, notary, and business formation — all in one neighborhood shop.",
+    url: "https://nohomailbox.org",
+  },
+  alternates: { canonical: "https://nohomailbox.org" },
+};
+
+const localBusinessJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://nohomailbox.org",
+  name: "NOHO Mailbox",
+  image: "https://nohomailbox.org/icon.svg",
+  url: "https://nohomailbox.org",
+  telephone: "+1-818-765-1539",
+  priceRange: "$",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "5250 Lankershim Blvd",
+    addressLocality: "North Hollywood",
+    addressRegion: "CA",
+    postalCode: "91601",
+    addressCountry: "US",
+  },
+  geo: { "@type": "GeoCoordinates", latitude: 34.1664, longitude: -118.3776 },
+  openingHoursSpecification: [
+    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday"], opens: "09:00", closes: "17:30" },
+    { "@type": "OpeningHoursSpecification", dayOfWeek: "Saturday", opens: "10:00", closes: "13:30" },
+  ],
+  sameAs: [],
+  description: "Private mailbox rental, mail scanning, package handling, same-day delivery, notary, and business formation in North Hollywood, CA.",
+};
 
 const steps = [
-  {
-    num: "01",
-    title: "Bring 2 Valid IDs",
-    desc: "Two government-issued photo IDs — required by USPS for any mailbox rental.",
-  },
-  {
-    num: "02",
-    title: "Sign USPS Form 1583",
-    desc: "A quick federal form authorizing us to receive mail on your behalf. We provide it in-store.",
-  },
-  {
-    num: "03",
-    title: "Pick Up Your Keys",
-    desc: "Walk out with your keys and a real street address active on the spot.",
-  },
+  { num: "01", title: "Bring 2 Valid IDs", desc: "Two government-issued photo IDs — required by USPS for any mailbox rental.", icon: "id" },
+  { num: "02", title: "Sign Form 1583", desc: "A quick federal form authorizing us to receive mail on your behalf.", icon: "form" },
+  { num: "03", title: "Get Your Keys", desc: "Walk out with keys and a real street address — active on the spot.", icon: "key" },
 ];
 
 const plans = [
   {
-    name: "Basic Box",
-    tagline: "For personal use",
-    prices: [
-      { term: "3 Months", price: "$50" },
-      { term: "6 Months", price: "$95" },
-      { term: "14 Months", price: "$160" },
-    ],
+    name: "Basic", tagline: "Personal use", popular: false,
+    price: "$50", term: "for 3 months",
     features: ["Real street address", "Mail scanning", "Package notifications", "In-store pickup"],
-    highlight: false,
-    dark: false,
   },
   {
-    name: "Business Box",
-    tagline: "Most popular",
-    prices: [
-      { term: "3 Months", price: "$80" },
-      { term: "6 Months", price: "$150" },
-      { term: "14 Months", price: "$230" },
-    ],
-    features: ["Real street address", "Mail scanning", "Package notifications", "In-store pickup", "Mail forwarding"],
-    highlight: true,
-    dark: false,
+    name: "Business", tagline: "Most popular", popular: true,
+    price: "$80", term: "for 3 months",
+    features: ["Everything in Basic", "Mail forwarding", "Priority handling", "Dedicated suite"],
   },
   {
-    name: "Premium Box",
-    tagline: "Everything included",
-    prices: [
-      { term: "3 Months", price: "$95" },
-      { term: "6 Months", price: "$180" },
-      { term: "14 Months", price: "$295" },
-    ],
-    features: ["Real street address", "Mail scanning", "Package notifications", "In-store pickup", "Mail forwarding", "Priority processing", "Notary discount"],
-    highlight: false,
-    dark: true,
+    name: "Premium", tagline: "Everything included", popular: false,
+    price: "$95", term: "for 3 months",
+    features: ["Everything in Business", "Priority processing", "Notary discount", "Concierge support"],
   },
 ];
 
 const perks = [
-  { icon: <MailboxIcon className="w-8 h-8" />, title: "Real Street Address", sub: "Not a P.O. Box — a real suite number" },
-  { icon: <EnvelopeIcon className="w-8 h-6" />, title: "Mail Scanning", sub: "See every piece online, anytime" },
-  { icon: <HeartBubbleIcon className="w-7 h-7" />, title: "Package Alerts", sub: "SMS + email the moment it arrives" },
-  { icon: <EnvelopeIcon className="w-8 h-6" />, title: "Mail Forwarding", sub: "Ship anywhere, domestic or international" },
-  { icon: <HeartBubbleIcon className="w-7 h-7" />, title: "Notary On-Site", sub: "Book same-day — no wait" },
-  { icon: <MailboxIcon className="w-8 h-8" />, title: "Secure Storage", sub: "Held safely until you pick up" },
+  { title: "Real Street Address", sub: "Not a P.O. Box — a real suite number you can use for business" },
+  { title: "Digital Mail Scanning", sub: "See every piece online before visiting" },
+  { title: "Package Alerts", sub: "Instant SMS + email when packages arrive" },
+  { title: "Mail Forwarding", sub: "Ship anywhere, domestic or international" },
+  { title: "Walk-in Notary", sub: "Same-day appointments, no wait" },
+  { title: "Secure Storage", sub: "Held safely in your private suite" },
+];
+
+const stats = [
+  { value: "4,500+", label: "Packages handled" },
+  { value: "99.9%", label: "Delivery accuracy" },
+  { value: "< 2hr", label: "Avg same-day delivery" },
+  { value: "5.0", label: "Google rating" },
 ];
 
 export default function Home() {
   return (
     <>
-      {/* ─── Hero ─── */}
-      <section
-        className="relative overflow-hidden pt-20 pb-32 px-4 text-center"
-        style={{
-          background:
-            "radial-gradient(ellipse at 15% 90%, rgba(51,116,181,0.35) 0%, transparent 52%), radial-gradient(ellipse at 85% 10%, rgba(247,230,194,0.08) 0%, transparent 45%), linear-gradient(155deg, #1a1108 0%, #2D1D0F 50%, #0d1e35 100%)",
-        }}
-      >
-        {/* Animated gradient orbs */}
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-20 blur-[100px] pointer-events-none" style={{ background: "radial-gradient(circle, #3374B5, transparent)" }} />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[400px] h-[400px] rounded-full opacity-15 blur-[80px] pointer-events-none" style={{ background: "radial-gradient(circle, #F7E6C2, transparent)" }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }} />
 
-        <div className="max-w-3xl mx-auto relative z-10 perspective-container">
-          {/* Logo with float animation */}
-          <div className="animate-scale-in">
-            <div className="animate-float inline-block">
-              <Logo className="mx-auto w-full max-w-[260px] sm:max-w-[300px] md:max-w-[360px] mb-10 drop-shadow-2xl" />
-            </div>
+      {/* ─── Hero ─── */}
+      <section className="relative overflow-hidden min-h-[90vh] flex items-center justify-center px-5 py-32 bg-bg-dark">
+        {/* Gradient orbs */}
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-20 blur-[120px] pointer-events-none bg-accent" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[400px] h-[400px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.03] pointer-events-none border border-white" />
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="animate-scale-in mb-8">
+            <Logo className="mx-auto w-full max-w-[200px] drop-shadow-2xl animate-float" />
           </div>
 
-          <h1 className="animate-fade-up delay-200 text-4xl md:text-5xl lg:text-6xl font-black uppercase text-[#F7E6C2] leading-[1.05] tracking-tight mb-5">
-            Your Neighborhood<br />Mailbox — Smarter.
-          </h1>
-          <p className="animate-fade-up delay-300 text-[#F7E6C2]/55 text-base md:text-lg max-w-md mx-auto mb-11 leading-relaxed">
-            A real street address. Mail scanning, forwarding, package alerts,
-            notary, and full business launch — all in one neighborhood spot.
+          <p className="animate-fade-up delay-100 text-accent font-semibold text-xs uppercase tracking-[0.25em] mb-5">
+            Private Mailbox Rental &middot; North Hollywood, CA
           </p>
 
-          <div className="animate-fade-up delay-400 flex flex-col sm:flex-row gap-4 justify-center">
+          <h1 className="animate-fade-up delay-200 text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold text-text-dark leading-[1.05] tracking-tight mb-6">
+            Your Address.<br />
+            <span className="gradient-text">Your Business.</span><br />
+            Your Privacy.
+          </h1>
+
+          <p className="animate-fade-up delay-300 text-text-dark-muted text-lg max-w-lg mx-auto mb-10 leading-relaxed">
+            A real street address with mail scanning, forwarding, same-day delivery, notary, and full business formation — all from one neighborhood shop.
+          </p>
+
+          <div className="animate-fade-up delay-400 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="#plans"
-              className="font-black px-9 py-4 rounded-full text-base text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl animate-shimmer"
-              style={{
-                background: "linear-gradient(135deg, #3374B5 0%, #2055A0 50%, #3374B5 100%)",
-                backgroundSize: "200% 100%",
-                boxShadow: "0 4px 24px rgba(51,116,181,0.5), 0 1px 0 rgba(255,255,255,0.15) inset",
-              }}
+              className="group relative font-semibold px-8 py-4 rounded-xl text-white text-[15px] bg-accent hover:bg-accent-hover transition-all duration-300 shadow-[0_4px_20px_rgba(51,116,181,0.4)] overflow-hidden"
             >
+              <span className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
               See Plans & Pricing
             </Link>
             <Link
-              href="/contact"
-              className="font-bold px-9 py-4 rounded-full text-base text-[#F7E6C2] transition-all duration-300 hover:bg-white/10 hover:-translate-y-1"
-              style={{ border: "1px solid rgba(247,230,194,0.2)" }}
+              href="/shipping"
+              className="font-semibold px-8 py-4 rounded-xl text-text-dark text-[15px] border border-white/[0.12] hover:bg-white/[0.06] transition-all duration-300"
             >
-              Visit Us
+              Get a Shipping Quote
             </Link>
           </div>
         </div>
-
-        {/* Decorative brand icons floating in hero */}
-        <div className="absolute top-20 left-8 opacity-10 animate-float delay-200 hidden lg:block">
-          <EnvelopeIcon className="w-16 h-12" />
-        </div>
-        <div className="absolute bottom-32 right-12 opacity-10 animate-float delay-500 hidden lg:block">
-          <HeartBubbleIcon className="w-14 h-14" />
-        </div>
       </section>
 
-      {/* ─── Trust Badges ─── */}
-      <section className="py-6 px-4 bg-[#F7E6C2] border-b border-[#2D1D0F]/5">
-        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-6 md:gap-10">
-          {[
-            { icon: <ShieldIcon className="w-5 h-5" />, label: "USPS Approved" },
-            { icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none"><rect x="3" y="3" width="18" height="18" rx="4" fill="#F7E6C2" stroke="#2D1D0F" strokeWidth="1.5"/><path d="M8 12 L11 15 L16 9" stroke="#3374B5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, label: "Secure Handling" },
-            { icon: <StarIcon className="w-5 h-5" />, label: "5-Star Reviews" },
-            { icon: <HeartBubbleIcon className="w-5 h-5" />, label: "Locally Owned" },
-          ].map((badge) => (
-            <div key={badge.label} className="flex items-center gap-2">
-              {badge.icon}
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#2D1D0F]/50">{badge.label}</span>
+      {/* ─── Carrier Trust Marquee ─── */}
+      <div className="bg-bg-dark border-y border-white/[0.06] py-4 overflow-hidden">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {[...Array(2)].map((_, set) => (
+            <div key={set} className="flex items-center gap-12 px-6">
+              {["USPS", "UPS", "FedEx", "DHL", "Same-Day Local"].map((c) => (
+                <span key={`${set}-${c}`} className="text-sm font-semibold text-text-dark-muted/40 tracking-wide">{c}</span>
+              ))}
+              {["Mail Scanning", "Forwarding", "Notary", "Business Formation", "Shipping Supplies"].map((s) => (
+                <span key={`${set}-${s}`} className="text-sm font-semibold text-text-dark-muted/40 tracking-wide">{s}</span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ─── Stats ─── */}
+      <section className="bg-bg-dark py-16 px-5">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+          {stats.map((s) => (
+            <div key={s.label} className="text-center">
+              <p className="text-3xl md:text-4xl font-extrabold text-text-dark mb-1">{s.value}</p>
+              <p className="text-xs text-text-dark-muted uppercase tracking-wider font-medium">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ─── 3 Steps ─── */}
-      <section className="py-24 px-4 bg-[#F7E6C2] perspective-container">
+      <section className="py-24 px-5 bg-bg-light">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-[#3374B5] font-bold text-xs uppercase tracking-[0.2em] mb-3">
-            Simple Setup
-          </p>
-          <h2 className="text-3xl md:text-4xl font-black uppercase text-[#2D1D0F] text-center mb-4">
+          <p className="text-center text-accent font-semibold text-xs uppercase tracking-[0.2em] mb-3">Simple Setup</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-text-light text-center mb-4 tracking-tight">
             Get a Mailbox in Minutes
           </h2>
-          <p className="text-center text-[#2D1D0F]/45 mb-14 max-w-sm mx-auto text-sm leading-relaxed">
+          <p className="text-center text-text-light-muted mb-14 max-w-sm mx-auto text-[15px] leading-relaxed">
             Walk in, sign one form, walk out with keys. That&apos;s it.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-            {/* connector line */}
-            <div className="hidden md:block absolute top-[3.25rem] left-[calc(16.67%+2.5rem)] right-[calc(16.67%+2.5rem)] h-px"
-              style={{ background: "linear-gradient(90deg, #F7E6C2 0%, rgba(51,116,181,0.4) 50%, #F7E6C2 100%)" }} />
-
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {steps.map((s, i) => (
               <div
                 key={s.num}
-                className="relative rounded-3xl p-8 text-center bg-white hover-tilt"
-                style={{
-                  boxShadow: "0 2px 4px rgba(45,29,15,0.04), 0 8px 24px rgba(45,29,15,0.08), 0 24px 56px rgba(45,29,15,0.06)",
-                  border: "1px solid rgba(247,230,194,0.7)",
-                }}
+                className="relative rounded-2xl p-7 bg-surface-light border border-border-light hover-lift transition-all duration-300"
+                style={{ boxShadow: "var(--shadow-md)" }}
               >
-                <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 relative z-10"
-                  style={
-                    i === 1
-                      ? {
-                          background: "linear-gradient(135deg, #3374B5, #1e4d8c)",
-                          boxShadow: "0 6px 20px rgba(51,116,181,0.5)",
-                        }
-                      : {
-                          background: "linear-gradient(135deg, #F7E6C2, #e8c97a)",
-                          boxShadow: "0 6px 16px rgba(247,230,194,0.8)",
-                        }
-                  }
-                >
-                  {i === 0 && <span className="text-2xl">🪪</span>}
-                  {i === 1 && <EnvelopeIcon className="w-7 h-5" />}
-                  {i === 2 && <span className="text-2xl">🗝️</span>}
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 text-white font-bold text-lg ${i === 1 ? "bg-accent shadow-[0_4px_16px_rgba(51,116,181,0.35)]" : "bg-text-light"}`}>
+                  {s.num}
                 </div>
-                <span className="block text-xs font-black uppercase tracking-[0.18em] text-[#3374B5] mb-2">
-                  Step {s.num}
-                </span>
-                <h3 className="font-black text-lg uppercase text-[#2D1D0F] mb-3 leading-tight">
-                  {s.title}
-                </h3>
-                <p className="text-[#2D1D0F]/50 text-sm leading-relaxed">{s.desc}</p>
+                <h3 className="font-bold text-lg text-text-light mb-2">{s.title}</h3>
+                <p className="text-sm text-text-light-muted leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── New Services Spotlight ─── */}
-      <section
-        className="py-20 px-4"
-        style={{ background: "radial-gradient(ellipse at 80% 80%, rgba(51,116,181,0.15) 0%, transparent 55%), linear-gradient(155deg, #2D1D0F 0%, #1a1108 100%)" }}
-      >
+      {/* ─── Services Spotlight ─── */}
+      <section className="py-24 px-5 bg-bg-dark">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-[#3374B5] font-bold text-xs uppercase tracking-[0.2em] mb-3">New</p>
-          <h2 className="text-3xl md:text-4xl font-black uppercase text-[#F7E6C2] text-center mb-12">
-            More Ways We Help
+          <p className="text-center text-accent font-semibold text-xs uppercase tracking-[0.2em] mb-3">Services</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-text-dark text-center mb-12 tracking-tight">
+            More Than a Mailbox
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div
-              className="bg-white rounded-2xl p-8 hover-tilt animate-fade-up"
-              style={{ boxShadow: "0 8px 32px rgba(45,29,15,0.08)" }}
-            >
-              <DeliveryTruckIcon className="w-14 h-14 mb-4" />
-              <h3 className="font-black text-xl uppercase text-[#2D1D0F] mb-2">Same-Day Delivery</h3>
-              <p className="text-sm text-[#2D1D0F]/60 mb-5 leading-relaxed">
-                Get your mail and packages delivered to your door. NoHo zone flat rate starting at $5. Open to everyone.
-              </p>
-              <Link href="/delivery" className="text-[#3374B5] font-bold text-sm inline-flex items-center gap-1 hover:gap-2 transition-all">
-                Learn More <span>→</span>
-              </Link>
-            </div>
-            <div
-              className="bg-white rounded-2xl p-8 hover-tilt animate-fade-up delay-200"
-              style={{ boxShadow: "0 8px 32px rgba(45,29,15,0.08)" }}
-            >
-              <ShoppingBagIcon className="w-14 h-14 mb-4" />
-              <h3 className="font-black text-xl uppercase text-[#2D1D0F] mb-2">Shipping Supplies</h3>
-              <p className="text-sm text-[#2D1D0F]/60 mb-5 leading-relaxed">
-                Custom envelopes, boxes, bubble wrap, and more. Branded NOHO items available. Everything you need in one spot.
-              </p>
-              <Link href="/shop" className="text-[#3374B5] font-bold text-sm inline-flex items-center gap-1 hover:gap-2 transition-all">
-                Browse Shop <span>→</span>
-              </Link>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {[
+              {
+                icon: <DeliveryTruckIcon className="w-10 h-10" />,
+                title: "Same-Day Delivery",
+                desc: "Get mail and packages delivered to your door. NoHo zone flat rate starting at $5. Open to everyone — no membership required.",
+                href: "/delivery",
+                cta: "Learn More",
+              },
+              {
+                icon: <ShoppingBagIcon className="w-10 h-10" />,
+                title: "Ship Anything",
+                desc: "Compare rates from USPS, UPS, FedEx, and DHL in seconds. Get the best price with dimensions and weight. Print labels in-store.",
+                href: "/shipping",
+                cta: "Get a Quote",
+              },
+            ].map((s) => (
+              <div
+                key={s.title}
+                className="rounded-2xl p-7 bg-white/[0.04] border border-white/[0.08] hover-lift transition-all duration-300"
+              >
+                <div className="mb-4">{s.icon}</div>
+                <h3 className="font-bold text-xl text-text-dark mb-2">{s.title}</h3>
+                <p className="text-sm text-text-dark-muted leading-relaxed mb-5">{s.desc}</p>
+                <Link href={s.href} className="text-accent font-semibold text-sm inline-flex items-center gap-1.5 hover:gap-2.5 transition-all">
+                  {s.cta} <span className="text-lg">→</span>
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ─── Plans ─── */}
-      <section id="plans" className="py-24 px-4 perspective-container" style={{ background: "linear-gradient(180deg, #F7E6C2 0%, #efe0c5 100%)" }}>
-        <div className="max-w-6xl mx-auto">
-          <p className="text-center text-[#3374B5] font-bold text-xs uppercase tracking-[0.2em] mb-3">
-            Pricing
-          </p>
-          <h2 className="text-3xl md:text-4xl font-black uppercase text-[#2D1D0F] text-center mb-4">
-            Pick Your Box
+      <section id="plans" className="py-24 px-5 bg-bg-light">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-center text-accent font-semibold text-xs uppercase tracking-[0.2em] mb-3">Pricing</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-text-light text-center mb-4 tracking-tight">
+            Pick Your Plan
           </h2>
-          <p className="text-center text-[#2D1D0F]/50 mb-14 max-w-xs mx-auto text-sm leading-relaxed">
+          <p className="text-center text-text-light-muted mb-14 max-w-sm mx-auto text-[15px] leading-relaxed">
             All plans include a real street address — not a P.O. Box.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-            {plans.map((plan, idx) => {
-              const isHighlight = plan.highlight;
-              const isDark = plan.dark;
-
-              const bgStyle = isHighlight
-                ? {
-                    background: "linear-gradient(160deg, #3374B5 0%, #1a3f7a 100%)",
-                    boxShadow:
-                      "0 0 0 1px rgba(255,255,255,0.12) inset, 0 4px 24px rgba(51,116,181,0.35), 0 24px 64px rgba(51,116,181,0.3), 0 56px 96px rgba(51,116,181,0.14)",
-                  }
-                : isDark
-                ? {
-                    background: "linear-gradient(160deg, #2D1D0F 0%, #1a1108 100%)",
-                    boxShadow:
-                      "0 0 0 1px rgba(247,230,194,0.1) inset, 0 4px 20px rgba(45,29,15,0.2), 0 24px 56px rgba(45,29,15,0.18)",
-                  }
-                : {
-                    background: "white",
-                    boxShadow:
-                      "0 2px 4px rgba(45,29,15,0.04), 0 10px 28px rgba(45,29,15,0.08), 0 28px 64px rgba(45,29,15,0.06)",
-                    border: "1px solid rgba(247,230,194,0.9)",
-                  };
-
-              const textColor = isHighlight || isDark ? "rgba(255,255,255,0.85)" : "rgba(45,29,15,0.7)";
-              const mutedColor = isHighlight || isDark ? "rgba(255,255,255,0.5)" : "rgba(45,29,15,0.4)";
-              const headingColor = isHighlight || isDark ? "#F7E6C2" : "#2D1D0F";
-              const rowBg0 = isHighlight ? "rgba(255,255,255,0.18)" : isDark ? "rgba(247,230,194,0.1)" : "rgba(247,230,194,0.55)";
-              const rowBgOther = isHighlight ? "rgba(255,255,255,0.08)" : isDark ? "rgba(247,230,194,0.05)" : "rgba(247,230,194,0.25)";
-              const checkBg = isHighlight || isDark ? "rgba(255,255,255,0.2)" : "#3374B5";
-              const ctaBg = isHighlight ? "white" : isDark ? "#3374B5" : "#3374B5";
-              const ctaColor = isHighlight ? "#3374B5" : "white";
-              const ctaShadow = isHighlight
-                ? "0 4px 16px rgba(255,255,255,0.15)"
-                : "0 4px 16px rgba(51,116,181,0.35)";
-
-              return (
-                <div
-                  key={plan.name}
-                  className={`rounded-3xl p-8 flex flex-col hover-tilt ${isHighlight ? "md:-mt-6 md:mb-6" : ""}`}
-                  style={bgStyle}
-                >
-                  {isHighlight && (
-                    <span
-                      className="inline-block text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-4 self-start"
-                      style={{ background: "rgba(255,255,255,0.22)", color: "white" }}
-                    >
-                      Most Popular
-                    </span>
-                  )}
-
-                  {/* Plan icon */}
-                  <div className="mb-4">
-                    {idx === 0 && <EnvelopeIcon className="w-10 h-8" />}
-                    {idx === 1 && <MailboxIcon className="w-10 h-12" />}
-                    {idx === 2 && <HeartBubbleIcon className="w-10 h-10" />}
-                  </div>
-
-                  <h3 className="font-black text-xl uppercase mb-1" style={{ color: headingColor }}>
-                    {plan.name}
-                  </h3>
-                  <p className="text-xs mb-6" style={{ color: mutedColor }}>
-                    {plan.tagline}
-                  </p>
-
-                  {/* Pricing rows */}
-                  <div className="space-y-2 mb-7">
-                    {plan.prices.map((p, i) => (
-                      <div
-                        key={p.term}
-                        className="flex items-center justify-between py-2.5 px-4 rounded-xl text-sm"
-                        style={{ background: i === 0 ? rowBg0 : rowBgOther }}
-                      >
-                        <span style={{ color: mutedColor }}>{p.term}</span>
-                        <span className="font-black text-base" style={{ color: headingColor }}>
-                          {p.price}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Features */}
-                  <ul className="space-y-2.5 text-sm flex-1 mb-8">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-3">
-                        <span
-                          className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 text-white"
-                          style={{ background: checkBg }}
-                        >
-                          ✓
-                        </span>
-                        <span style={{ color: textColor }}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link
-                    href="/signup"
-                    className="block text-center font-black py-3.5 rounded-2xl text-sm transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5"
-                    style={{ background: ctaBg, color: ctaColor, boxShadow: ctaShadow }}
-                  >
-                    Get Started
-                  </Link>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+            {plans.map((plan) => (
+              <div
+                key={plan.name}
+                className={`rounded-2xl p-7 flex flex-col transition-all duration-300 hover-lift ${
+                  plan.popular
+                    ? "bg-accent text-white md:-mt-4 md:mb-4 shadow-[0_12px_40px_rgba(51,116,181,0.3)]"
+                    : "bg-surface-light border border-border-light shadow-[var(--shadow-sm)]"
+                }`}
+              >
+                {plan.popular && (
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-white/20 text-white mb-4 self-start">
+                    Most Popular
+                  </span>
+                )}
+                <h3 className={`font-bold text-xl mb-1 ${plan.popular ? "text-white" : "text-text-light"}`}>
+                  {plan.name}
+                </h3>
+                <p className={`text-xs mb-5 ${plan.popular ? "text-white/60" : "text-text-light-muted"}`}>
+                  {plan.tagline}
+                </p>
+                <div className="mb-6">
+                  <span className={`text-4xl font-extrabold ${plan.popular ? "text-white" : "text-text-light"}`}>{plan.price}</span>
+                  <span className={`text-sm ml-1.5 ${plan.popular ? "text-white/60" : "text-text-light-muted"}`}>{plan.term}</span>
                 </div>
-              );
-            })}
+                <ul className="space-y-2.5 text-sm flex-1 mb-7">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2.5">
+                      <svg className={`w-4 h-4 shrink-0 ${plan.popular ? "text-white/80" : "text-accent"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
+                      <span className={plan.popular ? "text-white/80" : "text-text-light-muted"}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/signup"
+                  className={`block text-center font-semibold py-3.5 rounded-xl text-sm transition-all duration-200 ${
+                    plan.popular
+                      ? "bg-white text-accent hover:bg-white/90"
+                      : "bg-text-light text-white hover:bg-text-light/90"
+                  }`}
+                >
+                  Get Started
+                </Link>
+              </div>
+            ))}
           </div>
 
-          <p className="text-center mt-10 text-sm" style={{ color: "rgba(45,29,15,0.45)" }}>
-            Compare all tiers in detail —{" "}
-            <Link href="/pricing" className="text-[#3374B5] font-bold hover:underline">
-              Full pricing page →
-            </Link>
+          <p className="text-center mt-10 text-sm text-text-light-muted">
+            6-month and 14-month options available —{" "}
+            <Link href="/pricing" className="text-accent font-semibold hover:underline">See all pricing →</Link>
           </p>
         </div>
       </section>
 
       {/* ─── Perks ─── */}
-      <section className="py-20 px-4" style={{ background: "linear-gradient(180deg, #FFFDF8 0%, #f5ede0 100%)" }}>
+      <section className="py-20 px-5 bg-bg-light border-t border-border-light">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-3 mb-12">
-            <HeartBubbleIcon className="w-8 h-8" />
-            <h2 className="text-2xl md:text-3xl font-black uppercase text-[#2D1D0F]">
-              What You Get
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 perspective-container">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-text-light text-center mb-12 tracking-tight">
+            What You Get
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {perks.map((p) => (
-              <div
-                key={p.title}
-                className="flex items-start gap-4 p-5 rounded-2xl bg-white hover-tilt"
-                style={{
-                  boxShadow: "0 2px 4px rgba(45,29,15,0.04), 0 6px 18px rgba(45,29,15,0.07)",
-                  border: "1px solid rgba(247,230,194,0.7)",
-                }}
-              >
-                <span className="shrink-0 mt-0.5">{p.icon}</span>
+              <div key={p.title} className="flex items-start gap-4 p-5 rounded-xl bg-surface-light border border-border-light hover-lift transition-all" style={{ boxShadow: "var(--shadow-sm)" }}>
+                <div className="w-9 h-9 rounded-lg bg-accent-soft flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
+                </div>
                 <div>
-                  <p className="font-black text-xs text-[#2D1D0F] uppercase tracking-wide leading-tight">
-                    {p.title}
-                  </p>
-                  <p className="text-xs text-[#2D1D0F]/45 mt-1 leading-relaxed">{p.sub}</p>
+                  <p className="font-semibold text-sm text-text-light mb-0.5">{p.title}</p>
+                  <p className="text-xs text-text-light-muted leading-relaxed">{p.sub}</p>
                 </div>
               </div>
             ))}
@@ -409,34 +317,27 @@ export default function Home() {
       </section>
 
       {/* ─── Testimonials ─── */}
-      <section className="py-20 px-4 bg-[#F7E6C2]">
+      <section className="py-20 px-5 bg-bg-dark">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-3 mb-12">
-            <StarIcon className="w-6 h-6" />
-            <h2 className="text-2xl md:text-3xl font-black uppercase text-[#2D1D0F]">
-              What Our Customers Say
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-text-dark text-center mb-12 tracking-tight">
+            What Our Customers Say
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               { name: "Jessica M.", detail: "Business Box Member", quote: "Finally a mailbox service that actually feels modern. The scanning is fast and the team is incredibly friendly." },
               { name: "David K.", detail: "Premium Box Member", quote: "I use NOHO Mailbox for my law practice. The real street address and same-day notary have been game changers." },
               { name: "Sarah L.", detail: "Basic Box Member", quote: "So easy to sign up and the package notifications are a lifesaver. Worth every penny." },
-            ].map((t, i) => (
-              <div
-                key={t.name}
-                className={`bg-white rounded-2xl p-6 hover-tilt animate-fade-up ${i === 1 ? "delay-200" : i === 2 ? "delay-400" : ""}`}
-                style={{ boxShadow: "0 8px 32px rgba(45,29,15,0.08)" }}
-              >
-                <div className="flex gap-1 mb-4">
+            ].map((t) => (
+              <div key={t.name} className="rounded-2xl p-6 bg-white/[0.04] border border-white/[0.08] hover-lift transition-all">
+                <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, j) => (
-                    <StarIcon key={j} className="w-4 h-4" />
+                    <StarIcon key={j} className="w-3.5 h-3.5" />
                   ))}
                 </div>
-                <p className="text-sm text-[#2D1D0F]/70 italic leading-relaxed mb-5">&ldquo;{t.quote}&rdquo;</p>
-                <div className="border-t border-[#F7E6C2] pt-4">
-                  <p className="font-bold text-sm text-[#2D1D0F]">{t.name}</p>
-                  <p className="text-xs text-[#2D1D0F]/40">{t.detail}</p>
+                <p className="text-sm text-text-dark-muted italic leading-relaxed mb-5">&ldquo;{t.quote}&rdquo;</p>
+                <div className="border-t border-white/[0.06] pt-4">
+                  <p className="font-semibold text-sm text-text-dark">{t.name}</p>
+                  <p className="text-xs text-text-dark-muted">{t.detail}</p>
                 </div>
               </div>
             ))}
@@ -445,47 +346,28 @@ export default function Home() {
       </section>
 
       {/* ─── Business Solutions CTA ─── */}
-      <section
-        className="py-24 px-4 relative overflow-hidden text-center"
-        style={{
-          background:
-            "radial-gradient(ellipse at 80% 80%, rgba(51,116,181,0.22) 0%, transparent 55%), linear-gradient(155deg, #2D1D0F 0%, #1a1108 60%, #0d1e35 100%)",
-        }}
-      >
-        {/* Floating decorative icons */}
-        <div className="absolute top-16 right-16 opacity-10 animate-float hidden lg:block">
-          <MailboxIcon className="w-20 h-24" />
-        </div>
-        <div className="absolute bottom-20 left-20 opacity-10 animate-float delay-300 hidden lg:block">
-          <HeartBubbleIcon className="w-16 h-16" />
-        </div>
-
+      <section className="py-24 px-5 bg-bg-dark border-t border-white/[0.06] text-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "32px 32px" }} />
         <div className="max-w-2xl mx-auto relative z-10">
-          <MailboxIcon className="w-16 h-20 mx-auto mb-6 opacity-60" />
-          <p className="text-[#3374B5] font-bold text-xs uppercase tracking-[0.2em] mb-4">
-            Business Solutions
-          </p>
-          <h2 className="text-3xl md:text-4xl font-black uppercase text-[#F7E6C2] mb-5 leading-tight">
+          <p className="text-accent font-semibold text-xs uppercase tracking-[0.2em] mb-4">Business Solutions</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-text-dark mb-5 tracking-tight leading-tight">
             Launch Your Business<br />Under One Roof
           </h2>
-          <p className="text-[#F7E6C2]/50 mb-3 max-w-lg mx-auto leading-relaxed text-base">
-            LLC formation, EIN, branding, website, SEO, social media, Google Business
-            — plus 12 months of mail service.
+          <p className="text-text-dark-muted mb-3 max-w-lg mx-auto leading-relaxed text-[15px]">
+            LLC formation, EIN, branding, website, SEO, social media, Google Business — plus 12 months of mail service.
           </p>
-          <p className="text-5xl font-black text-[#3374B5] mb-9">$2,000</p>
+          <p className="text-5xl font-extrabold text-accent mb-9">$2,000</p>
           <Link
             href="/business-solutions"
-            className="inline-block font-black px-10 py-4 rounded-full text-base text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl animate-shimmer"
-            style={{
-              background: "linear-gradient(135deg, #3374B5 0%, #2055A0 50%, #3374B5 100%)",
-              backgroundSize: "200% 100%",
-              boxShadow: "0 4px 24px rgba(51,116,181,0.5), 0 1px 0 rgba(255,255,255,0.15) inset",
-            }}
+            className="inline-block font-semibold px-8 py-4 rounded-xl text-white bg-accent hover:bg-accent-hover transition-all duration-300 shadow-[0_4px_20px_rgba(51,116,181,0.4)]"
           >
             See What&apos;s Included
           </Link>
         </div>
       </section>
+
+      {/* Client-side scroll animations */}
+      <HomepageClient />
     </>
   );
 }

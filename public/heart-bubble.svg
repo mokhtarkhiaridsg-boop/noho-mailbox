@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <!-- Speech bubble -->
-  <path d="M24 44 L18 36 Q6 36 6 24 Q6 8 24 8 Q42 8 42 24 Q42 36 30 36 L24 44Z" fill="#F7E6C2" stroke="#2D1D0F" stroke-width="2.5"/>
-  <!-- Heart inside -->
-  <path d="M24 27 C24 22 18 20 18 24 C18 29 24 33 24 33 C24 33 30 29 30 24 C30 20 24 22 24 27Z" fill="#3374B5"/>
-</svg>

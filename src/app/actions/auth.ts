@@ -12,10 +12,11 @@ const signupSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  plan: z.string().min(1, "Please select a plan"),
+  plan: z.string().optional(),
 });
 
 export type AuthState = {
+  twoFactorRequired?: boolean;
   error?: string;
   success?: boolean;
 };
@@ -46,12 +47,18 @@ export async function signup(
     return { error: "An account with this email already exists" };
   }
 
-  // Parse plan ID (e.g., "business-6" → plan "Business", term "6")
-  const [planName, planTerm] = plan.split("-");
-  const planCapitalized = planName.charAt(0).toUpperCase() + planName.slice(1);
+  // Plan is optional — free members sign up without a mailbox; paid members
+  // wait in /dashboard/pending until an admin assigns them a suite number.
+  let planCapitalized: string | null = null;
+  let planTerm: string | null = null;
+  const isPaid = !!plan && plan.length > 0 && plan !== "free";
 
-  // Generate suite number
-  const suiteNumber = String(Math.floor(Math.random() * 900) + 100);
+  if (isPaid) {
+    const parts = plan!.split("-");
+    const planName = parts[0] ?? "";
+    planTerm = parts[1] ?? null;
+    planCapitalized = planName.charAt(0).toUpperCase() + planName.slice(1);
+  }
 
   const passwordHash = await bcrypt.hash(password, 12);
 
@@ -63,7 +70,8 @@ export async function signup(
       passwordHash,
       plan: planCapitalized,
       planTerm: planTerm,
-      suiteNumber,
+      // Suite assignment is now an admin workflow; mailboxStatus drives gating.
+      mailboxStatus: "Pending",
     },
   });
 
@@ -71,7 +79,7 @@ export async function signup(
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/dashboard",
+      redirectTo: isPaid ? "/dashboard/pending" : "/pricing?upgrade=1",
     });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -89,26 +97,42 @@ export async function login(
 ): Promise<AuthState> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const totpToken = (formData.get("totpToken") as string | null)?.trim() || "";
 
   if (!email || !password) {
     return { error: "Email and password are required" };
   }
 
-  // Look up user role to determine redirect destination
+  // Look up user role + plan + mailbox status to determine redirect destination
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { role: true },
+    select: { role: true, plan: true, mailboxStatus: true },
   });
-  const redirectTo = user?.role === "ADMIN" ? "/admin" : "/dashboard";
+  let redirectTo = "/dashboard";
+  if (user?.role === "ADMIN") {
+    redirectTo = "/admin";
+  } else if (!user?.plan || user.plan === "Free") {
+    redirectTo = "/pricing?upgrade=1";
+  } else if (user.mailboxStatus !== "Active") {
+    redirectTo = "/dashboard/pending";
+  }
 
   try {
     await signIn("credentials", {
       email,
       password,
+      totpToken,
       redirectTo,
     });
   } catch (error) {
     if (error instanceof AuthError) {
+      const cause = (error as AuthError & { cause?: { err?: { message?: string } } }).cause?.err?.message;
+      if (cause === "2FA_REQUIRED") {
+        return { twoFactorRequired: true };
+      }
+      if (cause === "2FA_INVALID") {
+        return { twoFactorRequired: true, error: "Invalid 2FA code" };
+      }
       return { error: "Invalid email or password" };
     }
     throw error; // redirect throws are expected
@@ -119,4 +143,31 @@ export async function login(
 
 export async function logout() {
   await signOut({ redirectTo: "/" });
+}
+
+export async function googleSignIn() {
+  try {
+    await signIn("google", { redirectTo: "/dashboard" });
+  } catch (error) {
+    // signIn throws a NEXT_REDIRECT on success — rethrow those
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
+    // Also rethrow redirect-like errors from NextAuth
+    if (error && typeof error === "object" && "digest" in error) throw error;
+    return { error: "Google sign-in is not available. Please use email login." };
+  }
+}
+
+export async function appleSignIn() {
+  try {
+    await signIn("apple", { redirectTo: "/dashboard" });
+  } catch (error) {
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
+    if (error && typeof error === "object" && "digest" in error) throw error;
+    return { error: "Apple sign-in is not available. Please use email login." };
+  }
+}
+
+export async function getOAuthConfig() {
+  const { isGoogleEnabled, isAppleEnabled } = await import("@/lib/auth");
+  return { isGoogleEnabled, isAppleEnabled };
 }

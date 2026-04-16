@@ -1,12 +1,12 @@
 export default function AdminLoading() {
   return (
-    <div className="min-h-screen bg-[#f4f1eb]">
+    <div className="min-h-screen bg-[#FAFAF8]">
       {/* Header skeleton */}
       <div
         className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
         style={{
-          background: "linear-gradient(155deg, #2D1D0F 0%, #1a1108 60%, #0d1e35 100%)",
-          borderBottom: "1px solid rgba(247,230,194,0.08)",
+          background: "linear-gradient(155deg, #1A1714 0%, #111110 60%, #0d1e35 100%)",
+          borderBottom: "1px solid rgba(235,242,250,0.08)",
         }}
       >
         <div className="flex items-center gap-4">
@@ -23,7 +23,7 @@ export default function AdminLoading() {
         {/* Sidebar skeleton */}
         <aside className="hidden md:block w-56 shrink-0 space-y-2">
           {Array.from({ length: 9 }).map((_, i) => (
-            <div key={i} className="h-10 rounded-xl bg-[#2D1D0F]/5 animate-pulse" />
+            <div key={i} className="h-10 rounded-xl bg-[#1A1714]/5 animate-pulse" />
           ))}
         </aside>
 
@@ -32,19 +32,19 @@ export default function AdminLoading() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-28 rounded-2xl bg-white animate-pulse" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04)" }} />
+              <div key={i} className="h-28 rounded-2xl bg-white animate-pulse" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04)" }} />
             ))}
           </div>
           {/* Quick actions */}
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-20 rounded-2xl bg-white animate-pulse" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04)" }} />
+              <div key={i} className="h-20 rounded-2xl bg-white animate-pulse" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04)" }} />
             ))}
           </div>
           {/* Tables */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-white h-64 animate-pulse" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04)" }} />
-            <div className="rounded-2xl bg-white h-64 animate-pulse" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04)" }} />
+            <div className="rounded-2xl bg-white h-64 animate-pulse" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04)" }} />
+            <div className="rounded-2xl bg-white h-64 animate-pulse" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04)" }} />
           </div>
         </div>
       </div>

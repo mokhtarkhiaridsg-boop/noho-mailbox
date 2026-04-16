@@ -1,5 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { EnvelopeIcon, MailboxIcon, DeliveryTruckIcon, ShieldIcon, HeartBubbleIcon } from "@/components/BrandIcons";
+
+export const metadata: Metadata = {
+  title: "Blog",
+  description:
+    "Guides, tips, and news about mailbox rentals, USPS Form 1583, mail privacy, and running a business from a virtual address.",
+  openGraph: {
+    title: "Blog — NOHO Mailbox",
+    description: "Helpful articles on mailbox rentals, mail privacy, and business address tips from NOHO Mailbox.",
+    url: "https://nohomailbox.org/blog",
+  },
+  alternates: { canonical: "https://nohomailbox.org/blog" },
+};
 
 const articles = [
   {
@@ -43,52 +56,49 @@ export default function BlogPage() {
   return (
     <div className="perspective-container">
       {/* Hero */}
-      <section className="relative py-24 px-4 overflow-hidden" style={{ background: "linear-gradient(135deg, #2D1D0F 0%, #1a120a 50%, #2D1D0F 100%)" }}>
-        <div className="absolute inset-0 overflow-hidden opacity-10">
-          <div className="absolute top-10 right-16 animate-float"><EnvelopeIcon className="w-14 h-14 opacity-40" /></div>
-          <div className="absolute bottom-10 left-12 animate-float delay-300"><MailboxIcon className="w-16 h-16 opacity-30" /></div>
-        </div>
+      <section className="relative py-24 px-4 overflow-hidden bg-bg-dark">
+        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[120px] pointer-events-none bg-accent" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
         <div className="max-w-5xl mx-auto text-center relative z-10">
-          <h1 className="text-5xl md:text-6xl font-black uppercase text-[#F7E6C2] mb-6 animate-scale-in">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-text-dark mb-6 animate-scale-in">
             Resources & Guides
           </h1>
-          <p className="text-[#F7E6C2]/60 max-w-xl mx-auto text-lg animate-fade-up delay-200">
+          <p className="text-text-dark-muted max-w-xl mx-auto text-lg animate-fade-up delay-200">
             Tips, guides, and everything you need to get the most out of your mailbox and business.
           </p>
         </div>
       </section>
 
       {/* Articles */}
-      <section className="py-20 px-4 bg-[#F7E6C2]">
+      <section className="py-20 px-4 bg-bg-light">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {articles.map((article, i) => (
             <Link
               key={article.title}
               href="/contact"
-              className={`group bg-white rounded-2xl overflow-hidden hover-tilt animate-fade-up ${i % 2 === 0 ? "delay-100" : "delay-300"}`}
-              style={{ boxShadow: "0 8px 32px rgba(45,29,15,0.08)" }}
+              className={`group bg-surface-light rounded-2xl overflow-hidden hover-lift animate-fade-up shadow-[var(--shadow-md)] ${i % 2 === 0 ? "delay-100" : "delay-300"}`}
             >
               {/* Icon header */}
-              <div className="bg-gradient-to-br from-[#FFFDF8] to-[#F7E6C2] px-6 py-8 flex items-center justify-center">
+              <div className="bg-gradient-to-br from-bg-light to-bg-light px-6 py-8 flex items-center justify-center">
                 {article.icon}
               </div>
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#3374B5]">{article.category}</span>
-                  <span className="text-[10px] text-[#2D1D0F]/30">•</span>
-                  <span className="text-[10px] text-[#2D1D0F]/40">{article.readTime}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-accent">{article.category}</span>
+                  <span className="text-[10px] text-text-light-muted/60">•</span>
+                  <span className="text-[10px] text-text-light-muted/60">{article.readTime}</span>
                 </div>
-                <h3 className="font-black text-[#2D1D0F] mb-2 group-hover:text-[#3374B5] transition-colors">{article.title}</h3>
-                <p className="text-sm text-[#2D1D0F]/60 leading-relaxed mb-4">{article.excerpt}</p>
-                <span className="text-sm font-bold text-[#3374B5] inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                <h3 className="font-extrabold tracking-tight text-text-light mb-2 group-hover:text-accent transition-colors">{article.title}</h3>
+                <p className="text-sm text-text-light-muted leading-relaxed mb-4">{article.excerpt}</p>
+                <span className="text-sm font-bold text-accent inline-flex items-center gap-1 group-hover:gap-2 transition-all">
                   Read More <span>→</span>
                 </span>
               </div>
             </Link>
           ))}
         </div>
-        <p className="text-center text-sm text-[#2D1D0F]/40 mt-10 animate-fade-up">
-          More articles coming soon. Have a question? <Link href="/contact" className="text-[#3374B5] hover:underline">Contact us</Link>.
+        <p className="text-center text-sm text-text-light-muted/60 mt-10 animate-fade-up">
+          More articles coming soon. Have a question? <Link href="/contact" className="text-accent hover:underline">Contact us</Link>.
         </p>
       </section>
     </div>

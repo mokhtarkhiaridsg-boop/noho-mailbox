@@ -1,13 +1,27 @@
-import { verifySession } from "@/lib/dal";
+import { verifyActiveMember } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import DashboardClient from "@/components/DashboardClient";
 
 export default async function DashboardPage() {
-  const sessionUser = await verifySession();
+  const sessionUser = await verifyActiveMember();
 
   // Run all independent queries in parallel
-  const [user, mailItems, addresses, bookings, totalMail, unread, packages, forwarded] =
-    await Promise.all([
+  const [
+    user,
+    mailItems,
+    addresses,
+    bookings,
+    totalMail,
+    unread,
+    packages,
+    forwarded,
+    cards,
+    walletTxns,
+    invoices,
+    deliveries,
+    threadsRaw,
+    keyRequests,
+  ] = await Promise.all([
       prisma.user.findUnique({
         where: { id: sessionUser.id },
         select: {
@@ -18,6 +32,13 @@ export default async function DashboardPage() {
           planTerm: true,
           suiteNumber: true,
           role: true,
+          securityDepositCents: true,
+          securityDepositTotalCents: true,
+          walletBalanceCents: true,
+          defaultCardId: true,
+          totpEnabled: true,
+          mailboxStatus: true,
+          kycStatus: true,
         },
       }),
       prisma.mailItem.findMany({
@@ -51,11 +72,106 @@ export default async function DashboardPage() {
         where: { userId: sessionUser.id, type: "Package", status: { in: ["Received", "Awaiting Pickup"] } },
       }),
       prisma.mailItem.count({ where: { userId: sessionUser.id, status: "Forwarded" } }),
+      prisma.card.findMany({
+        where: { userId: sessionUser.id },
+        select: { id: true, brand: true, last4: true, expMonth: true, expYear: true, isDefault: true },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.walletTransaction.findMany({
+        where: { userId: sessionUser.id },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        select: {
+          id: true,
+          kind: true,
+          amountCents: true,
+          description: true,
+          balanceAfterCents: true,
+          createdAt: true,
+        },
+      }),
+      prisma.invoice.findMany({
+        where: { userId: sessionUser.id },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        select: {
+          id: true,
+          number: true,
+          kind: true,
+          description: true,
+          totalCents: true,
+          status: true,
+          sentAt: true,
+          paidAt: true,
+          createdAt: true,
+        },
+      }),
+      prisma.deliveryOrder.findMany({
+        where: { userId: sessionUser.id },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        select: {
+          id: true,
+          destination: true,
+          tier: true,
+          status: true,
+          price: true,
+          date: true,
+          pickedUpAt: true,
+          inTransitAt: true,
+          deliveredAt: true,
+          podPhotoUrl: true,
+        },
+      }),
+      prisma.messageThread.findMany({
+        orderBy: { lastMessageAt: "desc" },
+        take: 25,
+        include: {
+          messages: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            include: { attachments: true },
+          },
+        },
+      }),
+      prisma.keyRequest.findMany({
+        where: { userId: sessionUser.id },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: { id: true, status: true, createdAt: true, feeCents: true },
+      }),
     ]);
 
   if (!user) {
     throw new Error("User not found");
   }
+
+  // Filter threads where current user is a participant
+  const userId = sessionUser.id!;
+  const threads = threadsRaw
+    .filter((t) => {
+      try {
+        const ids = JSON.parse(t.participantIds);
+        return Array.isArray(ids) && ids.includes(userId);
+      } catch {
+        return false;
+      }
+    })
+    .map((t) => ({
+      id: t.id,
+      subject: t.subject,
+      lastMessageAt: t.lastMessageAt.toISOString(),
+      preview: t.messages[0]?.body.slice(0, 140) ?? "",
+      attachmentCount: t.messages[0]?.attachments.length ?? 0,
+      unread: (() => {
+        try {
+          const ids = JSON.parse(t.unreadForUserIds ?? "[]");
+          return Array.isArray(ids) && ids.includes(userId);
+        } catch {
+          return false;
+        }
+      })(),
+    }));
 
   return (
     <DashboardClient
@@ -64,6 +180,25 @@ export default async function DashboardPage() {
       addresses={addresses}
       bookings={bookings}
       stats={{ totalMail, unread, packages, forwarded }}
+      cards={cards}
+      walletTxns={walletTxns.map((t) => ({ ...t, createdAt: t.createdAt.toISOString() }))}
+      invoices={invoices.map((i) => ({
+        ...i,
+        sentAt: i.sentAt?.toISOString() ?? null,
+        paidAt: i.paidAt?.toISOString() ?? null,
+        createdAt: i.createdAt.toISOString(),
+      }))}
+      deliveries={deliveries.map((d) => ({
+        ...d,
+        pickedUpAt: d.pickedUpAt?.toISOString() ?? null,
+        inTransitAt: d.inTransitAt?.toISOString() ?? null,
+        deliveredAt: d.deliveredAt?.toISOString() ?? null,
+      }))}
+      threads={threads}
+      keyRequests={keyRequests.map((k) => ({
+        ...k,
+        createdAt: k.createdAt.toISOString(),
+      }))}
     />
   );
 }

@@ -1,48 +1,90 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
 
+const carrierLogos = ["USPS", "UPS", "FedEx", "DHL"];
+
 export default function Footer() {
   return (
-    <footer className="bg-[#2D1D0F] text-[#F7E6C2] mt-auto">
-      <div className="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-3 gap-10">
-        <div>
-          <Logo className="h-16 w-auto mb-3" />
-          <p className="text-sm text-[#F7E6C2]/55 leading-relaxed">
-            Your neighborhood mailbox — smarter.
-          </p>
-        </div>
-
-        <div>
-          <p className="font-bold text-xs uppercase tracking-widest text-[#3374B5] mb-4">
-            Services
-          </p>
-          <ul className="space-y-2.5 text-sm text-[#F7E6C2]/70">
-            <li><Link href="/services" className="hover:text-[#3374B5] transition-colors">Mail Scanning</Link></li>
-            <li><Link href="/services" className="hover:text-[#3374B5] transition-colors">Mail Forwarding</Link></li>
-            <li><Link href="/services" className="hover:text-[#3374B5] transition-colors">Package Pickup</Link></li>
-            <li><Link href="/notary" className="hover:text-[#3374B5] transition-colors">Notary Services</Link></li>
-            <li><Link href="/business-solutions" className="hover:text-[#3374B5] transition-colors">Business Solutions</Link></li>
-            <li><Link href="/delivery" className="hover:text-[#3374B5] transition-colors">Same-Day Delivery</Link></li>
-            <li><Link href="/shop" className="hover:text-[#3374B5] transition-colors">Shipping Supplies</Link></li>
-          </ul>
-        </div>
-
-        <div>
-          <p className="font-bold text-xs uppercase tracking-widest text-[#3374B5] mb-4">
-            Company
-          </p>
-          <ul className="space-y-2.5 text-sm text-[#F7E6C2]/70">
-            <li><Link href="/pricing" className="hover:text-[#3374B5] transition-colors">Pricing</Link></li>
-            <li><Link href="/contact" className="hover:text-[#3374B5] transition-colors">Contact Us</Link></li>
-            <li><Link href="/faq" className="hover:text-[#3374B5] transition-colors">FAQ</Link></li>
-            <li><Link href="/blog" className="hover:text-[#3374B5] transition-colors">Blog</Link></li>
-            <li><Link href="/compare" className="hover:text-[#3374B5] transition-colors">Compare</Link></li>
-            <li><Link href="/security" className="hover:text-[#3374B5] transition-colors">Security</Link></li>
-          </ul>
+    <footer className="bg-bg-dark text-text-dark mt-auto">
+      {/* Carrier trust strip */}
+      <div className="border-b border-white/[0.06] py-6">
+        <div className="max-w-6xl mx-auto px-5 flex flex-wrap items-center justify-center gap-8">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-text-dark-muted">
+            We accept packages from
+          </span>
+          {carrierLogos.map((c) => (
+            <span key={c} className="text-sm font-bold text-text-dark-muted/60">{c}</span>
+          ))}
         </div>
       </div>
-      <div className="border-t border-[#F7E6C2]/8 text-center py-5 text-xs text-[#F7E6C2]/30">
-        © {new Date().getFullYear()} NOHO Mailbox. All rights reserved.
+
+      <div className="max-w-6xl mx-auto px-5 py-14 grid grid-cols-2 md:grid-cols-4 gap-10">
+        <div className="col-span-2 md:col-span-1">
+          <Logo className="h-12 w-auto mb-4" />
+          <p className="text-sm text-text-dark-muted leading-relaxed max-w-xs">
+            Private mailbox rental with mail scanning, forwarding, and business services in North Hollywood, CA.
+          </p>
+          <div className="mt-5 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse-soft" />
+            <span className="text-xs text-text-dark-muted">Open Mon–Fri 9–5:30, Sat 10–1:30</span>
+          </div>
+        </div>
+
+        <div>
+          <p className="font-semibold text-[11px] uppercase tracking-wider text-accent mb-4">
+            Services
+          </p>
+          <ul className="space-y-2.5 text-sm text-text-dark-muted">
+            <li><Link href="/services" className="hover:text-text-dark transition-colors">Mail & Packages</Link></li>
+            <li><Link href="/delivery" className="hover:text-text-dark transition-colors">Same-Day Delivery</Link></li>
+            <li><Link href="/shipping" className="hover:text-text-dark transition-colors">Shipping Rates</Link></li>
+            <li><Link href="/notary" className="hover:text-text-dark transition-colors">Notary</Link></li>
+            <li><Link href="/business-solutions" className="hover:text-text-dark transition-colors">Business Solutions</Link></li>
+            <li><Link href="/shop" className="hover:text-text-dark transition-colors">Supplies</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="font-semibold text-[11px] uppercase tracking-wider text-accent mb-4">
+            Company
+          </p>
+          <ul className="space-y-2.5 text-sm text-text-dark-muted">
+            <li><Link href="/pricing" className="hover:text-text-dark transition-colors">Pricing</Link></li>
+            <li><Link href="/compare" className="hover:text-text-dark transition-colors">Compare Plans</Link></li>
+            <li><Link href="/faq" className="hover:text-text-dark transition-colors">FAQ</Link></li>
+            <li><Link href="/blog" className="hover:text-text-dark transition-colors">Blog</Link></li>
+            <li><Link href="/security" className="hover:text-text-dark transition-colors">Security</Link></li>
+            <li><Link href="/contact" className="hover:text-text-dark transition-colors">Contact</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="font-semibold text-[11px] uppercase tracking-wider text-accent mb-4">
+            Visit Us
+          </p>
+          <address className="not-italic text-sm text-text-dark-muted space-y-1.5">
+            <p>5250 Lankershim Blvd</p>
+            <p>North Hollywood, CA 91601</p>
+            <p className="mt-3">
+              <a href="tel:+18187651539" className="hover:text-text-dark transition-colors">(818) 765-1539</a>
+            </p>
+            <p>
+              <a href="mailto:hello@nohomailbox.org" className="hover:text-text-dark transition-colors">hello@nohomailbox.org</a>
+            </p>
+          </address>
+        </div>
+      </div>
+
+      <div className="border-t border-white/[0.06] py-5 px-5">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-text-dark-muted/50">
+            &copy; {new Date().getFullYear()} NOHO Mailbox. All rights reserved.
+          </p>
+          <div className="flex items-center gap-4 text-xs text-text-dark-muted/50">
+            <Link href="/privacy" className="hover:text-text-dark-muted transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-text-dark-muted transition-colors">Terms</Link>
+          </div>
+        </div>
       </div>
     </footer>
   );

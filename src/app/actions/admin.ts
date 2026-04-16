@@ -72,3 +72,219 @@ export async function updateShopOrderStatus(orderId: string, status: string) {
   revalidatePath("/admin");
   return { success: true };
 }
+
+// ============================================================
+// iPostal1-parity admin actions
+// ============================================================
+
+export async function assignMailbox(userId: string, suiteNumber: string) {
+  const admin = await verifyAdmin();
+
+  if (!suiteNumber.trim()) return { error: "Suite number required" };
+
+  const conflict = await prisma.user.findUnique({
+    where: { suiteNumber },
+    select: { id: true },
+  });
+  if (conflict && conflict.id !== userId) {
+    return { error: "Suite number already taken" };
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      suiteNumber,
+      mailboxStatus: "Active",
+      mailboxAssignedAt: new Date(),
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id ?? "",
+      actorRole: "ADMIN",
+      action: "assignMailbox",
+      entityType: "User",
+      entityId: userId,
+      metadata: JSON.stringify({ suiteNumber }),
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function bulkAssignMailboxes(userIds: string[], startSuite: number) {
+  await verifyAdmin();
+  let suite = startSuite;
+  for (const userId of userIds) {
+    // Find next free suite
+    while (
+      await prisma.user.findUnique({
+        where: { suiteNumber: String(suite) },
+        select: { id: true },
+      })
+    ) {
+      suite += 1;
+    }
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        suiteNumber: String(suite),
+        mailboxStatus: "Active",
+        mailboxAssignedAt: new Date(),
+      },
+    });
+    suite += 1;
+  }
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+export async function reviewKyc(
+  userId: string,
+  decision: "Approved" | "Rejected",
+  notes?: string
+) {
+  const admin = await verifyAdmin();
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { plan: true, suiteNumber: true },
+  });
+  if (!user) return { error: "User not found" };
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      kycStatus: decision,
+      kycReviewedAt: new Date(),
+      kycReviewedBy: admin.id ?? null,
+      kycNotes: notes ?? null,
+      // If approved AND has paid plan AND already has a suite, activate
+      mailboxStatus:
+        decision === "Approved" && user.plan && user.plan !== "Free" && user.suiteNumber
+          ? "Active"
+          : undefined,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id ?? "",
+      actorRole: "ADMIN",
+      action: `kyc:${decision}`,
+      entityType: "User",
+      entityId: userId,
+      metadata: notes ? JSON.stringify({ notes }) : null,
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function issueNewKey(userId: string, keyRequestId?: string) {
+  const admin = await verifyAdmin();
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { securityDepositCents: true },
+  });
+  if (!user) return { error: "User not found" };
+
+  const feeCents = 2500;
+  const newBalance = Math.max(0, user.securityDepositCents - feeCents);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { securityDepositCents: newBalance },
+  });
+
+  await prisma.walletTransaction.create({
+    data: {
+      userId,
+      kind: "DepositCharge",
+      amountCents: -feeCents,
+      description: "Mailbox key replacement",
+      balanceAfterCents: newBalance,
+    },
+  });
+
+  if (keyRequestId) {
+    await prisma.keyRequest.update({
+      where: { id: keyRequestId },
+      data: { status: "Issued", completedAt: new Date() },
+    });
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id ?? "",
+      actorRole: "ADMIN",
+      action: "issueNewKey",
+      entityType: "User",
+      entityId: userId,
+      metadata: JSON.stringify({ feeCents }),
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function updateSecurityDeposit(userId: string, amountCents: number) {
+  await verifyAdmin();
+  await prisma.user.update({
+    where: { id: userId },
+    data: { securityDepositCents: amountCents },
+  });
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+export async function updateCustomerSuite(userId: string, newSuiteNumber: string) {
+  const admin = await verifyAdmin();
+  if (!newSuiteNumber.trim()) return { error: "Suite number required" };
+
+  const conflict = await prisma.user.findUnique({
+    where: { suiteNumber: newSuiteNumber.trim() },
+    select: { id: true },
+  });
+  if (conflict && conflict.id !== userId) {
+    return { error: "Suite number already taken" };
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { suiteNumber: newSuiteNumber.trim() },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id ?? "",
+      actorRole: "ADMIN",
+      action: "changeSuite",
+      entityType: "User",
+      entityId: userId,
+      metadata: JSON.stringify({ newSuiteNumber }),
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function updateCustomerPlanDueDate(userId: string, dueDate: string) {
+  await verifyAdmin();
+  await prisma.user.update({
+    where: { id: userId },
+    data: { planDueDate: dueDate || null },
+  });
+  revalidatePath("/admin");
+  return { success: true };
+}

@@ -26,6 +26,19 @@ const faqs = [
 
 const categories = [...new Set(faqs.map((f) => f.category))];
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: f.answer,
+    },
+  })),
+};
+
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -34,33 +47,35 @@ export default function FAQPage() {
 
   return (
     <div className="perspective-container">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       {/* Hero */}
-      <section className="relative py-24 px-4 overflow-hidden" style={{ background: "linear-gradient(135deg, #2D1D0F 0%, #1a120a 50%, #2D1D0F 100%)" }}>
-        <div className="absolute inset-0 overflow-hidden opacity-10">
-          <div className="absolute top-8 right-20 animate-float"><QuestionIcon className="w-16 h-16 opacity-40" /></div>
-          <div className="absolute bottom-12 left-12 animate-float delay-400"><QuestionIcon className="w-12 h-12 opacity-30" /></div>
-        </div>
+      <section className="relative py-24 px-4 overflow-hidden bg-bg-dark">
+        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[120px] pointer-events-none bg-accent" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-block mb-6 animate-float">
             <QuestionIcon className="w-20 h-20 mx-auto" />
           </div>
-          <h1 className="text-5xl md:text-6xl font-black uppercase text-[#F7E6C2] mb-6 animate-scale-in">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-text-dark mb-6 animate-scale-in">
             FAQ
           </h1>
-          <p className="text-[#F7E6C2]/60 max-w-xl mx-auto text-lg animate-fade-up delay-200">
+          <p className="text-text-dark-muted max-w-xl mx-auto text-lg animate-fade-up delay-200">
             Everything you need to know about NOHO Mailbox — from sign-up to delivery.
           </p>
         </div>
       </section>
 
       {/* Category filter + Accordion */}
-      <section className="py-20 px-4 bg-[#F7E6C2]">
+      <section className="py-20 px-4 bg-bg-light">
         <div className="max-w-3xl mx-auto">
           {/* Category pills */}
           <div className="flex flex-wrap gap-2 mb-10 justify-center animate-fade-up">
             <button
               onClick={() => { setActiveCategory("all"); setOpenIndex(null); }}
-              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeCategory === "all" ? "bg-[#2D1D0F] text-[#F7E6C2]" : "bg-white text-[#2D1D0F]/60 hover:bg-white/80"}`}
+              className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeCategory === "all" ? "bg-bg-dark text-text-dark" : "bg-surface-light text-text-light-muted hover:bg-surface-light/80"}`}
             >
               All
             </button>
@@ -68,7 +83,7 @@ export default function FAQPage() {
               <button
                 key={cat}
                 onClick={() => { setActiveCategory(cat); setOpenIndex(null); }}
-                className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeCategory === cat ? "bg-[#2D1D0F] text-[#F7E6C2]" : "bg-white text-[#2D1D0F]/60 hover:bg-white/80"}`}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeCategory === cat ? "bg-bg-dark text-text-dark" : "bg-surface-light text-text-light-muted hover:bg-surface-light/80"}`}
               >
                 {cat}
               </button>
@@ -82,8 +97,8 @@ export default function FAQPage() {
               return (
                 <div
                   key={faq.question}
-                  className="bg-white rounded-xl overflow-hidden animate-fade-up"
-                  style={{ boxShadow: "0 4px 16px rgba(45,29,15,0.06)", animationDelay: `${(i % 5) * 0.05}s` }}
+                  className="bg-surface-light rounded-xl overflow-hidden animate-fade-up shadow-[var(--shadow-sm)]"
+                  style={{ animationDelay: `${(i % 5) * 0.05}s` }}
                 >
                   <button
                     onClick={() => setOpenIndex(isOpen ? null : i)}
@@ -91,13 +106,13 @@ export default function FAQPage() {
                   >
                     <div>
                       {activeCategory === "all" && (
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-[#3374B5] block mb-1">{faq.category}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-accent block mb-1">{faq.category}</span>
                       )}
-                      <span className="font-bold text-[#2D1D0F] text-sm">{faq.question}</span>
+                      <span className="font-bold text-text-light text-sm">{faq.question}</span>
                     </div>
                     <svg
                       viewBox="0 0 24 24"
-                      className={`w-5 h-5 shrink-0 text-[#3374B5] transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                      className={`w-5 h-5 shrink-0 text-accent transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2.5"
@@ -108,7 +123,7 @@ export default function FAQPage() {
                     </svg>
                   </button>
                   <div className={`transition-all duration-300 ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"} overflow-hidden`}>
-                    <p className="px-6 pb-5 text-sm text-[#2D1D0F]/70 leading-relaxed">{faq.answer}</p>
+                    <p className="px-6 pb-5 text-sm text-text-light-muted leading-relaxed">{faq.answer}</p>
                   </div>
                 </div>
               );
@@ -118,16 +133,15 @@ export default function FAQPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-4 bg-[#FFFDF8]">
+      <section className="py-20 px-4 bg-bg-light">
         <div
-          className="max-w-3xl mx-auto rounded-3xl p-12 text-center animate-fade-up"
-          style={{ background: "linear-gradient(135deg, #2D1D0F 0%, #1a120a 100%)", boxShadow: "0 20px 60px rgba(45,29,15,0.3)" }}
+          className="max-w-3xl mx-auto rounded-3xl p-12 text-center animate-fade-up bg-bg-dark shadow-xl"
         >
-          <h2 className="text-3xl font-black uppercase text-[#F7E6C2] mb-3">Still Have Questions?</h2>
-          <p className="text-[#F7E6C2]/60 mb-8">We&apos;re here to help. Reach out anytime.</p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-text-dark mb-3">Still Have Questions?</h2>
+          <p className="text-text-dark-muted mb-8">We&apos;re here to help. Reach out anytime.</p>
           <a
             href="/contact"
-            className="bg-[#3374B5] text-white font-bold px-8 py-4 rounded-full hover:bg-[#2960A0] transition-all hover:-translate-y-1 hover:shadow-lg inline-block"
+            className="bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent-hover transition-all hover:-translate-y-1 hover:shadow-lg inline-block"
           >
             Contact Us
           </a>

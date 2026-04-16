@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111110"/>
+      <stop offset="55%" stop-color="#1A1714"/>
+      <stop offset="100%" stop-color="#0d1e35"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="15%" cy="90%" r="60%">
+      <stop offset="0%" stop-color="#3374B5" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#3374B5" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EBF2FA"/>
+      <stop offset="100%" stop-color="#3374B5"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Mailbox icon -->
+  <g transform="translate(95, 200)">
+    <rect x="0" y="40" width="170" height="120" rx="14" fill="#EBF2FA"/>
+    <path d="M0 100 Q0 40 85 40 Q170 40 170 100" fill="#EBF2FA" stroke="#1A1714" stroke-width="4"/>
+    <rect x="155" y="60" width="14" height="60" fill="#3374B5"/>
+    <rect x="148" y="50" width="35" height="22" fill="#3374B5"/>
+    <circle cx="85" cy="120" r="22" fill="#3374B5"/>
+    <rect x="78" y="160" width="14" height="50" fill="#EBF2FA"/>
+  </g>
+
+  <!-- Brand mark -->
+  <g transform="translate(330, 175)">
+    <text x="0" y="0" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="32" font-weight="800" fill="#EBF2FA" letter-spacing="6">NORTH HOLLYWOOD, CA</text>
+    <text x="0" y="100" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="92" font-weight="900" fill="url(#accent)">NOHO Mailbox</text>
+    <text x="0" y="170" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="40" font-weight="700" fill="#EBF2FA" opacity="0.85">Real Address. Real Service.</text>
+    <text x="0" y="220" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="26" font-weight="600" fill="#EBF2FA" opacity="0.55">Mail scanning · Notary · Same-day delivery · LLC formation</text>
+  </g>
+
+  <!-- Bottom badge -->
+  <g transform="translate(95, 530)">
+    <rect x="0" y="0" width="320" height="60" rx="30" fill="#3374B5"/>
+    <text x="160" y="38" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="22" font-weight="800" fill="#FFFFFF" text-anchor="middle">PLANS FROM $50 / 3 MONTHS</text>
+  </g>
+
+  <text x="1105" y="585" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="20" font-weight="700" fill="#EBF2FA" opacity="0.4" text-anchor="end">nohomailbox.org</text>
+</svg>

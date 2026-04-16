@@ -11,13 +11,35 @@ model User {
   name             String
   email            String   @unique
   phone            String?
-  passwordHash     String
+  passwordHash     String   // For OAuth-only users, this is set to an unguessable random hash
+  oauthProvider    String?  // "google" | "apple" | null
+  image            String?
   role             String   @default("USER") // "USER" | "ADMIN"
   plan             String?  // "Basic" | "Business" | "Premium"
   planTerm         String?  // "3" | "6" | "14"
   suiteNumber      String?  @unique
   status           String   @default("Active") // "Active" | "Expired"
   squareCustomerId String?  @unique // Linked Square customer ID
+
+  // iPostal1-parity fields
+  securityDepositCents      Int       @default(5000)
+  securityDepositTotalCents Int       @default(5000)
+  kycStatus                 String    @default("Pending") // "Pending" | "Submitted" | "Approved" | "Rejected"
+  kycForm1583Url            String?
+  kycIdImageUrl             String?
+  kycReviewedAt             DateTime?
+  kycReviewedBy             String?
+  kycNotes                  String?
+  mailboxStatus             String    @default("Pending") // "Pending" | "Assigned" | "Active" | "Suspended"
+  mailboxAssignedAt         DateTime?
+  totpSecret                String?
+  totpEnabled               Boolean   @default(false)
+  walletBalanceCents        Int       @default(0)
+  defaultCardId             String?
+  notifPrefs                String?
+  organizationId            String?
+  planDueDate               String?   // e.g. "2025-06-15" — admin-set due date for plan renewal
+
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -27,6 +49,12 @@ model User {
   shopOrders          ShopOrder[]
   forwardingAddresses ForwardingAddress[]
   payments            Payment[]
+  cards               Card[]
+  invoices            Invoice[]
+  walletTransactions  WalletTransaction[]
+  vaultItems          DocumentVaultItem[]
+  mailRequests        MailRequest[]
+  keyRequests         KeyRequest[]
 }
 
 model MailItem {
@@ -34,14 +62,24 @@ model MailItem {
   userId       String
   from         String
   type         String   // "Letter" | "Package"
-  status       String   @default("Received") // "Received" | "Scanned" | "Awaiting Pickup" | "Forwarded" | "Picked Up" | "Held"
+  status       String   @default("Received") // "Received" | "Scanned" | "Awaiting Pickup" | "Forwarded" | "Picked Up" | "Held" | "X Requested"
   scanned      Boolean  @default(false)
-  scanImageUrl String?  // URL to scanned document image
-  label        String?  // Custom label (e.g. "Tax Documents", "Legal", "Personal")
+  scanImageUrl String?
+  label        String?
   date         String
+
+  // iPostal1 mail intake fields
+  weightOz         Float?
+  dimensions       String?
+  exteriorImageUrl String?
+  assignedAt       DateTime?
+  holdUntil        DateTime?
+  feeChargedCents  Int?
+
   createdAt    DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requests MailRequest[]
 }
 
 model NotaryBooking {
@@ -49,8 +87,8 @@ model NotaryBooking {
   userId    String
   date      String
   time      String
-  type      String   // "Real Estate" | "Business Agreement" | "Legal Document"
-  status    String   @default("Pending") // "Pending" | "Confirmed" | "Completed" | "Cancelled"
+  type      String
+  status    String   @default("Pending")
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -65,13 +103,28 @@ model DeliveryOrder {
   pickupAddr   String   @default("NOHO Mailbox, North Hollywood, CA")
   destination  String
   zip          String
-  zone         String   // "NoHo" | "Extended"
+  zone         String
   price        Float
-  itemType     String   // "Letter" | "Package" | "Documents" | "Other"
+  itemType     String
   instructions String?
-  courier      String?  // Courier/driver name
-  status       String   @default("Pending") // "Pending" | "In Transit" | "Delivered"
+  courier      String?
+  status       String   @default("Pending") // "Pending" | "Picked Up" | "In Transit" | "Delivered"
   date         String
+
+  // iPostal1 delivery extensions
+  tier            String    @default("Standard") // "Standard" | "Rush" | "WhiteGlove"
+  etaWindow       String?
+  pickedUpAt      DateTime?
+  inTransitAt     DateTime?
+  deliveredAt     DateTime?
+  podSignatureUrl String?
+  podPhotoUrl     String?
+  recipientName   String?
+  recipientPhone  String?
+  dimensions      String?
+  weightOz        Float?
+  invoiceId       String?
+
   createdAt    DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -82,8 +135,8 @@ model ShopOrder {
   userId        String
   items         String
   total         Float
-  status        String   @default("Pending") // "Pending" | "Ready" | "Completed"
-  squareOrderId String?  @unique // Linked Square order ID
+  status        String   @default("Pending")
+  squareOrderId String?  @unique
   date          String
   createdAt     DateTime @default(now())
 
@@ -112,16 +165,17 @@ model Payment {
   id               String   @id @default(cuid())
   squarePaymentId  String   @unique
   userId           String?
-  amount           Int      // Amount in cents
+  amount           Int
   currency         String   @default("USD")
-  status           String   // "COMPLETED" | "PENDING" | "CANCELLED" | "FAILED"
-  sourceType       String?  // "CARD" | "CASH" | "BANK_ACCOUNT" etc.
+  status           String
+  sourceType       String?
   receiptUrl       String?
   note             String?
   squareCreatedAt  String
   syncedAt         DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  invoices Invoice[]
 }
 
 model CatalogItem {
@@ -129,7 +183,7 @@ model CatalogItem {
   squareCatalogId String   @unique
   name            String
   description     String?
-  price           Int      // Price in cents
+  price           Int
   currency        String   @default("USD")
   category        String?
   inStock         Boolean  @default(true)
@@ -138,11 +192,179 @@ model CatalogItem {
 }
 
 model SquareSyncLog {
-  id          String   @id @default(cuid())
-  syncType    String   // "customers" | "payments" | "catalog" | "all"
-  status      String   // "running" | "completed" | "failed"
-  itemsSynced Int      @default(0)
-  errors      String?  // JSON string of errors
-  startedAt   DateTime @default(now())
+  id          String    @id @default(cuid())
+  syncType    String
+  status      String
+  itemsSynced Int       @default(0)
+  errors      String?
+  startedAt   DateTime  @default(now())
   completedAt DateTime?
+}
+
+// ============================================================
+// iPostal1-parity new models
+// ============================================================
+
+model Card {
+  id           String   @id @default(cuid())
+  userId       String
+  squareCardId String   @unique
+  brand        String
+  last4        String
+  expMonth     Int
+  expYear      Int
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id          String    @id @default(cuid())
+  userId      String
+  number      String    @unique
+  kind        String    // "Membership" | "Forward" | "Scan" | "Delivery" | "KeyReplacement" | "Shop" | "Notary"
+  description String
+  amountCents Int
+  taxCents    Int       @default(0)
+  totalCents  Int
+  status      String    @default("Draft") // "Draft" | "Sent" | "Paid" | "Void"
+  paymentId   String?
+  pdfUrl      String?
+  sentAt      DateTime?
+  paidAt      DateTime?
+  dueAt       DateTime?
+  createdAt   DateTime  @default(now())
+
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payment             Payment?            @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  walletTransactions  WalletTransaction[]
+}
+
+model WalletTransaction {
+  id                String   @id @default(cuid())
+  userId            String
+  kind              String   // "TopUp" | "Charge" | "DepositCharge" | "DepositRefund" | "Refund"
+  amountCents       Int      // signed
+  description       String
+  balanceAfterCents Int
+  invoiceId         String?
+  createdAt         DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoice Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+}
+
+model MessageThread {
+  id                String   @id @default(cuid())
+  subject           String
+  participantIds    String   // JSON array
+  folder            String   @default("Inbox") // "Inbox" | "Sent" | "Archive" | "Trash"
+  labels            String?  // JSON array
+  lastMessageAt     DateTime @default(now())
+  unreadForUserIds  String?  // JSON array
+  createdAt         DateTime @default(now())
+
+  messages Message[]
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  threadId   String
+  senderId   String
+  body       String
+  readByIds  String?  // JSON array
+  createdAt  DateTime @default(now())
+
+  thread      MessageThread        @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  attachments MessageAttachment[]
+}
+
+model MessageAttachment {
+  id        String   @id @default(cuid())
+  messageId String
+  filename  String
+  mimeType  String
+  sizeBytes Int
+  blobUrl   String
+  kind      String   // "Image" | "Video" | "Document" | "Other"
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model DocumentVaultItem {
+  id                String   @id @default(cuid())
+  userId            String
+  kind              String   // "Scan" | "Invoice" | "Receipt" | "POD" | "Form1583" | "Other"
+  title             String
+  blobUrl           String
+  mimeType          String
+  sizeBytes         Int
+  sourceMailItemId  String?
+  sourceInvoiceId   String?
+  sourceDeliveryId  String?
+  tags              String?  // JSON array
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MailRequest {
+  id          String    @id @default(cuid())
+  mailItemId  String
+  userId      String
+  kind        String    // "Scan" | "Forward" | "Discard" | "Pickup" | "Consolidate" | "Hold" | "Shred" | "Deposit"
+  status      String    @default("Pending") // "Pending" | "In Progress" | "Completed" | "Cancelled"
+  notes       String?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  completedBy String?
+
+  mailItem MailItem @relation(fields: [mailItemId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model KeyRequest {
+  id          String    @id @default(cuid())
+  userId      String
+  reason      String
+  status      String    @default("Pending") // "Pending" | "Approved" | "Issued" | "Cancelled"
+  feeCents    Int       @default(2500)
+  invoiceId   String?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actorRole  String
+  action     String
+  entityType String
+  entityId   String?
+  metadata   String?  // JSON
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  ownerUserId String
+  createdAt   DateTime @default(now())
+
+  members OrganizationMember[]
+}
+
+model OrganizationMember {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  role           String    // "Owner" | "Admin" | "Member"
+  invitedAt      DateTime  @default(now())
+  acceptedAt     DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }

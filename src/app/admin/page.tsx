@@ -41,6 +41,8 @@ export default async function AdminPage() {
         suiteNumber: true,
         status: true,
         createdAt: true,
+        securityDepositCents: true,
+        planDueDate: true,
         _count: { select: { mailItems: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -158,6 +160,8 @@ export default async function AdminPage() {
     createdAt: c.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     mailCount: c._count.mailItems,
     packageCount: pkgMap.get(c.id) ?? 0,
+    securityDepositCents: c.securityDepositCents,
+    planDueDate: c.planDueDate ?? null,
   }));
 
   const recentMail = rawMail.map((m) => ({
@@ -232,6 +236,117 @@ export default async function AdminPage() {
     userName: p.user?.name ?? null,
   }));
 
+  // ─── iPostal1-parity admin queues ───
+  const [complianceRows, mailRequestRows, keyRequestRows, rawThreads, rawContacts] = await Promise.all([
+    prisma.user.findMany({
+      where: {
+        role: { not: "ADMIN" },
+        OR: [
+          { kycStatus: { in: ["Submitted", "Pending"] } },
+          { mailboxStatus: { in: ["Pending", "Assigned"] } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        plan: true,
+        kycStatus: true,
+        kycForm1583Url: true,
+        kycIdImageUrl: true,
+        mailboxStatus: true,
+        suiteNumber: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }),
+    prisma.mailRequest.findMany({
+      where: { status: "Pending" },
+      orderBy: { createdAt: "asc" },
+      take: 100,
+      include: {
+        user: { select: { name: true, suiteNumber: true } },
+        mailItem: { select: { from: true } },
+      },
+    }),
+    prisma.keyRequest.findMany({
+      where: { status: { in: ["Pending", "Approved"] } },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      include: { user: { select: { name: true } } },
+    }),
+    // Message threads where admin is participant
+    prisma.messageThread.findMany({
+      orderBy: { lastMessageAt: "desc" },
+      take: 50,
+      include: {
+        messages: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+      },
+    }),
+    // Contact form submissions
+    prisma.contactSubmission.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+  ]);
+
+  const complianceQueue = complianceRows.map((c) => ({
+    id: c.id,
+    name: c.name,
+    email: c.email,
+    plan: c.plan,
+    kycStatus: c.kycStatus,
+    kycForm1583Url: c.kycForm1583Url,
+    kycIdImageUrl: c.kycIdImageUrl,
+    mailboxStatus: c.mailboxStatus,
+    suiteNumber: c.suiteNumber,
+    createdAt: c.createdAt.toISOString(),
+  }));
+
+  const mailRequests = mailRequestRows.map((r) => ({
+    id: r.id,
+    kind: r.kind,
+    status: r.status,
+    notes: r.notes,
+    createdAt: r.createdAt.toISOString(),
+    userName: r.user.name,
+    suiteNumber: r.user.suiteNumber,
+    mailFrom: r.mailItem.from,
+  }));
+
+  const keyRequests = keyRequestRows.map((k) => ({
+    id: k.id,
+    status: k.status,
+    reason: k.reason,
+    feeCents: k.feeCents,
+    createdAt: k.createdAt.toISOString(),
+    userId: k.userId,
+    userName: k.user.name,
+  }));
+
+  const messageThreads = rawThreads.map((t: any) => ({
+    id: t.id,
+    subject: t.subject,
+    lastMessageAt: t.lastMessageAt.toISOString(),
+    preview: t.messages[0]?.body?.slice(0, 120) ?? "",
+    senderId: t.messages[0]?.senderId ?? null,
+    participantIds: t.participantIds,
+    unreadForUserIds: t.unreadForUserIds,
+  }));
+
+  const contactSubmissions = rawContacts.map((c: any) => ({
+    id: c.id,
+    name: c.name,
+    email: c.email,
+    service: c.service,
+    message: c.message,
+    createdAt: c.createdAt.toISOString(),
+  }));
+
   return (
     <AdminDashboardClient
       customers={customers}
@@ -247,6 +362,11 @@ export default async function AdminPage() {
       }}
       squareStatus={squareStatus}
       recentPayments={recentPayments}
+      complianceQueue={complianceQueue}
+      mailRequests={mailRequests}
+      keyRequests={keyRequests}
+      messageThreads={messageThreads}
+      contactSubmissions={contactSubmissions}
     />
   );
 }

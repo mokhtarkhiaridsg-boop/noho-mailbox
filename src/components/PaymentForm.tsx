@@ -178,8 +178,8 @@ export default function PaymentForm({ amount, description, onSuccess, onError }:
     return (
       <div className="text-center py-8">
         <div className="text-4xl mb-3">✅</div>
-        <h3 className="text-lg font-black text-[#2D1D0F]">Payment Successful!</h3>
-        <p className="text-sm text-[#2D1D0F]/60 mt-1">${(amount / 100).toFixed(2)} paid</p>
+        <h3 className="text-lg font-black text-text-light">Payment Successful!</h3>
+        <p className="text-sm text-text-light/60 mt-1">${(amount / 100).toFixed(2)} paid</p>
       </div>
     );
   }
@@ -187,13 +187,13 @@ export default function PaymentForm({ amount, description, onSuccess, onError }:
   return (
     <div className="space-y-4">
       <div className="text-center mb-4">
-        <p className="text-sm text-[#2D1D0F]/60">{description}</p>
-        <p className="text-2xl font-black text-[#2D1D0F]">${(amount / 100).toFixed(2)}</p>
+        <p className="text-sm text-text-light/60">{description}</p>
+        <p className="text-2xl font-black text-text-light">${(amount / 100).toFixed(2)}</p>
       </div>
 
       {loading && (
         <div className="text-center py-8">
-          <div className="animate-pulse text-sm text-[#2D1D0F]/50">Loading payment methods...</div>
+          <div className="animate-pulse text-sm text-text-light/50">Loading payment methods...</div>
         </div>
       )}
 
@@ -220,9 +220,9 @@ export default function PaymentForm({ amount, description, onSuccess, onError }:
       {/* Divider */}
       {(applePayAvailable || googlePayAvailable) && !loading && (
         <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-[#F7E6C2]" />
-          <span className="text-xs text-[#2D1D0F]/40 font-bold">OR PAY WITH CARD</span>
-          <div className="flex-1 h-px bg-[#F7E6C2]" />
+          <div className="flex-1 h-px bg-border-light" />
+          <span className="text-xs text-text-light/40 font-bold">OR PAY WITH CARD</span>
+          <div className="flex-1 h-px bg-border-light" />
         </div>
       )}
 
@@ -231,7 +231,7 @@ export default function PaymentForm({ amount, description, onSuccess, onError }:
 
       {/* Card logos */}
       {!loading && (
-        <div className="flex items-center justify-center gap-3 text-[10px] text-[#2D1D0F]/30 font-bold uppercase tracking-wider">
+        <div className="flex items-center justify-center gap-3 text-[10px] text-text-light/30 font-bold uppercase tracking-wider">
           <span>Visa</span>
           <span>&middot;</span>
           <span>Mastercard</span>
@@ -257,7 +257,7 @@ export default function PaymentForm({ amount, description, onSuccess, onError }:
         </button>
       )}
 
-      <p className="text-[10px] text-center text-[#2D1D0F]/30">
+      <p className="text-[10px] text-center text-text-light/30">
         Payments securely processed by Square
       </p>
     </div>

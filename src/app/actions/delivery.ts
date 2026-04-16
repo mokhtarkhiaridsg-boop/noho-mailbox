@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { verifyAdmin, verifySession } from "@/lib/dal";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const NOHO_ZIPS = ["91601", "91602", "91603", "91604", "91605", "91606", "91607", "91608"];
@@ -90,5 +92,104 @@ export async function requestDelivery(
     },
   });
 
+  return { success: true };
+}
+
+// ============================================================
+// In-dashboard same-day delivery scheduler (members)
+// ============================================================
+
+export async function scheduleDelivery(input: {
+  destination: string;
+  zip: string;
+  itemType: string;
+  tier: "Standard" | "Rush" | "WhiteGlove";
+  recipientName: string;
+  recipientPhone: string;
+  dimensions?: string;
+  weightOz?: number;
+  instructions?: string;
+}) {
+  const sessionUser = await verifySession();
+  const userId = sessionUser.id!;
+
+  const pricing = calculatePrice(input.zip);
+  if (!pricing) return { error: "Address outside delivery range" };
+
+  const tierMultiplier =
+    input.tier === "WhiteGlove" ? 2.5 : input.tier === "Rush" ? 1.6 : 1;
+  const price = +(pricing.price * tierMultiplier).toFixed(2);
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true, phone: true, walletBalanceCents: true },
+  });
+  if (!user) return { error: "User not found" };
+
+  const today = new Date();
+  const dateStr = today.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  const order = await prisma.deliveryOrder.create({
+    data: {
+      userId,
+      customerName: user.name,
+      phone: user.phone ?? "",
+      email: user.email,
+      pickupAddr: "NOHO Mailbox, North Hollywood, CA",
+      destination: input.destination,
+      zip: input.zip,
+      zone: pricing.zone,
+      price,
+      itemType: input.itemType,
+      instructions: input.instructions ?? null,
+      tier: input.tier,
+      recipientName: input.recipientName,
+      recipientPhone: input.recipientPhone,
+      dimensions: input.dimensions ?? null,
+      weightOz: input.weightOz ?? null,
+      date: dateStr,
+    },
+  });
+
+  // Charge wallet (simple)
+  const cents = Math.round(price * 100);
+  if (user.walletBalanceCents >= cents) {
+    const newBal = user.walletBalanceCents - cents;
+    await prisma.user.update({
+      where: { id: userId },
+      data: { walletBalanceCents: newBal },
+    });
+    await prisma.walletTransaction.create({
+      data: {
+        userId,
+        kind: "Charge",
+        amountCents: -cents,
+        description: `Delivery #${order.id.slice(-6)} (${input.tier})`,
+        balanceAfterCents: newBal,
+      },
+    });
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin");
+  return { success: true, orderId: order.id };
+}
+
+export async function updateDeliveryTimeline(
+  orderId: string,
+  status: "Picked Up" | "In Transit" | "Delivered",
+  podPhotoUrl?: string
+) {
+  await verifyAdmin();
+  const data: Record<string, unknown> = { status };
+  if (status === "Picked Up") data.pickedUpAt = new Date();
+  if (status === "In Transit") data.inTransitAt = new Date();
+  if (status === "Delivered") {
+    data.deliveredAt = new Date();
+    if (podPhotoUrl) data.podPhotoUrl = podPhotoUrl;
+  }
+  await prisma.deliveryOrder.update({ where: { id: orderId }, data });
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
   return { success: true };
 }

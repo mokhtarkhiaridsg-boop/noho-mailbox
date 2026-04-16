@@ -1,18 +1,12 @@
 export default function DashboardLoading() {
   return (
-    <div className="min-h-screen bg-[#f4f1eb]">
+    <div className="min-h-screen bg-bg-light">
       {/* Header skeleton */}
-      <div
-        className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
-        style={{
-          background: "linear-gradient(155deg, #2D1D0F 0%, #1a1108 60%, #0d1e35 100%)",
-          borderBottom: "1px solid rgba(247,230,194,0.08)",
-        }}
-      >
-        <div className="h-9 w-32 rounded bg-white/10 animate-pulse" />
+      <div className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between bg-surface-light border-b border-border-light">
+        <div className="h-9 w-32 rounded bg-border-light animate-pulse" />
         <div className="flex items-center gap-4">
-          <div className="h-4 w-24 rounded bg-white/10 animate-pulse" />
-          <div className="w-9 h-9 rounded-full bg-white/10 animate-pulse" />
+          <div className="h-4 w-24 rounded bg-border-light animate-pulse" />
+          <div className="w-9 h-9 rounded-full bg-border-light animate-pulse" />
         </div>
       </div>
 
@@ -20,7 +14,7 @@ export default function DashboardLoading() {
         {/* Sidebar skeleton */}
         <aside className="hidden md:block w-56 shrink-0 space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-10 rounded-xl bg-[#2D1D0F]/5 animate-pulse" />
+            <div key={i} className="h-10 rounded-xl bg-border-light/50 animate-pulse" />
           ))}
         </aside>
 
@@ -29,12 +23,12 @@ export default function DashboardLoading() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-24 rounded-2xl bg-white animate-pulse" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04)" }} />
+              <div key={i} className="h-24 rounded-2xl bg-surface-light animate-pulse shadow-[var(--shadow-sm)]" />
             ))}
           </div>
           {/* Main content */}
-          <div className="rounded-2xl bg-white h-64 animate-pulse" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04)" }} />
-          <div className="rounded-2xl bg-white h-48 animate-pulse" style={{ boxShadow: "0 1px 3px rgba(45,29,15,0.04)" }} />
+          <div className="rounded-2xl bg-surface-light h-64 animate-pulse shadow-[var(--shadow-sm)]" />
+          <div className="rounded-2xl bg-surface-light h-48 animate-pulse shadow-[var(--shadow-sm)]" />
         </div>
       </div>
     </div>
