@@ -39,6 +39,12 @@ model User {
   notifPrefs                String?
   organizationId            String?
   planDueDate               String?   // e.g. "2025-06-15" — admin-set due date for plan renewal
+  tosAcceptedAt             DateTime?
+  kycIdImage2Url            String?   // Second ID for CMRA compliance
+  idPrimaryExpDate          String?   // e.g. "2027-03-15"
+  idSecondaryExpDate        String?   // e.g. "2028-01-01"
+  planExpiresAt             DateTime?
+  planAutoRenew             Boolean   @default(false)
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -367,4 +373,13 @@ model OrganizationMember {
   acceptedAt     DateTime?
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
 }

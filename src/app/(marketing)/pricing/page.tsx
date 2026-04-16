@@ -162,6 +162,51 @@ export default function PricingPage() {
           </p>
         </div>
       </section>
+
+      {/* Fees & Policies */}
+      <section className="py-20 px-4 bg-bg-light">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-extrabold tracking-tight text-text-light text-center mb-4 animate-fade-up">
+            Fees &amp; Policies
+          </h2>
+          <p className="text-text-light-muted text-center max-w-xl mx-auto mb-10 animate-fade-up delay-100">
+            Transparent pricing for additional services. No surprises.
+          </p>
+          <div className="overflow-x-auto rounded-2xl shadow-[var(--shadow-md)] animate-fade-up delay-200">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-bg-dark text-text-dark">
+                  <th className="text-left p-4 font-extrabold tracking-tight">Fee</th>
+                  <th className="text-right p-4 font-extrabold tracking-tight">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["Security Deposit (refundable)", "$50"],
+                  ["Key Replacement", "$25"],
+                  ["Late Payment (after 10-day grace period)", "$15"],
+                  ["Mail Scanning", "$2 per page"],
+                  ["Mail Forwarding", "Postage + $5 handling"],
+                  ["Notary Services", "$15 per signature"],
+                  ["Same-Day Delivery (NoHo zone)", "Starting at $5"],
+                ].map(([fee, amount], i) => (
+                  <tr key={fee} className={i % 2 === 0 ? "bg-surface-light" : "bg-bg-light"}>
+                    <td className="p-4 text-text-light-muted font-medium">{fee}</td>
+                    <td className="p-4 text-right font-bold text-text-light">{amount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-center text-sm text-text-light-muted/60 mt-8">
+            All fees are subject to applicable sales tax. See our{" "}
+            <Link href="/contact" className="text-accent hover:underline">
+              terms of service
+            </Link>{" "}
+            for full details.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

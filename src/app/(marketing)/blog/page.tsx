@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EnvelopeIcon, MailboxIcon, DeliveryTruckIcon, ShieldIcon, HeartBubbleIcon } from "@/components/BrandIcons";
+/* eslint-disable @typescript-eslint/no-unused-vars -- icons used in article data below */
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -73,14 +74,14 @@ export default function BlogPage() {
       <section className="py-20 px-4 bg-bg-light">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {articles.map((article, i) => (
-            <Link
+            <div
               key={article.title}
-              href="/contact"
-              className={`group bg-surface-light rounded-2xl overflow-hidden hover-lift animate-fade-up shadow-[var(--shadow-md)] ${i % 2 === 0 ? "delay-100" : "delay-300"}`}
+              className={`bg-surface-light rounded-2xl overflow-hidden animate-fade-up shadow-[var(--shadow-md)] ${i % 2 === 0 ? "delay-100" : "delay-300"}`}
             >
               {/* Icon header */}
-              <div className="bg-gradient-to-br from-bg-light to-bg-light px-6 py-8 flex items-center justify-center">
+              <div className="bg-gradient-to-br from-bg-light to-bg-light px-6 py-8 flex items-center justify-center relative">
                 {article.icon}
+                <span className="absolute top-3 right-3 bg-accent/10 text-accent text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-xl">Coming Soon</span>
               </div>
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-3">
@@ -88,13 +89,10 @@ export default function BlogPage() {
                   <span className="text-[10px] text-text-light-muted/60">•</span>
                   <span className="text-[10px] text-text-light-muted/60">{article.readTime}</span>
                 </div>
-                <h3 className="font-extrabold tracking-tight text-text-light mb-2 group-hover:text-accent transition-colors">{article.title}</h3>
+                <h3 className="font-extrabold tracking-tight text-text-light mb-2">{article.title}</h3>
                 <p className="text-sm text-text-light-muted leading-relaxed mb-4">{article.excerpt}</p>
-                <span className="text-sm font-bold text-accent inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                  Read More <span>→</span>
-                </span>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
         <p className="text-center text-sm text-text-light-muted/60 mt-10 animate-fade-up">

@@ -126,7 +126,7 @@ export default function ContactPage() {
                 <h3 className="font-extrabold tracking-tight text-text-light text-sm">Location</h3>
               </div>
               <p className="text-sm text-text-light-muted">
-                5250 Lankershim Blvd<br />
+                5062 Lankershim Blvd<br />
                 North Hollywood, CA 91601
               </p>
             </div>
@@ -139,7 +139,7 @@ export default function ContactPage() {
                 <h3 className="font-extrabold tracking-tight text-text-light text-sm">Hours</h3>
               </div>
               <p className="text-sm text-text-light-muted">
-                Mon – Fri: 9am – 5:30pm<br />
+                Mon – Fri: 9:30am – 5:30pm<br />
                 <span className="text-xs text-text-light-muted/70">(Break 1:30 – 2pm)</span><br />
                 Saturday: 10am – 1:30pm<br />
                 Sunday: Closed

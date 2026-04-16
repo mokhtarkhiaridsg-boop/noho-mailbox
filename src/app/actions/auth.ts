@@ -62,6 +62,8 @@ export async function signup(
 
   const passwordHash = await bcrypt.hash(password, 12);
 
+  const tosAccepted = formData.get("tosAccepted") === "true";
+
   await prisma.user.create({
     data: {
       name: `${firstName} ${lastName}`,
@@ -70,6 +72,7 @@ export async function signup(
       passwordHash,
       plan: planCapitalized,
       planTerm: planTerm,
+      tosAcceptedAt: tosAccepted ? new Date() : null,
       // Suite assignment is now an admin workflow; mailboxStatus drives gating.
       mailboxStatus: "Pending",
     },
@@ -79,7 +82,7 @@ export async function signup(
     await signIn("credentials", {
       email,
       password,
-      redirectTo: isPaid ? "/dashboard/pending" : "/pricing?upgrade=1",
+      redirectTo: isPaid ? "/dashboard/pending" : "/dashboard",
     });
   } catch (error) {
     if (error instanceof AuthError) {

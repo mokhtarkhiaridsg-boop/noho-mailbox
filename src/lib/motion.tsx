@@ -50,6 +50,16 @@ export const staggerContainerSlow: Variants = {
   },
 };
 
+/* ─── Pre-created motion components (must be at module level, not inside render) ─── */
+
+const motionComponents = {
+  div: motion.create("div"),
+  section: motion.create("section"),
+  article: motion.create("article"),
+  li: motion.create("li"),
+  ul: motion.create("ul"),
+} as const;
+
 /* ─── Components ─── */
 
 export function AnimateOnScroll({
@@ -63,7 +73,7 @@ export function AnimateOnScroll({
   className?: string;
   as?: "div" | "section" | "article" | "li" | "ul";
 }) {
-  const Component = motion.create(as);
+  const Component = motionComponents[as];
   return (
     <Component
       initial="hidden"

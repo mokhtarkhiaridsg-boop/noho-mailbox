@@ -89,7 +89,7 @@ export default async function OnboardingPage() {
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-[#0e2240]/60">
-                  Government ID photo
+                  Primary ID (photo)
                 </label>
                 <input
                   type="file"
@@ -98,8 +98,47 @@ export default async function OnboardingPage() {
                   required
                   className="mt-2 block w-full rounded-xl border border-[#0e2240]/15 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[#3374B5] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
                 />
-                <p className="mt-1.5 text-[11px] text-[#0e2240]/50">
+                <div className="mt-2 flex items-center gap-2">
+                  <label className="text-[11px] text-[#0e2240]/50 shrink-0">Exp. date:</label>
+                  <input
+                    type="date"
+                    name="idPrimaryExpDate"
+                    className="rounded-lg border border-[#0e2240]/15 bg-white px-2 py-1 text-xs"
+                  />
+                </div>
+                <p className="mt-1 text-[11px] text-[#0e2240]/50">
                   Driver&apos;s license, passport, or state ID. Max 8 MB.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#0e2240]/60">
+                  Second ID (photo)
+                </label>
+                <input
+                  type="file"
+                  name="idImage2"
+                  accept="image/*"
+                  required
+                  className="mt-2 block w-full rounded-xl border border-[#0e2240]/15 bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[#3374B5] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
+                />
+                <div className="mt-2 flex items-center gap-2">
+                  <label className="text-[11px] text-[#0e2240]/50 shrink-0">Exp. date:</label>
+                  <input
+                    type="date"
+                    name="idSecondaryExpDate"
+                    className="rounded-lg border border-[#0e2240]/15 bg-white px-2 py-1 text-xs"
+                  />
+                </div>
+                <p className="mt-1 text-[11px] text-[#0e2240]/50">
+                  Must be different from primary. Examples: passport, utility bill, social security card. Max 8 MB.
+                </p>
+              </div>
+
+              <div className="rounded-xl bg-amber-50 border border-amber-200 p-4">
+                <p className="text-xs text-amber-800 font-semibold">CMRA Requirement</p>
+                <p className="text-[11px] text-amber-700 mt-1">
+                  Federal law (USPS DMM 508.1.8) requires two valid forms of identification to rent a commercial mailbox.
                 </p>
               </div>
 

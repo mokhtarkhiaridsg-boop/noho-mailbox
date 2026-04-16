@@ -288,7 +288,7 @@ export function ShippingQuoteClient() {
                 {quotes.length} {quotes.length === 1 ? "rate" : "rates"} found
               </h3>
 
-              {quotes.map((q, i) => (
+              {quotes.map((q) => (
                 <div
                   key={`${q.carrier}-${q.service}`}
                   className={`flex items-center justify-between p-5 rounded-2xl transition-all hover-lift ${
@@ -325,7 +325,7 @@ export function ShippingQuoteClient() {
               ))}
 
               <p className="text-xs text-text-light-muted/60 text-center mt-6">
-                Rates are estimates. Final price calculated at checkout.
+                * All rates are estimates. Final pricing may vary based on actual package dimensions and weight. Contact us for exact quotes.
                 Visit us in-store or <Link href="/contact" className="text-accent font-semibold hover:underline">contact us</Link> to ship.
               </p>
             </div>

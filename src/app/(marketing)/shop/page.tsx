@@ -111,7 +111,7 @@ export default function ShopPage() {
                       href="/contact"
                       className="text-xs font-bold text-text-light-muted border border-text-light/15 px-3 py-1.5 rounded-xl hover:bg-bg-light hover:text-text-light transition-all"
                     >
-                      Inquire
+                      Ask About This Item
                     </Link>
                   </div>
                 </div>

@@ -32,6 +32,7 @@ export default function SignUpPage() {
   const [state, formAction, pending] = useActionState<AuthState, FormData>(signup, {});
   const [oauth, setOauth] = useState({ google: false, apple: false });
   const [oauthError, setOauthError] = useState<string | null>(null);
+  const [tosAccepted, setTosAccepted] = useState(false);
 
   useEffect(() => {
     getOAuthConfig().then((cfg) => setOauth({ google: cfg.isGoogleEnabled, apple: cfg.isAppleEnabled }));
@@ -305,9 +306,30 @@ export default function SignUpPage() {
                 <input type="hidden" name="email" value={formValues.email} />
                 <input type="hidden" name="phone" value={formValues.phone} />
                 <input type="hidden" name="password" value={formValues.password} />
+                <input type="hidden" name="tosAccepted" value={tosAccepted ? "true" : ""} />
+
+                <label className="flex items-start gap-3 mb-4 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={tosAccepted}
+                    onChange={(e) => setTosAccepted(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded accent-accent shrink-0"
+                  />
+                  <span className="text-xs text-text-dark-muted leading-relaxed">
+                    I agree to the{" "}
+                    <Link href="/terms" target="_blank" className="text-accent hover:underline font-semibold">
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link href="/privacy" target="_blank" className="text-accent hover:underline font-semibold">
+                      Privacy Policy
+                    </Link>
+                  </span>
+                </label>
+
                 <button
                   type="submit"
-                  disabled={pending}
+                  disabled={pending || !tosAccepted}
                   className="block w-full text-center font-semibold py-3.5 rounded-xl text-sm text-white bg-accent hover:bg-accent-hover transition-all duration-200 shadow-[0_4px_16px_rgba(51,116,181,0.4)] disabled:opacity-60"
                 >
                   {pending ? "Creating Account..." : "Go to My Dashboard"}

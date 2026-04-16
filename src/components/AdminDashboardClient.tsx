@@ -22,9 +22,7 @@ import {
   updateCustomerSuite,
   updateCustomerPlanDueDate,
 } from "@/app/actions/admin";
-import { sendMessage } from "@/app/actions/messages";
 import { logout } from "@/app/actions/auth";
-import { updateDeliveryTimeline } from "@/app/actions/delivery";
 
 type Customer = {
   id: string;
@@ -327,7 +325,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
     { label: "Address", value: "North Hollywood, CA" },
     { label: "Phone", value: "(818) 765-1539" },
     { label: "Email", value: "hello@nohomailbox.org" },
-    { label: "Hours", value: "Mon-Fri 9am-5:30pm, Sat 10am-1:30pm" },
+    { label: "Hours", value: "Mon-Fri 9:30am-5:30pm (break 1:30-2pm), Sat 10am-1:30pm" },
   ]);
 
   // Notification toggles

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import { MailboxIcon, HeartBubbleIcon, EnvelopeIcon, DeliveryTruckIcon, ShoppingBagIcon, StarIcon, ShieldIcon } from "@/components/BrandIcons";
+import { DeliveryTruckIcon, ShoppingBagIcon, StarIcon } from "@/components/BrandIcons";
 import { HomepageClient } from "./homepage-client";
 
 export const metadata: Metadata = {
@@ -28,7 +28,7 @@ const localBusinessJsonLd = {
   priceRange: "$",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "5250 Lankershim Blvd",
+    streetAddress: "5062 Lankershim Blvd",
     addressLocality: "North Hollywood",
     addressRegion: "CA",
     postalCode: "91601",
@@ -36,7 +36,7 @@ const localBusinessJsonLd = {
   },
   geo: { "@type": "GeoCoordinates", latitude: 34.1664, longitude: -118.3776 },
   openingHoursSpecification: [
-    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday"], opens: "09:00", closes: "17:30" },
+    { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday"], opens: "09:30", closes: "17:30" },
     { "@type": "OpeningHoursSpecification", dayOfWeek: "Saturday", opens: "10:00", closes: "13:30" },
   ],
   sameAs: [],

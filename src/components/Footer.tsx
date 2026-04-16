@@ -26,7 +26,7 @@ export default function Footer() {
           </p>
           <div className="mt-5 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-success animate-pulse-soft" />
-            <span className="text-xs text-text-dark-muted">Open Mon–Fri 9–5:30, Sat 10–1:30</span>
+            <span className="text-xs text-text-dark-muted">Open Mon–Fri 9:30–5:30, Sat 10–1:30</span>
           </div>
         </div>
 
@@ -63,7 +63,7 @@ export default function Footer() {
             Visit Us
           </p>
           <address className="not-italic text-sm text-text-dark-muted space-y-1.5">
-            <p>5250 Lankershim Blvd</p>
+            <p>5062 Lankershim Blvd</p>
             <p>North Hollywood, CA 91601</p>
             <p className="mt-3">
               <a href="tel:+18187651539" className="hover:text-text-dark transition-colors">(818) 765-1539</a>
