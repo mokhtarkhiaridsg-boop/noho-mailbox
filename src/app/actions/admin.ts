@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { sendKycStatusEmail, sendMailboxActivatedEmail } from "@/lib/email";
 
 export async function createCustomer(formData: FormData) {
   await verifyAdmin();
@@ -90,6 +91,11 @@ export async function assignMailbox(userId: string, suiteNumber: string) {
     return { error: "Suite number already taken" };
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true },
+  });
+
   await prisma.user.update({
     where: { id: userId },
     data: {
@@ -109,6 +115,13 @@ export async function assignMailbox(userId: string, suiteNumber: string) {
       metadata: JSON.stringify({ suiteNumber }),
     },
   });
+
+  // Notify customer their mailbox is live (fire-and-forget)
+  if (user) {
+    try {
+      await sendMailboxActivatedEmail(user.email, user.name ?? "there", suiteNumber);
+    } catch { /* non-fatal */ }
+  }
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");
@@ -151,7 +164,7 @@ export async function reviewKyc(
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { plan: true, suiteNumber: true },
+    select: { name: true, email: true, plan: true, suiteNumber: true },
   });
   if (!user) return { error: "User not found" };
 
@@ -180,6 +193,11 @@ export async function reviewKyc(
       metadata: notes ? JSON.stringify({ notes }) : null,
     },
   });
+
+  // Notify customer of KYC decision (fire-and-forget)
+  try {
+    await sendKycStatusEmail(user.email, user.name ?? "there", decision, notes);
+  } catch { /* non-fatal */ }
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");

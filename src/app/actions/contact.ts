@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { sendContactNotification, sendContactConfirmation } from "@/lib/email";
 import { z } from "zod";
 
 const contactSchema = z.object({
@@ -34,6 +35,16 @@ export async function submitContact(
   await prisma.contactSubmission.create({
     data: result.data,
   });
+
+  // Send notification to store + confirmation to sender (fire-and-forget)
+  try {
+    await Promise.all([
+      sendContactNotification(result.data),
+      sendContactConfirmation({ name: result.data.name, email: result.data.email }),
+    ]);
+  } catch {
+    // Non-fatal — submission is already saved
+  }
 
   return { success: true };
 }
