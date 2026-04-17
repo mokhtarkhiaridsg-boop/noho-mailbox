@@ -15,12 +15,14 @@ export type PlanStatus = "active" | "warning" | "grace" | "expired";
 export function getPlanStatus(planDueDate: string | null | undefined): PlanStatus {
   if (!planDueDate) return "active";
 
-  // Treat the due date as the end of that calendar day
-  const due = new Date(planDueDate + "T23:59:59");
+  // Parse as UTC midnight so comparisons are timezone-independent
+  const due = new Date(planDueDate + "T00:00:00Z");
   if (isNaN(due.getTime())) return "active";
 
-  const now = new Date();
-  const diffDays = (due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+  // Compare against UTC midnight today so the diff is whole days
+  const todayUTC = new Date();
+  todayUTC.setUTCHours(0, 0, 0, 0);
+  const diffDays = (due.getTime() - todayUTC.getTime()) / (1000 * 60 * 60 * 24);
 
   if (diffDays > 14) return "active";
   if (diffDays > 0) return "warning";
@@ -30,9 +32,11 @@ export function getPlanStatus(planDueDate: string | null | undefined): PlanStatu
 
 /** Human-readable label for the banner */
 export function planStatusMessage(planDueDate: string, status: PlanStatus): string {
-  const due = new Date(planDueDate + "T23:59:59");
-  const daysUntil = Math.ceil((due.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  const daysOver = Math.floor((Date.now() - due.getTime()) / (1000 * 60 * 60 * 24));
+  const due = new Date(planDueDate + "T00:00:00Z");
+  const todayUTC = new Date();
+  todayUTC.setUTCHours(0, 0, 0, 0);
+  const daysUntil = Math.ceil((due.getTime() - todayUTC.getTime()) / (1000 * 60 * 60 * 24));
+  const daysOver = Math.floor((todayUTC.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
   const graceLeft = 10 - daysOver;
 
   switch (status) {

@@ -225,7 +225,7 @@ export default function DeliveryPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-text-light mb-1">Phone</label>
-                      <input required name="phone" type="tel" placeholder="(818) 555-0100" className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent" />
+                      <input required name="phone" type="tel" placeholder="(818) 765-1539" className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent" />
                     </div>
                   </div>
                   <div>

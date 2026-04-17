@@ -5,8 +5,8 @@
         font-family: 'Arial Rounded MT Bold', 'Nunito', Arial, sans-serif;
         font-size: 110px;
         font-weight: 900;
-        fill: #F7E6C2;
-        stroke: #2D1D0F;
+        fill: #EBF2FA;
+        stroke: #1A1714;
         stroke-width: 11;
         stroke-linejoin: round;
         stroke-linecap: round;
@@ -33,17 +33,17 @@
   <!-- Mailbox icon (original icon at 0.5 scale) -->
   <g transform="translate(304, 118) scale(0.5)">
     <!-- Post -->
-    <rect x="52" y="90" width="16" height="45" rx="2" fill="#F7E6C2" stroke="#2D1D0F" stroke-width="3"/>
+    <rect x="52" y="90" width="16" height="45" rx="2" fill="#EBF2FA" stroke="#1A1714" stroke-width="3"/>
     <!-- Base plate -->
-    <rect x="40" y="130" width="40" height="6" rx="3" fill="#F7E6C2" stroke="#2D1D0F" stroke-width="3"/>
+    <rect x="40" y="130" width="40" height="6" rx="3" fill="#EBF2FA" stroke="#1A1714" stroke-width="3"/>
     <!-- Mailbox body -->
-    <rect x="18" y="30" width="84" height="55" rx="10" fill="#F7E6C2" stroke="#2D1D0F" stroke-width="3.5"/>
+    <rect x="18" y="30" width="84" height="55" rx="10" fill="#EBF2FA" stroke="#1A1714" stroke-width="3.5"/>
     <!-- Mailbox top arc -->
-    <path d="M18 50 Q18 20 60 20 Q102 20 102 50" fill="#F7E6C2" stroke="#2D1D0F" stroke-width="3.5"/>
+    <path d="M18 50 Q18 20 60 20 Q102 20 102 50" fill="#EBF2FA" stroke="#1A1714" stroke-width="3.5"/>
     <!-- Flag pole -->
-    <rect x="100" y="32" width="6" height="30" rx="2" fill="#3374B5" stroke="#2D1D0F" stroke-width="2"/>
+    <rect x="100" y="32" width="6" height="30" rx="2" fill="#3374B5" stroke="#1A1714" stroke-width="2"/>
     <!-- Flag -->
-    <rect x="98" y="28" width="16" height="10" rx="3" fill="#3374B5" stroke="#2D1D0F" stroke-width="2"/>
+    <rect x="98" y="28" width="16" height="10" rx="3" fill="#3374B5" stroke="#1A1714" stroke-width="2"/>
     <!-- Heart -->
     <path d="M50 55 C50 48 40 45 40 52 C40 60 50 66 50 66 C50 66 60 60 60 52 C60 45 50 48 50 55Z" fill="#3374B5"/>
   </g>

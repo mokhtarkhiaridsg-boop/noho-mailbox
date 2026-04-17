@@ -223,7 +223,7 @@ export default function SignUpPage() {
                     value={formValues.phone}
                     onChange={(e) => setFormValues({ ...formValues, phone: e.target.value })}
                     className="w-full rounded-xl px-4 py-3 text-sm text-text-dark placeholder-text-dark-muted/40 bg-white/[0.06] border border-white/[0.08] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/30 transition-all"
-                    placeholder="(818) 555-0100"
+                    placeholder="(818) 765-1539"
                   />
                 </div>
                 <div>

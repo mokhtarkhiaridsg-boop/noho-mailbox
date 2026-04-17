@@ -1728,7 +1728,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                 {[
                   { label: "Full Name", key: "name", type: "text", placeholder: "Jane Smith" },
                   { label: "Email", key: "email", type: "email", placeholder: "jane@example.com" },
-                  { label: "Phone", key: "phone", type: "tel", placeholder: "(818) 555-0100" },
+                  { label: "Phone", key: "phone", type: "tel", placeholder: "(818) 765-1539" },
                 ].map(({ label, key, type, placeholder }) => (
                   <div key={key}>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-text-light/40 mb-1">{label}</label>

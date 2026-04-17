@@ -3,7 +3,8 @@ import { getPlanStatus, planStatusMessage } from "@/lib/plan";
 
 function daysFromNow(n: number): string {
   const d = new Date();
-  d.setDate(d.getDate() + n);
+  d.setUTCHours(0, 0, 0, 0);
+  d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
 }
 
