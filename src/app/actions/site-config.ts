@@ -18,3 +18,25 @@ export async function setSiteConfig(key: string, value: string): Promise<{ succe
   revalidatePath("/admin");
   return { success: true };
 }
+
+export async function setSiteConfigs(entries: Record<string, string>): Promise<{ success: boolean }> {
+  await verifyAdmin();
+  await Promise.all(
+    Object.entries(entries).map(([key, value]) =>
+      prisma.siteConfig.upsert({
+        where: { key },
+        update: { value },
+        create: { key, value },
+      })
+    )
+  );
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+export async function getManyConfigs(keys: string[]): Promise<Record<string, string>> {
+  const rows = await prisma.siteConfig.findMany({ where: { key: { in: keys } } });
+  const out: Record<string, string> = {};
+  for (const row of rows) out[row.key] = row.value;
+  return out;
+}

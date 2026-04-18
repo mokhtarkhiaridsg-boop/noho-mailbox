@@ -29,6 +29,7 @@ import {
   updateDeliveryStatus,
 } from "@/app/actions/admin";
 import { logout } from "@/app/actions/auth";
+import { setSiteConfigs } from "@/app/actions/site-config";
 
 type Customer = {
   id: string;
@@ -205,6 +206,7 @@ type Props = {
   recentPayments: PaymentRow[];
   messageThreads?: MessageThreadRow[];
   contactSubmissions?: ContactRow[];
+  siteSettings?: Record<string, string>;
 };
 
 const sideNav = [
@@ -308,7 +310,7 @@ function ProfileDropdown() {
   );
 }
 
-export default function AdminDashboardClient({ customers, recentMail, notaryQueue, deliveryOrders, shopOrders, stats, squareStatus, recentPayments, complianceQueue = [], mailRequests = [], keyRequests = [], messageThreads = [], contactSubmissions = [] }: Props) {
+export default function AdminDashboardClient({ customers, recentMail, notaryQueue, deliveryOrders, shopOrders, stats, squareStatus, recentPayments, complianceQueue = [], mailRequests = [], keyRequests = [], messageThreads = [], contactSubmissions = [], siteSettings = {} }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
@@ -372,23 +374,24 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   const [showNewClientModal, setShowNewClientModal] = useState(false);
   const [clientForm, setClientForm] = useState({ name: "", email: "", phone: "", package: "Full Package" });
 
-  // Inline edit for store settings
+  // Inline edit for store settings — seeded from DB, saved back to DB
   const [editingSetting, setEditingSetting] = useState<string | null>(null);
   const [editSettingValue, setEditSettingValue] = useState("");
+  const [settingsSaved, setSettingsSaved] = useState(false);
   const [storeInfo, setStoreInfo] = useState([
-    { label: "Store Name", value: "NOHO Mailbox" },
-    { label: "Address", value: "North Hollywood, CA" },
-    { label: "Phone", value: "(818) 765-1539" },
-    { label: "Email", value: "hello@nohomailbox.org" },
-    { label: "Hours", value: "Mon-Fri 9:30am-5:30pm (break 1:30-2pm), Sat 10am-1:30pm" },
+    { key: "store.name",  label: "Store Name", value: siteSettings["store.name"]  ?? "NOHO Mailbox" },
+    { key: "store.address", label: "Address", value: siteSettings["store.address"] ?? "5062 Lankershim Blvd, North Hollywood, CA 91601" },
+    { key: "store.phone", label: "Phone",    value: siteSettings["store.phone"]  ?? "(818) 765-1539" },
+    { key: "store.email", label: "Email",    value: siteSettings["store.email"]  ?? "nohomailbox@gmail.com" },
+    { key: "store.hours", label: "Hours",    value: siteSettings["store.hours"]  ?? "Mon–Fri 9:30am–5:30pm (break 1:30–2pm) · Sat 10am–1:30pm" },
   ]);
 
-  // Notification toggles
+  // Notification toggles — seeded from DB
   const [notifications, setNotifications] = useState([
-    { label: "Email alerts for new mail", on: true },
-    { label: "SMS alerts for packages", on: true },
-    { label: "Daily summary email", on: false },
-    { label: "Notary appointment reminders", on: true },
+    { key: "notif.mailArrived",       label: "Email alerts for new mail",       on: siteSettings["notif.mailArrived"]       !== "false" },
+    { key: "notif.smsPackages",       label: "SMS alerts for packages",          on: siteSettings["notif.smsPackages"]       !== "false" },
+    { key: "notif.dailySummary",      label: "Daily summary email",             on: siteSettings["notif.dailySummary"]      === "true" },
+    { key: "notif.notaryReminders",   label: "Notary appointment reminders",    on: siteSettings["notif.notaryReminders"]   !== "false" },
   ]);
 
   const filteredCustomers = customers.filter(
@@ -1632,15 +1635,26 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {/* ─── Settings ─── */}
           {tab === "settings" && (
             <div className="space-y-6">
-              <h2 className="font-black text-lg uppercase tracking-wide text-text-light">Settings</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="font-black text-lg uppercase tracking-wide text-text-light">Settings</h2>
+                {settingsSaved && (
+                  <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
+                    ✓ Saved to database
+                  </span>
+                )}
+              </div>
 
+              {/* Store Information — persists to SiteConfig DB */}
               <div className="rounded-2xl p-6 bg-white space-y-5" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
-                <h3 className="font-black text-sm uppercase tracking-wide text-text-light">Store Information</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-black text-sm uppercase tracking-wide text-text-light">Store Information</h3>
+                  <span className="text-[10px] text-text-light/40 font-semibold">Persisted to database</span>
+                </div>
                 {storeInfo.map((f) => (
-                  <div key={f.label} className="flex items-center justify-between p-4 rounded-xl" style={{ background: "rgba(232,229,224,0.25)", border: "1px solid rgba(232,229,224,0.5)" }}>
+                  <div key={f.key} className="flex items-center justify-between p-4 rounded-xl" style={{ background: "rgba(232,229,224,0.25)", border: "1px solid rgba(232,229,224,0.5)" }}>
                     <div className="flex-1 mr-4">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-text-light/35">{f.label}</p>
-                      {editingSetting === f.label ? (
+                      {editingSetting === f.key ? (
                         <input
                           type="text"
                           value={editSettingValue}
@@ -1649,7 +1663,8 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                           autoFocus
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
-                              setStoreInfo((prev) => prev.map((s) => s.label === f.label ? { ...s, value: editSettingValue } : s));
+                              const newValue = editSettingValue;
+                              setStoreInfo((prev) => prev.map((s) => s.key === f.key ? { ...s, value: newValue } : s));
                               setEditingSetting(null);
                             } else if (e.key === "Escape") {
                               setEditingSetting(null);
@@ -1660,16 +1675,17 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                         <p className="text-sm font-semibold text-text-light">{f.value}</p>
                       )}
                     </div>
-                    {editingSetting === f.label ? (
+                    {editingSetting === f.key ? (
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
-                            setStoreInfo((prev) => prev.map((s) => s.label === f.label ? { ...s, value: editSettingValue } : s));
+                            const newValue = editSettingValue;
+                            setStoreInfo((prev) => prev.map((s) => s.key === f.key ? { ...s, value: newValue } : s));
                             setEditingSetting(null);
                           }}
                           className="text-xs font-bold text-green-600 hover:underline"
                         >
-                          Save
+                          OK
                         </button>
                         <button onClick={() => setEditingSetting(null)} className="text-xs font-bold text-text-light/40 hover:underline">
                           Cancel
@@ -1677,7 +1693,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                       </div>
                     ) : (
                       <button
-                        onClick={() => { setEditingSetting(f.label); setEditSettingValue(f.value); }}
+                        onClick={() => { setEditingSetting(f.key); setEditSettingValue(f.value); }}
                         className="text-xs font-bold text-accent hover:underline"
                       >
                         Edit
@@ -1685,15 +1701,43 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                     )}
                   </div>
                 ))}
+                <button
+                  disabled={isPending}
+                  onClick={() => {
+                    const entries = Object.fromEntries(storeInfo.map((f) => [f.key, f.value]));
+                    startTransition(async () => {
+                      await setSiteConfigs(entries);
+                      setSettingsSaved(true);
+                      setTimeout(() => setSettingsSaved(false), 3000);
+                      router.refresh();
+                    });
+                  }}
+                  className="w-full py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-40 transition-transform hover:-translate-y-0.5"
+                  style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)", boxShadow: "0 4px 14px rgba(51,116,181,0.3)" }}
+                >
+                  {isPending ? "Saving…" : "Save Store Info to Database"}
+                </button>
               </div>
 
+              {/* Notification toggles — persists to SiteConfig DB */}
               <div className="rounded-2xl p-6 bg-white space-y-4" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
-                <h3 className="font-black text-sm uppercase tracking-wide text-text-light">Notifications</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-black text-sm uppercase tracking-wide text-text-light">Notifications</h3>
+                  <span className="text-[10px] text-text-light/40 font-semibold">Persisted to database</span>
+                </div>
                 {notifications.map((n, idx) => (
-                  <div key={n.label} className="flex items-center justify-between py-2">
+                  <div key={n.key} className="flex items-center justify-between py-2">
                     <span className="text-sm text-text-light/70">{n.label}</span>
                     <div
-                      onClick={() => setNotifications((prev) => prev.map((item, i) => i === idx ? { ...item, on: !item.on } : item))}
+                      onClick={() => {
+                        const updated = notifications.map((item, i) => i === idx ? { ...item, on: !item.on } : item);
+                        setNotifications(updated);
+                        // Auto-save toggle immediately
+                        const entries = Object.fromEntries(updated.map((item) => [item.key, item.on ? "true" : "false"]));
+                        startTransition(async () => {
+                          await setSiteConfigs(entries);
+                        });
+                      }}
                       className="w-10 h-6 rounded-full relative cursor-pointer transition-colors"
                       style={{ background: n.on ? "#3374B5" : "rgba(26,23,20,0.12)" }}
                     >

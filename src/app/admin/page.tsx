@@ -2,6 +2,7 @@ import { verifyAdmin } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { isSquareConfigured } from "@/lib/square";
 import AdminDashboardClient from "@/components/AdminDashboardClient";
+import { getManyConfigs } from "@/app/actions/site-config";
 
 export default async function AdminPage() {
   await verifyAdmin();
@@ -261,7 +262,7 @@ export default async function AdminPage() {
   }));
 
   // ─── iPostal1-parity admin queues ───
-  const [complianceRows, mailRequestRows, keyRequestRows, rawThreads, rawContacts] = await Promise.all([
+  const [complianceRows, mailRequestRows, keyRequestRows, rawThreads, rawContacts, siteSettings] = await Promise.all([
     prisma.user.findMany({
       where: {
         role: { not: "ADMIN" },
@@ -316,6 +317,11 @@ export default async function AdminPage() {
       orderBy: { createdAt: "desc" },
       take: 50,
     }),
+    // Site settings from DB
+    getManyConfigs([
+      "store.name", "store.address", "store.phone", "store.email", "store.hours",
+      "notif.mailArrived", "notif.smsPackages", "notif.dailySummary", "notif.notaryReminders",
+    ]),
   ]);
 
   const complianceQueue = complianceRows.map((c) => ({
@@ -391,6 +397,7 @@ export default async function AdminPage() {
       keyRequests={keyRequests}
       messageThreads={messageThreads}
       contactSubmissions={contactSubmissions}
+      siteSettings={siteSettings}
     />
   );
 }
