@@ -49,11 +49,11 @@ export default function Footer() {
             Company
           </p>
           <ul className="space-y-2.5 text-sm text-text-dark-muted">
-            <li><Link href="/pricing" className="hover:text-text-dark transition-colors">Pricing</Link></li>
+            <li><Link href="/pricing" className="hover:text-text-dark transition-colors">Pricing & Plans</Link></li>
+            <li><Link href="/pricing#fees" className="hover:text-text-dark transition-colors">Fee Schedule</Link></li>
             <li><Link href="/compare" className="hover:text-text-dark transition-colors">Compare Plans</Link></li>
             <li><Link href="/faq" className="hover:text-text-dark transition-colors">FAQ</Link></li>
             <li><Link href="/blog" className="hover:text-text-dark transition-colors">Blog</Link></li>
-            <li><Link href="/security" className="hover:text-text-dark transition-colors">Security</Link></li>
             <li><Link href="/contact" className="hover:text-text-dark transition-colors">Contact</Link></li>
           </ul>
         </div>
@@ -75,15 +75,29 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/[0.06] py-5 px-5">
+      {/* Policy strip */}
+      <div className="border-t border-white/[0.06] py-4 px-5 bg-white/[0.02]">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          {[
+            { label: "Privacy Policy", href: "/privacy" },
+            { label: "Terms of Service", href: "/terms" },
+            { label: "Fee Schedule", href: "/pricing#fees" },
+            { label: "CMRA Compliance", href: "/terms#cmra" },
+            { label: "Security", href: "/security" },
+          ].map((l) => (
+            <Link key={l.href} href={l.href} className="text-[11px] text-text-dark-muted/45 hover:text-text-dark-muted transition-colors">
+              {l.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="border-t border-white/[0.04] py-4 px-5">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-text-dark-muted/50">
-            &copy; {new Date().getFullYear()} NOHO Mailbox. All rights reserved.
+          <p className="text-xs text-text-dark-muted/40">
+            &copy; {new Date().getFullYear()} NOHO Mailbox · CMRA Licensed · 5062 Lankershim Blvd, North Hollywood CA 91601
           </p>
-          <div className="flex items-center gap-4 text-xs text-text-dark-muted/50">
-            <Link href="/privacy" className="hover:text-text-dark-muted transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-text-dark-muted transition-colors">Terms</Link>
-          </div>
+          <p className="text-[10px] text-text-dark-muted/30">All rights reserved.</p>
         </div>
       </div>
     </footer>

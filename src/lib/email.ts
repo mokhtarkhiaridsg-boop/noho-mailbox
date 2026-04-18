@@ -196,6 +196,41 @@ export async function sendPlanRenewalReminder(
   });
 }
 
+// ─── Mail Arrived Notification ───────────────────────────────────────────────
+export async function sendMailArrivedEmail(data: {
+  email: string;
+  name: string;
+  suiteNumber: string;
+  from: string;
+  type: "Letter" | "Package" | string;
+  recipientName?: string | null;
+  photoUrl?: string | null;
+}) {
+  const typeLabel = data.type === "Package" ? "Package" : "Letter";
+  const html = layout(`You have a new ${typeLabel.toLowerCase()}! — NOHO Mailbox`, `
+    ${h1(`You've got ${typeLabel === "Package" ? "a package" : "mail"}! 📬`)}
+    ${p(`Hi ${data.name.split(" ")[0]}, ${typeLabel === "Package" ? "a package has" : "a piece of mail has"} arrived at your NOHO Mailbox.`)}
+    <div style="background:#f7faff;border-left:3px solid #3374B5;border-radius:4px;padding:16px 20px;margin:16px 0;">
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Suite:</strong> #${data.suiteNumber}</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Type:</strong> ${typeLabel}</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>From:</strong> ${data.from}</p>
+      ${data.recipientName ? `<p style="margin:0;font-size:13px;color:#334155;"><strong>Addressed to:</strong> ${data.recipientName}</p>` : ""}
+    </div>
+    ${data.photoUrl ? `<div style="margin:16px 0;text-align:center;"><img src="${data.photoUrl}" alt="Mail photo" style="max-width:100%;border-radius:8px;border:1px solid #e2e8f0;" /></div>` : ""}
+    ${p("Log in to your dashboard to request a scan, forwarding, or schedule a pickup.")}
+    ${btn(`${BASE_URL}/dashboard`, "View in Dashboard")}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">Questions? Call us at <a href="tel:+18187651539" style="color:#3374B5;">(818) 765-1539</a> or stop by Mon–Fri 9:30am–5:30pm · Sat 10am–1:30pm.</span>`)}
+  `);
+
+  return resend.emails.send({
+    from: FROM,
+    replyTo: REPLY_TO,
+    to: data.email,
+    subject: `New ${typeLabel} arrived at your NOHO Mailbox — Suite #${data.suiteNumber}`,
+    html,
+  });
+}
+
 // ─── Mailbox Activated ────────────────────────────────────────────────────────
 export async function sendMailboxActivatedEmail(
   email: string,

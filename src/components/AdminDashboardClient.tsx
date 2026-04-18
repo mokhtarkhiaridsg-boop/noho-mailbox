@@ -313,7 +313,8 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   const [mailFilter, setMailFilter] = useState("All");
   const [showLogMailModal, setShowLogMailModal] = useState(false);
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
-  const [logMailForm, setLogMailForm] = useState({ suite: "", from: "", type: "Letter" });
+  const [logMailForm, setLogMailForm] = useState({ suite: "", from: "", type: "Letter", recipientName: "", recipientPhone: "", exteriorImageUrl: "" });
+  const [logMailPhotoUploading, setLogMailPhotoUploading] = useState(false);
   const [addCustomerForm, setAddCustomerForm] = useState({ name: "", email: "", plan: "Basic", suite: "" });
 
   // View / Edit Customer modal
@@ -406,12 +407,30 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
     fd.append("suite", logMailForm.suite);
     fd.append("from", logMailForm.from);
     fd.append("type", logMailForm.type);
+    if (logMailForm.recipientName) fd.append("recipientName", logMailForm.recipientName);
+    if (logMailForm.recipientPhone) fd.append("recipientPhone", logMailForm.recipientPhone);
+    if (logMailForm.exteriorImageUrl) fd.append("exteriorImageUrl", logMailForm.exteriorImageUrl);
     startTransition(async () => {
-      await logMail(fd);
-      setShowLogMailModal(false);
-      setLogMailForm({ suite: "", from: "", type: "Letter" });
-      router.refresh();
+      const result = await logMail(fd);
+      if (!result?.error) {
+        setShowLogMailModal(false);
+        setLogMailForm({ suite: "", from: "", type: "Letter", recipientName: "", recipientPhone: "", exteriorImageUrl: "" });
+        router.refresh();
+      }
     });
+  }
+
+  async function handleLogMailPhotoUpload(file: File) {
+    setLogMailPhotoUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.url) setLogMailForm((prev) => ({ ...prev, exteriorImageUrl: data.url }));
+    } catch { /* ignore */ } finally {
+      setLogMailPhotoUploading(false);
+    }
   }
 
   function handleAddCustomerSubmit() {
@@ -1002,7 +1021,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
-                      setLogMailForm({ suite: "", from: "", type: "Letter" });
+                      setLogMailForm({ suite: "", from: "", type: "Letter", recipientName: "", recipientPhone: "", exteriorImageUrl: "" });
                       setShowLogMailModal(true);
                     }}
                     className="px-4 py-2.5 rounded-xl text-sm font-black text-white"
@@ -1012,7 +1031,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                   </button>
                   <button
                     onClick={() => {
-                      setLogMailForm({ suite: "", from: "", type: "Package" });
+                      setLogMailForm({ suite: "", from: "", type: "Package", recipientName: "", recipientPhone: "", exteriorImageUrl: "" });
                       setShowLogMailModal(true);
                     }}
                     className="px-4 py-2.5 rounded-xl text-sm font-bold text-text-light bg-white"
@@ -1570,62 +1589,102 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
 
       {/* ─── Log Mail Modal ─── */}
       {showLogMailModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 space-y-4" style={{ boxShadow: "0 8px 40px rgba(26,23,20,0.2)" }}>
-            <h3 className="font-black text-lg uppercase tracking-wide text-text-light">
-              Log {logMailForm.type === "Package" ? "Package" : "Mail"}
-            </h3>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="bg-white rounded-2xl w-full max-w-md max-h-[92vh] overflow-y-auto" style={{ boxShadow: "0 8px 40px rgba(26,23,20,0.2)" }}>
+            <div className="sticky top-0 bg-white px-6 pt-5 pb-4 border-b border-[#e8e5e0] flex items-center justify-between">
+              <h3 className="font-black text-base uppercase tracking-wide text-text-light">Log Incoming Mail</h3>
+              <button onClick={() => setShowLogMailModal(false)} className="text-text-light/30 hover:text-text-light text-xl">✕</button>
+            </div>
 
-            <div className="space-y-3">
+            <div className="px-6 py-5 space-y-4">
+              {/* Type selector — big buttons */}
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Suite Number</label>
-                <input
-                  type="text"
-                  value={logMailForm.suite}
-                  onChange={(e) => setLogMailForm((prev) => ({ ...prev, suite: e.target.value }))}
+                <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-2 block">Type</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {["Letter", "Package"].map((t) => (
+                    <button key={t} type="button"
+                      onClick={() => setLogMailForm((p) => ({ ...p, type: t }))}
+                      className={`py-3 rounded-xl text-sm font-black border transition-colors ${logMailForm.type === t ? "bg-[#3374B5] text-white border-[#3374B5]" : "border-[#e8e5e0] text-text-light hover:border-[#3374B5]"}`}
+                    >{t}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Suite */}
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Suite Number *</label>
+                <input type="text" value={logMailForm.suite}
+                  onChange={(e) => setLogMailForm((p) => ({ ...p, suite: e.target.value }))}
                   placeholder="e.g. 101"
                   className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3374B5]"
                 />
               </div>
+
+              {/* From */}
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">From</label>
-                <input
-                  type="text"
-                  value={logMailForm.from}
-                  onChange={(e) => setLogMailForm((prev) => ({ ...prev, from: e.target.value }))}
+                <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">From / Sender *</label>
+                <input type="text" value={logMailForm.from}
+                  onChange={(e) => setLogMailForm((p) => ({ ...p, from: e.target.value }))}
                   placeholder="e.g. Amazon, IRS, Bank of America"
                   className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3374B5]"
                 />
               </div>
+
+              {/* Recipient */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Addressed To</label>
+                  <input type="text" value={logMailForm.recipientName}
+                    onChange={(e) => setLogMailForm((p) => ({ ...p, recipientName: e.target.value }))}
+                    placeholder="Name on label"
+                    className="w-full rounded-xl border border-border-light px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3374B5]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Recipient Phone</label>
+                  <input type="tel" value={logMailForm.recipientPhone}
+                    onChange={(e) => setLogMailForm((p) => ({ ...p, recipientPhone: e.target.value }))}
+                    placeholder="Optional"
+                    className="w-full rounded-xl border border-border-light px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3374B5]"
+                  />
+                </div>
+              </div>
+
+              {/* Photo upload */}
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Type</label>
-                <select
-                  value={logMailForm.type}
-                  onChange={(e) => setLogMailForm((prev) => ({ ...prev, type: e.target.value }))}
-                  className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3374B5] bg-white"
-                >
-                  <option value="Letter">Letter</option>
-                  <option value="Package">Package</option>
-                </select>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Photo of Mail</label>
+                {logMailForm.exteriorImageUrl ? (
+                  <div className="relative">
+                    <img src={logMailForm.exteriorImageUrl} alt="Mail photo" className="w-full rounded-xl object-cover max-h-48" />
+                    <button
+                      onClick={() => setLogMailForm((p) => ({ ...p, exteriorImageUrl: "" }))}
+                      className="absolute top-2 right-2 bg-white rounded-full w-7 h-7 flex items-center justify-center text-red-500 shadow text-xs font-bold"
+                    >✕</button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-full h-28 rounded-xl border-2 border-dashed border-[#e8e5e0] cursor-pointer hover:border-[#3374B5] transition-colors bg-[#f8f9fa]">
+                    <svg className="w-6 h-6 text-text-light/30 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                    <span className="text-xs text-text-light/40">{logMailPhotoUploading ? "Uploading…" : "Tap to add photo"}</span>
+                    <input type="file" accept="image/*" capture="environment" className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleLogMailPhotoUpload(f); }}
+                    />
+                  </label>
+                )}
               </div>
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="px-6 pb-6 flex gap-3">
               <button
                 onClick={handleLogMailSubmit}
                 disabled={isPending || !logMailForm.suite || !logMailForm.from}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-40"
+                className="flex-1 px-4 py-3 rounded-xl text-sm font-black text-white disabled:opacity-40"
                 style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)", boxShadow: "0 2px 10px rgba(51,116,181,0.3)" }}
               >
-                {isPending ? "Saving..." : "Log Mail"}
+                {isPending ? "Saving…" : `Log ${logMailForm.type} & Notify Customer`}
               </button>
-              <button
-                onClick={() => setShowLogMailModal(false)}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-text-light"
-                style={{ border: "1px solid rgba(232,229,224,0.7)" }}
-              >
-                Cancel
-              </button>
+              <button onClick={() => setShowLogMailModal(false)}
+                className="px-4 py-3 rounded-xl text-sm font-bold text-text-light border border-[#e8e5e0] hover:bg-[#f5f3f0]"
+              >Cancel</button>
             </div>
           </div>
         </div>

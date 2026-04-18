@@ -50,6 +50,11 @@ export default async function AdminPage() {
         kycForm1583Url: true,
         kycIdImageUrl: true,
         kycIdImage2Url: true,
+        cardLast4: true,
+        cardBrand: true,
+        cardExpiry: true,
+        cardholderName: true,
+        cardDiscountPct: true,
         _count: { select: { mailItems: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -176,6 +181,11 @@ export default async function AdminPage() {
     kycForm1583Url: c.kycForm1583Url ?? null,
     kycIdImageUrl: c.kycIdImageUrl ?? null,
     kycIdImage2Url: c.kycIdImage2Url ?? null,
+    cardLast4: c.cardLast4 ?? null,
+    cardBrand: c.cardBrand ?? null,
+    cardExpiry: c.cardExpiry ?? null,
+    cardholderName: c.cardholderName ?? null,
+    cardDiscountPct: c.cardDiscountPct,
   }));
 
   const recentMail = rawMail.map((m) => ({

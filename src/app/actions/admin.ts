@@ -409,6 +409,11 @@ export async function updateCustomerDetails(
     planDueDate?: string | null;
     securityDepositCents?: number;
     kycStatus?: string;
+    cardLast4?: string | null;
+    cardBrand?: string | null;
+    cardExpiry?: string | null;
+    cardholderName?: string | null;
+    cardDiscountPct?: number;
   }
 ) {
   const admin = await verifyAdmin();
@@ -444,6 +449,11 @@ export async function updateCustomerDetails(
       ...(data.planDueDate !== undefined ? { planDueDate: data.planDueDate || null } : {}),
       ...(data.securityDepositCents !== undefined ? { securityDepositCents: data.securityDepositCents } : {}),
       ...(data.kycStatus ? { kycStatus: data.kycStatus } : {}),
+      ...(data.cardLast4 !== undefined ? { cardLast4: data.cardLast4 || null } : {}),
+      ...(data.cardBrand !== undefined ? { cardBrand: data.cardBrand || null } : {}),
+      ...(data.cardExpiry !== undefined ? { cardExpiry: data.cardExpiry || null } : {}),
+      ...(data.cardholderName !== undefined ? { cardholderName: data.cardholderName || null } : {}),
+      ...(data.cardDiscountPct !== undefined ? { cardDiscountPct: data.cardDiscountPct } : {}),
     },
   });
 

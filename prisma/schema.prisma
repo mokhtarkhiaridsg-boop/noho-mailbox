@@ -46,6 +46,12 @@ model User {
   planExpiresAt             DateTime?
   planAutoRenew             Boolean   @default(false)
 
+  cardLast4         String?   // Last 4 digits of card on file
+  cardBrand         String?   // "Visa" | "Mastercard" | "Amex" | "Discover"
+  cardExpiry        String?   // "MM/YY"
+  cardholderName    String?
+  cardDiscountPct   Int       @default(0)  // % discount applied to this customer (0-100)
+
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -81,6 +87,8 @@ model MailItem {
   assignedAt       DateTime?
   holdUntil        DateTime?
   feeChargedCents  Int?
+  recipientName    String?   // Name on the label / who it's addressed to
+  recipientPhone   String?   // Optional phone for recipient
 
   createdAt    DateTime @default(now())
 
@@ -382,4 +390,10 @@ model PasswordResetToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime @default(now())
+}
+
+model SiteConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }

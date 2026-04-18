@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { verifySession, verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 import { getPlanStatus } from "@/lib/plan";
+import { sendMailArrivedEmail } from "@/lib/email";
 
 export async function updateMailStatus(mailItemId: string, newStatus: string) {
   const user = await verifySession();
@@ -36,13 +37,16 @@ export async function logMail(formData: FormData) {
   const from = formData.get("from") as string;
   const type = formData.get("type") as string;
   const label = (formData.get("label") as string) || null;
+  const recipientName = (formData.get("recipientName") as string) || null;
+  const recipientPhone = (formData.get("recipientPhone") as string) || null;
+  const exteriorImageUrl = (formData.get("exteriorImageUrl") as string) || null;
 
   if (!suiteNumber || !from || !type) {
-    return { error: "All fields are required" };
+    return { error: "Suite number, sender, and type are required" };
   }
 
   const customer = await prisma.user.findUnique({ where: { suiteNumber } });
-  if (!customer) return { error: "No customer with that suite number" };
+  if (!customer) return { error: `No customer found for suite #${suiteNumber}` };
 
   const today = new Date();
   const dateStr = today.toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -56,8 +60,24 @@ export async function logMail(formData: FormData) {
       scanned: false,
       label,
       date: dateStr,
+      recipientName,
+      recipientPhone,
+      exteriorImageUrl,
     },
   });
+
+  // Notify the customer by email (fire-and-forget — don't block the response)
+  try {
+    await sendMailArrivedEmail({
+      email: customer.email,
+      name: customer.name,
+      suiteNumber,
+      from,
+      type,
+      recipientName,
+      photoUrl: exteriorImageUrl,
+    });
+  } catch { /* non-fatal */ }
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");
