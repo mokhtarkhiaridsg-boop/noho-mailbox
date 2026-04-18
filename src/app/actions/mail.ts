@@ -5,6 +5,7 @@ import { verifySession, verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 import { getPlanStatus } from "@/lib/plan";
 import { sendMailArrivedEmail } from "@/lib/email";
+import { notifyMailArrived } from "@/app/actions/notifications";
 
 export async function updateMailStatus(mailItemId: string, newStatus: string) {
   const user = await verifySession();
@@ -66,17 +67,24 @@ export async function logMail(formData: FormData) {
     },
   });
 
-  // Notify the customer by email (fire-and-forget — don't block the response)
+  // Notify customer (email + in-app) — fire-and-forget, don't block response
   try {
-    await sendMailArrivedEmail({
-      email: customer.email,
-      name: customer.name,
-      suiteNumber,
-      from,
-      type,
-      recipientName,
-      photoUrl: exteriorImageUrl,
-    });
+    await Promise.all([
+      sendMailArrivedEmail({
+        email: customer.email,
+        name: customer.name,
+        suiteNumber,
+        from,
+        type,
+        recipientName,
+        photoUrl: exteriorImageUrl,
+      }),
+      notifyMailArrived({
+        userId: customer.id,
+        from,
+        type: type as "Letter" | "Package",
+      }),
+    ]);
   } catch { /* non-fatal */ }
 
   revalidatePath("/admin");

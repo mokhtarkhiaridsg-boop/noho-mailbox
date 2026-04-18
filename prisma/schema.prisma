@@ -69,6 +69,7 @@ model User {
   keyRequests         KeyRequest[]
   shippoLabels        ShippoLabel[]
   labelUploads        LabelUpload[]
+  notifications       Notification[]
 }
 
 model MailItem {
@@ -441,6 +442,20 @@ model LabelUpload {
   notes       String?
   status      String   @default("uploaded") // "uploaded" | "picked_up" | "shipped"
   createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "mail_arrived" | "package_arrived" | "plan_expiring" | "kyc_approved" | "delivery_update" | "key_ready" | "general"
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  link      String?  // optional deep-link in dashboard
+  createdAt DateTime @default(now())
+  readAt    DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

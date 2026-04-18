@@ -98,6 +98,16 @@ export type DashboardUser = {
   planDueDate: string | null;
 };
 
+export type AppNotification = {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  link?: string | null;
+  createdAt: string;
+};
+
 export type DashboardProps = {
   user: DashboardUser;
   mailItems: MailItem[];
@@ -110,6 +120,7 @@ export type DashboardProps = {
   deliveries: Delivery[];
   threads: Thread[];
   keyRequests: KeyReq[];
+  notifications?: AppNotification[];
 };
 
 // Brand palette — blue-forward

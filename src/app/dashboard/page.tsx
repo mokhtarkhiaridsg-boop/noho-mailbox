@@ -143,6 +143,13 @@ export default async function DashboardPage() {
       }),
     ]);
 
+  // Fetch notifications separately (table may not exist on older deploys)
+  const notificationsRaw = await prisma.notification.findMany({
+    where: { userId: sessionUser.id },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  }).catch(() => []);
+
   if (!user) {
     throw new Error("User not found");
   }
@@ -199,6 +206,15 @@ export default async function DashboardPage() {
       keyRequests={keyRequests.map((k) => ({
         ...k,
         createdAt: k.createdAt.toISOString(),
+      }))}
+      notifications={notificationsRaw.map((n) => ({
+        id: n.id,
+        type: n.type,
+        title: n.title,
+        body: n.body,
+        read: n.read,
+        link: n.link ?? null,
+        createdAt: n.createdAt.toISOString(),
       }))}
     />
   );

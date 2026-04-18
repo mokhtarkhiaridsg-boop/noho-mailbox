@@ -88,3 +88,33 @@ for (const sql of phase3) {
   }
 }
 console.log("Phase 3 migration done.");
+
+// Phase 4 — Notifications
+const phase4 = [
+  `CREATE TABLE IF NOT EXISTS Notification (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    read INTEGER NOT NULL DEFAULT 0,
+    link TEXT,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    readAt DATETIME,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+  )`,
+];
+
+for (const sql of phase4) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 4 migration done.");

@@ -6,6 +6,7 @@ import { verifyAdmin, verifySession } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { calculateDeliveryPrice } from "@/lib/delivery-zones";
+import { notifyDeliveryUpdate } from "@/app/actions/notifications";
 
 const deliverySchema = z.object({
   customerName: z.string().min(1, "Name is required"),
@@ -172,7 +173,17 @@ export async function updateDeliveryTimeline(
     data.deliveredAt = new Date();
     if (podPhotoUrl) data.podPhotoUrl = podPhotoUrl;
   }
-  await prisma.deliveryOrder.update({ where: { id: orderId }, data });
+  const order = await prisma.deliveryOrder.update({ where: { id: orderId }, data });
+  // In-app notification for logged-in customers
+  if (order.userId) {
+    try {
+      await notifyDeliveryUpdate({
+        userId: order.userId,
+        status,
+        destination: order.destination,
+      });
+    } catch { /* non-fatal */ }
+  }
   revalidatePath("/admin");
   revalidatePath("/dashboard");
   return { success: true };

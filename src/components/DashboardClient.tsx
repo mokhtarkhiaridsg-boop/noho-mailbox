@@ -35,6 +35,7 @@ import WalletPanel from "./dashboard/WalletPanel";
 import MessagesPanel from "./dashboard/MessagesPanel";
 import DeliveriesPanel from "./dashboard/DeliveriesPanel";
 import InvoicesPanel from "./dashboard/InvoicesPanel";
+import NotificationBell from "./NotificationBell";
 
 const sideNav = [
   { Icon: IconMail, label: "Mail", id: "mail" },
@@ -60,6 +61,7 @@ export default function DashboardClient({
   deliveries,
   threads,
   keyRequests,
+  notifications = [],
 }: DashboardProps) {
   const [activeTab, setActiveTab] = useState("mail");
   const [isPending, startTransition] = useTransition();
@@ -173,18 +175,7 @@ export default function DashboardClient({
               Admin Panel
             </Link>
           )}
-          <button
-            className="relative w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-[#3374B5]/8"
-            aria-label="Notifications"
-          >
-            <IconBell className="w-4 h-4" style={{ color: BRAND.blueDeep }} />
-            {stats.unread > 0 && (
-              <span
-                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
-                style={{ background: "#e0a800" }}
-              />
-            )}
-          </button>
+          <NotificationBell notifications={notifications} />
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
