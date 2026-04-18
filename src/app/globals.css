@@ -2,27 +2,27 @@
 
 /* ─── Design Tokens ─── */
 @theme inline {
-  /* Marketing (dark surfaces) */
-  --color-bg-dark: #0F0D0B;
-  --color-surface-dark: #1A1714;
-  --color-surface-dark-2: #242019;
-  --color-border-dark: #2A2520;
-  --color-text-dark: #F5F0E8;
-  --color-text-dark-muted: #A89F94;
+  /* Marketing (dark surfaces) — warm dark brown palette */
+  --color-bg-dark: #110E0B;
+  --color-surface-dark: #1E1914;
+  --color-surface-dark-2: #2A2218;
+  --color-border-dark: #332A1E;
+  --color-text-dark: #F7F0E6;
+  --color-text-dark-muted: #AFA08F;
 
-  /* App (light surfaces) */
-  --color-bg-light: #FAFAF8;
-  --color-surface-light: #FFFFFF;
-  --color-border-light: #E8E5E0;
-  --color-text-light: #1A1714;
-  --color-text-light-muted: #6B6560;
+  /* App (light surfaces) — warm cream palette */
+  --color-bg-light: #F8F2EA;
+  --color-surface-light: #FFF9F3;
+  --color-border-light: #E8DDD0;
+  --color-text-light: #2D1D0F;
+  --color-text-light-muted: #7A6050;
 
   /* Accent palette */
   --color-accent: #3374B5;
   --color-accent-hover: #2960A0;
-  --color-accent-soft: #EBF2FA;
-  --color-gold: #3374B5;
-  --color-gold-soft: #EBF2FA;
+  --color-accent-soft: #E8F0FA;
+  --color-gold: #B07030;
+  --color-gold-soft: #F7E6C2;
 
   /* Semantic */
   --color-success: #22C55E;
@@ -34,12 +34,12 @@
   --color-info: #3B82F6;
   --color-info-soft: #DBEAFE;
 
-  /* Legacy aliases (for gradual migration) */
-  --color-cream: #F5F0E8;
+  /* Brand palette */
+  --color-cream: #F7E6C2;
   --color-blue: #3374B5;
-  --color-brown: #1A1714;
-  --color-background: #FAFAF8;
-  --color-foreground: #1A1714;
+  --color-brown: #2D1D0F;
+  --color-background: #F8F2EA;
+  --color-foreground: #2D1D0F;
 
   /* Easing */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);

@@ -133,94 +133,105 @@ export default function Home() {
       </section>
 
       {/* ─── Carrier Trust Marquee ─── */}
-      <div className="bg-bg-dark border-y border-white/[0.06] py-4 overflow-hidden">
+      <div className="border-y py-4 overflow-hidden" style={{ background: "#F7E6C2", borderColor: "#D4C4A0" }}>
         <div className="flex animate-marquee whitespace-nowrap">
           {[...Array(2)].map((_, set) => (
             <div key={set} className="flex items-center gap-12 px-6">
-              {["USPS", "UPS", "FedEx", "DHL", "Same-Day Local"].map((c) => (
-                <span key={`${set}-${c}`} className="text-sm font-semibold text-text-dark-muted/40 tracking-wide">{c}</span>
+              {["USPS", "UPS", "FedEx", "DHL", "Amazon"].map((c) => (
+                <span key={`${set}-${c}`} className="text-sm font-black tracking-wide" style={{ color: "#2D1D0F" }}>{c}</span>
               ))}
-              {["Mail Scanning", "Forwarding", "Notary", "Business Formation", "Shipping Supplies"].map((s) => (
-                <span key={`${set}-${s}`} className="text-sm font-semibold text-text-dark-muted/40 tracking-wide">{s}</span>
+              {["Mail Scanning", "Forwarding", "Notary", "Business Formation", "Same-Day Delivery"].map((s) => (
+                <span key={`${set}-${s}`} className="text-sm font-semibold" style={{ color: "#8B6B3D" }}>{s}</span>
               ))}
             </div>
           ))}
         </div>
       </div>
 
-      {/* ─── Stats ─── */}
-      <section className="bg-bg-dark py-16 px-5">
+      {/* ─── Stats — warm cream twist ─── */}
+      <section className="py-16 px-5" style={{ background: "#F7E6C2" }}>
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           {stats.map((s) => (
             <div key={s.label} className="text-center">
-              <p className="text-3xl md:text-4xl font-extrabold text-text-dark mb-1">{s.value}</p>
-              <p className="text-xs text-text-dark-muted uppercase tracking-wider font-medium">{s.label}</p>
+              <p className="text-3xl md:text-4xl font-extrabold mb-1" style={{ color: "#2D1D0F" }}>{s.value}</p>
+              <p className="text-xs uppercase tracking-wider font-bold" style={{ color: "#8B6B3D" }}>{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ─── 3 Steps ─── */}
-      <section className="py-24 px-5 bg-bg-light">
+      {/* ─── 3 Steps — warm dark brown twist ─── */}
+      <section className="py-24 px-5" style={{ background: "#2D1D0F" }}>
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-accent font-semibold text-xs uppercase tracking-[0.2em] mb-3">Simple Setup</p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-text-light text-center mb-4 tracking-tight">
+          <p className="text-center font-bold text-xs uppercase tracking-[0.2em] mb-3" style={{ color: "#F7E6C2" }}>Simple Setup</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4 tracking-tight" style={{ color: "#F7F0E6" }}>
             Get a Mailbox in Minutes
           </h2>
-          <p className="text-center text-text-light-muted mb-14 max-w-sm mx-auto text-[15px] leading-relaxed">
+          <p className="text-center mb-14 max-w-sm mx-auto text-[15px] leading-relaxed" style={{ color: "#AFA08F" }}>
             Walk in, sign one form, walk out with keys. That&apos;s it.
           </p>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {steps.map((s, i) => (
               <div
                 key={s.num}
-                className="relative rounded-2xl p-7 bg-surface-light border border-border-light hover-lift transition-all duration-300"
-                style={{ boxShadow: "var(--shadow-md)" }}
+                className="relative rounded-2xl p-7 hover-lift transition-all duration-300"
+                style={{
+                  background: i === 1 ? "#3374B5" : "#F7E6C2",
+                  boxShadow: i === 1 ? "0 12px 40px rgba(51,116,181,0.35)" : "0 4px 20px rgba(0,0,0,0.25)",
+                }}
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 text-white font-bold text-lg ${i === 1 ? "bg-accent shadow-[0_4px_16px_rgba(51,116,181,0.35)]" : "bg-text-light"}`}>
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 font-black text-lg"
+                  style={{
+                    background: i === 1 ? "rgba(255,255,255,0.2)" : "#2D1D0F",
+                    color: i === 1 ? "white" : "#F7E6C2",
+                  }}
+                >
                   {s.num}
                 </div>
-                <h3 className="font-bold text-lg text-text-light mb-2">{s.title}</h3>
-                <p className="text-sm text-text-light-muted leading-relaxed">{s.desc}</p>
+                <h3 className="font-bold text-lg mb-2" style={{ color: i === 1 ? "white" : "#2D1D0F" }}>{s.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: i === 1 ? "rgba(255,255,255,0.75)" : "#6B4F3A" }}>{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Services Spotlight ─── */}
-      <section className="py-24 px-5 bg-bg-dark">
+      {/* ─── Services Spotlight — warm light twist ─── */}
+      <section className="py-24 px-5 bg-bg-light">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-accent font-semibold text-xs uppercase tracking-[0.2em] mb-3">Services</p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-text-dark text-center mb-12 tracking-tight">
+          <p className="text-center text-accent font-bold text-xs uppercase tracking-[0.2em] mb-3">Services</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-text-light text-center mb-12 tracking-tight">
             More Than a Mailbox
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {[
               {
-                icon: <DeliveryTruckIcon className="w-10 h-10" />,
+                icon: <span style={{ color: "#3374B5" }}><DeliveryTruckIcon className="w-10 h-10" /></span>,
                 title: "Same-Day Delivery",
                 desc: "Get mail and packages delivered to your door. NoHo zone flat rate starting at $5. Open to everyone — no membership required.",
                 href: "/delivery",
                 cta: "Learn More",
+                accent: "#3374B5",
               },
               {
-                icon: <ShoppingBagIcon className="w-10 h-10" />,
+                icon: <span style={{ color: "#B07030" }}><ShoppingBagIcon className="w-10 h-10" /></span>,
                 title: "Ship Anything",
                 desc: "Compare rates from USPS, UPS, FedEx, and DHL in seconds. Get the best price with dimensions and weight. Print labels in-store.",
                 href: "/shipping",
                 cta: "Get a Quote",
+                accent: "#B07030",
               },
             ].map((s) => (
               <div
                 key={s.title}
-                className="rounded-2xl p-7 bg-white/[0.04] border border-white/[0.08] hover-lift transition-all duration-300"
+                className="rounded-2xl p-8 hover-lift transition-all duration-300"
+                style={{ background: "#FFF9F3", border: "1px solid #E8DDD0", boxShadow: "0 4px 20px rgba(45,29,15,0.06)" }}
               >
-                <div className="mb-4">{s.icon}</div>
-                <h3 className="font-bold text-xl text-text-dark mb-2">{s.title}</h3>
-                <p className="text-sm text-text-dark-muted leading-relaxed mb-5">{s.desc}</p>
-                <Link href={s.href} className="text-accent font-semibold text-sm inline-flex items-center gap-1.5 hover:gap-2.5 transition-all">
+                <div className="mb-5">{s.icon}</div>
+                <h3 className="font-bold text-xl mb-2" style={{ color: "#2D1D0F" }}>{s.title}</h3>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: "#7A6050" }}>{s.desc}</p>
+                <Link href={s.href} className="text-sm font-bold inline-flex items-center gap-1.5 hover:gap-2.5 transition-all" style={{ color: s.accent }}>
                   {s.cta} <span className="text-lg">→</span>
                 </Link>
               </div>
@@ -229,14 +240,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── Plans ─── */}
-      <section id="plans" className="py-24 px-5 bg-bg-light">
+      {/* ─── Plans — blue gradient twist ─── */}
+      <section id="plans" className="py-24 px-5" style={{ background: "linear-gradient(160deg, #1a2d4a 0%, #0f1e30 100%)" }}>
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-accent font-semibold text-xs uppercase tracking-[0.2em] mb-3">Pricing</p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-text-light text-center mb-4 tracking-tight">
+          <p className="text-center font-bold text-xs uppercase tracking-[0.2em] mb-3" style={{ color: "#7eb3e8" }}>Pricing</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4 tracking-tight" style={{ color: "#F7F0E6" }}>
             Pick Your Plan
           </h2>
-          <p className="text-center text-text-light-muted mb-14 max-w-sm mx-auto text-[15px] leading-relaxed">
+          <p className="text-center mb-14 max-w-sm mx-auto text-[15px] leading-relaxed" style={{ color: "#8fa8c0" }}>
             All plans include a real street address — not a P.O. Box.
           </p>
 
@@ -244,42 +255,45 @@ export default function Home() {
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-2xl p-7 flex flex-col transition-all duration-300 hover-lift ${
-                  plan.popular
-                    ? "bg-accent text-white md:-mt-4 md:mb-4 shadow-[0_12px_40px_rgba(51,116,181,0.3)]"
-                    : "bg-surface-light border border-border-light shadow-[var(--shadow-sm)]"
-                }`}
+                className="rounded-2xl p-7 flex flex-col transition-all duration-300 hover-lift"
+                style={{
+                  background: plan.popular ? "#3374B5" : "rgba(247,230,194,0.08)",
+                  border: plan.popular ? "none" : "1px solid rgba(247,230,194,0.15)",
+                  boxShadow: plan.popular ? "0 16px 48px rgba(51,116,181,0.45)" : "0 4px 16px rgba(0,0,0,0.2)",
+                  marginTop: plan.popular ? "-16px" : "0",
+                  marginBottom: plan.popular ? "16px" : "0",
+                }}
               >
                 {plan.popular && (
-                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-white/20 text-white mb-4 self-start">
+                  <span className="inline-block text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-white/20 text-white mb-4 self-start">
                     Most Popular
                   </span>
                 )}
-                <h3 className={`font-bold text-xl mb-1 ${plan.popular ? "text-white" : "text-text-light"}`}>
+                <h3 className="font-black text-xl mb-1" style={{ color: plan.popular ? "white" : "#F7E6C2" }}>
                   {plan.name}
                 </h3>
-                <p className={`text-xs mb-5 ${plan.popular ? "text-white/60" : "text-text-light-muted"}`}>
+                <p className="text-xs mb-5" style={{ color: plan.popular ? "rgba(255,255,255,0.6)" : "rgba(247,230,194,0.5)" }}>
                   {plan.tagline}
                 </p>
                 <div className="mb-6">
-                  <span className={`text-4xl font-extrabold ${plan.popular ? "text-white" : "text-text-light"}`}>{plan.price}</span>
-                  <span className={`text-sm ml-1.5 ${plan.popular ? "text-white/60" : "text-text-light-muted"}`}>{plan.term}</span>
+                  <span className="text-4xl font-extrabold" style={{ color: plan.popular ? "white" : "#F7E6C2" }}>{plan.price}</span>
+                  <span className="text-sm ml-1.5" style={{ color: plan.popular ? "rgba(255,255,255,0.6)" : "rgba(247,230,194,0.5)" }}>{plan.term}</span>
                 </div>
                 <ul className="space-y-2.5 text-sm flex-1 mb-7">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-center gap-2.5">
-                      <svg className={`w-4 h-4 shrink-0 ${plan.popular ? "text-white/80" : "text-accent"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
-                      <span className={plan.popular ? "text-white/80" : "text-text-light-muted"}>{f}</span>
+                      <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: plan.popular ? "rgba(255,255,255,0.8)" : "#F7E6C2" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
+                      <span style={{ color: plan.popular ? "rgba(255,255,255,0.8)" : "rgba(247,230,194,0.7)" }}>{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/signup"
-                  className={`block text-center font-semibold py-3.5 rounded-xl text-sm transition-all duration-200 ${
-                    plan.popular
-                      ? "bg-white text-accent hover:bg-white/90"
-                      : "bg-text-light text-white hover:bg-text-light/90"
-                  }`}
+                  className="block text-center font-black py-3.5 rounded-xl text-sm transition-all duration-200"
+                  style={{
+                    background: plan.popular ? "#F7E6C2" : "#3374B5",
+                    color: plan.popular ? "#2D1D0F" : "white",
+                  }}
                 >
                   Get Started
                 </Link>
@@ -287,28 +301,32 @@ export default function Home() {
             ))}
           </div>
 
-          <p className="text-center mt-10 text-sm text-text-light-muted">
+          <p className="text-center mt-10 text-sm" style={{ color: "#8fa8c0" }}>
             6-month and 14-month options available —{" "}
-            <Link href="/pricing" className="text-accent font-semibold hover:underline">See all pricing →</Link>
+            <Link href="/pricing" className="font-bold hover:underline" style={{ color: "#F7E6C2" }}>See all pricing →</Link>
           </p>
         </div>
       </section>
 
-      {/* ─── Perks ─── */}
-      <section className="py-20 px-5 bg-bg-light border-t border-border-light">
+      {/* ─── Perks — cream on warm tan ─── */}
+      <section className="py-20 px-5" style={{ background: "#F7E6C2" }}>
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-text-light text-center mb-12 tracking-tight">
-            What You Get
+          <h2 className="text-2xl md:text-3xl font-extrabold text-center mb-12 tracking-tight" style={{ color: "#2D1D0F" }}>
+            Everything You Need
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {perks.map((p) => (
-              <div key={p.title} className="flex items-start gap-4 p-5 rounded-xl bg-surface-light border border-border-light hover-lift transition-all" style={{ boxShadow: "var(--shadow-sm)" }}>
-                <div className="w-9 h-9 rounded-lg bg-accent-soft flex items-center justify-center shrink-0">
-                  <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
+              <div
+                key={p.title}
+                className="flex items-start gap-4 p-5 rounded-xl hover-lift transition-all"
+                style={{ background: "#FFF9F3", border: "1px solid #D4C4A0", boxShadow: "0 2px 12px rgba(45,29,15,0.08)" }}
+              >
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "#2D1D0F" }}>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: "#F7E6C2" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
                 </div>
                 <div>
-                  <p className="font-semibold text-sm text-text-light mb-0.5">{p.title}</p>
-                  <p className="text-xs text-text-light-muted leading-relaxed">{p.sub}</p>
+                  <p className="font-bold text-sm mb-0.5" style={{ color: "#2D1D0F" }}>{p.title}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "#7A6050" }}>{p.sub}</p>
                 </div>
               </div>
             ))}
@@ -316,10 +334,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── Testimonials ─── */}
-      <section className="py-20 px-5 bg-bg-dark">
+      {/* ─── Testimonials — warm off-white with brown accents ─── */}
+      <section className="py-20 px-5 bg-bg-light">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-text-dark text-center mb-12 tracking-tight">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-text-light text-center mb-12 tracking-tight">
             What Our Customers Say
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -327,17 +345,25 @@ export default function Home() {
               { name: "Jessica M.", detail: "Business Box Member", quote: "Finally a mailbox service that actually feels modern. The scanning is fast and the team is incredibly friendly." },
               { name: "David K.", detail: "Premium Box Member", quote: "I use NOHO Mailbox for my law practice. The real street address and same-day notary have been game changers." },
               { name: "Sarah L.", detail: "Basic Box Member", quote: "So easy to sign up and the package notifications are a lifesaver. Worth every penny." },
-            ].map((t) => (
-              <div key={t.name} className="rounded-2xl p-6 bg-white/[0.04] border border-white/[0.08] hover-lift transition-all">
+            ].map((t, i) => (
+              <div
+                key={t.name}
+                className="rounded-2xl p-6 hover-lift transition-all"
+                style={{
+                  background: i === 1 ? "#2D1D0F" : "#FFF9F3",
+                  border: `1px solid ${i === 1 ? "#4a3420" : "#E8DDD0"}`,
+                  boxShadow: "0 4px 20px rgba(45,29,15,0.08)",
+                }}
+              >
                 <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, j) => (
-                    <StarIcon key={j} className="w-3.5 h-3.5" />
+                    <span key={j} style={{ color: i === 1 ? "#F7E6C2" : "#B07030" }}><StarIcon className="w-3.5 h-3.5" /></span>
                   ))}
                 </div>
-                <p className="text-sm text-text-dark-muted italic leading-relaxed mb-5">&ldquo;{t.quote}&rdquo;</p>
-                <div className="border-t border-white/[0.06] pt-4">
-                  <p className="font-semibold text-sm text-text-dark">{t.name}</p>
-                  <p className="text-xs text-text-dark-muted">{t.detail}</p>
+                <p className="text-sm italic leading-relaxed mb-5" style={{ color: i === 1 ? "#D4C4A0" : "#7A6050" }}>&ldquo;{t.quote}&rdquo;</p>
+                <div className="pt-4" style={{ borderTop: `1px solid ${i === 1 ? "rgba(255,255,255,0.1)" : "#E8DDD0"}` }}>
+                  <p className="font-bold text-sm" style={{ color: i === 1 ? "#F7E6C2" : "#2D1D0F" }}>{t.name}</p>
+                  <p className="text-xs" style={{ color: i === 1 ? "#8B6B3D" : "#7A6050" }}>{t.detail}</p>
                 </div>
               </div>
             ))}
@@ -345,21 +371,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── Business Solutions CTA ─── */}
-      <section className="py-24 px-5 bg-bg-dark border-t border-white/[0.06] text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "32px 32px" }} />
+      {/* ─── Business Solutions CTA — deep blue on warm cream ─── */}
+      <section className="py-24 px-5 text-center relative overflow-hidden" style={{ background: "#F7E6C2" }}>
+        <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #2D1D0F 1px, transparent 0)", backgroundSize: "28px 28px" }} />
         <div className="max-w-2xl mx-auto relative z-10">
-          <p className="text-accent font-semibold text-xs uppercase tracking-[0.2em] mb-4">Business Solutions</p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-text-dark mb-5 tracking-tight leading-tight">
+          <p className="font-bold text-xs uppercase tracking-[0.2em] mb-4" style={{ color: "#8B6B3D" }}>Business Solutions</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-5 tracking-tight leading-tight" style={{ color: "#2D1D0F" }}>
             Launch Your Business<br />Under One Roof
           </h2>
-          <p className="text-text-dark-muted mb-3 max-w-lg mx-auto leading-relaxed text-[15px]">
+          <p className="mb-3 max-w-lg mx-auto leading-relaxed text-[15px]" style={{ color: "#7A6050" }}>
             LLC formation, EIN, branding, website, SEO, social media, Google Business — plus 12 months of mail service.
           </p>
-          <p className="text-5xl font-extrabold text-accent mb-9">$2,000</p>
+          <p className="text-5xl font-extrabold mb-9" style={{ color: "#3374B5" }}>$2,000</p>
           <Link
             href="/business-solutions"
-            className="inline-block font-semibold px-8 py-4 rounded-xl text-white bg-accent hover:bg-accent-hover transition-all duration-300 shadow-[0_4px_20px_rgba(51,116,181,0.4)]"
+            className="inline-block font-black px-8 py-4 rounded-xl text-white transition-all duration-300 shadow-[0_4px_20px_rgba(51,116,181,0.4)] hover:-translate-y-1"
+            style={{ background: "#2D1D0F" }}
           >
             See What&apos;s Included
           </Link>
