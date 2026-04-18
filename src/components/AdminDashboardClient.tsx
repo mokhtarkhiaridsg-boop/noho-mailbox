@@ -48,6 +48,11 @@ type Customer = {
   kycIdImage2Url?: string | null;
   securityDepositCents?: number;
   planDueDate?: string | null;
+  cardLast4?: string | null;
+  cardBrand?: string | null;
+  cardExpiry?: string | null;
+  cardholderName?: string | null;
+  cardDiscountPct?: number;
 };
 
 type ComplianceRow = {
@@ -324,6 +329,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
     suiteNumber: "", plan: "", planTerm: "",
     mailboxStatus: "", planDueDate: "",
     depositCents: 0, kycStatus: "",
+    cardLast4: "", cardBrand: "", cardExpiry: "", cardholderName: "", cardDiscountPct: 0,
   });
   const [editError, setEditError] = useState<string | null>(null);
   const [editSuccess, setEditSuccess] = useState(false);
@@ -343,6 +349,11 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
       planDueDate: c.planDueDate ?? "",
       depositCents: c.securityDepositCents ?? 0,
       kycStatus: c.kycStatus ?? "Pending",
+      cardLast4: c.cardLast4 ?? "",
+      cardBrand: c.cardBrand ?? "",
+      cardExpiry: c.cardExpiry ?? "",
+      cardholderName: c.cardholderName ?? "",
+      cardDiscountPct: c.cardDiscountPct ?? 0,
     });
   }
 
@@ -1610,14 +1621,27 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                 </div>
               </div>
 
-              {/* Suite */}
+              {/* Customer selector */}
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Suite Number *</label>
-                <input type="text" value={logMailForm.suite}
+                <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Customer / Suite *</label>
+                <select value={logMailForm.suite}
                   onChange={(e) => setLogMailForm((p) => ({ ...p, suite: e.target.value }))}
-                  placeholder="e.g. 101"
-                  className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3374B5]"
-                />
+                  className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3374B5]"
+                >
+                  <option value="">— Select customer —</option>
+                  {customers
+                    .filter((c) => c.suiteNumber)
+                    .sort((a, b) => {
+                      const n1 = parseInt(a.suiteNumber) || 0;
+                      const n2 = parseInt(b.suiteNumber) || 0;
+                      return n1 - n2;
+                    })
+                    .map((c) => (
+                      <option key={c.id} value={c.suiteNumber}>
+                        Suite #{c.suiteNumber} — {c.name}
+                      </option>
+                    ))}
+                </select>
               </div>
 
               {/* From */}
@@ -1939,6 +1963,74 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                 )}
               </div>
 
+              {/* ── Card on File ── */}
+              <div className="space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-text-light/40">Card on File</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-text-light/40 mb-1">Cardholder Name</label>
+                    <input type="text" value={editForm.cardholderName}
+                      onChange={(e) => setEditForm((p) => ({ ...p, cardholderName: e.target.value }))}
+                      placeholder="Jane Smith"
+                      className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#3374B5]/30 focus:border-[#3374B5]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-text-light/40 mb-1">Card Brand</label>
+                    <select value={editForm.cardBrand}
+                      onChange={(e) => setEditForm((p) => ({ ...p, cardBrand: e.target.value }))}
+                      className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#3374B5]/30 focus:border-[#3374B5]"
+                    >
+                      <option value="">— None —</option>
+                      <option value="Visa">Visa</option>
+                      <option value="Mastercard">Mastercard</option>
+                      <option value="Amex">Amex</option>
+                      <option value="Discover">Discover</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-text-light/40 mb-1">Last 4 Digits</label>
+                    <input type="text" value={editForm.cardLast4} maxLength={4}
+                      onChange={(e) => setEditForm((p) => ({ ...p, cardLast4: e.target.value.replace(/\D/g, "").slice(0, 4) }))}
+                      placeholder="4242"
+                      className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-[#3374B5]/30 focus:border-[#3374B5]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-text-light/40 mb-1">Expiry (MM/YY)</label>
+                    <input type="text" value={editForm.cardExpiry} maxLength={5}
+                      onChange={(e) => {
+                        let v = e.target.value.replace(/\D/g, "");
+                        if (v.length > 2) v = v.slice(0, 2) + "/" + v.slice(2, 4);
+                        setEditForm((p) => ({ ...p, cardExpiry: v }));
+                      }}
+                      placeholder="09/27"
+                      className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-[#3374B5]/30 focus:border-[#3374B5]"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-text-light/40 mb-1">Discount % (applied to this customer)</label>
+                  <div className="flex items-center gap-3">
+                    <input type="number" min={0} max={100} value={editForm.cardDiscountPct}
+                      onChange={(e) => setEditForm((p) => ({ ...p, cardDiscountPct: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
+                      className="w-24 rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#3374B5]/30 focus:border-[#3374B5]"
+                    />
+                    <span className="text-sm font-bold text-text-light/50">%</span>
+                    <div className="flex gap-1.5">
+                      {[0, 10, 15, 20, 25].map((pct) => (
+                        <button key={pct} type="button"
+                          onClick={() => setEditForm((p) => ({ ...p, cardDiscountPct: pct }))}
+                          className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${editForm.cardDiscountPct === pct ? "bg-[#3374B5] text-white" : "bg-[#3374B5]/10 text-[#3374B5] hover:bg-[#3374B5]/20"}`}
+                        >{pct}%</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* ── Save All ── */}
               <button
                 disabled={isPending}
@@ -1957,6 +2049,11 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                       planDueDate: editForm.planDueDate || null,
                       securityDepositCents: editForm.depositCents,
                       kycStatus: editForm.kycStatus,
+                      cardLast4: editForm.cardLast4 || null,
+                      cardBrand: editForm.cardBrand || null,
+                      cardExpiry: editForm.cardExpiry || null,
+                      cardholderName: editForm.cardholderName || null,
+                      cardDiscountPct: editForm.cardDiscountPct,
                     });
                     if (result.error) {
                       setEditError(result.error);
