@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { TransitionStartFunction } from "react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { BRAND, type DashboardUser, type KeyReq } from "./types";
+import { BRAND, type DashboardUser, type KeyReq, type ForwardingAddress } from "./types";
 import {
   IconSettings,
   IconKey,
@@ -18,6 +18,8 @@ import { logout } from "@/app/actions/auth";
 import { getOrCreateMyReferralCode } from "@/app/actions/referral";
 import { requestCancellation } from "@/app/actions/cancellation";
 import { setVacationHold, cancelVacationHold, getMyVacationHold, getMyJunkSenders, removeJunkSender } from "@/app/actions/mailPreferences";
+import { addGuestPickup, revokeGuestPickup, getMyGuestPickups } from "@/app/actions/guestPickup";
+import { setScheduledForwarding, cancelScheduledForwarding, getMyScheduledForwarding } from "@/app/actions/scheduledForwarding";
 
 type Props = {
   user: DashboardUser;
@@ -33,6 +35,7 @@ type Props = {
   planStatus: string;
   isBlocked: boolean;
   keyRequests: KeyReq[];
+  addresses: ForwardingAddress[];
   runAction: (label: string, fn: () => Promise<unknown>) => void;
 };
 
@@ -189,6 +192,202 @@ function TwoFactorPanel({ enabled }: { enabled: boolean }) {
         <p className="mt-2 text-[11px] font-bold" style={{ color: BRAND.inkSoft }}>
           {message}
         </p>
+      )}
+    </div>
+  );
+}
+
+function GuestPickupCard({ setToast }: { setToast: (s: string) => void }) {
+  const [guests, setGuests] = useState<any[] | null>(null);
+  const [pending, startTransition] = useTransition();
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [expires, setExpires] = useState("");
+
+  async function load() {
+    const data = await getMyGuestPickups();
+    setGuests(data);
+  }
+
+  if (guests === null) load();
+
+  function add() {
+    if (!name) return;
+    startTransition(async () => {
+      await addGuestPickup({ guestName: name, guestPhone: phone || undefined, guestEmail: email || undefined, expiresAt: expires || undefined });
+      setToast("Guest authorized");
+      setName(""); setPhone(""); setEmail(""); setExpires("");
+      setShowForm(false);
+      load();
+    });
+  }
+
+  function revoke(id: string) {
+    startTransition(async () => {
+      await revokeGuestPickup(id);
+      setToast("Authorization revoked");
+      load();
+    });
+  }
+
+  return (
+    <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>👤 Guest Pickup</p>
+          <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Authorize someone else to pick up your mail</p>
+        </div>
+        <button onClick={() => setShowForm(!showForm)} className="text-xs font-black px-3 py-1 rounded-lg text-white" style={{ background: BRAND.blue }}>
+          + Add
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="space-y-2 bg-white rounded-xl p-3" style={{ border: `1px solid ${BRAND.border}` }}>
+          <input placeholder="Guest name *" value={name} onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-xl px-3 py-2 text-sm" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }} />
+          <input placeholder="Phone (optional)" value={phone} onChange={(e) => setPhone(e.target.value)}
+            className="w-full rounded-xl px-3 py-2 text-sm" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }} />
+          <input placeholder="Email (optional)" value={email} onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-xl px-3 py-2 text-sm" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }} />
+          <div>
+            <p className="text-[10px] font-black mb-1" style={{ color: BRAND.inkFaint }}>Expires (optional)</p>
+            <input type="date" value={expires} onChange={(e) => setExpires(e.target.value)}
+              className="w-full rounded-xl px-3 py-2 text-sm" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }} />
+          </div>
+          <div className="flex gap-2">
+            <button disabled={!name || pending} onClick={add}
+              className="text-xs font-black px-4 py-1.5 rounded-xl text-white disabled:opacity-50" style={{ background: BRAND.blue }}>
+              Authorize
+            </button>
+            <button onClick={() => setShowForm(false)} className="text-xs" style={{ color: BRAND.inkFaint }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {guests && guests.length > 0 && (
+        <div className="space-y-1.5">
+          {guests.map((g: any) => (
+            <div key={g.id} className="flex items-center justify-between gap-2 rounded-xl px-3 py-2.5" style={{ background: "white", border: `1px solid ${BRAND.border}` }}>
+              <div>
+                <p className="text-xs font-bold" style={{ color: BRAND.ink }}>{g.guestName}</p>
+                {g.guestPhone && <p className="text-[11px]" style={{ color: BRAND.inkFaint }}>{g.guestPhone}</p>}
+                {g.expiresAt && <p className="text-[10px] mt-0.5" style={{ color: BRAND.inkFaint }}>Expires {new Date(g.expiresAt).toLocaleDateString()}</p>}
+              </div>
+              <button disabled={pending} onClick={() => revoke(g.id)}
+                className="text-[11px] font-black text-red-500 hover:text-red-700 disabled:opacity-40">
+                Revoke
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {guests?.length === 0 && !showForm && (
+        <p className="text-[11px]" style={{ color: BRAND.inkFaint }}>No authorized guests</p>
+      )}
+    </div>
+  );
+}
+
+function ScheduledForwardingCard({ addresses, setToast }: { addresses: ForwardingAddress[]; setToast: (s: string) => void }) {
+  const [sf, setSf] = useState<any | null | undefined>(undefined);
+  const [pending, startTransition] = useTransition();
+  const [showForm, setShowForm] = useState(false);
+  const [freq, setFreq] = useState<"weekly" | "biweekly" | "monthly">("weekly");
+  const [addrId, setAddrId] = useState("");
+
+  async function load() {
+    const data = await getMyScheduledForwarding();
+    setSf(data);
+  }
+
+  if (sf === undefined && !pending) load();
+
+  function save() {
+    startTransition(async () => {
+      await setScheduledForwarding({ frequency: freq, addressId: addrId || undefined });
+      setToast("Scheduled forwarding saved!");
+      setShowForm(false);
+      load();
+    });
+  }
+
+  function cancel() {
+    startTransition(async () => {
+      await cancelScheduledForwarding();
+      setToast("Scheduled forwarding cancelled");
+      load();
+    });
+  }
+
+  return (
+    <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>📅 Scheduled Forwarding</p>
+          <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Auto-forward all mail on a regular schedule</p>
+        </div>
+        {sf?.frequency && (
+          <span className="text-[10px] font-black px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(51,116,181,0.15)", color: BRAND.blueDeep }}>
+            {sf.frequency}
+          </span>
+        )}
+      </div>
+
+      {sf?.frequency ? (
+        <div className="space-y-2">
+          <p className="text-xs" style={{ color: BRAND.inkSoft }}>
+            Next run: <strong>{sf.nextRunDate}</strong>
+            {sf.lastRunDate ? ` · Last: ${sf.lastRunDate}` : ""}
+          </p>
+          <div className="flex gap-2">
+            <button onClick={() => setShowForm(!showForm)} className="text-xs font-black px-3 py-1.5 rounded-lg" style={{ background: "white", border: `1px solid ${BRAND.border}`, color: BRAND.blueDeep }}>
+              Edit
+            </button>
+            <button disabled={pending} onClick={cancel} className="text-xs font-black px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40">
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {(!sf?.frequency || showForm) && (
+        <div className="space-y-2">
+          <div>
+            <p className="text-[10px] font-black mb-1.5" style={{ color: BRAND.inkFaint }}>Frequency</p>
+            <div className="flex gap-2">
+              {(["weekly", "biweekly", "monthly"] as const).map((f) => (
+                <button key={f} onClick={() => setFreq(f)}
+                  className="text-xs font-black px-3 py-1.5 rounded-xl capitalize"
+                  style={{ background: freq === f ? BRAND.blue : "white", color: freq === f ? "white" : BRAND.ink, border: `1px solid ${BRAND.border}` }}>
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+          {addresses.length > 0 && (
+            <div>
+              <p className="text-[10px] font-black mb-1" style={{ color: BRAND.inkFaint }}>Forward to</p>
+              <select value={addrId} onChange={(e) => setAddrId(e.target.value)}
+                className="w-full rounded-xl px-3 py-2 text-sm" style={{ background: "white", border: `1px solid ${BRAND.border}` }}>
+                <option value="">Default address</option>
+                {addresses.map((a) => (
+                  <option key={a.id} value={a.id}>{a.label} — {a.address}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <button disabled={pending} onClick={save}
+              className="text-xs font-black px-4 py-1.5 rounded-xl text-white disabled:opacity-50" style={{ background: BRAND.blue }}>
+              {pending ? "Saving…" : "Save Schedule"}
+            </button>
+            {sf?.frequency && <button onClick={() => setShowForm(false)} className="text-xs" style={{ color: BRAND.inkFaint }}>Cancel</button>}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -357,6 +556,7 @@ export default function SettingsPanel({
   planStatus,
   isBlocked,
   keyRequests,
+  addresses,
   runAction,
 }: Props) {
   const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -561,6 +761,12 @@ export default function SettingsPanel({
             >{loadingCode ? "Generating…" : "Get My Referral Code"}</button>
           )}
         </div>
+
+        {/* Guest Pickup */}
+        <GuestPickupCard setToast={setToast} />
+
+        {/* Scheduled Forwarding */}
+        <ScheduledForwardingCard addresses={addresses} setToast={setToast} />
 
         {/* Vacation Hold */}
         <VacationHoldCard setToast={setToast} />

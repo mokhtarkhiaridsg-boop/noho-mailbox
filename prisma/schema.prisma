@@ -74,6 +74,36 @@ model User {
   cancellationRequests    CancellationRequest[]
   junkSenders             JunkSender[]
   vacationHold            VacationHold?
+  guestPickups            GuestPickupAuth[]
+  scheduledForwardings    ScheduledForwarding[]
+}
+
+model GuestPickupAuth {
+  id          String    @id @default(cuid())
+  userId      String
+  guestName   String
+  guestPhone  String?
+  guestEmail  String?
+  expiresAt   DateTime?
+  usedAt      DateTime?
+  active      Boolean   @default(true)
+  notes       String?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ScheduledForwarding {
+  id              String   @id @default(cuid())
+  userId          String
+  addressId       String?  // ForwardingAddress.id (null = default address)
+  frequency       String   @default("weekly") // "weekly" | "biweekly" | "monthly"
+  nextRunDate     String   // "2025-07-01"
+  active          Boolean  @default(true)
+  lastRunDate     String?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model MailItem {

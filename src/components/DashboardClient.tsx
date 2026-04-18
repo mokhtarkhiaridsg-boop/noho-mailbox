@@ -615,6 +615,7 @@ export default function DashboardClient({
               planStatus={planStatus}
               isBlocked={isBlocked}
               keyRequests={keyRequests}
+              addresses={addresses}
               runAction={runAction}
             />
           )}

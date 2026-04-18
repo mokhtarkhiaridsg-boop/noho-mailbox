@@ -213,3 +213,45 @@ for (const sql of phase5) {
   }
 }
 console.log("Phase 5 migration done.");
+
+// Phase 5b — Guest pickup + scheduled forwarding
+const phase5b = [
+  `CREATE TABLE IF NOT EXISTS GuestPickupAuth (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    guestName TEXT NOT NULL,
+    guestPhone TEXT,
+    guestEmail TEXT,
+    expiresAt DATETIME,
+    usedAt DATETIME,
+    active INTEGER NOT NULL DEFAULT 1,
+    notes TEXT,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+  )`,
+  `CREATE TABLE IF NOT EXISTS ScheduledForwarding (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    addressId TEXT,
+    frequency TEXT NOT NULL DEFAULT 'weekly',
+    nextRunDate TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    lastRunDate TEXT,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+  )`,
+];
+
+for (const sql of phase5b) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 5b migration done.");
