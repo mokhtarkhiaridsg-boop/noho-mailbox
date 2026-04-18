@@ -5,22 +5,7 @@ import { auth } from "@/lib/auth";
 import { verifyAdmin, verifySession } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-
-const NOHO_ZIPS = ["91601", "91602", "91603", "91604", "91605", "91606", "91607", "91608"];
-
-function calculatePrice(zip: string, distance?: number): { zone: string; price: number } | null {
-  if (NOHO_ZIPS.includes(zip)) {
-    return { zone: "NoHo", price: 5.0 };
-  }
-  const d = distance ?? 3;
-  if (d <= 5) {
-    return { zone: "Extended", price: 9.75 };
-  }
-  if (d <= 15) {
-    return { zone: "Extended", price: 9.75 + (d - 5) * 0.75 };
-  }
-  return null; // out of range
-}
+import { calculateDeliveryPrice } from "@/lib/delivery-zones";
 
 const deliverySchema = z.object({
   customerName: z.string().min(1, "Name is required"),
@@ -29,7 +14,7 @@ const deliverySchema = z.object({
   pickupAddr: z.string().optional(),
   destination: z.string().min(1, "Delivery address is required"),
   zip: z.string().min(5, "Zip code is required"),
-  distance: z.string().optional(),
+  tier: z.enum(["Standard", "Rush", "WhiteGlove"]).optional(),
   itemType: z.string().min(1, "Item type is required"),
   instructions: z.string().optional(),
 });
@@ -50,7 +35,7 @@ export async function requestDelivery(
     pickupAddr: (formData.get("pickupAddr") as string) || undefined,
     destination: formData.get("destination") as string,
     zip: formData.get("zip") as string,
-    distance: (formData.get("distance") as string) || undefined,
+    tier: (formData.get("tier") as string) || "Standard",
     itemType: formData.get("itemType") as string,
     instructions: (formData.get("instructions") as string) || undefined,
   };
@@ -60,12 +45,12 @@ export async function requestDelivery(
     return { error: result.error.issues[0].message };
   }
 
-  const { zip, distance: distStr, ...data } = result.data;
-  const distance = distStr ? parseFloat(distStr) : undefined;
-  const pricing = calculatePrice(zip, distance);
+  const { zip, tier, ...data } = result.data;
+  const safeTier = (tier ?? "Standard") as "Standard" | "Rush" | "WhiteGlove";
+  const pricing = calculateDeliveryPrice(zip, safeTier);
 
   if (!pricing) {
-    return { error: "Sorry, this address is outside our delivery range (15 mile max)" };
+    return { error: "Sorry, this address is outside our delivery area. Zones beyond 30 miles — please call us for a custom quote." };
   }
 
   // Check if user is authenticated
@@ -81,13 +66,15 @@ export async function requestDelivery(
       customerName: data.customerName,
       phone: data.phone,
       email: data.email,
-      pickupAddr: data.pickupAddr || "NOHO Mailbox, North Hollywood, CA",
+      pickupAddr: data.pickupAddr || "NOHO Mailbox, 5062 Lankershim Blvd, North Hollywood, CA 91601",
       destination: data.destination,
       zip,
-      zone: pricing.zone,
+      zone: pricing.zone.name,
       price: pricing.price,
       itemType: data.itemType,
       instructions: data.instructions || null,
+      tier: safeTier,
+      etaWindow: pricing.zone.etaWindow,
       date: dateStr,
     },
   });
@@ -113,12 +100,8 @@ export async function scheduleDelivery(input: {
   const sessionUser = await verifySession();
   const userId = sessionUser.id!;
 
-  const pricing = calculatePrice(input.zip);
-  if (!pricing) return { error: "Address outside delivery range" };
-
-  const tierMultiplier =
-    input.tier === "WhiteGlove" ? 2.5 : input.tier === "Rush" ? 1.6 : 1;
-  const price = +(pricing.price * tierMultiplier).toFixed(2);
+  const pricing = calculateDeliveryPrice(input.zip, input.tier);
+  if (!pricing) return { error: "Address outside delivery range. Please call us for a custom quote." };
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -135,14 +118,15 @@ export async function scheduleDelivery(input: {
       customerName: user.name,
       phone: user.phone ?? "",
       email: user.email,
-      pickupAddr: "NOHO Mailbox, North Hollywood, CA",
+      pickupAddr: "NOHO Mailbox, 5062 Lankershim Blvd, North Hollywood, CA 91601",
       destination: input.destination,
       zip: input.zip,
-      zone: pricing.zone,
-      price,
+      zone: pricing.zone.name,
+      price: pricing.price,
       itemType: input.itemType,
       instructions: input.instructions ?? null,
       tier: input.tier,
+      etaWindow: pricing.zone.etaWindow,
       recipientName: input.recipientName,
       recipientPhone: input.recipientPhone,
       dimensions: input.dimensions ?? null,
@@ -152,7 +136,7 @@ export async function scheduleDelivery(input: {
   });
 
   // Charge wallet (simple)
-  const cents = Math.round(price * 100);
+  const cents = Math.round(pricing.price * 100);
   if (user.walletBalanceCents >= cents) {
     const newBal = user.walletBalanceCents - cents;
     await prisma.user.update({
@@ -164,7 +148,7 @@ export async function scheduleDelivery(input: {
         userId,
         kind: "Charge",
         amountCents: -cents,
-        description: `Delivery #${order.id.slice(-6)} (${input.tier})`,
+        description: `Delivery #${order.id.slice(-6)} (${input.tier} · Zone ${pricing.zone.name})`,
         balanceAfterCents: newBal,
       },
     });
@@ -192,4 +176,17 @@ export async function updateDeliveryTimeline(
   revalidatePath("/admin");
   revalidatePath("/dashboard");
   return { success: true };
+}
+
+// ─── Public quote endpoint (no auth needed) ─────────────────────────────────
+export async function getDeliveryQuote(zip: string, tier: "Standard" | "Rush" | "WhiteGlove" = "Standard") {
+  const pricing = calculateDeliveryPrice(zip, tier);
+  if (!pricing) return null;
+  return {
+    zone: pricing.zone.name,
+    zoneLabel: pricing.zone.label,
+    description: pricing.zone.description,
+    price: pricing.price,
+    etaWindow: pricing.zone.etaWindow,
+  };
 }

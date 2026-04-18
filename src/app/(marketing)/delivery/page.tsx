@@ -4,36 +4,18 @@ import { useState, useActionState } from "react";
 import Link from "next/link";
 import { DeliveryTruckIcon, EnvelopeIcon, MailboxIcon } from "@/components/BrandIcons";
 import { requestDelivery, type DeliveryState } from "@/app/actions/delivery";
-
-const nohoZips = ["91601", "91602", "91603", "91604", "91605", "91606", "91607", "91608"];
-
-function calculatePrice(zip: string, distance: number): { zone: string; price: string; note: string } | null {
-  if (!zip) return null;
-  if (nohoZips.includes(zip)) {
-    return { zone: "NoHo Zone", price: "$5.00", note: "Flat rate — North Hollywood local delivery" };
-  }
-  if (distance <= 0) return null;
-  if (distance > 15) {
-    return { zone: "Out of Range", price: "—", note: "Maximum delivery radius is 15 miles. Please contact us for special arrangements." };
-  }
-  const base = 9.75;
-  const extra = distance > 5 ? (distance - 5) * 0.75 : 0;
-  const total = base + extra;
-  return { zone: "Extended Zone", price: `$${total.toFixed(2)}`, note: `Base $9.75${extra > 0 ? ` + $${extra.toFixed(2)} distance` : ""} — extended zone delivery` };
-}
+import { DELIVERY_ZONES, calculateDeliveryPrice } from "@/lib/delivery-zones";
 
 export default function DeliveryPage() {
   const [zip, setZip] = useState("");
-  const [distance, setDistance] = useState(0);
-  const [result, setResult] = useState<{ zone: string; price: string; note: string } | null>(null);
+  const [quoteResult, setQuoteResult] = useState<ReturnType<typeof calculateDeliveryPrice>>(null);
   const [showForm, setShowForm] = useState(false);
   const [state, formAction, pending] = useActionState<DeliveryState, FormData>(requestDelivery, {});
 
-  const isNoHo = nohoZips.includes(zip);
-
   const handleEstimate = () => {
-    const r = calculatePrice(zip, distance);
-    setResult(r);
+    if (zip.length === 5) {
+      setQuoteResult(calculateDeliveryPrice(zip));
+    }
   };
 
   return (
@@ -87,64 +69,64 @@ export default function DeliveryPage() {
         </div>
       </section>
 
-      {/* Zone Pricing */}
+      {/* 7-Zone Pricing */}
       <section className="py-20 px-4" style={{ background: "#1E1914" }}>
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-extrabold tracking-tight text-center mb-12 animate-fade-up" style={{ color: "#F8F2EA" }}>
-            Delivery Zones &amp; Pricing
+          <p className="text-center text-xs font-bold uppercase tracking-[0.2em] mb-3" style={{ color: "#AFA08F" }}>Coverage Area</p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-center mb-2 animate-fade-up" style={{ color: "#F8F2EA" }}>
+            7 Delivery Zones Across LA
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* NoHo Zone — blue highlight */}
-            <div
-              className="rounded-2xl p-8 text-white hover-lift animate-fade-up delay-100"
-              style={{
-                background: "linear-gradient(145deg, #1B3A5C 0%, #0E2340 100%)",
-                boxShadow: "0 12px 40px rgba(51,116,181,0.35)",
-              }}
-            >
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(147,196,255,0.75)" }}>Local</span>
-              <h3 className="text-2xl font-extrabold tracking-tight mt-1 mb-4">NoHo Zone</h3>
-              <p className="text-6xl font-extrabold tracking-tight mb-4">$5<span className="text-2xl font-bold" style={{ color: "rgba(147,196,255,0.7)" }}>.00</span></p>
-              <p className="text-sm mb-6" style={{ color: "rgba(147,196,255,0.75)" }}>Flat rate — any address within the zone</p>
-              <ul className="space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
-                <li className="flex items-center gap-2"><span style={{ color: "#93C4FF" }}>✓</span> North Hollywood</li>
-                <li className="flex items-center gap-2"><span style={{ color: "#93C4FF" }}>✓</span> Studio City</li>
-                <li className="flex items-center gap-2"><span style={{ color: "#93C4FF" }}>✓</span> Valley Village</li>
-                <li className="flex items-center gap-2"><span style={{ color: "#93C4FF" }}>✓</span> Toluca Lake</li>
-              </ul>
-              <p className="text-[10px] mt-4 uppercase tracking-wider" style={{ color: "rgba(147,196,255,0.4)" }}>Same-day local delivery</p>
-            </div>
-
-            {/* Extended Zone — warm cream card */}
-            <div
-              className="rounded-2xl p-8 hover-lift animate-fade-up delay-300"
-              style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
-            >
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#B07030" }}>Extended</span>
-              <h3 className="text-2xl font-extrabold tracking-tight text-text-light mt-1 mb-4">Beyond NoHo</h3>
-              <div className="space-y-3 mb-6">
-                {[
-                  { range: "Under 5 miles", price: "$9.75" },
-                  { range: "5 – 10 miles", price: "$9.75 + $0.75/mi" },
-                  { range: "10 – 15 miles", price: "$9.75 + $0.75/mi" },
-                ].map((tier) => (
-                  <div key={tier.range} className="flex justify-between items-center text-sm border-b pb-3" style={{ borderColor: "#E8D8C4" }}>
-                    <span className="text-text-light-muted">{tier.range}</span>
-                    <span className="font-bold text-text-light">{tier.price}</span>
+          <p className="text-center text-sm mb-12 animate-fade-up" style={{ color: "#AFA08F" }}>
+            Enter your zip below for an instant quote — or see all zone prices here.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {DELIVERY_ZONES.map((zone, i) => (
+              <div
+                key={zone.id}
+                className="rounded-2xl p-6 hover-lift animate-fade-up"
+                style={{
+                  animationDelay: `${i * 60}ms`,
+                  background: zone.id === 1
+                    ? "linear-gradient(145deg, #1B3A5C 0%, #0E2340 100%)"
+                    : zone.id === 7
+                    ? "rgba(255,255,255,0.04)"
+                    : "#2A2218",
+                  border: zone.id === 1 ? "none" : "1px solid rgba(255,255,255,0.06)",
+                  boxShadow: zone.id === 1 ? "0 12px 40px rgba(51,116,181,0.35)" : "none",
+                }}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: zone.id === 1 ? "rgba(147,196,255,0.7)" : "#AFA08F" }}>
+                      Zone {zone.id}
+                    </span>
+                    <h3 className="text-base font-extrabold mt-0.5" style={{ color: "#F8F2EA" }}>{zone.name}</h3>
                   </div>
-                ))}
+                  <span
+                    className="text-2xl font-extrabold tracking-tight"
+                    style={{ color: zone.id === 1 ? "#93C4FF" : zone.id === 7 ? "#AFA08F" : "#F7E6C2" }}
+                  >
+                    {zone.id === 7 ? "Call" : `$${zone.basePrice.toFixed(0)}`}
+                  </span>
+                </div>
+                <p className="text-xs mb-1" style={{ color: "#AFA08F" }}>{zone.label}</p>
+                <p className="text-[10px]" style={{ color: zone.id === 1 ? "rgba(147,196,255,0.5)" : "rgba(175,160,143,0.5)" }}>
+                  {zone.id === 7 ? "Call (818) 765-1539 for a custom quote" : `ETA ${zone.etaWindow}`}
+                </p>
               </div>
-              <p className="text-xs" style={{ color: "rgba(122,96,80,0.6)" }}>Maximum delivery radius: 15 miles</p>
-              <p className="text-[10px] mt-2 uppercase tracking-wider" style={{ color: "rgba(122,96,80,0.4)" }}>Courier delivery for extended distances</p>
-            </div>
+            ))}
           </div>
+          <p className="text-center text-xs mt-8" style={{ color: "rgba(175,160,143,0.5)" }}>
+            Rush +50% · White Glove +120% · Standard rates shown above · Prices are estimates, not guaranteed
+          </p>
         </div>
       </section>
 
-      {/* Delivery Calculator */}
+      {/* Delivery Calculator — zip lookup */}
       <section className="py-20 px-4 bg-bg-light">
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-extrabold tracking-tight text-text-light text-center mb-10 animate-fade-up">Estimate Your Delivery</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight text-text-light text-center mb-3 animate-fade-up">Instant Zip Code Quote</h2>
+          <p className="text-center text-sm text-text-light-muted mb-10">Type your zip for an instant price — no distance estimate needed.</p>
           <div
             className="rounded-2xl p-8 animate-fade-up delay-200"
             style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
@@ -156,56 +138,60 @@ export default function DeliveryPage() {
                   type="text"
                   maxLength={5}
                   value={zip}
-                  onChange={(e) => { setZip(e.target.value.replace(/\D/g, "")); setResult(null); }}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/\D/g, "");
+                    setZip(v);
+                    setQuoteResult(null);
+                    if (v.length === 5) setQuoteResult(calculateDeliveryPrice(v));
+                  }}
                   placeholder="e.g. 91601"
                   className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-shadow"
                   style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                 />
               </div>
-
-              {zip.length === 5 && !isNoHo && (
-                <div className="animate-fade-up">
-                  <label className="block text-sm font-bold text-text-light mb-1">Estimated Distance from Store</label>
-                  <select
-                    value={distance}
-                    onChange={(e) => { setDistance(Number(e.target.value)); setResult(null); }}
-                    className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-shadow"
-                    style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
-                  >
-                    <option value={0}>Select distance</option>
-                    <option value={3}>Under 5 miles</option>
-                    <option value={7}>5 – 8 miles</option>
-                    <option value={10}>8 – 12 miles</option>
-                    <option value={14}>12 – 15 miles</option>
-                    <option value={20}>Over 15 miles</option>
-                  </select>
-                </div>
-              )}
-
               <button
                 onClick={handleEstimate}
-                disabled={!zip || (zip.length === 5 && !isNoHo && distance === 0)}
+                disabled={zip.length !== 5}
                 className="w-full text-white font-bold py-3 rounded-xl transition-all hover:-translate-y-1 disabled:opacity-40 disabled:hover:translate-y-0"
                 style={{ background: "#3374B5" }}
               >
-                Estimate Delivery Cost
+                Check My Zone
               </button>
             </div>
 
-            {result && (
+            {zip.length === 5 && quoteResult === null && (
+              <div className="mt-6 rounded-xl p-5 text-center animate-fade-up" style={{ background: "#FFF0F0", border: "1px solid #FECACA" }}>
+                <p className="font-bold text-sm" style={{ color: "#B91C1C" }}>Zip {zip} is outside our delivery area</p>
+                <p className="text-xs mt-1" style={{ color: "#B91C1C" }}>Call us at (818) 765-1539 for a custom quote on longer distances.</p>
+              </div>
+            )}
+
+            {quoteResult && (
               <div
-                className={`mt-6 rounded-xl p-6 animate-fade-up`}
+                className="mt-6 rounded-xl p-6 animate-fade-up"
                 style={
-                  result.zone === "NoHo Zone"
+                  quoteResult.zone.id === 1
                     ? { background: "linear-gradient(135deg,#1B3A5C,#0E2340)", color: "#fff" }
-                    : result.zone === "Out of Range"
-                    ? { background: "#FFF0F0", border: "1px solid #FECACA", color: "#B91C1C" }
                     : { background: "#F7E6C2", border: "1px solid #D8C8B4", color: "#6B3F1A" }
                 }
               >
-                <p className="text-xs font-bold uppercase tracking-widest mb-1 opacity-70">{result.zone}</p>
-                <p className="text-4xl font-extrabold tracking-tight mb-2">{result.price}</p>
-                <p className="text-sm opacity-80">{result.note}</p>
+                <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ opacity: 0.7 }}>
+                  Zone {quoteResult.zone.id} — {quoteResult.zone.name}
+                </p>
+                <p className="text-4xl font-extrabold tracking-tight mb-1">${quoteResult.price.toFixed(2)}</p>
+                <p className="text-sm opacity-80">{quoteResult.zone.label}</p>
+                <p className="text-xs mt-2 opacity-60">ETA: {quoteResult.zone.etaWindow} · Standard rate</p>
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5"
+                  style={
+                    quoteResult.zone.id === 1
+                      ? { background: "rgba(255,255,255,0.15)", color: "#fff" }
+                      : { background: "#2D1D0F", color: "#F7E6C2" }
+                  }
+                >
+                  Schedule This Delivery →
+                </button>
               </div>
             )}
           </div>
@@ -292,7 +278,7 @@ export default function DeliveryPage() {
                     <label className="block text-sm font-bold text-text-light mb-1">Special Instructions <span className="font-normal" style={{ color: "rgba(122,96,80,0.4)" }}>(optional)</span></label>
                     <textarea name="instructions" rows={3} placeholder="Any details about the delivery..." className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none resize-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                   </div>
-                  <input type="hidden" name="distance" value={distance || ""} />
+                  <input type="hidden" name="zip" value={zip} />
                   <button
                     type="submit"
                     disabled={pending}
