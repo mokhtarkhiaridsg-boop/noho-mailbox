@@ -321,6 +321,7 @@ export default async function AdminPage() {
     getManyConfigs([
       "store.name", "store.address", "store.phone", "store.email", "store.hours",
       "notif.mailArrived", "notif.smsPackages", "notif.dailySummary", "notif.notaryReminders",
+      "carrier.usps", "carrier.ups", "carrier.fedex", "carrier.dhl",
     ]),
   ]);
 

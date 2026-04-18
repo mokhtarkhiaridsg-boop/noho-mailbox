@@ -398,11 +398,18 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   const [editSettingValue, setEditSettingValue] = useState("");
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [storeInfo, setStoreInfo] = useState([
-    { key: "store.name",  label: "Store Name", value: siteSettings["store.name"]  ?? "NOHO Mailbox" },
-    { key: "store.address", label: "Address", value: siteSettings["store.address"] ?? "5062 Lankershim Blvd, North Hollywood, CA 91601" },
-    { key: "store.phone", label: "Phone",    value: siteSettings["store.phone"]  ?? "(818) 765-1539" },
-    { key: "store.email", label: "Email",    value: siteSettings["store.email"]  ?? "nohomailbox@gmail.com" },
-    { key: "store.hours", label: "Hours",    value: siteSettings["store.hours"]  ?? "Mon–Fri 9:30am–5:30pm (break 1:30–2pm) · Sat 10am–1:30pm" },
+    { key: "store.name",    label: "Store Name", value: siteSettings["store.name"]    ?? "NOHO Mailbox" },
+    { key: "store.address", label: "Address",    value: siteSettings["store.address"] ?? "5062 Lankershim Blvd, North Hollywood, CA 91601" },
+    { key: "store.phone",   label: "Phone",      value: siteSettings["store.phone"]   ?? "(818) 765-1539" },
+    { key: "store.email",   label: "Email",      value: siteSettings["store.email"]   ?? "nohomailbox@gmail.com" },
+    { key: "store.hours",   label: "Hours",      value: siteSettings["store.hours"]   ?? "Mon–Fri 9:30am–5:30pm (break 1:30–2pm) · Sat 10am–1:30pm" },
+  ]);
+
+  const [carrierTimes, setCarrierTimes] = useState([
+    { key: "carrier.usps",  label: "USPS Pickup",  value: siteSettings["carrier.usps"]  ?? "Mon–Sat ~4:00 PM" },
+    { key: "carrier.ups",   label: "UPS Pickup",   value: siteSettings["carrier.ups"]   ?? "Mon–Fri ~5:00 PM" },
+    { key: "carrier.fedex", label: "FedEx Pickup", value: siteSettings["carrier.fedex"] ?? "Mon–Fri ~4:30 PM" },
+    { key: "carrier.dhl",   label: "DHL Pickup",   value: siteSettings["carrier.dhl"]   ?? "Mon–Fri ~3:30 PM" },
   ]);
 
   // Notification toggles — seeded from DB
@@ -824,6 +831,64 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Carrier Pickup Times — persists to SiteConfig DB */}
+              <div className="rounded-2xl p-6 bg-white space-y-5" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-black text-sm uppercase tracking-wide text-text-light">Carrier Pickup Times</h3>
+                  <span className="text-[10px] text-text-light/40 font-semibold">Shown on FAQ page</span>
+                </div>
+                {carrierTimes.map((f) => (
+                  <div key={f.key} className="flex items-center justify-between p-4 rounded-xl" style={{ background: "rgba(232,229,224,0.25)", border: "1px solid rgba(232,229,224,0.5)" }}>
+                    <div className="flex-1 mr-4">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-text-light/35">{f.label}</p>
+                      {editingSetting === f.key ? (
+                        <input
+                          type="text"
+                          value={editSettingValue}
+                          onChange={(e) => setEditSettingValue(e.target.value)}
+                          className="text-sm font-semibold text-text-light bg-white border border-[#3374B5] rounded-lg px-2 py-1 mt-1 w-full focus:outline-none focus:ring-2 focus:ring-[#3374B5]"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              const v = editSettingValue;
+                              setCarrierTimes((prev) => prev.map((s) => s.key === f.key ? { ...s, value: v } : s));
+                              setEditingSetting(null);
+                            } else if (e.key === "Escape") {
+                              setEditingSetting(null);
+                            }
+                          }}
+                        />
+                      ) : (
+                        <p className="text-sm font-semibold text-text-light">{f.value}</p>
+                      )}
+                    </div>
+                    {editingSetting === f.key ? (
+                      <div className="flex gap-2">
+                        <button onClick={() => { const v = editSettingValue; setCarrierTimes((prev) => prev.map((s) => s.key === f.key ? { ...s, value: v } : s)); setEditingSetting(null); }} className="text-xs font-bold text-green-600 hover:underline">OK</button>
+                        <button onClick={() => setEditingSetting(null)} className="text-xs font-bold text-text-light/40 hover:underline">Cancel</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => { setEditingSetting(f.key); setEditSettingValue(f.value); }} className="text-xs font-bold text-accent hover:underline">Edit</button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  disabled={isPending}
+                  onClick={() => {
+                    const entries = Object.fromEntries(carrierTimes.map((f) => [f.key, f.value]));
+                    startTransition(async () => {
+                      await setSiteConfigs(entries);
+                      setSettingsSaved(true);
+                      setTimeout(() => setSettingsSaved(false), 3000);
+                    });
+                  }}
+                  className="w-full py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-40 transition-transform hover:-translate-y-0.5"
+                  style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)", boxShadow: "0 4px 14px rgba(51,116,181,0.3)" }}
+                >
+                  {isPending ? "Saving…" : "Save Carrier Times"}
+                </button>
               </div>
             </div>
           )}
