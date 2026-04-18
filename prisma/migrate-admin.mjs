@@ -147,3 +147,32 @@ for (const sql of phase4b) {
   }
 }
 console.log("Phase 4b migration done.");
+
+// Phase 4c — Cancellation workflow
+const phase4c = [
+  `CREATE TABLE IF NOT EXISTS CancellationRequest (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Pending',
+    requestedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    gracePeriodEnd DATETIME,
+    completedAt DATETIME,
+    adminNotes TEXT,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+  )`,
+];
+
+for (const sql of phase4c) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 4c migration done.");

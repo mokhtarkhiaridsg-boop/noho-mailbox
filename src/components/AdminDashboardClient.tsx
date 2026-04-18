@@ -45,6 +45,7 @@ import { AdminBusinessPanel } from "@/components/admin/AdminBusinessPanel";
 import { AdminSquarePanel } from "@/components/admin/AdminSquarePanel";
 import { AdminShippoPanel } from "@/components/admin/AdminShippoPanel";
 import AdminBillingPanel from "@/components/admin/AdminBillingPanel";
+import { AdminCancellationsPanel } from "@/components/admin/AdminCancellationsPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
 import { EditCustomerModal } from "@/components/admin/EditCustomerModal";
@@ -259,6 +260,7 @@ const sideNav = [
   { icon: "🛒", label: "Shop Orders", id: "shop" },
   { icon: "✍️", label: "Notary", id: "notary" },
   { icon: "💳", label: "Billing", id: "billing" },
+  { icon: "❌", label: "Cancellations", id: "cancellations" },
   { icon: "💰", label: "Revenue", id: "revenue" },
   { icon: "🏢", label: "Business Solutions", id: "business" },
   { icon: "📦", label: "Shipping", id: "shipping" },
@@ -707,6 +709,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             />
           )}
           {tab === "billing" && <AdminBillingPanel />}
+          {tab === "cancellations" && <AdminCancellationsPanel />}
           {tab === "revenue" && (
             <AdminRevenuePanel
               squareStatus={squareStatus}

@@ -16,6 +16,7 @@ import { requestNewKey } from "@/app/actions/keys";
 import { enable2FA, confirm2FA, disable2FA } from "@/app/actions/security";
 import { logout } from "@/app/actions/auth";
 import { getOrCreateMyReferralCode } from "@/app/actions/referral";
+import { requestCancellation } from "@/app/actions/cancellation";
 
 type Props = {
   user: DashboardUser;
@@ -409,6 +410,32 @@ export default function SettingsPanel({
               style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
             >{loadingCode ? "Generating…" : "Get My Referral Code"}</button>
           )}
+        </div>
+
+        {/* Cancel Membership */}
+        <div
+          className="rounded-2xl p-4 space-y-2"
+          style={{ background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.15)" }}
+        >
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-red-700">Close Account</p>
+          <p className="text-xs text-gray-500">
+            Request to close your mailbox. After approval you&apos;ll have 30 days to collect remaining mail.
+          </p>
+          <button
+            disabled={isPending}
+            onClick={() => {
+              const reason = window.prompt("Please tell us why you want to cancel:");
+              if (!reason) return;
+              startTransition(async () => {
+                const res = await requestCancellation(reason);
+                if ("error" in res && res.error) setToast(res.error);
+                else setToast("Cancellation request submitted. We'll review it shortly.");
+              });
+            }}
+            className="text-xs font-black px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40 transition-colors"
+          >
+            Request Cancellation
+          </button>
         </div>
 
         <button

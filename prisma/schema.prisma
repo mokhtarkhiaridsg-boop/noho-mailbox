@@ -70,7 +70,8 @@ model User {
   shippoLabels        ShippoLabel[]
   labelUploads        LabelUpload[]
   notifications       Notification[]
-  referrals           Referral[] @relation("ReferrerReferrals")
+  referrals               Referral[] @relation("ReferrerReferrals")
+  cancellationRequests    CancellationRequest[]
 }
 
 model MailItem {
@@ -472,4 +473,17 @@ model Referral {
   creditedAt   DateTime?
 
   referrer User @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
+}
+
+model CancellationRequest {
+  id             String    @id @default(cuid())
+  userId         String
+  reason         String
+  status         String    @default("Pending") // "Pending" | "Approved" | "Completed" | "Denied"
+  requestedAt    DateTime  @default(now())
+  gracePeriodEnd DateTime? // 30 days from approval
+  completedAt    DateTime?
+  adminNotes     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
