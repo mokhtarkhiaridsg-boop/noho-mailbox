@@ -14,7 +14,6 @@ import {
 import { updateMailStatus, logMail, fulfillMailRequest, setScanImage } from "@/app/actions/mail";
 import { updateNotaryStatus } from "@/app/actions/notary";
 import {
-  createCustomer,
   assignMailbox,
   reviewKyc,
   issueNewKey,
@@ -342,7 +341,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
   const [logMailForm, setLogMailForm] = useState({ suite: "", from: "", type: "Letter", recipientName: "", recipientPhone: "", exteriorImageUrl: "" });
   const [logMailPhotoUploading, setLogMailPhotoUploading] = useState(false);
-  const [addCustomerForm, setAddCustomerForm] = useState({ name: "", email: "", plan: "Basic", suite: "" });
+  // AddCustomerModal is now self-contained — no parent state needed
 
   // View / Edit Customer modal
   const [viewCustomer, setViewCustomer] = useState<Customer | null>(null);
@@ -492,20 +491,6 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   function handleDeliveryStatus(orderId: string, status: string, courier?: string) {
     startTransition(async () => {
       await updateDeliveryStatus(orderId, status, courier);
-      router.refresh();
-    });
-  }
-
-  function handleAddCustomerSubmit() {
-    const fd = new FormData();
-    fd.append("name", addCustomerForm.name);
-    fd.append("email", addCustomerForm.email);
-    fd.append("plan", addCustomerForm.plan);
-    fd.append("suite", addCustomerForm.suite);
-    startTransition(async () => {
-      await createCustomer(fd);
-      setShowAddCustomerModal(false);
-      setAddCustomerForm({ name: "", email: "", plan: "Basic", suite: "" });
       router.refresh();
     });
   }
@@ -910,10 +895,6 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
       )}
       {showAddCustomerModal && (
         <AddCustomerModal
-          addCustomerForm={addCustomerForm}
-          setAddCustomerForm={setAddCustomerForm}
-          handleAddCustomerSubmit={handleAddCustomerSubmit}
-          isPending={isPending}
           onClose={() => setShowAddCustomerModal(false)}
         />
       )}

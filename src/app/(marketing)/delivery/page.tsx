@@ -7,15 +7,28 @@ import { requestDelivery, type DeliveryState } from "@/app/actions/delivery";
 import { DELIVERY_ZONES, calculateDeliveryPrice } from "@/lib/delivery-zones";
 
 export default function DeliveryPage() {
+  const [addressInput, setAddressInput] = useState("");
   const [zip, setZip] = useState("");
   const [quoteResult, setQuoteResult] = useState<ReturnType<typeof calculateDeliveryPrice>>(null);
   const [showForm, setShowForm] = useState(false);
+  const [pickupType, setPickupType] = useState<"store" | "location">("store");
+  const [pickupAddress, setPickupAddress] = useState("");
   const [state, formAction, pending] = useActionState<DeliveryState, FormData>(requestDelivery, {});
 
+  function extractZip(address: string): string {
+    const m = address.match(/\b(\d{5})(?:-\d{4})?\b/);
+    return m ? m[1] : "";
+  }
+
+  function handleAddressChange(val: string) {
+    setAddressInput(val);
+    const foundZip = extractZip(val);
+    setZip(foundZip);
+    setQuoteResult(foundZip.length === 5 ? calculateDeliveryPrice(foundZip) : null);
+  }
+
   const handleEstimate = () => {
-    if (zip.length === 5) {
-      setQuoteResult(calculateDeliveryPrice(zip));
-    }
+    if (zip.length === 5) setQuoteResult(calculateDeliveryPrice(zip));
   };
 
   return (
@@ -125,29 +138,26 @@ export default function DeliveryPage() {
       {/* Delivery Calculator — zip lookup */}
       <section className="py-20 px-4 bg-bg-light">
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-extrabold tracking-tight text-text-light text-center mb-3 animate-fade-up">Instant Zip Code Quote</h2>
-          <p className="text-center text-sm text-text-light-muted mb-10">Type your zip for an instant price — no distance estimate needed.</p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-text-light text-center mb-3 animate-fade-up">Instant Delivery Quote</h2>
+          <p className="text-center text-sm text-text-light-muted mb-10">Enter your delivery address for an instant price — no account required.</p>
           <div
             className="rounded-2xl p-8 animate-fade-up delay-200"
             style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
           >
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-text-light mb-1">Delivery Zip Code</label>
+                <label className="block text-sm font-bold text-text-light mb-1">Delivery Address</label>
                 <input
                   type="text"
-                  maxLength={5}
-                  value={zip}
-                  onChange={(e) => {
-                    const v = e.target.value.replace(/\D/g, "");
-                    setZip(v);
-                    setQuoteResult(null);
-                    if (v.length === 5) setQuoteResult(calculateDeliveryPrice(v));
-                  }}
-                  placeholder="e.g. 91601"
+                  value={addressInput}
+                  onChange={(e) => handleAddressChange(e.target.value)}
+                  placeholder="123 Main St, Los Angeles, CA 90028"
                   className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-shadow"
                   style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                 />
+                {addressInput && !zip && (
+                  <p className="text-xs mt-1.5" style={{ color: "#B07030" }}>Include a 5-digit zip code in the address for an instant quote</p>
+                )}
               </div>
               <button
                 onClick={handleEstimate}
@@ -250,29 +260,71 @@ export default function DeliveryPage() {
                     <label className="block text-sm font-bold text-text-light mb-1">Email</label>
                     <input required name="email" type="email" placeholder="you@example.com" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                   </div>
+                  {/* Pickup Type */}
                   <div>
-                    <label className="block text-sm font-bold text-text-light mb-1">Pickup Address</label>
-                    <input name="pickupAddr" type="text" defaultValue="NOHO Mailbox Store (Default)" className="w-full rounded-xl px-4 py-3 text-sm text-text-light-muted focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
+                    <label className="block text-sm font-bold text-text-light mb-2">Pickup From</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {([
+                        { value: "store", label: "🏪 NOHO Mailbox", sub: "5062 Lankershim Blvd" },
+                        { value: "location", label: "📍 My Location", sub: "Custom pickup address" },
+                      ] as const).map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setPickupType(opt.value)}
+                          className="rounded-xl px-4 py-3 text-left transition-all"
+                          style={pickupType === opt.value
+                            ? { background: "#3374B5", color: "#fff", border: "2px solid #3374B5" }
+                            : { background: "#F8F2EA", color: "#2D1D0F", border: "2px solid #D8C8B4" }}
+                        >
+                          <p className="font-bold text-sm">{opt.label}</p>
+                          <p className="text-[11px] mt-0.5 opacity-70">{opt.sub}</p>
+                        </button>
+                      ))}
+                    </div>
+                    {pickupType === "location" && (
+                      <div className="mt-3">
+                        <input
+                          required
+                          name="pickupAddr"
+                          type="text"
+                          value={pickupAddress}
+                          onChange={(e) => setPickupAddress(e.target.value)}
+                          placeholder="Your pickup address..."
+                          className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none"
+                          style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
+                        />
+                      </div>
+                    )}
                   </div>
+                  {/* Delivery Address */}
                   <div>
                     <label className="block text-sm font-bold text-text-light mb-1">Delivery Address</label>
-                    <input required name="destination" type="text" placeholder="123 Main St, Los Angeles, CA" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
+                    <input
+                      required
+                      name="destination"
+                      type="text"
+                      defaultValue={addressInput || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const foundZip = extractZip(val);
+                        if (foundZip) setZip(foundZip);
+                      }}
+                      placeholder="123 Main St, Los Angeles, CA 90028"
+                      className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none"
+                      style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
+                    />
+                    <p className="text-[11px] mt-1" style={{ color: "rgba(122,96,80,0.5)" }}>Include zip code for automatic pricing (e.g. &ldquo;Los Angeles, CA 90028&rdquo;)</p>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-text-light mb-1">Zip Code</label>
-                      <input required name="zip" type="text" maxLength={5} placeholder="91601" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-text-light mb-1">Item Type</label>
-                      <select required name="itemType" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}>
-                        <option value="">Select type</option>
-                        <option value="Letter">Letter / Envelope</option>
-                        <option value="Package">Package</option>
-                        <option value="Documents">Legal Documents</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-bold text-text-light mb-1">Item Type</label>
+                    <select required name="itemType" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}>
+                      <option value="">Select type</option>
+                      <option value="Letter">Letter / Envelope</option>
+                      <option value="Package">Package</option>
+                      <option value="Documents">Legal Documents</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-text-light mb-1">Special Instructions <span className="font-normal" style={{ color: "rgba(122,96,80,0.4)" }}>(optional)</span></label>

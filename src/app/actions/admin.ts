@@ -14,9 +14,21 @@ export async function createCustomer(formData: FormData) {
   const plan = formData.get("plan") as string;
   const suiteNumber = formData.get("suite") as string;
   const password = formData.get("password") as string;
+  const phone = (formData.get("phone") as string) || null;
+  const planTerm = (formData.get("planTerm") as string) || null;
+  const planDueDate = (formData.get("planDueDate") as string) || null;
+  const mailboxStatus = (formData.get("mailboxStatus") as string) || "Pending";
+  const kycStatus = (formData.get("kycStatus") as string) || "Pending";
+  const depositCentsRaw = formData.get("depositCents") as string;
+  const securityDepositCents = depositCentsRaw ? parseInt(depositCentsRaw) : 0;
+  const cardLast4 = (formData.get("cardLast4") as string) || null;
+  const cardBrand = (formData.get("cardBrand") as string) || null;
+  const cardExpiry = (formData.get("cardExpiry") as string) || null;
+  const cardholderName = (formData.get("cardholderName") as string) || null;
+  const cardDiscountPct = parseInt((formData.get("cardDiscountPct") as string) || "0") || 0;
 
   if (!name || !email || !plan || !suiteNumber) {
-    return { error: "All fields are required" };
+    return { error: "Name, email, plan, and suite number are required" };
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -36,6 +48,17 @@ export async function createCustomer(formData: FormData) {
       passwordHash,
       plan,
       suiteNumber,
+      phone,
+      planTerm,
+      planDueDate,
+      mailboxStatus,
+      kycStatus,
+      securityDepositCents,
+      cardLast4,
+      cardBrand,
+      cardExpiry,
+      cardholderName,
+      cardDiscountPct,
     },
   });
 
