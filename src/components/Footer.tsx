@@ -69,25 +69,32 @@ export default function Footer() {
               <a href="tel:+18187651539" className="hover:text-text-dark transition-colors">(818) 765-1539</a>
             </p>
             <p>
-              <a href="mailto:hello@nohomailbox.org" className="hover:text-text-dark transition-colors">hello@nohomailbox.org</a>
+              <a href="mailto:nohomailbox@gmail.com" className="hover:text-text-dark transition-colors">nohomailbox@gmail.com</a>
             </p>
           </address>
         </div>
       </div>
 
       {/* Policy strip */}
-      <div className="border-t border-white/[0.06] py-4 px-5 bg-white/[0.02]">
-        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+      <div className="border-t border-white/[0.06] py-5 px-5 bg-white/[0.02]">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-x-1 gap-y-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-text-dark-muted/40 mr-3">Policies</span>
+          <span className="text-text-dark-muted/20 mr-3">|</span>
           {[
             { label: "Privacy Policy", href: "/privacy" },
             { label: "Terms of Service", href: "/terms" },
+            { label: "Package Holding", href: "/terms#holding" },
+            { label: "Oversized Packages", href: "/terms#oversized" },
             { label: "Fee Schedule", href: "/pricing#fees" },
             { label: "CMRA Compliance", href: "/terms#cmra" },
             { label: "Security", href: "/security" },
-          ].map((l) => (
-            <Link key={l.href} href={l.href} className="text-[11px] text-text-dark-muted/45 hover:text-text-dark-muted transition-colors">
-              {l.label}
-            </Link>
+          ].map((l, i, arr) => (
+            <span key={l.href} className="flex items-center gap-x-1">
+              <Link href={l.href} className="text-[11px] text-text-dark-muted/45 hover:text-text-dark-muted transition-colors">
+                {l.label}
+              </Link>
+              {i < arr.length - 1 && <span className="text-text-dark-muted/20 ml-1">·</span>}
+            </span>
           ))}
         </div>
       </div>

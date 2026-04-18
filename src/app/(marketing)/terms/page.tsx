@@ -170,21 +170,52 @@ export default function TermsOfServicePage() {
             <div>
               <h2 className="text-2xl font-extrabold text-text-light mb-4">7. Mail and Package Handling</h2>
               <p className="text-text-light-muted mb-3">
-                We accept mail and packages from all carriers (USPS, UPS, FedEx, DHL, Amazon, and others)
-                on your behalf. Our responsibilities and policies include:
+                All mail and packages are logged upon arrival. Customers may request notifications where applicable.
+                We are not responsible for carrier delays, damages prior to arrival, or missing shipments once marked
+                delivered by the carrier. Oversized or high-volume deliveries may incur additional handling fees or
+                may be refused at our discretion.
               </p>
               <ul className="list-disc pl-6 text-text-light-muted space-y-1.5">
                 <li>Mail and packages are logged and photographed upon receipt</li>
                 <li>You will receive digital notifications when new items arrive</li>
-                <li>Standard mail and packages are held for up to 30 days</li>
-                <li>Extended holding may be arranged by contacting us in advance</li>
-                <li>
-                  Unclaimed items after the holding period will be returned to sender (mail) or
-                  disposed of (packages), with reasonable notice to you
-                </li>
                 <li>We are not responsible for items damaged during shipping by third-party carriers</li>
                 <li>We are not liable for delays caused by carriers, weather, or other circumstances beyond our control</li>
               </ul>
+            </div>
+
+            {/* 7A. Package Holding Policy */}
+            <div id="holding">
+              <h2 className="text-2xl font-extrabold text-text-light mb-4">7A. Package Holding Policy</h2>
+              <p className="text-text-light-muted mb-3">
+                We are not a storage facility. Packages are held free for <strong className="text-text-light">5 days</strong> from
+                delivery date. After 5 days, storage fees apply:
+              </p>
+              <ul className="list-disc pl-6 text-text-light-muted space-y-1.5">
+                <li><strong className="text-text-light">Days 6–10:</strong> $2.60/day per package</li>
+                <li><strong className="text-text-light">Days 11–14:</strong> $5.20/day per package</li>
+                <li><strong className="text-text-light">After 14 days:</strong> Subject to return, disposal, or forced forwarding at customer expense</li>
+              </ul>
+              <p className="text-text-light-muted mt-3">
+                Oversized packages may incur immediate or higher daily storage fees. Failure to pick up packages
+                in a timely manner may result in service restrictions.
+              </p>
+            </div>
+
+            {/* 7B. Oversized Package Fees */}
+            <div id="oversized">
+              <h2 className="text-2xl font-extrabold text-text-light mb-4">7B. Oversized Package Fees</h2>
+              <p className="text-text-light-muted mb-3">
+                Packages exceeding <strong className="text-text-light">18&quot; in any dimension or 20 lbs</strong> are considered
+                oversized. Additional fees apply:
+              </p>
+              <ul className="list-disc pl-6 text-text-light-muted space-y-1.5">
+                <li><strong className="text-text-light">Oversized intake fee:</strong> $6.50 per package</li>
+                <li><strong className="text-text-light">Daily storage</strong> (no grace after Day 3): $6.50/day starting Day 4</li>
+                <li><strong className="text-text-light">Extremely large items</strong> (24&quot;+ or 40 lbs+): Subject to custom handling fees or refusal</li>
+              </ul>
+              <p className="text-text-light-muted mt-3">
+                We reserve the right to refuse oversized deliveries due to space constraints.
+              </p>
             </div>
 
             {/* 8. Mail Scanning */}

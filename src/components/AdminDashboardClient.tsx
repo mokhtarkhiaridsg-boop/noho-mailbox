@@ -11,7 +11,7 @@ import {
   syncAll,
   type SyncResult,
 } from "@/app/actions/square";
-import { updateMailStatus, logMail, fulfillMailRequest } from "@/app/actions/mail";
+import { updateMailStatus, logMail, fulfillMailRequest, setScanImage } from "@/app/actions/mail";
 import { updateNotaryStatus } from "@/app/actions/notary";
 import {
   createCustomer,
@@ -26,6 +26,7 @@ import {
   suspendCustomer,
   reactivateCustomer,
   updateCustomerDetails,
+  updateDeliveryStatus,
 } from "@/app/actions/admin";
 import { logout } from "@/app/actions/auth";
 
@@ -442,6 +443,28 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
     } catch { /* ignore */ } finally {
       setLogMailPhotoUploading(false);
     }
+  }
+
+  async function handleScanUpload(mailItemId: string, file: File) {
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.url) {
+        startTransition(async () => {
+          await setScanImage(mailItemId, data.url);
+          router.refresh();
+        });
+      }
+    } catch { /* ignore */ }
+  }
+
+  function handleDeliveryStatus(orderId: string, status: string, courier?: string) {
+    startTransition(async () => {
+      await updateDeliveryStatus(orderId, status, courier);
+      router.refresh();
+    });
   }
 
   function handleAddCustomerSubmit() {
@@ -1114,6 +1137,13 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                             FULFILL
                           </button>
                         )}
+                        <label
+                          title="Upload scan image"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-blue-50 transition-colors cursor-pointer"
+                        >
+                          <svg className="w-3.5 h-3.5 text-[#3374B5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleScanUpload(m.id, f); }} />
+                        </label>
                         <button
                           onClick={() => handleMailAction(m.id, "Scanned")}
                           disabled={isPending}
@@ -1175,6 +1205,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                         <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-text-light/40">Courier</th>
                         <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-text-light/40">Status</th>
                         <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-text-light/40">Date</th>
+                        <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-text-light/40">Update</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1192,6 +1223,19 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                           <td className="px-5 py-3 text-xs text-text-light/60">{d.courier}</td>
                           <td className="px-5 py-3"><StatusBadge status={d.status} /></td>
                           <td className="px-5 py-3 text-xs text-text-light/40">{d.date}</td>
+                          <td className="px-5 py-3">
+                            <select
+                              value={d.status}
+                              onChange={(e) => handleDeliveryStatus(d.id, e.target.value)}
+                              disabled={isPending}
+                              className="text-[10px] font-bold rounded-lg px-2 py-1 border border-[#e8e5e0] bg-white focus:outline-none focus:ring-1 focus:ring-[#3374B5]"
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Picked Up">Picked Up</option>
+                              <option value="In Transit">In Transit</option>
+                              <option value="Delivered">Delivered</option>
+                            </select>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

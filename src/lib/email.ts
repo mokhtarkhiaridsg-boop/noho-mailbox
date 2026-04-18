@@ -3,7 +3,7 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const FROM = "NOHO Mailbox <noreply@nohomailbox.org>";
-const REPLY_TO = "hello@nohomailbox.org";
+const REPLY_TO = "nohomailbox@gmail.com";
 const BASE_URL = process.env.AUTH_URL ?? "https://nohomailbox.org";
 
 // ─── Shared layout ────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ function layout(title: string, body: string) {
               NOHO Mailbox · 5062 Lankershim Blvd · North Hollywood, CA 91601<br/>
               Mon–Fri 9:30am–5:30pm (break 1:30–2pm) · Sat 10am–1:30pm<br/>
               <a href="tel:+18187651539" style="color:#3374B5;text-decoration:none;">(818) 765-1539</a> ·
-              <a href="mailto:hello@nohomailbox.org" style="color:#3374B5;text-decoration:none;">hello@nohomailbox.org</a>
+              <a href="mailto:nohomailbox@gmail.com" style="color:#3374B5;text-decoration:none;">nohomailbox@gmail.com</a>
             </p>
           </td>
         </tr>
