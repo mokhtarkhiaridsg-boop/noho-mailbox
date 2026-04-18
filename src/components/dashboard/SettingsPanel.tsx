@@ -19,6 +19,7 @@ import { getOrCreateMyReferralCode } from "@/app/actions/referral";
 import { requestCancellation } from "@/app/actions/cancellation";
 import { setVacationHold, cancelVacationHold, getMyVacationHold, getMyJunkSenders, removeJunkSender } from "@/app/actions/mailPreferences";
 import { addGuestPickup, revokeGuestPickup, getMyGuestPickups } from "@/app/actions/guestPickup";
+import { grantSharedAccess, revokeSharedAccess, getMySharedAccess } from "@/app/actions/sharedMailbox";
 import { setScheduledForwarding, cancelScheduledForwarding, getMyScheduledForwarding } from "@/app/actions/scheduledForwarding";
 
 type Props = {
@@ -192,6 +193,95 @@ function TwoFactorPanel({ enabled }: { enabled: boolean }) {
         <p className="mt-2 text-[11px] font-bold" style={{ color: BRAND.inkSoft }}>
           {message}
         </p>
+      )}
+    </div>
+  );
+}
+
+function SharedAccessCard({ setToast }: { setToast: (s: string) => void }) {
+  const [grants, setGrants] = useState<{ id: string; name: string; email: string }[] | null>(null);
+  const [pending, startTransition] = useTransition();
+  const [showForm, setShowForm] = useState(false);
+  const [email, setEmail] = useState("");
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function load() {
+    const data = await getMySharedAccess();
+    setGrants(data);
+  }
+
+  if (grants === null) load();
+
+  function grant() {
+    if (!email.includes("@")) return;
+    startTransition(async () => {
+      const res = await grantSharedAccess(email);
+      if ("error" in res && res.error) {
+        setMsg(`✗ ${res.error}`);
+      } else {
+        setToast(`Access granted to ${"sharedWith" in res ? res.sharedWith : email}`);
+        setEmail(""); setShowForm(false);
+        load();
+      }
+    });
+  }
+
+  function revoke(id: string) {
+    startTransition(async () => {
+      await revokeSharedAccess(id);
+      setToast("Access revoked");
+      load();
+    });
+  }
+
+  return (
+    <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>👥 Shared Mailbox Access</p>
+          <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Let another NOHO member view your mail</p>
+        </div>
+        <button onClick={() => setShowForm(!showForm)} className="text-xs font-black px-3 py-1 rounded-lg text-white" style={{ background: BRAND.blue }}>
+          + Add
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="space-y-2 bg-white rounded-xl p-3" style={{ border: `1px solid ${BRAND.border}` }}>
+          <p className="text-[11px]" style={{ color: BRAND.inkFaint }}>Enter the email address of another NOHO Mailbox member</p>
+          <input placeholder="member@email.com" value={email} onChange={(e) => setEmail(e.target.value)}
+            type="email" className="w-full rounded-xl px-3 py-2 text-sm"
+            style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }} />
+          {msg && <p className="text-[11px] font-bold text-red-600">{msg}</p>}
+          <div className="flex gap-2">
+            <button disabled={!email || pending} onClick={grant}
+              className="text-xs font-black px-4 py-1.5 rounded-xl text-white disabled:opacity-50" style={{ background: BRAND.blue }}>
+              Grant Access
+            </button>
+            <button onClick={() => { setShowForm(false); setMsg(null); }} className="text-xs" style={{ color: BRAND.inkFaint }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {grants && grants.length > 0 && (
+        <div className="space-y-1.5">
+          {grants.map((g) => (
+            <div key={g.id} className="flex items-center justify-between gap-2 rounded-xl px-3 py-2.5" style={{ background: "white", border: `1px solid ${BRAND.border}` }}>
+              <div>
+                <p className="text-xs font-bold" style={{ color: BRAND.ink }}>{g.name}</p>
+                <p className="text-[11px]" style={{ color: BRAND.inkFaint }}>{g.email}</p>
+              </div>
+              <button disabled={pending} onClick={() => revoke(g.id)}
+                className="text-[11px] font-black text-red-500 hover:text-red-700 disabled:opacity-40">
+                Revoke
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {grants?.length === 0 && !showForm && (
+        <p className="text-[11px]" style={{ color: BRAND.inkFaint }}>No shared access granted</p>
       )}
     </div>
   );
@@ -761,6 +851,9 @@ export default function SettingsPanel({
             >{loadingCode ? "Generating…" : "Get My Referral Code"}</button>
           )}
         </div>
+
+        {/* Shared Mailbox Access */}
+        <SharedAccessCard setToast={setToast} />
 
         {/* Guest Pickup */}
         <GuestPickupCard setToast={setToast} />

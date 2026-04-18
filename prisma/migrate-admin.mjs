@@ -325,3 +325,30 @@ for (const sql of phase5e) {
   }
 }
 console.log("Phase 5e migration done.");
+
+// Phase 5f — Shared mailbox access
+const phase5f = [
+  `CREATE TABLE IF NOT EXISTS SharedMailboxAccess (
+    id TEXT PRIMARY KEY,
+    primaryUserId TEXT NOT NULL,
+    sharedUserId TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (primaryUserId) REFERENCES User(id) ON DELETE CASCADE,
+    FOREIGN KEY (sharedUserId) REFERENCES User(id) ON DELETE CASCADE
+  )`,
+];
+
+for (const sql of phase5f) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 5f migration done.");

@@ -78,6 +78,19 @@ model User {
   vacationHold            VacationHold?
   guestPickups            GuestPickupAuth[]
   scheduledForwardings    ScheduledForwarding[]
+  sharedAccessGranted     SharedMailboxAccess[] @relation("PrimaryUser")
+  sharedAccessReceived    SharedMailboxAccess[] @relation("SharedUser")
+}
+
+model SharedMailboxAccess {
+  id            String   @id @default(cuid())
+  primaryUserId String   // mailbox owner
+  sharedUserId  String   // person who gets read access
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  primaryUser User @relation("PrimaryUser", fields: [primaryUserId], references: [id], onDelete: Cascade)
+  sharedUser  User @relation("SharedUser", fields: [sharedUserId], references: [id], onDelete: Cascade)
 }
 
 model GuestPickupAuth {

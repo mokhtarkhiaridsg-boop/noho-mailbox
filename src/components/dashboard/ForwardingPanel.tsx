@@ -1,10 +1,59 @@
 "use client";
 
+import { useState } from "react";
 import type { TransitionStartFunction } from "react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { BRAND, type ForwardingAddress } from "./types";
 import { IconForward, IconHome, IconTrash, IconPlus } from "@/components/MemberIcons";
 import { addForwardingAddress, deleteForwardingAddress } from "@/app/actions/user";
+
+// Forwarding cost estimator — no API needed, uses weight-based USPS estimates
+const USPS_ESTIMATES: { label: string; weight: string; price: string }[] = [
+  { label: "Single letter", weight: "< 1 oz", price: "$0.68–$1.50" },
+  { label: "Thick envelope", weight: "1–3 oz", price: "$1.50–$3.50" },
+  { label: "Small package", weight: "< 1 lb", price: "$4.50–$8.00" },
+  { label: "Medium package", weight: "1–5 lbs", price: "$8.00–$18.00" },
+  { label: "Large package", weight: "5–10 lbs", price: "$18.00–$40.00" },
+];
+
+function CostEstimator() {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="mt-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BRAND.border}` }}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full px-4 py-3 flex items-center justify-between text-sm font-black"
+        style={{ background: BRAND.blueSoft, color: BRAND.blueDeep }}
+      >
+        <span>📦 Forwarding Cost Estimator</span>
+        <span>{expanded ? "▲" : "▼"}</span>
+      </button>
+      {expanded && (
+        <div className="p-4 space-y-3 bg-white">
+          <p className="text-xs" style={{ color: BRAND.inkSoft }}>
+            Estimates based on USPS First-Class and Priority Mail rates (postage + $5 handling).
+            Actual cost depends on destination zip and package dimensions.
+          </p>
+          <div className="space-y-1.5">
+            {USPS_ESTIMATES.map((e) => (
+              <div key={e.label} className="flex items-center justify-between py-2 px-3 rounded-xl" style={{ background: BRAND.blueSoft }}>
+                <div>
+                  <p className="text-xs font-bold" style={{ color: BRAND.ink }}>{e.label}</p>
+                  <p className="text-[10px]" style={{ color: BRAND.inkFaint }}>{e.weight}</p>
+                </div>
+                <span className="text-xs font-black" style={{ color: BRAND.blueDeep }}>{e.price}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px]" style={{ color: BRAND.inkFaint }}>
+            * Add $5 handling fee to all estimates. Express forwarding (1-2 day) available at 2× rate.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 type Props = {
   addresses: ForwardingAddress[];
@@ -173,6 +222,7 @@ export default function ForwardingPanel({
           Add New Address
         </button>
       )}
+      <CostEstimator />
     </div>
   );
 }
