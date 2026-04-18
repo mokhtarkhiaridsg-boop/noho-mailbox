@@ -138,7 +138,7 @@ export function ShippingQuoteClient() {
         <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
 
         <div className="max-w-3xl mx-auto text-center relative z-10">
-          <p className="text-accent font-semibold text-xs uppercase tracking-[0.2em] mb-4 animate-fade-up">
+          <p className="font-semibold text-xs uppercase tracking-[0.2em] mb-4 animate-fade-up" style={{ color: "#93C4FF" }}>
             Ship with Confidence
           </p>
           <h1 className="text-[clamp(2rem,5vw,3.5rem)] font-extrabold text-text-dark leading-tight tracking-tight mb-5 animate-fade-up delay-100">
@@ -151,10 +151,21 @@ export function ShippingQuoteClient() {
         </div>
       </section>
 
+      {/* Warm cream personality strip */}
+      <div
+        className="py-3 px-4 text-center text-sm font-semibold"
+        style={{ background: "#F7E6C2", color: "#6B3F1A" }}
+      >
+        NoHo same-day delivery just $5 &mdash; bring your package in-store and we handle the rest
+      </div>
+
       {/* Quote Form */}
       <section className="py-16 px-5 bg-bg-light">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-surface-light border border-border-light rounded-2xl p-8 shadow-[var(--shadow-md)]">
+          <div
+            className="rounded-2xl p-8"
+            style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
+          >
             <h2 className="text-xl font-bold text-text-light mb-6">Package Details</h2>
 
             {/* Zip codes */}
@@ -167,7 +178,8 @@ export function ShippingQuoteClient() {
                   value={fromZip}
                   onChange={(e) => setFromZip(e.target.value.replace(/\D/g, ""))}
                   placeholder="91601"
-                  className="w-full rounded-xl px-4 py-3 text-sm text-text-light bg-bg-light border border-border-light focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                  className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-all"
+                  style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                 />
               </div>
               <div>
@@ -178,7 +190,8 @@ export function ShippingQuoteClient() {
                   value={toZip}
                   onChange={(e) => setToZip(e.target.value.replace(/\D/g, ""))}
                   placeholder="90001"
-                  className="w-full rounded-xl px-4 py-3 text-sm text-text-light bg-bg-light border border-border-light focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                  className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-all"
+                  style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                 />
               </div>
             </div>
@@ -193,7 +206,8 @@ export function ShippingQuoteClient() {
                 value={weightLbs}
                 onChange={(e) => setWeightLbs(e.target.value)}
                 placeholder="e.g. 2.5"
-                className="w-full rounded-xl px-4 py-3 text-sm text-text-light bg-bg-light border border-border-light focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-all"
+                style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
               />
             </div>
 
@@ -209,16 +223,17 @@ export function ShippingQuoteClient() {
                       key={key}
                       type="button"
                       onClick={() => setSizePreset(key)}
-                      className={`rounded-xl py-3 px-2 text-center transition-all duration-200 ${
+                      className="rounded-xl py-3 px-2 text-center transition-all duration-200"
+                      style={
                         active
-                          ? "bg-accent text-white shadow-[0_4px_12px_rgba(51,116,181,0.3)]"
-                          : "bg-bg-light border border-border-light text-text-light hover:bg-border-light/50"
-                      }`}
+                          ? { background: "#3374B5", color: "#fff", boxShadow: "0 4px 12px rgba(51,116,181,0.3)" }
+                          : { background: "#F8F2EA", border: "1px solid #D8C8B4", color: "#2D1D0F" }
+                      }
                     >
                       <span className="text-lg block mb-0.5">{p.icon}</span>
                       <span className="text-[10px] font-semibold block">{p.label}</span>
                       {key !== "custom" && (
-                        <span className={`text-[9px] block mt-0.5 ${active ? "text-white/60" : "text-text-light-muted/60"}`}>
+                        <span className="text-[9px] block mt-0.5" style={{ color: active ? "rgba(255,255,255,0.6)" : "rgba(122,96,80,0.6)" }}>
                           {p.l}&times;{p.w}&times;{p.h}&quot;
                         </span>
                       )}
@@ -239,7 +254,8 @@ export function ShippingQuoteClient() {
                     value={customL}
                     onChange={(e) => setCustomL(e.target.value)}
                     placeholder="L"
-                    className="w-full rounded-xl px-4 py-3 text-sm text-text-light bg-bg-light border border-border-light focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                    className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-all"
+                    style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                   />
                 </div>
                 <div>
@@ -250,7 +266,8 @@ export function ShippingQuoteClient() {
                     value={customW}
                     onChange={(e) => setCustomW(e.target.value)}
                     placeholder="W"
-                    className="w-full rounded-xl px-4 py-3 text-sm text-text-light bg-bg-light border border-border-light focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                    className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-all"
+                    style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                   />
                 </div>
                 <div>
@@ -261,7 +278,8 @@ export function ShippingQuoteClient() {
                     value={customH}
                     onChange={(e) => setCustomH(e.target.value)}
                     placeholder="H"
-                    className="w-full rounded-xl px-4 py-3 text-sm text-text-light bg-bg-light border border-border-light focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                    className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-all"
+                    style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                   />
                 </div>
               </div>
@@ -275,7 +293,8 @@ export function ShippingQuoteClient() {
 
             <button
               onClick={handleQuote}
-              className="w-full font-semibold py-3.5 rounded-xl text-sm text-white bg-accent hover:bg-accent-hover transition-all duration-200 shadow-[0_4px_16px_rgba(51,116,181,0.4)]"
+              className="w-full font-semibold py-3.5 rounded-xl text-sm text-white transition-all duration-200"
+              style={{ background: "#3374B5", boxShadow: "0 4px 16px rgba(51,116,181,0.4)" }}
             >
               Compare Rates
             </button>
@@ -291,52 +310,53 @@ export function ShippingQuoteClient() {
               {quotes.map((q) => (
                 <div
                   key={`${q.carrier}-${q.service}`}
-                  className={`flex items-center justify-between p-5 rounded-2xl transition-all hover-lift ${
+                  className="flex items-center justify-between p-5 rounded-2xl transition-all hover-lift"
+                  style={
                     q.highlight
-                      ? "bg-accent text-white shadow-[0_8px_24px_rgba(51,116,181,0.25)]"
-                      : "bg-surface-light border border-border-light shadow-[var(--shadow-sm)]"
-                  }`}
+                      ? { background: "linear-gradient(135deg,#B07030,#8A5520)", color: "#fff", boxShadow: "0 8px 24px rgba(176,112,48,0.3)" }
+                      : { background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-sm)" }
+                  }
                 >
                   <div className="flex items-center gap-4">
                     <span className="text-2xl">{q.logo}</span>
                     <div>
-                      <p className={`font-semibold text-sm ${q.highlight ? "text-white" : "text-text-light"}`}>
+                      <p className="font-semibold text-sm" style={{ color: q.highlight ? "#fff" : "#2D1D0F" }}>
                         {q.carrier}
                         {q.highlight && (
-                          <span className="ml-2 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20">
+                          <span className="ml-2 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.2)" }}>
                             Best Value
                           </span>
                         )}
                       </p>
-                      <p className={`text-xs ${q.highlight ? "text-white/70" : "text-text-light-muted"}`}>
+                      <p className="text-xs" style={{ color: q.highlight ? "rgba(255,240,200,0.8)" : "#7A6050" }}>
                         {q.service}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`text-xl font-extrabold ${q.highlight ? "text-white" : "text-text-light"}`}>
+                    <p className="text-xl font-extrabold" style={{ color: q.highlight ? "#fff" : "#2D1D0F" }}>
                       {q.price}
                     </p>
-                    <p className={`text-xs ${q.highlight ? "text-white/60" : "text-text-light-muted"}`}>
+                    <p className="text-xs" style={{ color: q.highlight ? "rgba(255,240,200,0.7)" : "#7A6050" }}>
                       {q.eta}
                     </p>
                   </div>
                 </div>
               ))}
 
-              <p className="text-xs text-text-light-muted/60 text-center mt-6">
+              <p className="text-xs text-center mt-6" style={{ color: "rgba(122,96,80,0.6)" }}>
                 * All rates are estimates. Final pricing may vary based on actual package dimensions and weight. Contact us for exact quotes.
-                Visit us in-store or <Link href="/contact" className="text-accent font-semibold hover:underline">contact us</Link> to ship.
+                Visit us in-store or <Link href="/contact" className="font-semibold hover:underline" style={{ color: "#3374B5" }}>contact us</Link> to ship.
               </p>
             </div>
           )}
         </div>
       </section>
 
-      {/* Info section */}
-      <section className="py-20 px-5 bg-bg-dark">
+      {/* Info section — dark brown personality */}
+      <section className="py-20 px-5" style={{ background: "#1E1914" }}>
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-extrabold text-text-dark text-center mb-12 tracking-tight">
+          <h2 className="text-2xl font-extrabold text-center mb-12 tracking-tight" style={{ color: "#F8F2EA" }}>
             Why Ship with NOHO Mailbox?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -350,6 +370,7 @@ export function ShippingQuoteClient() {
                 icon: "⚡",
                 title: "Same-Day Local Delivery",
                 desc: "Shipping within North Hollywood? Skip the carriers — we deliver same-day for a flat $5.",
+                accent: true,
               },
               {
                 icon: "🏪",
@@ -359,11 +380,16 @@ export function ShippingQuoteClient() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-2xl p-7 bg-white/[0.04] border border-white/[0.08] hover-lift transition-all"
+                className="rounded-2xl p-7 hover-lift transition-all"
+                style={
+                  item.accent
+                    ? { background: "linear-gradient(135deg,#B07030,#8A5520)", boxShadow: "0 8px 24px rgba(176,112,48,0.3)" }
+                    : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }
+                }
               >
                 <span className="text-3xl mb-4 block">{item.icon}</span>
-                <h3 className="font-bold text-lg text-text-dark mb-2">{item.title}</h3>
-                <p className="text-sm text-text-dark-muted leading-relaxed">{item.desc}</p>
+                <h3 className="font-bold text-lg mb-2" style={{ color: item.accent ? "#FFE4A0" : "#F8F2EA" }}>{item.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: item.accent ? "rgba(255,255,255,0.85)" : "rgba(248,242,234,0.6)" }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -381,7 +407,8 @@ export function ShippingQuoteClient() {
           </p>
           <Link
             href="/signup"
-            className="inline-block font-semibold px-8 py-4 rounded-xl text-white bg-accent hover:bg-accent-hover transition-all duration-300 shadow-[0_4px_20px_rgba(51,116,181,0.4)]"
+            className="inline-block font-semibold px-8 py-4 rounded-xl text-white transition-all duration-300"
+            style={{ background: "#3374B5", boxShadow: "0 4px 20px rgba(51,116,181,0.4)" }}
           >
             Get a Mailbox
           </Link>

@@ -55,6 +55,14 @@ export default function DeliveryPage() {
         </div>
       </section>
 
+      {/* Gold personality banner */}
+      <div
+        className="py-4 px-4 text-center text-sm font-semibold"
+        style={{ background: "#F7E6C2", color: "#6B3F1A" }}
+      >
+        NoHo flat rate $5 &mdash; Extended zone from $9.75 &mdash; No membership required
+      </div>
+
       {/* How It Works */}
       <section className="py-20 px-4 bg-bg-light">
         <div className="max-w-5xl mx-auto">
@@ -67,9 +75,10 @@ export default function DeliveryPage() {
             ].map((s) => (
               <div
                 key={s.step}
-                className={`text-center bg-surface-light border border-border-light rounded-2xl p-7 hover-lift animate-fade-up ${s.delay}`}
+                className={`text-center rounded-2xl p-7 hover-lift animate-fade-up ${s.delay}`}
+                style={{ background: "#FFF9F3", border: "1px solid #E8D8C4" }}
               >
-                <p className="text-5xl font-extrabold tracking-tight text-accent mb-3">{s.step}</p>
+                <p className="text-5xl font-extrabold tracking-tight mb-3" style={{ color: "#3374B5" }}>{s.step}</p>
                 <p className="font-extrabold tracking-tight text-text-light text-sm mb-3">{s.title}</p>
                 <p className="text-text-light-muted text-sm">{s.desc}</p>
               </div>
@@ -79,32 +88,39 @@ export default function DeliveryPage() {
       </section>
 
       {/* Zone Pricing */}
-      <section className="py-20 px-4 bg-bg-light">
+      <section className="py-20 px-4" style={{ background: "#1E1914" }}>
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-extrabold tracking-tight text-text-light text-center mb-12 animate-fade-up">Delivery Zones & Pricing</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight text-center mb-12 animate-fade-up" style={{ color: "#F8F2EA" }}>
+            Delivery Zones &amp; Pricing
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* NoHo Zone */}
+            {/* NoHo Zone — blue highlight */}
             <div
-              className="rounded-2xl p-8 text-white bg-accent shadow-[0_12px_40px_rgba(51,116,181,0.3)] hover-lift animate-fade-up delay-100"
+              className="rounded-2xl p-8 text-white hover-lift animate-fade-up delay-100"
+              style={{
+                background: "linear-gradient(145deg, #1B3A5C 0%, #0E2340 100%)",
+                boxShadow: "0 12px 40px rgba(51,116,181,0.35)",
+              }}
             >
-              <span className="text-xs font-bold uppercase tracking-widest text-white/60">Local</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(147,196,255,0.75)" }}>Local</span>
               <h3 className="text-2xl font-extrabold tracking-tight mt-1 mb-4">NoHo Zone</h3>
-              <p className="text-6xl font-extrabold tracking-tight mb-4">$5<span className="text-2xl font-bold text-white/70">.00</span></p>
-              <p className="text-white/70 text-sm mb-6">Flat rate — any address within the zone</p>
-              <ul className="space-y-2 text-sm text-white/80">
-                <li className="flex items-center gap-2"><span className="text-white">✓</span> North Hollywood</li>
-                <li className="flex items-center gap-2"><span className="text-white">✓</span> Studio City</li>
-                <li className="flex items-center gap-2"><span className="text-white">✓</span> Valley Village</li>
-                <li className="flex items-center gap-2"><span className="text-white">✓</span> Toluca Lake</li>
+              <p className="text-6xl font-extrabold tracking-tight mb-4">$5<span className="text-2xl font-bold" style={{ color: "rgba(147,196,255,0.7)" }}>.00</span></p>
+              <p className="text-sm mb-6" style={{ color: "rgba(147,196,255,0.75)" }}>Flat rate — any address within the zone</p>
+              <ul className="space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.8)" }}>
+                <li className="flex items-center gap-2"><span style={{ color: "#93C4FF" }}>✓</span> North Hollywood</li>
+                <li className="flex items-center gap-2"><span style={{ color: "#93C4FF" }}>✓</span> Studio City</li>
+                <li className="flex items-center gap-2"><span style={{ color: "#93C4FF" }}>✓</span> Valley Village</li>
+                <li className="flex items-center gap-2"><span style={{ color: "#93C4FF" }}>✓</span> Toluca Lake</li>
               </ul>
-              <p className="text-[10px] text-white/40 mt-4 uppercase tracking-wider">Same-day local delivery</p>
+              <p className="text-[10px] mt-4 uppercase tracking-wider" style={{ color: "rgba(147,196,255,0.4)" }}>Same-day local delivery</p>
             </div>
 
-            {/* Extended Zone */}
+            {/* Extended Zone — warm cream card */}
             <div
-              className="bg-surface-light border border-border-light rounded-2xl p-8 shadow-[var(--shadow-md)] hover-lift animate-fade-up delay-300"
+              className="rounded-2xl p-8 hover-lift animate-fade-up delay-300"
+              style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
             >
-              <span className="text-xs font-bold uppercase tracking-widest text-accent">Extended</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#B07030" }}>Extended</span>
               <h3 className="text-2xl font-extrabold tracking-tight text-text-light mt-1 mb-4">Beyond NoHo</h3>
               <div className="space-y-3 mb-6">
                 {[
@@ -112,14 +128,14 @@ export default function DeliveryPage() {
                   { range: "5 – 10 miles", price: "$9.75 + $0.75/mi" },
                   { range: "10 – 15 miles", price: "$9.75 + $0.75/mi" },
                 ].map((tier) => (
-                  <div key={tier.range} className="flex justify-between items-center text-sm border-b border-border-light pb-3">
+                  <div key={tier.range} className="flex justify-between items-center text-sm border-b pb-3" style={{ borderColor: "#E8D8C4" }}>
                     <span className="text-text-light-muted">{tier.range}</span>
                     <span className="font-bold text-text-light">{tier.price}</span>
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-text-light-muted/60">Maximum delivery radius: 15 miles</p>
-              <p className="text-[10px] text-text-light-muted/40 mt-2 uppercase tracking-wider">Courier delivery for extended distances</p>
+              <p className="text-xs" style={{ color: "rgba(122,96,80,0.6)" }}>Maximum delivery radius: 15 miles</p>
+              <p className="text-[10px] mt-2 uppercase tracking-wider" style={{ color: "rgba(122,96,80,0.4)" }}>Courier delivery for extended distances</p>
             </div>
           </div>
         </div>
@@ -130,7 +146,8 @@ export default function DeliveryPage() {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl font-extrabold tracking-tight text-text-light text-center mb-10 animate-fade-up">Estimate Your Delivery</h2>
           <div
-            className="bg-surface-light border border-border-light rounded-2xl p-8 shadow-[var(--shadow-md)] animate-fade-up delay-200"
+            className="rounded-2xl p-8 animate-fade-up delay-200"
+            style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
           >
             <div className="space-y-4">
               <div>
@@ -141,7 +158,8 @@ export default function DeliveryPage() {
                   value={zip}
                   onChange={(e) => { setZip(e.target.value.replace(/\D/g, "")); setResult(null); }}
                   placeholder="e.g. 91601"
-                  className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent transition-shadow"
+                  className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-shadow"
+                  style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                 />
               </div>
 
@@ -151,7 +169,8 @@ export default function DeliveryPage() {
                   <select
                     value={distance}
                     onChange={(e) => { setDistance(Number(e.target.value)); setResult(null); }}
-                    className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent transition-shadow"
+                    className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-shadow"
+                    style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                   >
                     <option value={0}>Select distance</option>
                     <option value={3}>Under 5 miles</option>
@@ -166,17 +185,27 @@ export default function DeliveryPage() {
               <button
                 onClick={handleEstimate}
                 disabled={!zip || (zip.length === 5 && !isNoHo && distance === 0)}
-                className="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-accent-hover transition-all hover:-translate-y-1 disabled:opacity-40 disabled:hover:translate-y-0"
+                className="w-full text-white font-bold py-3 rounded-xl transition-all hover:-translate-y-1 disabled:opacity-40 disabled:hover:translate-y-0"
+                style={{ background: "#3374B5" }}
               >
                 Estimate Delivery Cost
               </button>
             </div>
 
             {result && (
-              <div className={`mt-6 rounded-xl p-6 animate-fade-up ${result.zone === "NoHo Zone" ? "bg-accent text-white" : result.zone === "Out of Range" ? "bg-danger-soft text-danger" : "bg-bg-light border border-border-light"}`}>
+              <div
+                className={`mt-6 rounded-xl p-6 animate-fade-up`}
+                style={
+                  result.zone === "NoHo Zone"
+                    ? { background: "linear-gradient(135deg,#1B3A5C,#0E2340)", color: "#fff" }
+                    : result.zone === "Out of Range"
+                    ? { background: "#FFF0F0", border: "1px solid #FECACA", color: "#B91C1C" }
+                    : { background: "#F7E6C2", border: "1px solid #D8C8B4", color: "#6B3F1A" }
+                }
+              >
                 <p className="text-xs font-bold uppercase tracking-widest mb-1 opacity-70">{result.zone}</p>
                 <p className="text-4xl font-extrabold tracking-tight mb-2">{result.price}</p>
-                <p className={`text-sm ${result.zone === "NoHo Zone" ? "text-white/70" : result.zone === "Out of Range" ? "text-danger" : "text-text-light-muted"}`}>{result.note}</p>
+                <p className="text-sm opacity-80">{result.note}</p>
               </div>
             )}
           </div>
@@ -191,7 +220,8 @@ export default function DeliveryPage() {
 
           {state.success ? (
             <div
-              className="bg-surface-light border border-border-light rounded-2xl p-10 text-center shadow-[var(--shadow-md)] animate-scale-in"
+              className="rounded-2xl p-10 text-center animate-scale-in"
+              style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
             >
               <div className="inline-block mb-4">
                 <DeliveryTruckIcon className="w-20 h-20 mx-auto" />
@@ -205,7 +235,8 @@ export default function DeliveryPage() {
                 <div className="text-center animate-fade-up">
                   <button
                     onClick={() => setShowForm(true)}
-                    className="bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent-hover transition-all hover:-translate-y-1 hover:shadow-lg"
+                    className="text-white font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-1 hover:shadow-lg"
+                    style={{ background: "#3374B5" }}
                   >
                     Start Delivery Request
                   </button>
@@ -213,7 +244,8 @@ export default function DeliveryPage() {
               ) : (
                 <form
                   action={formAction}
-                  className="bg-surface-light border border-border-light rounded-2xl p-8 space-y-4 shadow-[var(--shadow-md)] animate-scale-in"
+                  className="rounded-2xl p-8 space-y-4 animate-scale-in"
+                  style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
                 >
                   {state.error && (
                     <p className="text-danger text-sm bg-danger-soft p-3 rounded-xl">{state.error}</p>
@@ -221,33 +253,33 @@ export default function DeliveryPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-bold text-text-light mb-1">Full Name</label>
-                      <input required name="customerName" type="text" placeholder="John Doe" className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent" />
+                      <input required name="customerName" type="text" placeholder="John Doe" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-text-light mb-1">Phone</label>
-                      <input required name="phone" type="tel" placeholder="(818) 765-1539" className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent" />
+                      <input required name="phone" type="tel" placeholder="(818) 765-1539" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-text-light mb-1">Email</label>
-                    <input required name="email" type="email" placeholder="you@example.com" className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent" />
+                    <input required name="email" type="email" placeholder="you@example.com" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-text-light mb-1">Pickup Address</label>
-                    <input name="pickupAddr" type="text" defaultValue="NOHO Mailbox Store (Default)" className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light-muted focus:outline-none focus:ring-2 focus:ring-accent" />
+                    <input name="pickupAddr" type="text" defaultValue="NOHO Mailbox Store (Default)" className="w-full rounded-xl px-4 py-3 text-sm text-text-light-muted focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-text-light mb-1">Delivery Address</label>
-                    <input required name="destination" type="text" placeholder="123 Main St, Los Angeles, CA" className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent" />
+                    <input required name="destination" type="text" placeholder="123 Main St, Los Angeles, CA" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-bold text-text-light mb-1">Zip Code</label>
-                      <input required name="zip" type="text" maxLength={5} placeholder="91601" className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent" />
+                      <input required name="zip" type="text" maxLength={5} placeholder="91601" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-text-light mb-1">Item Type</label>
-                      <select required name="itemType" className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent">
+                      <select required name="itemType" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}>
                         <option value="">Select type</option>
                         <option value="Letter">Letter / Envelope</option>
                         <option value="Package">Package</option>
@@ -257,14 +289,15 @@ export default function DeliveryPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-text-light mb-1">Special Instructions <span className="text-text-light-muted/40 font-normal">(optional)</span></label>
-                    <textarea name="instructions" rows={3} placeholder="Any details about the delivery..." className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent resize-none" />
+                    <label className="block text-sm font-bold text-text-light mb-1">Special Instructions <span className="font-normal" style={{ color: "rgba(122,96,80,0.4)" }}>(optional)</span></label>
+                    <textarea name="instructions" rows={3} placeholder="Any details about the delivery..." className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none resize-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                   </div>
                   <input type="hidden" name="distance" value={distance || ""} />
                   <button
                     type="submit"
                     disabled={pending}
-                    className="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-accent-hover transition-all hover:-translate-y-1 hover:shadow-lg disabled:opacity-50"
+                    className="w-full text-white font-bold py-3 rounded-xl transition-all hover:-translate-y-1 hover:shadow-lg disabled:opacity-50"
+                    style={{ background: "#3374B5" }}
                   >
                     {pending ? "Submitting..." : "Request Delivery"}
                   </button>
@@ -282,13 +315,14 @@ export default function DeliveryPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               { icon: <EnvelopeIcon className="w-10 h-10" />, label: "Letters & Mail" },
-              { icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect x="6" y="14" width="36" height="28" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><rect x="14" y="4" width="20" height="14" rx="3" fill="#3374B5" stroke="#1A1714" strokeWidth="2" /></svg>, label: "Packages" },
-              { icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect x="8" y="4" width="32" height="40" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M16 14 L32 14 M16 22 L32 22 M16 30 L26 30" stroke="#3374B5" strokeWidth="2" strokeLinecap="round" /></svg>, label: "Legal Documents" },
+              { icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect x="6" y="14" width="36" height="28" rx="4" fill="#EBF2FA" stroke="#110E0B" strokeWidth="2.5" /><rect x="14" y="4" width="20" height="14" rx="3" fill="#3374B5" stroke="#110E0B" strokeWidth="2" /></svg>, label: "Packages" },
+              { icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect x="8" y="4" width="32" height="40" rx="4" fill="#EBF2FA" stroke="#110E0B" strokeWidth="2.5" /><path d="M16 14 L32 14 M16 22 L32 22 M16 30 L26 30" stroke="#3374B5" strokeWidth="2" strokeLinecap="round" /></svg>, label: "Legal Documents" },
               { icon: <MailboxIcon className="w-10 h-10" />, label: "Business Mail" },
             ].map((item) => (
               <div
                 key={item.label}
-                className="bg-surface-light border border-border-light rounded-xl p-6 text-center shadow-sm hover-lift animate-fade-up"
+                className="rounded-xl p-6 text-center hover-lift animate-fade-up"
+                style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-sm)" }}
               >
                 <div className="flex justify-center mb-3">{item.icon}</div>
                 <p className="font-bold text-sm text-text-light">{item.label}</p>
@@ -301,15 +335,17 @@ export default function DeliveryPage() {
       {/* CTA */}
       <section className="py-20 px-4 bg-bg-light">
         <div
-          className="relative max-w-3xl mx-auto rounded-3xl p-12 text-center overflow-hidden bg-bg-dark shadow-xl animate-fade-up"
+          className="relative max-w-3xl mx-auto rounded-3xl p-12 text-center overflow-hidden shadow-xl animate-fade-up"
+          style={{ background: "#110E0B" }}
         >
-          <div className="absolute top-[-30%] right-[-10%] w-[300px] h-[300px] rounded-full opacity-15 blur-[100px] pointer-events-none bg-accent" />
+          <div className="absolute top-[-30%] right-[-10%] w-[300px] h-[300px] rounded-full opacity-15 blur-[100px] pointer-events-none" style={{ background: "#3374B5" }} />
           <div className="relative z-10">
-            <h2 className="text-3xl font-extrabold tracking-tight text-text-dark mb-3">Need a Mailbox Too?</h2>
-            <p className="text-text-dark-muted mb-8">Members get delivery requests right from their dashboard.</p>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3" style={{ color: "#F8F2EA" }}>Need a Mailbox Too?</h2>
+            <p className="mb-8" style={{ color: "rgba(248,242,234,0.65)" }}>Members get delivery requests right from their dashboard.</p>
             <Link
               href="/signup"
-              className="bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent-hover transition-all hover:-translate-y-1 hover:shadow-lg inline-block"
+              className="text-white font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-1 hover:shadow-lg inline-block"
+              style={{ background: "#3374B5" }}
             >
               Get a Mailbox
             </Link>

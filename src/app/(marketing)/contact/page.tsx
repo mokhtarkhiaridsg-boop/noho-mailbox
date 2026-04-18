@@ -23,14 +23,25 @@ export default function ContactPage() {
         </div>
       </section>
 
+      {/* Warm cream personality strip */}
+      <div
+        className="py-3 px-4 text-center text-sm font-semibold"
+        style={{ background: "#F7E6C2", color: "#6B3F1A" }}
+      >
+        We typically respond within 24 hours &mdash; or stop by in person Mon&ndash;Sat at 5062 Lankershim Blvd
+      </div>
+
       {/* Content */}
       <section className="py-20 px-4 bg-bg-light">
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Form */}
           {state.success ? (
-            <div className="bg-surface-light border border-border-light rounded-2xl p-8 animate-scale-in flex flex-col items-center justify-center text-center shadow-[var(--shadow-md)]">
-              <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            <div
+              className="rounded-2xl p-8 animate-scale-in flex flex-col items-center justify-center text-center"
+              style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
+            >
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ background: "rgba(51,116,181,0.1)" }}>
+                <svg className="w-8 h-8" style={{ color: "#3374B5" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               </div>
               <h3 className="text-xl font-extrabold tracking-tight text-text-light mb-2">Message Sent!</h3>
               <p className="text-text-light-muted text-sm">We&apos;ll get back to you within 24 hours.</p>
@@ -38,7 +49,8 @@ export default function ContactPage() {
           ) : (
             <form
               action={formAction}
-              className="space-y-5 bg-surface-light border border-border-light rounded-2xl p-8 animate-slide-left shadow-[var(--shadow-md)]"
+              className="space-y-5 rounded-2xl p-8 animate-slide-left"
+              style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
             >
               <h2 className="font-extrabold tracking-tight text-text-light text-lg mb-2">Send a Message</h2>
               {state.error && (
@@ -54,7 +66,8 @@ export default function ContactPage() {
                   type="text"
                   required
                   placeholder="Your full name"
-                  className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                  className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-all"
+                  style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                 />
               </div>
               <div>
@@ -67,7 +80,8 @@ export default function ContactPage() {
                   type="email"
                   required
                   placeholder="you@example.com"
-                  className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                  className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-all"
+                  style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                 />
               </div>
               <div>
@@ -77,7 +91,8 @@ export default function ContactPage() {
                 <select
                   id="service"
                   name="service"
-                  className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+                  className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none transition-all"
+                  style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                 >
                   <option value="">Select a service</option>
                   <option value="mailbox">Getting a Mailbox</option>
@@ -102,26 +117,31 @@ export default function ContactPage() {
                   rows={5}
                   required
                   placeholder="Tell us more about what you need..."
-                  className="w-full border border-border-light bg-bg-light rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none transition-all"
+                  className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none resize-none transition-all"
+                  style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}
                 />
               </div>
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-accent-hover transition-all hover:-translate-y-1 hover:shadow-lg disabled:opacity-50"
+                className="w-full text-white font-bold py-3 rounded-xl transition-all hover:-translate-y-1 hover:shadow-lg disabled:opacity-50"
+                style={{ background: "#3374B5" }}
               >
                 {pending ? "Sending..." : "Send Message"}
               </button>
             </form>
           )}
 
-          {/* Info */}
+          {/* Cream info sidebar */}
           <div className="space-y-6 animate-slide-right">
-            <div className="bg-surface-light border border-border-light rounded-2xl p-6 hover-lift shadow-[var(--shadow-sm)]">
+            <div
+              className="rounded-2xl p-6 hover-lift"
+              style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-sm)" }}
+            >
               <div className="flex items-center gap-3 mb-3">
                 <svg viewBox="0 0 32 32" className="w-6 h-6" fill="none">
-                  <circle cx="16" cy="12" r="5" fill="#3374B5" stroke="#1A1714" strokeWidth="2" />
-                  <path d="M8 28 C8 18 24 18 24 28" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
+                  <circle cx="16" cy="12" r="5" fill="#3374B5" stroke="#110E0B" strokeWidth="2" />
+                  <path d="M8 28 C8 18 24 18 24 28" fill="#EBF2FA" stroke="#110E0B" strokeWidth="2" />
                 </svg>
                 <h3 className="font-extrabold tracking-tight text-text-light text-sm">Location</h3>
               </div>
@@ -130,38 +150,47 @@ export default function ContactPage() {
                 North Hollywood, CA 91601
               </p>
             </div>
-            <div className="bg-surface-light border border-border-light rounded-2xl p-6 hover-lift shadow-[var(--shadow-sm)]">
+
+            <div
+              className="rounded-2xl p-6 hover-lift"
+              style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-sm)" }}
+            >
               <div className="flex items-center gap-3 mb-3">
                 <svg viewBox="0 0 32 32" className="w-6 h-6" fill="none">
-                  <circle cx="16" cy="16" r="13" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
+                  <circle cx="16" cy="16" r="13" fill="#EBF2FA" stroke="#110E0B" strokeWidth="2" />
                   <path d="M16 8 L16 16 L22 20" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 <h3 className="font-extrabold tracking-tight text-text-light text-sm">Hours</h3>
               </div>
               <p className="text-sm text-text-light-muted">
                 Mon – Fri: 9:30am – 5:30pm<br />
-                <span className="text-xs text-text-light-muted/70">(Break 1:30 – 2pm)</span><br />
+                <span className="text-xs" style={{ color: "rgba(122,96,80,0.7)" }}>(Break 1:30 – 2pm)</span><br />
                 Saturday: 10am – 1:30pm<br />
                 Sunday: Closed
               </p>
             </div>
-            <div className="bg-surface-light border border-border-light rounded-2xl p-6 hover-lift shadow-[var(--shadow-sm)]">
+
+            {/* Gold-accent quick links card */}
+            <div
+              className="rounded-2xl p-6 hover-lift"
+              style={{ background: "linear-gradient(135deg, #B07030 0%, #8A5520 100%)", boxShadow: "0 8px 24px rgba(176,112,48,0.3)" }}
+            >
               <div className="flex items-center gap-3 mb-3">
                 <svg viewBox="0 0 32 32" className="w-6 h-6" fill="none">
-                  <rect x="2" y="6" width="28" height="20" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-                  <path d="M4 8 L16 16 L28 8" stroke="#3374B5" strokeWidth="2" />
+                  <rect x="2" y="6" width="28" height="20" rx="4" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" strokeWidth="2" />
+                  <path d="M4 8 L16 16 L28 8" stroke="rgba(255,255,255,0.8)" strokeWidth="2" />
                 </svg>
-                <h3 className="font-extrabold tracking-tight text-text-light text-sm">Quick Links</h3>
+                <h3 className="font-extrabold tracking-tight text-sm" style={{ color: "#FFE4A0" }}>Quick Links</h3>
               </div>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="/pricing" className="text-accent hover:underline flex items-center gap-1">View Mailbox Plans <span>→</span></Link>
+                  <Link href="/pricing" className="flex items-center gap-1 hover:underline" style={{ color: "rgba(255,255,255,0.9)" }}>View Mailbox Plans <span>→</span></Link>
                 </li>
                 <li>
-                  <Link href="/business-solutions" className="text-accent hover:underline flex items-center gap-1">Business Solutions Package <span>→</span></Link>
+                  <Link href="/business-solutions" className="flex items-center gap-1 hover:underline" style={{ color: "rgba(255,255,255,0.9)" }}>Business Solutions Package <span>→</span></Link>
                 </li>
                 <li>
-                  <Link href="/notary" className="text-accent hover:underline flex items-center gap-1">Notary Services <span>→</span></Link>
+                  <Link href="/notary" className="flex items-center gap-1 hover:underline" style={{ color: "rgba(255,255,255,0.9)" }}>Notary Services <span>→</span></Link>
                 </li>
               </ul>
             </div>
