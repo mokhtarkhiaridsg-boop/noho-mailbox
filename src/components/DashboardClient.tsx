@@ -37,6 +37,7 @@ import DeliveriesPanel from "./dashboard/DeliveriesPanel";
 import InvoicesPanel from "./dashboard/InvoicesPanel";
 import NotificationBell from "./NotificationBell";
 import VaultPanel from "./dashboard/VaultPanel";
+import QRPickupPanel from "./dashboard/QRPickupPanel";
 
 const sideNav = [
   { Icon: IconMail, label: "Mail", id: "mail" },
@@ -49,6 +50,7 @@ const sideNav = [
   { Icon: IconNotary, label: "Notary", id: "notary" },
   { Icon: IconSettings, label: "Settings", id: "settings" },
   { Icon: IconShield, label: "Vault", id: "vault" },
+  { Icon: IconSparkle, label: "QR Pickup", id: "qrpickup" },
 ];
 
 export default function DashboardClient({
@@ -622,6 +624,7 @@ export default function DashboardClient({
           {activeTab === "vault" && (
             <VaultPanel vaultItems={vaultItems} />
           )}
+          {activeTab === "qrpickup" && <QRPickupPanel />}
         </div>
       </div>
 

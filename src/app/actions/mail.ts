@@ -192,6 +192,15 @@ export async function requestHold(mailItemId: string, untilDate: string) {
   return { success: true };
 }
 
+export async function requestReturnToSender(mailItemId: string) {
+  const auth = await authorizeMailItem(mailItemId);
+  if ("error" in auth) return auth;
+  await createMailRequest(auth.user.id ?? "", mailItemId, "Return", "Return Requested");
+  revalidatePath("/dashboard");
+  revalidatePath("/admin");
+  return { success: true };
+}
+
 export async function requestShred(mailItemId: string) {
   const auth = await authorizeMailItem(mailItemId);
   if ("error" in auth) return auth;

@@ -255,3 +255,22 @@ for (const sql of phase5b) {
   }
 }
 console.log("Phase 5b migration done.");
+
+// Phase 5c — QR express pickup token
+const phase5c = [
+  `ALTER TABLE User ADD COLUMN pickupToken TEXT`,
+];
+
+for (const sql of phase5c) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 5c migration done.");

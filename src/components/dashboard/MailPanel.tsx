@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { BRAND, statusColor, type MailItem } from "./types";
 import {
   IconMail,
@@ -9,8 +10,52 @@ import {
   IconForward,
   IconTrash,
 } from "@/components/MemberIcons";
-import { requestForward, requestScan, requestDiscard } from "@/app/actions/mail";
+import { requestForward, requestScan, requestDiscard, requestReturnToSender, updateMailLabel } from "@/app/actions/mail";
 import { togglePriorityFlag, addJunkSender } from "@/app/actions/mailPreferences";
+
+// Inline label editor — small chip that turns into input on click
+function LabelEditor({ itemId, initial }: { itemId: string; initial: string | null | undefined }) {
+  const [label, setLabel] = useState(initial ?? "");
+  const [editing, setEditing] = useState(false);
+  const [saving, startTransition] = useTransition();
+
+  function save() {
+    startTransition(async () => {
+      await updateMailLabel(itemId, label.trim() || null);
+      setEditing(false);
+    });
+  }
+
+  if (editing) {
+    return (
+      <span className="inline-flex items-center gap-1">
+        <input
+          autoFocus
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") save(); if (e.key === "Escape") setEditing(false); }}
+          placeholder="Add label…"
+          className="text-[11px] rounded-lg px-2 py-0.5 w-24"
+          style={{ background: "white", border: `1px solid ${BRAND.border}` }}
+        />
+        <button onClick={save} disabled={saving} className="text-[10px] font-black" style={{ color: BRAND.blue }}>
+          {saving ? "…" : "✓"}
+        </button>
+        <button onClick={() => setEditing(false)} className="text-[10px]" style={{ color: BRAND.inkFaint }}>✗</button>
+      </span>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setEditing(true)}
+      className="text-[11px] hover:underline"
+      style={{ color: label ? BRAND.blueDeep : BRAND.inkFaint }}
+    >
+      {label ? `· ${label}` : "+ label"}
+    </button>
+  );
+}
 
 type Props = {
   mailItems: MailItem[];
@@ -110,9 +155,9 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
                         title={item.status}
                       />
                     </div>
-                    <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkFaint }}>
+                    <p className="text-[11px] mt-0.5 flex items-center gap-1 flex-wrap" style={{ color: BRAND.inkFaint }}>
                       {item.date} · {item.type}
-                      {item.label ? ` · ${item.label}` : ""}
+                      <LabelEditor itemId={item.id} initial={item.label} />
                     </p>
                     {/* Mobile status text */}
                     <span
@@ -199,6 +244,18 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
                     title="Block Sender"
                   >
                     <span className="text-xs">🚫</span>
+                  </button>
+                  <button
+                    disabled={isPending}
+                    onClick={() => runAction("Return to sender requested", () => requestReturnToSender(item.id))}
+                    className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                    style={{
+                      background: "rgba(100,100,100,0.08)",
+                      color: "#555",
+                    }}
+                    title="Return to Sender"
+                  >
+                    <span className="text-sm">↩</span>
                   </button>
                   <button
                     disabled={isPending}

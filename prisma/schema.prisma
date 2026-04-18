@@ -70,6 +70,7 @@ model User {
   shippoLabels        ShippoLabel[]
   labelUploads        LabelUpload[]
   notifications       Notification[]
+  pickupToken             String?   // short token for QR express pickup
   referrals               Referral[] @relation("ReferrerReferrals")
   cancellationRequests    CancellationRequest[]
   junkSenders             JunkSender[]
