@@ -55,6 +55,8 @@ export default async function DashboardPage() {
           scanned: true,
           scanImageUrl: true,
           label: true,
+          priority: true,
+          junkBlocked: true,
         },
       }),
       prisma.forwardingAddress.findMany({

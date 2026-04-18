@@ -10,6 +10,7 @@ import {
   IconTrash,
 } from "@/components/MemberIcons";
 import { requestForward, requestScan, requestDiscard } from "@/app/actions/mail";
+import { togglePriorityFlag, addJunkSender } from "@/app/actions/mailPreferences";
 
 type Props = {
   mailItems: MailItem[];
@@ -95,8 +96,12 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-black truncate" style={{ color: BRAND.ink }}>
+                      {item.priority && (
+                        <span title="Priority" className="text-sm shrink-0">⭐</span>
+                      )}
+                      <p className="text-sm font-black truncate" style={{ color: item.junkBlocked ? BRAND.inkFaint : BRAND.ink }}>
                         {item.from}
+                        {item.junkBlocked && <span className="ml-1 text-[10px] font-normal text-red-400">(junk)</span>}
                       </p>
                       {/* Mobile status dot */}
                       <span
@@ -167,6 +172,33 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
                     title="Request Forward"
                   >
                     <IconForward className="w-4 h-4" />
+                  </button>
+                  <button
+                    disabled={isPending}
+                    onClick={() => runAction(item.priority ? "Priority removed" : "Marked priority", () => togglePriorityFlag(item.id))}
+                    className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                    style={{
+                      background: item.priority ? "rgba(234,179,8,0.15)" : BRAND.blueSoft,
+                      color: item.priority ? "#b45309" : BRAND.blueDeep,
+                    }}
+                    title={item.priority ? "Remove Priority Flag" : "Mark as Priority"}
+                  >
+                    <span className="text-sm">{item.priority ? "⭐" : "☆"}</span>
+                  </button>
+                  <button
+                    disabled={isPending}
+                    onClick={() => {
+                      if (!window.confirm(`Block all mail from "${item.from}"?`)) return;
+                      runAction("Sender blocked", () => addJunkSender(item.from));
+                    }}
+                    className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                    style={{
+                      background: item.junkBlocked ? "rgba(200,50,50,0.12)" : BRAND.blueSoft,
+                      color: item.junkBlocked ? "#c03030" : BRAND.inkFaint,
+                    }}
+                    title="Block Sender"
+                  >
+                    <span className="text-xs">🚫</span>
                   </button>
                   <button
                     disabled={isPending}

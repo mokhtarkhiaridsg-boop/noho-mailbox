@@ -176,3 +176,40 @@ for (const sql of phase4c) {
   }
 }
 console.log("Phase 4c migration done.");
+
+// Phase 5 — QoL features (priority mail, junk senders, vacation hold)
+const phase5 = [
+  `ALTER TABLE MailItem ADD COLUMN priority INTEGER NOT NULL DEFAULT 0`,
+  `ALTER TABLE MailItem ADD COLUMN junkBlocked INTEGER NOT NULL DEFAULT 0`,
+  `CREATE TABLE IF NOT EXISTS JunkSender (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    sender TEXT NOT NULL,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+  )`,
+  `CREATE TABLE IF NOT EXISTS VacationHold (
+    id TEXT PRIMARY KEY,
+    userId TEXT UNIQUE NOT NULL,
+    startDate TEXT NOT NULL,
+    endDate TEXT NOT NULL,
+    digest INTEGER NOT NULL DEFAULT 1,
+    active INTEGER NOT NULL DEFAULT 1,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+  )`,
+];
+
+for (const sql of phase5) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 5 migration done.");

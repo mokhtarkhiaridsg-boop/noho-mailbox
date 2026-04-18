@@ -72,6 +72,8 @@ model User {
   notifications       Notification[]
   referrals               Referral[] @relation("ReferrerReferrals")
   cancellationRequests    CancellationRequest[]
+  junkSenders             JunkSender[]
+  vacationHold            VacationHold?
 }
 
 model MailItem {
@@ -94,11 +96,34 @@ model MailItem {
   feeChargedCents  Int?
   recipientName    String?   // Name on the label / who it's addressed to
   recipientPhone   String?   // Optional phone for recipient
+  priority         Boolean   @default(false) // member-flagged as priority
+  junkBlocked      Boolean   @default(false) // auto-blocked by junk sender rule
 
   createdAt    DateTime @default(now())
 
   user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   requests MailRequest[]
+}
+
+model JunkSender {
+  id        String   @id @default(cuid())
+  userId    String
+  sender    String   // sender name/address pattern to block
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VacationHold {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  startDate String    // "2025-07-01"
+  endDate   String    // "2025-07-14"
+  digest    Boolean   @default(true) // send daily digest email
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model NotaryBooking {

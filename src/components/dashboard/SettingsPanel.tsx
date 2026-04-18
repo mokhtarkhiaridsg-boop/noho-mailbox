@@ -17,6 +17,7 @@ import { enable2FA, confirm2FA, disable2FA } from "@/app/actions/security";
 import { logout } from "@/app/actions/auth";
 import { getOrCreateMyReferralCode } from "@/app/actions/referral";
 import { requestCancellation } from "@/app/actions/cancellation";
+import { setVacationHold, cancelVacationHold, getMyVacationHold, getMyJunkSenders, removeJunkSender } from "@/app/actions/mailPreferences";
 
 type Props = {
   user: DashboardUser;
@@ -189,6 +190,155 @@ function TwoFactorPanel({ enabled }: { enabled: boolean }) {
           {message}
         </p>
       )}
+    </div>
+  );
+}
+
+function VacationHoldCard({ setToast }: { setToast: (s: string) => void }) {
+  const [pending, startTransition] = useTransition();
+  const [hold, setHold] = useState<{ startDate: string; endDate: string; digest: boolean; active: boolean } | null | undefined>(undefined);
+  const [showForm, setShowForm] = useState(false);
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [digest, setDigest] = useState(true);
+
+  async function load() {
+    const h = await getMyVacationHold();
+    setHold(h as any);
+  }
+
+  if (hold === undefined && !pending) load();
+
+  function save() {
+    if (!start || !end) return;
+    startTransition(async () => {
+      await setVacationHold({ startDate: start, endDate: end, digest });
+      setToast("Vacation hold set!");
+      setShowForm(false);
+      load();
+    });
+  }
+
+  function cancel() {
+    startTransition(async () => {
+      await cancelVacationHold();
+      setToast("Vacation hold cancelled");
+      load();
+    });
+  }
+
+  return (
+    <div
+      className="rounded-2xl p-4 space-y-3"
+      style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>🏖️ Vacation Hold</p>
+          <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Auto-hold all mail while you're away</p>
+        </div>
+        {hold?.active && (
+          <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: "rgba(234,179,8,0.15)", color: "#92400e" }}>
+            Active
+          </span>
+        )}
+      </div>
+
+      {hold?.active ? (
+        <div className="space-y-2">
+          <p className="text-xs" style={{ color: BRAND.inkSoft }}>
+            {hold.startDate} → {hold.endDate} {hold.digest ? "· daily digest on" : ""}
+          </p>
+          <button
+            disabled={pending}
+            onClick={cancel}
+            className="text-xs font-black px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40"
+          >
+            Cancel Hold
+          </button>
+        </div>
+      ) : showForm ? (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <p className="text-[10px] font-black mb-1" style={{ color: BRAND.inkFaint }}>Start</p>
+              <input type="date" value={start} onChange={(e) => setStart(e.target.value)}
+                className="w-full rounded-xl px-3 py-2 text-sm"
+                style={{ background: "white", border: `1px solid ${BRAND.border}` }} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black mb-1" style={{ color: BRAND.inkFaint }}>End</p>
+              <input type="date" value={end} onChange={(e) => setEnd(e.target.value)}
+                className="w-full rounded-xl px-3 py-2 text-sm"
+                style={{ background: "white", border: `1px solid ${BRAND.border}` }} />
+            </div>
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={digest} onChange={(e) => setDigest(e.target.checked)} className="rounded" />
+            <span className="text-xs" style={{ color: BRAND.inkSoft }}>Send daily mail digest</span>
+          </label>
+          <div className="flex gap-2">
+            <button disabled={pending} onClick={save}
+              className="text-xs font-black px-4 py-1.5 rounded-xl text-white disabled:opacity-50"
+              style={{ background: BRAND.blue }}>
+              {pending ? "Saving…" : "Save"}
+            </button>
+            <button onClick={() => setShowForm(false)} className="text-xs font-bold" style={{ color: BRAND.inkFaint }}>Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowForm(true)}
+          className="text-xs font-black px-4 py-2 rounded-xl text-white"
+          style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+        >
+          Set Vacation Hold
+        </button>
+      )}
+    </div>
+  );
+}
+
+function JunkSendersCard() {
+  const [senders, setSenders] = useState<{ id: string; sender: string }[] | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  async function load() {
+    const data = await getMyJunkSenders();
+    setSenders(data);
+  }
+
+  if (senders === null) load();
+
+  function unblock(id: string) {
+    startTransition(async () => {
+      await removeJunkSender(id);
+      load();
+    });
+  }
+
+  if (!senders || senders.length === 0) return null;
+
+  return (
+    <div
+      className="rounded-2xl p-4 space-y-3"
+      style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}
+    >
+      <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>🚫 Blocked Senders ({senders.length})</p>
+      <div className="space-y-1.5">
+        {senders.map((s) => (
+          <div key={s.id} className="flex items-center justify-between gap-2 rounded-xl px-3 py-2" style={{ background: "white" }}>
+            <span className="text-xs text-gray-700 truncate">{s.sender}</span>
+            <button
+              disabled={pending}
+              onClick={() => unblock(s.id)}
+              className="text-[11px] font-black text-red-500 hover:text-red-700 shrink-0 disabled:opacity-40"
+            >
+              Unblock
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -411,6 +561,12 @@ export default function SettingsPanel({
             >{loadingCode ? "Generating…" : "Get My Referral Code"}</button>
           )}
         </div>
+
+        {/* Vacation Hold */}
+        <VacationHoldCard setToast={setToast} />
+
+        {/* Junk Senders */}
+        <JunkSendersCard />
 
         {/* Cancel Membership */}
         <div

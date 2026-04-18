@@ -9,6 +9,8 @@ export type MailItem = {
   scanned: boolean;
   scanImageUrl: string | null;
   label: string | null;
+  priority?: boolean;
+  junkBlocked?: boolean;
 };
 
 export type ForwardingAddress = { id: string; label: string; address: string };
