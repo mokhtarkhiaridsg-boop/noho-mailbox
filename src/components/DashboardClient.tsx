@@ -36,6 +36,7 @@ import MessagesPanel from "./dashboard/MessagesPanel";
 import DeliveriesPanel from "./dashboard/DeliveriesPanel";
 import InvoicesPanel from "./dashboard/InvoicesPanel";
 import NotificationBell from "./NotificationBell";
+import VaultPanel from "./dashboard/VaultPanel";
 
 const sideNav = [
   { Icon: IconMail, label: "Mail", id: "mail" },
@@ -47,6 +48,7 @@ const sideNav = [
   { Icon: IconForward, label: "Forwarding", id: "forwarding" },
   { Icon: IconNotary, label: "Notary", id: "notary" },
   { Icon: IconSettings, label: "Settings", id: "settings" },
+  { Icon: IconShield, label: "Vault", id: "vault" },
 ];
 
 export default function DashboardClient({
@@ -62,6 +64,7 @@ export default function DashboardClient({
   threads,
   keyRequests,
   notifications = [],
+  vaultItems = [],
 }: DashboardProps) {
   const [activeTab, setActiveTab] = useState("mail");
   const [isPending, startTransition] = useTransition();
@@ -614,6 +617,9 @@ export default function DashboardClient({
               keyRequests={keyRequests}
               runAction={runAction}
             />
+          )}
+          {activeTab === "vault" && (
+            <VaultPanel vaultItems={vaultItems} />
           )}
         </div>
       </div>

@@ -70,6 +70,7 @@ model User {
   shippoLabels        ShippoLabel[]
   labelUploads        LabelUpload[]
   notifications       Notification[]
+  referrals           Referral[] @relation("ReferrerReferrals")
 }
 
 model MailItem {
@@ -458,4 +459,17 @@ model Notification {
   readAt    DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Referral {
+  id           String    @id @default(cuid())
+  referrerId   String    // the user who shared their code
+  refereeId    String?   // the user who signed up using the code (null until signup)
+  code         String    @unique
+  status       String    @default("pending") // "pending" | "credited"
+  creditCents  Int       @default(1000) // $10 credit for both parties
+  createdAt    DateTime  @default(now())
+  creditedAt   DateTime?
+
+  referrer User @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
 }

@@ -118,3 +118,32 @@ for (const sql of phase4) {
   }
 }
 console.log("Phase 4 migration done.");
+
+// Phase 4b — Referral program
+const phase4b = [
+  `CREATE TABLE IF NOT EXISTS Referral (
+    id TEXT PRIMARY KEY,
+    referrerId TEXT NOT NULL,
+    refereeId TEXT,
+    code TEXT UNIQUE NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    creditCents INTEGER NOT NULL DEFAULT 1000,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    creditedAt DATETIME,
+    FOREIGN KEY (referrerId) REFERENCES User(id) ON DELETE CASCADE
+  )`,
+];
+
+for (const sql of phase4b) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 4b migration done.");

@@ -98,6 +98,17 @@ export type DashboardUser = {
   planDueDate: string | null;
 };
 
+export type VaultItem = {
+  id: string;
+  kind: string;
+  title: string;
+  blobUrl: string;
+  mimeType: string;
+  sizeBytes: number;
+  tags?: string | null;
+  createdAt: string;
+};
+
 export type AppNotification = {
   id: string;
   type: string;
@@ -121,6 +132,7 @@ export type DashboardProps = {
   threads: Thread[];
   keyRequests: KeyReq[];
   notifications?: AppNotification[];
+  vaultItems?: VaultItem[];
 };
 
 // Brand palette — blue-forward

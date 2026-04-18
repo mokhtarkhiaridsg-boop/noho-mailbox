@@ -15,6 +15,7 @@ import { updateProfile } from "@/app/actions/user";
 import { requestNewKey } from "@/app/actions/keys";
 import { enable2FA, confirm2FA, disable2FA } from "@/app/actions/security";
 import { logout } from "@/app/actions/auth";
+import { getOrCreateMyReferralCode } from "@/app/actions/referral";
 
 type Props = {
   user: DashboardUser;
@@ -207,6 +208,24 @@ export default function SettingsPanel({
   keyRequests,
   runAction,
 }: Props) {
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [loadingCode, setLoadingCode] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  async function handleGetCode() {
+    setLoadingCode(true);
+    const { code } = await getOrCreateMyReferralCode();
+    setReferralCode(code);
+    setLoadingCode(false);
+  }
+
+  function copyCode() {
+    if (!referralCode) return;
+    navigator.clipboard.writeText(referralCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   return (
     <div
       className="rounded-3xl p-6"
@@ -361,6 +380,36 @@ export default function SettingsPanel({
 
         <TwoFactorPanel enabled={user.totpEnabled} />
 
+        {/* Referral Program */}
+        <div className="rounded-2xl p-5 space-y-3" style={{ background: BRAND.bgDeep, border: `1px solid ${BRAND.border}` }}>
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🎁</span>
+            <div>
+              <p className="font-black text-sm" style={{ color: BRAND.ink }}>Refer a Friend — Get $10</p>
+              <p className="text-[11px]" style={{ color: BRAND.inkFaint }}>You both get $10 in wallet credit when they sign up with your code</p>
+            </div>
+          </div>
+          {referralCode ? (
+            <div className="flex items-center gap-2">
+              <code
+                className="flex-1 font-mono font-black text-sm px-4 py-2.5 rounded-xl text-center tracking-widest"
+                style={{ background: "white", border: `2px solid ${BRAND.blue}`, color: BRAND.blue }}
+              >{referralCode}</code>
+              <button
+                onClick={copyCode}
+                className="px-4 py-2.5 rounded-xl text-sm font-black text-white transition-colors"
+                style={{ background: copied ? "#16A34A" : BRAND.blue }}
+              >{copied ? "✓ Copied!" : "Copy"}</button>
+            </div>
+          ) : (
+            <button
+              onClick={handleGetCode}
+              disabled={loadingCode}
+              className="w-full py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-50"
+              style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+            >{loadingCode ? "Generating…" : "Get My Referral Code"}</button>
+          )}
+        </div>
 
         <button
           onClick={() => logout()}

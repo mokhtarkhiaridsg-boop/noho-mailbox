@@ -143,12 +143,18 @@ export default async function DashboardPage() {
       }),
     ]);
 
-  // Fetch notifications separately (table may not exist on older deploys)
-  const notificationsRaw = await prisma.notification.findMany({
-    where: { userId: sessionUser.id },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  }).catch(() => []);
+  // Fetch notifications + vault items separately (tables may not exist on older deploys)
+  const [notificationsRaw, vaultItemsRaw] = await Promise.all([
+    prisma.notification.findMany({
+      where: { userId: sessionUser.id },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }).catch(() => []),
+    prisma.documentVaultItem.findMany({
+      where: { userId: sessionUser.id },
+      orderBy: { createdAt: "desc" },
+    }).catch(() => []),
+  ]);
 
   if (!user) {
     throw new Error("User not found");
@@ -215,6 +221,16 @@ export default async function DashboardPage() {
         read: n.read,
         link: n.link ?? null,
         createdAt: n.createdAt.toISOString(),
+      }))}
+      vaultItems={vaultItemsRaw.map((v) => ({
+        id: v.id,
+        kind: v.kind,
+        title: v.title,
+        blobUrl: v.blobUrl,
+        mimeType: v.mimeType,
+        sizeBytes: v.sizeBytes,
+        tags: v.tags ?? null,
+        createdAt: v.createdAt.toISOString(),
       }))}
     />
   );
