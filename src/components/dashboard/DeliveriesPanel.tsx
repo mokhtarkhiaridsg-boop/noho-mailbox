@@ -7,6 +7,116 @@ import { BRAND, type Delivery } from "./types";
 import { IconTruck, IconClock } from "@/components/MemberIcons";
 import { scheduleDelivery } from "@/app/actions/delivery";
 import { uploadMemberLabel } from "@/app/actions/shippo";
+import { setRecurringDelivery, cancelRecurringDelivery, getMyRecurringDelivery } from "@/app/actions/recurringDelivery";
+import { useState as useLocalState, useTransition as useLocalTransition, useEffect } from "react";
+
+function RecurringDeliveryCard({ addresses }: { addresses?: { id: string; label: string; address: string }[] }) {
+  const [current, setCurrent] = useLocalState<any | null | undefined>(undefined);
+  const [pending, startTransition] = useLocalTransition();
+  const [showForm, setShowForm] = useLocalState(false);
+  const [freq, setFreq] = useLocalState<"weekly" | "biweekly" | "monthly">("weekly");
+  const [destination, setDestination] = useLocalState("");
+  const [tier, setTier] = useLocalState<"standard" | "express">("standard");
+  const [msg, setMsg] = useLocalState<string | null>(null);
+
+  useEffect(() => { getMyRecurringDelivery().then(setCurrent); }, []);
+
+  function save() {
+    if (!destination) return;
+    startTransition(async () => {
+      await setRecurringDelivery({ frequency: freq, destination, tier });
+      setMsg("✓ Recurring delivery set!");
+      setShowForm(false);
+      const updated = await getMyRecurringDelivery();
+      setCurrent(updated);
+    });
+  }
+
+  function cancel() {
+    startTransition(async () => {
+      await cancelRecurringDelivery();
+      setMsg("Recurring delivery cancelled");
+      setCurrent(null);
+    });
+  }
+
+  return (
+    <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>🔄 Recurring Delivery</p>
+          <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Auto-delivery on a set schedule</p>
+        </div>
+        {current?.frequency && (
+          <span className="text-[10px] font-black px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(51,116,181,0.15)", color: BRAND.blueDeep }}>
+            {current.frequency}
+          </span>
+        )}
+      </div>
+
+      {current?.frequency && !showForm ? (
+        <div className="space-y-2">
+          <p className="text-xs" style={{ color: BRAND.inkSoft }}>
+            Next: <strong>{current.nextRunDate}</strong> · To: {current.destination.slice(0, 40)}
+          </p>
+          <div className="flex gap-2">
+            <button onClick={() => { setDestination(current.destination); setFreq(current.frequency); setTier(current.tier); setShowForm(true); }}
+              className="text-xs font-black px-3 py-1.5 rounded-lg" style={{ background: "white", border: `1px solid ${BRAND.border}`, color: BRAND.blueDeep }}>
+              Edit
+            </button>
+            <button disabled={pending} onClick={cancel}
+              className="text-xs font-black px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40">
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {(!current?.frequency || showForm) && (
+        <div className="space-y-2.5">
+          <div>
+            <p className="text-[10px] font-black mb-1.5" style={{ color: BRAND.inkFaint }}>Frequency</p>
+            <div className="flex gap-1.5">
+              {(["weekly", "biweekly", "monthly"] as const).map((f) => (
+                <button key={f} onClick={() => setFreq(f)}
+                  className="text-xs font-black px-3 py-1.5 rounded-xl capitalize"
+                  style={{ background: freq === f ? BRAND.blue : "white", color: freq === f ? "white" : BRAND.ink, border: `1px solid ${BRAND.border}` }}>
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-[10px] font-black mb-1" style={{ color: BRAND.inkFaint }}>Delivery tier</p>
+            <div className="flex gap-1.5">
+              {([["standard", "Standard ($8)"], ["express", "Express ($15)"]] as const).map(([t, label]) => (
+                <button key={t} onClick={() => setTier(t)}
+                  className="text-xs font-black px-3 py-1.5 rounded-xl"
+                  style={{ background: tier === t ? BRAND.blue : "white", color: tier === t ? "white" : BRAND.ink, border: `1px solid ${BRAND.border}` }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-[10px] font-black mb-1" style={{ color: BRAND.inkFaint }}>Delivery address</p>
+            <input placeholder="123 Main St, Los Angeles, CA 90210" value={destination} onChange={(e) => setDestination(e.target.value)}
+              className="w-full rounded-xl px-3 py-2 text-sm" style={{ background: "white", border: `1px solid ${BRAND.border}` }} />
+          </div>
+          <div className="flex gap-2">
+            <button disabled={!destination || pending} onClick={save}
+              className="text-xs font-black px-4 py-1.5 rounded-xl text-white disabled:opacity-50" style={{ background: BRAND.blue }}>
+              {pending ? "Saving…" : "Save Schedule"}
+            </button>
+            {current?.frequency && <button onClick={() => setShowForm(false)} className="text-xs" style={{ color: BRAND.inkFaint }}>Cancel</button>}
+          </div>
+        </div>
+      )}
+
+      {msg && <p className="text-[11px] font-bold" style={{ color: msg.startsWith("✓") ? "#16a34a" : BRAND.inkSoft }}>{msg}</p>}
+    </div>
+  );
+}
 
 type Props = {
   deliveries: Delivery[];
@@ -438,6 +548,9 @@ export default function DeliveriesPanel({
           </div>
         )}
       </section>
+
+      {/* Recurring Delivery */}
+      <RecurringDeliveryCard />
     </div>
   );
 }

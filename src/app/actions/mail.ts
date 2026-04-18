@@ -5,7 +5,7 @@ import { verifySession, verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 import { getPlanStatus } from "@/lib/plan";
 import { sendMailArrivedEmail } from "@/lib/email";
-import { notifyMailArrived } from "@/app/actions/notifications";
+import { notifyMailArrived, notifyOversizePackage } from "@/app/actions/notifications";
 
 export async function updateMailStatus(mailItemId: string, newStatus: string) {
   const user = await verifySession();
@@ -46,6 +46,14 @@ export async function logMail(formData: FormData) {
     return { error: "Suite number, sender, and type are required" };
   }
 
+  const weightOzRaw = formData.get("weightOz") as string;
+  const dimensions = (formData.get("dimensions") as string) || null;
+  const weightOz = weightOzRaw ? parseFloat(weightOzRaw) : null;
+
+  // Oversize = weight > 32oz (2 lbs) or any dimension > 18"
+  const isOversize = (weightOz && weightOz > 32) ||
+    (dimensions && /(\d+)/.test(dimensions) && parseInt(dimensions.match(/(\d+)/)?.[1] ?? "0") > 18);
+
   const customer = await prisma.user.findUnique({ where: { suiteNumber } });
   if (!customer) return { error: `No customer found for suite #${suiteNumber}` };
 
@@ -64,6 +72,8 @@ export async function logMail(formData: FormData) {
       recipientName,
       recipientPhone,
       exteriorImageUrl,
+      weightOz: weightOz ?? undefined,
+      dimensions: dimensions ?? undefined,
     },
   });
 
@@ -79,11 +89,13 @@ export async function logMail(formData: FormData) {
         recipientName,
         photoUrl: exteriorImageUrl,
       }),
-      notifyMailArrived({
-        userId: customer.id,
-        from,
-        type: type as "Letter" | "Package",
-      }),
+      isOversize
+        ? notifyOversizePackage({ userId: customer.id, from, weightOz: weightOz ?? undefined, dimensions: dimensions ?? undefined })
+        : notifyMailArrived({
+            userId: customer.id,
+            from,
+            type: type as "Letter" | "Package",
+          }),
     ]);
   } catch { /* non-fatal */ }
 

@@ -294,3 +294,34 @@ for (const sql of phase5d) {
   }
 }
 console.log("Phase 5d migration done.");
+
+// Phase 5e — Recurring delivery schedule
+const phase5e = [
+  `CREATE TABLE IF NOT EXISTS RecurringDelivery (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    frequency TEXT NOT NULL DEFAULT 'weekly',
+    destination TEXT NOT NULL,
+    tier TEXT NOT NULL DEFAULT 'standard',
+    notes TEXT,
+    nextRunDate TEXT NOT NULL,
+    lastRunDate TEXT,
+    active INTEGER NOT NULL DEFAULT 1,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+  )`,
+];
+
+for (const sql of phase5e) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 5e migration done.");

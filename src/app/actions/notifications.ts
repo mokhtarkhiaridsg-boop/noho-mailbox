@@ -148,6 +148,23 @@ export async function notifyKycStatus(input: {
 
 // ─── Notify delivery update ───────────────────────────────────────────────────
 
+export async function notifyOversizePackage(input: {
+  userId: string;
+  from: string;
+  weightOz?: number;
+  dimensions?: string;
+}) {
+  const sizeNote = input.dimensions ? ` (${input.dimensions})` : "";
+  const weightNote = input.weightOz ? ` · ${(input.weightOz / 16).toFixed(1)} lbs` : "";
+  return createNotification({
+    userId: input.userId,
+    type: "package_arrived",
+    title: "📦 Oversize Package Arrived",
+    body: `An oversize package from ${input.from} has arrived${sizeNote}${weightNote}. Additional storage fees may apply after 30 days.`,
+    link: "/dashboard?tab=mail",
+  });
+}
+
 export async function notifyDeliveryUpdate(input: {
   userId: string;
   status: "Picked Up" | "In Transit" | "Delivered";

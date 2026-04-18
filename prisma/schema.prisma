@@ -72,6 +72,7 @@ model User {
   notifications       Notification[]
   pickupToken             String?   // short token for QR express pickup
   referrals               Referral[] @relation("ReferrerReferrals")
+  recurringDeliveries     RecurringDelivery[]
   cancellationRequests    CancellationRequest[]
   junkSenders             JunkSender[]
   vacationHold            VacationHold?
@@ -155,6 +156,21 @@ model VacationHold {
   digest    Boolean   @default(true) // send daily digest email
   active    Boolean   @default(true)
   createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RecurringDelivery {
+  id          String   @id @default(cuid())
+  userId      String
+  frequency   String   @default("weekly") // "weekly" | "biweekly" | "monthly"
+  destination String
+  tier        String   @default("standard") // "standard" | "express"
+  notes       String?
+  nextRunDate String   // "2025-07-01"
+  lastRunDate String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
