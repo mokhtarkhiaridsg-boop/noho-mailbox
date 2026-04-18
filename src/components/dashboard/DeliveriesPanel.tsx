@@ -6,6 +6,7 @@ import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.
 import { BRAND, type Delivery } from "./types";
 import { IconTruck, IconClock } from "@/components/MemberIcons";
 import { scheduleDelivery } from "@/app/actions/delivery";
+import { uploadMemberLabel } from "@/app/actions/shippo";
 
 type Props = {
   deliveries: Delivery[];
@@ -23,6 +24,42 @@ export default function DeliveriesPanel({
   router,
 }: Props) {
   const [showForm, setShowForm] = useState(false);
+  const [showLabelUpload, setShowLabelUpload] = useState(false);
+  const [labelFile, setLabelFile] = useState<File | null>(null);
+  const [labelCarrier, setLabelCarrier] = useState("USPS");
+  const [labelTracking, setLabelTracking] = useState("");
+  const [labelNotes, setLabelNotes] = useState("");
+  const [labelUploading, setLabelUploading] = useState(false);
+  const [labelSuccess, setLabelSuccess] = useState(false);
+
+  async function handleLabelUpload() {
+    if (!labelFile) return;
+    setLabelUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", labelFile);
+      const uploadRes = await fetch("/api/upload", { method: "POST", body: fd });
+      const uploadData = await uploadRes.json();
+      if (!uploadData.url) throw new Error("Upload failed");
+
+      await uploadMemberLabel({
+        filename: labelFile.name,
+        url: uploadData.url,
+        carrier: labelCarrier || undefined,
+        trackingNum: labelTracking || undefined,
+        notes: labelNotes || undefined,
+      });
+      setLabelSuccess(true);
+      setLabelFile(null);
+      setLabelTracking("");
+      setLabelNotes("");
+      router.refresh();
+    } catch {
+      setToast("Upload failed — please try again");
+    } finally {
+      setLabelUploading(false);
+    }
+  }
 
   function refresh(label: string) {
     setToast(label);
@@ -262,6 +299,143 @@ export default function DeliveriesPanel({
               </li>
             ))}
           </ul>
+        )}
+      </section>
+
+      {/* Label-from-Home Upload */}
+      <section
+        className="rounded-3xl p-6"
+        style={{
+          background: "white",
+          border: `1px solid ${BRAND.border}`,
+          boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+        }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-black text-xs uppercase tracking-[0.16em]" style={{ color: BRAND.ink }}>
+              📦 Drop Off a Pre-Paid Label
+            </h2>
+            <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkFaint }}>
+              Print your label at home, drop it off — we handle the rest.
+            </p>
+          </div>
+          <button
+            onClick={() => { setShowLabelUpload(!showLabelUpload); setLabelSuccess(false); }}
+            className="text-[11px] font-black px-3 py-1.5 rounded-full text-white"
+            style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+          >
+            {showLabelUpload ? "Close" : "Upload Label"}
+          </button>
+        </div>
+
+        {showLabelUpload && (
+          labelSuccess ? (
+            <div className="rounded-2xl p-5 text-center" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+              <p className="text-2xl mb-2">✓</p>
+              <p className="font-bold text-sm" style={{ color: "#166534" }}>Label received! We&apos;ll drop it off for you.</p>
+              <button
+                onClick={() => { setLabelSuccess(false); setShowLabelUpload(false); }}
+                className="mt-3 text-xs font-bold underline"
+                style={{ color: BRAND.blue }}
+              >Upload another</button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {/* File drop zone */}
+              <div
+                className="rounded-2xl border-2 border-dashed p-6 text-center cursor-pointer transition-colors"
+                style={{
+                  borderColor: labelFile ? BRAND.blue : BRAND.border,
+                  background: labelFile ? "rgba(51,116,181,0.04)" : BRAND.bgDeep,
+                }}
+                onClick={() => document.getElementById("label-file-input")?.click()}
+              >
+                <input
+                  id="label-file-input"
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  onChange={(e) => setLabelFile(e.target.files?.[0] ?? null)}
+                />
+                {labelFile ? (
+                  <div>
+                    <p className="text-2xl mb-1">📄</p>
+                    <p className="font-bold text-sm" style={{ color: BRAND.ink }}>{labelFile.name}</p>
+                    <p className="text-[11px]" style={{ color: BRAND.inkFaint }}>{(labelFile.size / 1024).toFixed(0)} KB · Click to change</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-2xl mb-1">⬆️</p>
+                    <p className="font-bold text-sm" style={{ color: BRAND.ink }}>Drop your label here or click to browse</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkFaint }}>PDF, PNG, or JPG</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: BRAND.inkFaint }}>Carrier</label>
+                  <select
+                    value={labelCarrier}
+                    onChange={(e) => setLabelCarrier(e.target.value)}
+                    className="w-full rounded-xl px-3 py-2 text-sm font-semibold bg-white focus:outline-none"
+                    style={{ border: `1px solid ${BRAND.border}` }}
+                  >
+                    {["USPS", "UPS", "FedEx", "DHL", "Other"].map((c) => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: BRAND.inkFaint }}>Tracking # (optional)</label>
+                  <input
+                    type="text"
+                    value={labelTracking}
+                    onChange={(e) => setLabelTracking(e.target.value)}
+                    placeholder="9400111..."
+                    className="w-full rounded-xl px-3 py-2 text-sm font-mono focus:outline-none"
+                    style={{ border: `1px solid ${BRAND.border}` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: BRAND.inkFaint }}>Notes (optional)</label>
+                <input
+                  type="text"
+                  value={labelNotes}
+                  onChange={(e) => setLabelNotes(e.target.value)}
+                  placeholder="Fragile, handle with care..."
+                  className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none"
+                  style={{ border: `1px solid ${BRAND.border}` }}
+                />
+              </div>
+
+              <button
+                disabled={!labelFile || labelUploading}
+                onClick={handleLabelUpload}
+                className="w-full py-3 rounded-xl text-white font-black text-sm disabled:opacity-40 transition-opacity"
+                style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+              >
+                {labelUploading ? "Uploading…" : "Submit Label for Drop-Off"}
+              </button>
+            </div>
+          )
+        )}
+
+        {!showLabelUpload && (
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { icon: "🖨️", title: "Print at Home", desc: "Print your prepaid label from any printer" },
+              { icon: "🏪", title: "Drop Off", desc: "Bring it to NOHO Mailbox — we scan & submit" },
+              { icon: "📬", title: "We Ship It", desc: "Your package is handed off to the carrier same day" },
+            ].map((s) => (
+              <div key={s.title} className="rounded-2xl p-3 text-center" style={{ background: BRAND.bgDeep }}>
+                <p className="text-xl mb-1">{s.icon}</p>
+                <p className="font-black text-[11px]" style={{ color: BRAND.ink }}>{s.title}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: BRAND.inkFaint }}>{s.desc}</p>
+              </div>
+            ))}
+          </div>
         )}
       </section>
     </div>

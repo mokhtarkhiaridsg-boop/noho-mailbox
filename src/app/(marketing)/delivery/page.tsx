@@ -5,6 +5,7 @@ import Link from "next/link";
 import { DeliveryTruckIcon, EnvelopeIcon, MailboxIcon } from "@/components/BrandIcons";
 import { requestDelivery, type DeliveryState } from "@/app/actions/delivery";
 import { DELIVERY_ZONES, calculateDeliveryPrice } from "@/lib/delivery-zones";
+import DeliveryZoneMap from "@/components/DeliveryZoneMap";
 
 export default function DeliveryPage() {
   const [addressInput, setAddressInput] = useState("");
@@ -205,6 +206,20 @@ export default function DeliveryPage() {
               </div>
             )}
           </div>
+        </div>
+      </section>
+
+      {/* Delivery Coverage Map */}
+      <section className="py-20 px-4" style={{ background: "#0F1923" }}>
+        <div className="max-w-2xl mx-auto">
+          <p className="text-center text-xs font-bold uppercase tracking-[0.2em] mb-3 animate-fade-up" style={{ color: "rgba(147,196,255,0.5)" }}>Coverage</p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-center mb-3 animate-fade-up" style={{ color: "#F8F2EA" }}>
+            Delivery Coverage Map
+          </h2>
+          <p className="text-center text-sm mb-10 animate-fade-up" style={{ color: "rgba(175,160,143,0.65)" }}>
+            Hover or click a zone to see pricing and ETA. Zones radiate out from our North Hollywood store.
+          </p>
+          <DeliveryZoneMap activeZone={quoteResult?.zone.id} />
         </div>
       </section>
 
