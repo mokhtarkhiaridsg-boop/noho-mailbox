@@ -43,6 +43,7 @@ import { AdminMessagesPanel } from "@/components/admin/AdminMessagesPanel";
 import { AdminRevenuePanel } from "@/components/admin/AdminRevenuePanel";
 import { AdminBusinessPanel } from "@/components/admin/AdminBusinessPanel";
 import { AdminSquarePanel } from "@/components/admin/AdminSquarePanel";
+import { AdminShippoPanel } from "@/components/admin/AdminShippoPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
 import { EditCustomerModal } from "@/components/admin/EditCustomerModal";
@@ -225,6 +226,24 @@ type Props = {
   messageThreads?: MessageThreadRow[];
   contactSubmissions?: ContactRow[];
   siteSettings?: Record<string, string>;
+  shippoConfigured?: boolean;
+  recentShippoLabels?: Array<{
+    id: string;
+    carrier: string;
+    servicelevel: string;
+    trackingNumber: string;
+    trackingUrl: string;
+    labelUrl: string;
+    amountPaid: number;
+    status: string;
+    toName: string;
+    toCity: string;
+    toState: string;
+    toZip: string;
+    createdAt: string;
+    userName?: string | null;
+    suiteNumber?: string | null;
+  }>;
 };
 
 const sideNav = [
@@ -240,6 +259,7 @@ const sideNav = [
   { icon: "✍️", label: "Notary", id: "notary" },
   { icon: "💰", label: "Revenue", id: "revenue" },
   { icon: "🏢", label: "Business Solutions", id: "business" },
+  { icon: "📦", label: "Shipping", id: "shipping" },
   { icon: "🟪", label: "Square", id: "square" },
   { icon: "⚙️", label: "Settings", id: "settings" },
 ];
@@ -328,7 +348,7 @@ function ProfileDropdown() {
   );
 }
 
-export default function AdminDashboardClient({ customers, recentMail, notaryQueue, deliveryOrders, shopOrders, stats, squareStatus, recentPayments, complianceQueue = [], mailRequests = [], keyRequests = [], messageThreads = [], contactSubmissions = [], siteSettings = {} }: Props) {
+export default function AdminDashboardClient({ customers, recentMail, notaryQueue, deliveryOrders, shopOrders, stats, squareStatus, recentPayments, complianceQueue = [], mailRequests = [], keyRequests = [], messageThreads = [], contactSubmissions = [], siteSettings = {}, shippoConfigured = false, recentShippoLabels = [] }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
@@ -693,6 +713,12 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           )}
           {tab === "business" && (
             <AdminBusinessPanel setShowNewClientModal={setShowNewClientModal} />
+          )}
+          {tab === "shipping" && (
+            <AdminShippoPanel
+              isConfigured={shippoConfigured}
+              recentLabels={recentShippoLabels}
+            />
           )}
           {tab === "square" && (
             <AdminSquarePanel

@@ -67,6 +67,8 @@ model User {
   vaultItems          DocumentVaultItem[]
   mailRequests        MailRequest[]
   keyRequests         KeyRequest[]
+  shippoLabels        ShippoLabel[]
+  labelUploads        LabelUpload[]
 }
 
 model MailItem {
@@ -396,4 +398,49 @@ model SiteConfig {
   key       String   @id
   value     String
   updatedAt DateTime @updatedAt
+}
+
+model ShippoLabel {
+  id               String    @id @default(cuid())
+  userId           String?
+  mailItemId       String?
+  deliveryOrderId  String?
+  transactionId    String    @unique // Shippo transaction ID
+  shipmentId       String
+  carrier          String    // "USPS" | "UPS" | "FedEx" etc
+  servicelevel     String
+  trackingNumber   String
+  trackingUrl      String
+  labelUrl         String
+  amountPaid       Float
+  currency         String    @default("USD")
+  labelFormat      String    @default("PDF")
+  status           String    @default("purchased") // "purchased" | "refunded"
+  toName           String
+  toStreet         String
+  toCity           String
+  toState          String
+  toZip            String
+  lengthIn         Float?
+  widthIn          Float?
+  heightIn         Float?
+  weightOz         Float?
+  createdAt        DateTime  @default(now())
+  refundedAt       DateTime?
+
+  user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model LabelUpload {
+  id          String   @id @default(cuid())
+  userId      String
+  filename    String
+  url         String
+  carrier     String?
+  trackingNum String?
+  notes       String?
+  status      String   @default("uploaded") // "uploaded" | "picked_up" | "shipped"
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

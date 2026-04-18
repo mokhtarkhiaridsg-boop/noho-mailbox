@@ -29,3 +29,62 @@ for (const sql of stmts) {
   }
 }
 console.log("Done.");
+
+// Phase 3 — Shippo Labels + Label Uploads
+const phase3 = [
+  `CREATE TABLE IF NOT EXISTS ShippoLabel (
+    id TEXT PRIMARY KEY,
+    userId TEXT,
+    mailItemId TEXT,
+    deliveryOrderId TEXT,
+    transactionId TEXT UNIQUE NOT NULL,
+    shipmentId TEXT NOT NULL,
+    carrier TEXT NOT NULL,
+    servicelevel TEXT NOT NULL,
+    trackingNumber TEXT NOT NULL,
+    trackingUrl TEXT NOT NULL,
+    labelUrl TEXT NOT NULL,
+    amountPaid REAL NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'USD',
+    labelFormat TEXT NOT NULL DEFAULT 'PDF',
+    status TEXT NOT NULL DEFAULT 'purchased',
+    toName TEXT NOT NULL,
+    toStreet TEXT NOT NULL,
+    toCity TEXT NOT NULL,
+    toState TEXT NOT NULL,
+    toZip TEXT NOT NULL,
+    lengthIn REAL,
+    widthIn REAL,
+    heightIn REAL,
+    weightOz REAL,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    refundedAt DATETIME,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE SET NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS LabelUpload (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    url TEXT NOT NULL,
+    carrier TEXT,
+    trackingNum TEXT,
+    notes TEXT,
+    status TEXT NOT NULL DEFAULT 'uploaded',
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+  )`,
+];
+
+for (const sql of phase3) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 3 migration done.");

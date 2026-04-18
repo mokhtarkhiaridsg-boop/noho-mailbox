@@ -1,6 +1,7 @@
 import { verifyAdmin } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { isSquareConfigured } from "@/lib/square";
+import { isShippoConfigured } from "@/lib/shippo";
 import AdminDashboardClient from "@/components/AdminDashboardClient";
 import { getManyConfigs } from "@/app/actions/site-config";
 
@@ -30,6 +31,7 @@ export default async function AdminPage() {
     catalogItemCount,
     totalRevenueAgg,
     rawPayments,
+    rawShippoLabels,
   ] = await Promise.all([
     // Customers
     prisma.user.findMany({
@@ -158,6 +160,11 @@ export default async function AdminPage() {
         user: { select: { name: true } },
       },
     }),
+    prisma.shippoLabel.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      include: { user: { select: { name: true, suiteNumber: true } } },
+    }).catch(() => []),
   ]);
 
   // Build package count lookup map
@@ -378,6 +385,24 @@ export default async function AdminPage() {
     createdAt: c.createdAt.toISOString(),
   }));
 
+  const recentShippoLabels = (rawShippoLabels as any[]).map((l) => ({
+    id: l.id,
+    carrier: l.carrier,
+    servicelevel: l.servicelevel,
+    trackingNumber: l.trackingNumber,
+    trackingUrl: l.trackingUrl,
+    labelUrl: l.labelUrl,
+    amountPaid: l.amountPaid,
+    status: l.status,
+    toName: l.toName,
+    toCity: l.toCity,
+    toState: l.toState,
+    toZip: l.toZip,
+    createdAt: l.createdAt.toISOString(),
+    userName: l.user?.name ?? null,
+    suiteNumber: l.user?.suiteNumber ?? null,
+  }));
+
   return (
     <AdminDashboardClient
       customers={customers}
@@ -399,6 +424,8 @@ export default async function AdminPage() {
       messageThreads={messageThreads}
       contactSubmissions={contactSubmissions}
       siteSettings={siteSettings}
+      shippoConfigured={isShippoConfigured()}
+      recentShippoLabels={recentShippoLabels}
     />
   );
 }
