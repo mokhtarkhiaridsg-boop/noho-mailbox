@@ -57,6 +57,8 @@ export default async function DashboardPage() {
           label: true,
           priority: true,
           junkBlocked: true,
+          trackingNumber: true,
+          carrier: true,
         },
       }),
       prisma.forwardingAddress.findMany({

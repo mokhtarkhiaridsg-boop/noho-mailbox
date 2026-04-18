@@ -129,6 +129,8 @@ model MailItem {
   recipientPhone   String?   // Optional phone for recipient
   priority         Boolean   @default(false) // member-flagged as priority
   junkBlocked      Boolean   @default(false) // auto-blocked by junk sender rule
+  trackingNumber   String?   // package tracking number
+  carrier          String?   // "UPS" | "USPS" | "FedEx" | "DHL" | "Amazon"
 
   createdAt    DateTime @default(now())
 

@@ -11,6 +11,8 @@ export type MailItem = {
   label: string | null;
   priority?: boolean;
   junkBlocked?: boolean;
+  trackingNumber?: string | null;
+  carrier?: string | null;
 };
 
 export type ForwardingAddress = { id: string; label: string; address: string };

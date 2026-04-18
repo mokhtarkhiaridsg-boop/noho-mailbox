@@ -274,3 +274,23 @@ for (const sql of phase5c) {
   }
 }
 console.log("Phase 5c migration done.");
+
+// Phase 5d — Package tracking fields on MailItem
+const phase5d = [
+  `ALTER TABLE MailItem ADD COLUMN trackingNumber TEXT`,
+  `ALTER TABLE MailItem ADD COLUMN carrier TEXT`,
+];
+
+for (const sql of phase5d) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 5d migration done.");

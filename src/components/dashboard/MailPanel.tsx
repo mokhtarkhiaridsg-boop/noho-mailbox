@@ -12,6 +12,7 @@ import {
 } from "@/components/MemberIcons";
 import { requestForward, requestScan, requestDiscard, requestReturnToSender, updateMailLabel } from "@/app/actions/mail";
 import { togglePriorityFlag, addJunkSender } from "@/app/actions/mailPreferences";
+import { addTrackingToPackage, detectCarrier, getTrackingUrl } from "@/app/actions/packageTracking";
 
 // Inline label editor — small chip that turns into input on click
 function LabelEditor({ itemId, initial }: { itemId: string; initial: string | null | undefined }) {
@@ -159,6 +160,18 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
                       {item.date} · {item.type}
                       <LabelEditor itemId={item.id} initial={item.label} />
                     </p>
+                    {/* Tracking number */}
+                    {item.trackingNumber && item.carrier && (
+                      <a
+                        href={getTrackingUrl(item.carrier, item.trackingNumber)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] font-black flex items-center gap-1 mt-0.5 hover:underline"
+                        style={{ color: BRAND.blueDeep }}
+                      >
+                        📦 {item.carrier} · {item.trackingNumber.slice(-8)}
+                      </a>
+                    )}
                     {/* Mobile status text */}
                     <span
                       className="sm:hidden inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider mt-1"
