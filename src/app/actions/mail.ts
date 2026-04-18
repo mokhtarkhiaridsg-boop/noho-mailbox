@@ -165,6 +165,45 @@ export async function requestScan(mailItemId: string) {
   return { success: true };
 }
 
+// Quick Peek — $0.50 exterior scan, charged immediately from wallet
+export async function requestQuickPeek(mailItemId: string) {
+  const auth = await authorizeMailItem(mailItemId);
+  if ("error" in auth) return auth;
+
+  const QUICK_PEEK_CENTS = 50;
+  const userId = auth.user.id as string;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { walletBalanceCents: true },
+  });
+
+  if (!user || user.walletBalanceCents < QUICK_PEEK_CENTS) {
+    return { error: "Insufficient wallet balance ($0.50 needed for Quick Peek)" };
+  }
+
+  const newBal = user.walletBalanceCents - QUICK_PEEK_CENTS;
+
+  await Promise.all([
+    prisma.user.update({ where: { id: userId }, data: { walletBalanceCents: newBal } }),
+    prisma.walletTransaction.create({
+      data: {
+        id: Math.random().toString(36).slice(2),
+        userId,
+        kind: "Charge",
+        amountCents: -QUICK_PEEK_CENTS,
+        description: "Quick Peek scan ($0.50)",
+        balanceAfterCents: newBal,
+      },
+    }),
+    createMailRequest(userId, mailItemId, "QuickPeek", "Scan Requested"),
+  ]);
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin");
+  return { success: true, chargedCents: QUICK_PEEK_CENTS };
+}
+
 export async function requestDiscard(mailItemId: string) {
   const auth = await authorizeMailItem(mailItemId);
   if ("error" in auth) return auth;

@@ -10,7 +10,7 @@ import {
   IconForward,
   IconTrash,
 } from "@/components/MemberIcons";
-import { requestForward, requestScan, requestDiscard, requestReturnToSender, updateMailLabel } from "@/app/actions/mail";
+import { requestForward, requestScan, requestQuickPeek, requestDiscard, requestReturnToSender, updateMailLabel } from "@/app/actions/mail";
 import { togglePriorityFlag, addJunkSender } from "@/app/actions/mailPreferences";
 import { addTrackingToPackage, detectCarrier, getTrackingUrl } from "@/app/actions/packageTracking";
 
@@ -215,10 +215,27 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
                       background: BRAND.blueSoft,
                       color: BRAND.blueDeep,
                     }}
-                    title="Request Scan"
+                    title="Request Full Scan"
                   >
                     <IconScan className="w-4 h-4" />
                   </button>
+                  {!item.scanned && item.type === "Letter" && (
+                    <button
+                      disabled={isPending}
+                      onClick={() => {
+                        if (!window.confirm("Quick Peek: $0.50 will be charged from your wallet for an exterior preview scan. Continue?")) return;
+                        runAction("Quick Peek requested ($0.50)", () => requestQuickPeek(item.id));
+                      }}
+                      className="w-10 h-10 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                      style={{
+                        background: "rgba(120,90,200,0.1)",
+                        color: "#7956d8",
+                      }}
+                      title="Quick Peek ($0.50)"
+                    >
+                      <span className="text-sm">👁</span>
+                    </button>
+                  )}
                   <button
                     disabled={isPending}
                     onClick={() => runAction("Forward requested", () => requestForward(item.id))}
