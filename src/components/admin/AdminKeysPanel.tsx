@@ -20,9 +20,15 @@ export function AdminKeysPanel({ keyRequests }: Props) {
       </h2>
       <div className="rounded-2xl bg-white border border-[#162d3a]/10 overflow-hidden">
         {keyRequests.length === 0 ? (
-          <p className="p-10 text-center text-sm text-[#162d3a]/60">
-            No pending key requests.
-          </p>
+          <div className="p-12 text-center">
+            <svg viewBox="0 0 48 48" className="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="#162d3a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="14" cy="24" r="6" />
+              <path d="M20 24 L40 24" />
+              <path d="M34 24 L34 30 M40 24 L40 32" />
+            </svg>
+            <p className="text-sm font-bold text-[#162d3a]/70">No pending key requests</p>
+            <p className="text-xs text-[#162d3a]/50 mt-1">Customers request replacements from the Member dashboard.</p>
+          </div>
         ) : (
           <ul className="divide-y divide-[#162d3a]/8">
             {keyRequests.map((r) => (
@@ -51,7 +57,7 @@ export function AdminKeysPanel({ keyRequests }: Props) {
                         router.refresh();
                       })
                     }
-                    className="text-[11px] font-black px-4 py-2 rounded-full bg-accent text-white hover:bg-[#1e4d8c] disabled:opacity-50"
+                    className="text-[11px] font-black px-4 py-2 rounded-full bg-accent text-white hover:bg-[#23596A] disabled:opacity-50"
                   >
                     Issue Key (−$25)
                   </button>

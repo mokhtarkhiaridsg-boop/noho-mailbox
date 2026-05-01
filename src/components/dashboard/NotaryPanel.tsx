@@ -15,7 +15,7 @@ export default function NotaryPanel({ bookings }: Props) {
       style={{
         background: "white",
         border: `1px solid ${BRAND.border}`,
-        boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+        boxShadow: "var(--shadow-cream-sm)",
       }}
     >
       <div
@@ -26,7 +26,7 @@ export default function NotaryPanel({ bookings }: Props) {
         className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
         style={{
           background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
-          boxShadow: "0 8px 24px rgba(51,116,181,0.32)",
+          boxShadow: "0 8px 24px rgba(51,116,133,0.32)",
         }}
       >
         <IconNotary className="w-7 h-7 text-white" />
@@ -77,7 +77,7 @@ export default function NotaryPanel({ bookings }: Props) {
         className="inline-flex items-center gap-2 font-black px-6 py-3 rounded-2xl text-sm text-white transition-transform hover:-translate-y-0.5"
         style={{
           background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
-          boxShadow: "0 6px 20px rgba(51,116,181,0.32)",
+          boxShadow: "0 6px 20px rgba(51,116,133,0.32)",
         }}
       >
         Book Appointment

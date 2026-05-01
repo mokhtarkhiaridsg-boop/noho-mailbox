@@ -100,7 +100,7 @@ export default function DeliveryZoneMap({ activeZone, onZoneHover }: DeliveryZon
 
           // Use a slightly lighter fill for very dark zones so they're visible
           let fillColor = zone.color;
-          // Zone 5 (#2D1D0F) and zone 6 (#110E0B) are very dark — bump opacity for fill
+          // Zone 5 (#2D100F) and zone 6 (#110E0B) are very dark — bump opacity for fill
           const fillOpacity = zone.id >= 5 ? 0.35 : 0.15;
 
           return (
@@ -197,7 +197,7 @@ export default function DeliveryZoneMap({ activeZone, onZoneHover }: DeliveryZon
             d={`M ${CX} ${CY + 16} C ${CX - 8} ${CY + 4} ${CX - 10} ${CY - 6} ${CX - 10} ${CY - 10}
                A 10 10 0 0 1 ${CX + 10} ${CY - 10}
                C ${CX + 10} ${CY - 6} ${CX + 8} ${CY + 4} ${CX} ${CY + 16} Z`}
-            fill="#3374B5"
+            fill="#337485"
             stroke="#fff"
             strokeWidth={1.5}
           />
@@ -211,7 +211,7 @@ export default function DeliveryZoneMap({ activeZone, onZoneHover }: DeliveryZon
             height={14}
             rx={4}
             fill="rgba(15,25,35,0.85)"
-            stroke="rgba(51,116,181,0.6)"
+            stroke="rgba(51,116,133,0.6)"
             strokeWidth={1}
           />
           <text

@@ -19,7 +19,7 @@ interface ButtonProps {
 
 const variantStyles: Record<Variant, string> = {
   primary:
-    "bg-gradient-to-r from-accent to-accent-hover text-white shadow-[0_4px_16px_rgba(51,116,181,0.35)]",
+    "bg-gradient-to-r from-accent to-accent-hover text-white shadow-[0_4px_16px_rgba(51,116,133,0.35)]",
   secondary:
     "bg-surface-light text-text-light border border-border-light shadow-[var(--shadow-sm)] hover:bg-bg-light",
   ghost:

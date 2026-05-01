@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { InteractiveCursor } from "@/components/InteractiveCursor";
+import { ScrollProgress } from "@/components/ScrollProgress";
+import { Ripple } from "@/components/Ripple";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -48,6 +51,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://nohomailbox.org"),
   alternates: {
     canonical: "https://nohomailbox.org",
+    types: {
+      "application/rss+xml": [
+        {
+          url: "https://nohomailbox.org/feed.xml",
+          title: "NOHO Mailbox — Blog RSS feed",
+        },
+      ],
+    },
   },
   openGraph: {
     siteName: "NOHO Mailbox",
@@ -99,7 +110,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen flex flex-col font-[family-name:var(--font-inter)] antialiased">
+        <ScrollProgress />
         {children}
+        <InteractiveCursor />
+        <Ripple />
       </body>
     </html>
   );

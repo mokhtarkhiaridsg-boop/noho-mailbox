@@ -40,8 +40,8 @@ export default function ContactPage() {
               className="rounded-2xl p-8 animate-scale-in flex flex-col items-center justify-center text-center"
               style={{ background: "#FFF9F3", border: "1px solid #E8D8C4", boxShadow: "var(--shadow-md)" }}
             >
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ background: "rgba(51,116,181,0.1)" }}>
-                <svg className="w-8 h-8" style={{ color: "#3374B5" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ background: "rgba(51,116,133,0.1)" }}>
+                <svg className="w-8 h-8" style={{ color: "#337485" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               </div>
               <h3 className="text-xl font-extrabold tracking-tight text-text-light mb-2">Message Sent!</h3>
               <p className="text-text-light-muted text-sm">We&apos;ll get back to you within 24 hours.</p>
@@ -125,7 +125,7 @@ export default function ContactPage() {
                 type="submit"
                 disabled={pending}
                 className="w-full text-white font-bold py-3 rounded-xl transition-all hover:-translate-y-1 hover:shadow-lg disabled:opacity-50"
-                style={{ background: "#3374B5" }}
+                style={{ background: "#337485" }}
               >
                 {pending ? "Sending..." : "Send Message"}
               </button>
@@ -140,7 +140,7 @@ export default function ContactPage() {
             >
               <div className="flex items-center gap-3 mb-3">
                 <svg viewBox="0 0 32 32" className="w-6 h-6" fill="none">
-                  <circle cx="16" cy="12" r="5" fill="#3374B5" stroke="#110E0B" strokeWidth="2" />
+                  <circle cx="16" cy="12" r="5" fill="#337485" stroke="#110E0B" strokeWidth="2" />
                   <path d="M8 28 C8 18 24 18 24 28" fill="#EBF2FA" stroke="#110E0B" strokeWidth="2" />
                 </svg>
                 <h3 className="font-extrabold tracking-tight text-text-light text-sm">Location</h3>
@@ -158,7 +158,7 @@ export default function ContactPage() {
               <div className="flex items-center gap-3 mb-3">
                 <svg viewBox="0 0 32 32" className="w-6 h-6" fill="none">
                   <circle cx="16" cy="16" r="13" fill="#EBF2FA" stroke="#110E0B" strokeWidth="2" />
-                  <path d="M16 8 L16 16 L22 20" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M16 8 L16 16 L22 20" stroke="#337485" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 <h3 className="font-extrabold tracking-tight text-text-light text-sm">Hours</h3>
               </div>

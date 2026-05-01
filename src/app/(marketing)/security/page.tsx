@@ -16,27 +16,27 @@ export const metadata: Metadata = {
 
 const features = [
   {
-    icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect x="6" y="6" width="36" height="36" rx="8" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M16 24 L22 30 L34 16" stroke="#3374B5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+    icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect x="6" y="6" width="36" height="36" rx="8" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M16 24 L22 30 L34 16" stroke="#337485" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>,
     title: "Secure Mail Handling",
     desc: "All mail is handled by trained staff in a monitored facility. Your items are logged, stored, and tracked from arrival to pickup.",
   },
   {
-    icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect x="4" y="14" width="40" height="28" rx="6" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><circle cx="24" cy="28" r="6" fill="#3374B5" /><path d="M24 26 L24 30 M24 26 L26 28" stroke="#EBF2FA" strokeWidth="1.5" strokeLinecap="round" /></svg>,
+    icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect x="4" y="14" width="40" height="28" rx="6" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><circle cx="24" cy="28" r="6" fill="#337485" /><path d="M24 26 L24 30 M24 26 L26 28" stroke="#EBF2FA" strokeWidth="1.5" strokeLinecap="round" /></svg>,
     title: "Private Suite Numbers",
     desc: "Your mail goes to a unique suite number — your home address stays private. Use it for banking, business registration, and more.",
   },
   {
-    icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><circle cx="24" cy="18" r="10" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M10 42 C10 32 38 32 38 42" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M20 18 L22 20 L28 14" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+    icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><circle cx="24" cy="18" r="10" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M10 42 C10 32 38 32 38 42" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M20 18 L22 20 L28 14" stroke="#337485" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>,
     title: "ID Verification Required",
     desc: "Every account requires two valid government-issued photo IDs and a notarized USPS Form 1583 — no exceptions.",
   },
   {
-    icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect x="8" y="4" width="32" height="40" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M16 16 L32 32 M32 16 L16 32" stroke="#3374B5" strokeWidth="3" strokeLinecap="round" /></svg>,
+    icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect x="8" y="4" width="32" height="40" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M16 16 L32 32 M32 16 L16 32" stroke="#337485" strokeWidth="3" strokeLinecap="round" /></svg>,
     title: "Secure Shredding",
     desc: "When you discard mail, it's securely shredded and disposed of — not just thrown away. Certified destruction on demand.",
   },
   {
-    icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><circle cx="24" cy="24" r="20" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M24 14 L24 24 L30 28" stroke="#3374B5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /><circle cx="24" cy="24" r="2" fill="#3374B5" /></svg>,
+    icon: <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><circle cx="24" cy="24" r="20" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" /><path d="M24 14 L24 24 L30 28" stroke="#337485" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /><circle cx="24" cy="24" r="2" fill="#337485" /></svg>,
     title: "Staff Background Checks",
     desc: "All team members pass background screenings before handling customer mail. Your trust is our top priority.",
   },

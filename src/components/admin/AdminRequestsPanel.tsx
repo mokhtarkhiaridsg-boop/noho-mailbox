@@ -47,13 +47,27 @@ export function AdminRequestsPanel({ mailRequests }: Props) {
                 </div>
                 <button
                   disabled={isPending}
-                  onClick={() =>
+                  onClick={() => {
+                    let scanPages: number | undefined;
+                    if (r.kind === "Scan") {
+                      const ans = window.prompt(
+                        `How many pages did you scan for ${r.userName}? (charges $2/page from their wallet)`,
+                        "1",
+                      );
+                      if (ans === null) return; // cancelled
+                      const n = parseInt(ans, 10);
+                      if (!Number.isFinite(n) || n < 1) {
+                        alert("Enter a whole number ≥ 1");
+                        return;
+                      }
+                      scanPages = n;
+                    }
                     startTransition(async () => {
-                      await fulfillMailRequest(r.id);
+                      await fulfillMailRequest(r.id, undefined, scanPages);
                       router.refresh();
-                    })
-                  }
-                  className="text-[11px] font-black px-4 py-2 rounded-full bg-accent text-white hover:bg-[#1e4d8c] disabled:opacity-50"
+                    });
+                  }}
+                  className="text-[11px] font-black px-4 py-2 rounded-full bg-accent text-white hover:bg-[#23596A] disabled:opacity-50"
                 >
                   Fulfill
                 </button>

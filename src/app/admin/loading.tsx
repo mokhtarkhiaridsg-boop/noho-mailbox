@@ -14,7 +14,7 @@ export default function AdminLoading() {
         <div className="flex items-center gap-3">
           <div className="h-7 w-48 rounded-md bg-[#162d3a]/08 animate-pulse hidden md:block" style={{ border: "1px solid rgba(22,45,58,0.1)" }} />
           <div className="h-7 w-20 rounded animate-pulse hidden sm:block" />
-          <div className="w-8 h-8 rounded-full bg-[#3374B5]/30 animate-pulse" />
+          <div className="w-8 h-8 rounded-full bg-[#337485]/30 animate-pulse" />
         </div>
       </div>
 
@@ -93,7 +93,7 @@ export default function AdminLoading() {
               <div className="p-5 space-y-3">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="flex items-center gap-3" style={{ animationDelay: `${i * 90}ms` }}>
-                    <div className="w-2 h-2 rounded-full bg-[#3374B5]/30 animate-pulse shrink-0" />
+                    <div className="w-2 h-2 rounded-full bg-[#337485]/30 animate-pulse shrink-0" />
                     <div className="flex-1 h-3 rounded bg-[#162d3a]/08 animate-pulse" />
                     <div className="h-5 w-16 rounded-full bg-[#162d3a]/05 animate-pulse" />
                   </div>

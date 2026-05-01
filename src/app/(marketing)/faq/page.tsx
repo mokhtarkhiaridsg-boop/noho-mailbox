@@ -132,7 +132,7 @@ export default function FAQPage() {
                   >
                     <div>
                       {activeCategory === "all" && (
-                        <span className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "#3374B5" }}>
+                        <span className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: "#337485" }}>
                           {faq.category}
                         </span>
                       )}
@@ -141,7 +141,7 @@ export default function FAQPage() {
                     <svg
                       viewBox="0 0 24 24"
                       className={`w-5 h-5 shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
-                      style={{ color: "#3374B5" }}
+                      style={{ color: "#337485" }}
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2.5"
@@ -172,7 +172,7 @@ export default function FAQPage() {
           <a
             href="/contact"
             className="font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-1 hover:shadow-lg inline-block text-white"
-            style={{ background: "#3374B5" }}
+            style={{ background: "#337485" }}
           >
             Contact Us
           </a>

@@ -35,9 +35,9 @@ export default function NotaryPage() {
           <div className="inline-block mb-6 animate-float">
             <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-20 h-20 mx-auto">
               <circle cx="40" cy="40" r="36" fill="#EBF2FA" stroke="#1A1714" strokeWidth="3" />
-              <path d="M28 56 L40 16 L52 56" stroke="#3374B5" strokeWidth="4" fill="none" strokeLinejoin="round" />
-              <circle cx="40" cy="22" r="5" fill="#3374B5" />
-              <path d="M33 48 L47 48" stroke="#3374B5" strokeWidth="3" strokeLinecap="round" />
+              <path d="M28 56 L40 16 L52 56" stroke="#337485" strokeWidth="4" fill="none" strokeLinejoin="round" />
+              <circle cx="40" cy="22" r="5" fill="#337485" />
+              <path d="M33 48 L47 48" stroke="#337485" strokeWidth="3" strokeLinecap="round" />
             </svg>
           </div>
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-text-dark mb-6 animate-scale-in">

@@ -2,6 +2,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { retry } from "@/lib/retry";
 
 export const verifySession = cache(async () => {
   const session = await auth();
@@ -35,10 +36,16 @@ export const verifyActiveMember = cache(async () => {
   // Admins always allowed
   if (sessionUser.role === "ADMIN") return sessionUser;
 
-  const user = await prisma.user.findUnique({
-    where: { id: sessionUser.id },
-    select: { plan: true, mailboxStatus: true },
-  });
+  // First DB hit on every dashboard load — wrap in retry to absorb the
+  // cold-start / Turso edge transients that surface as 503s when the
+  // function takes the connection failure as a fatal error. Idempotent read,
+  // safe to retry.
+  const user = await retry(() =>
+    prisma.user.findUnique({
+      where: { id: sessionUser.id },
+      select: { plan: true, mailboxStatus: true },
+    }),
+  );
 
   // Free members can access dashboard (no mailbox needed)
   if (!user || !user.plan || user.plan === "Free") return sessionUser;

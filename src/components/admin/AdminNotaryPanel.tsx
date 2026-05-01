@@ -18,13 +18,19 @@ export function AdminNotaryPanel({ notaryQueue, isPending, handleNotaryAction, s
         <button
           onClick={() => setShowNewApptModal(true)}
           className="px-4 py-2.5 rounded-xl text-sm font-black text-white"
-          style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)", boxShadow: "0 2px 10px rgba(51,116,181,0.3)" }}
+          style={{ background: "linear-gradient(135deg, #337485, #23596A)", boxShadow: "0 2px 10px rgba(51,116,133,0.3)" }}
         >
           + New Appointment
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {notaryQueue.length === 0 && (
+          <div className="md:col-span-2 rounded-2xl bg-white border border-border-light/60 px-6 py-12 text-center">
+            <p className="text-sm font-bold text-text-light/60">No notary appointments yet</p>
+            <p className="text-xs text-text-light/45 mt-1">Bookings come in through /notary or by phone — they'll show up here as soon as a customer schedules.</p>
+          </div>
+        )}
         {notaryQueue.map((n) => (
           <div
             key={n.id}
@@ -44,7 +50,7 @@ export function AdminNotaryPanel({ notaryQueue, isPending, handleNotaryAction, s
                 onClick={() => handleNotaryAction(n.id, "Completed")}
                 disabled={isPending}
                 className="flex-1 text-center text-xs font-bold py-2.5 rounded-xl text-white disabled:opacity-40"
-                style={{ background: "linear-gradient(135deg, #3374B5, #2055A0)" }}
+                style={{ background: "linear-gradient(135deg, #337485, #23596A)" }}
               >
                 Complete
               </button>

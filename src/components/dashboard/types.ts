@@ -13,6 +13,12 @@ export type MailItem = {
   junkBlocked?: boolean;
   trackingNumber?: string | null;
   carrier?: string | null;
+  exteriorImageUrl?: string | null;
+  recipientName?: string | null;
+  // iter-80: ISO timestamp of intake. Lets the panel compute days-on-shelf
+  // for the storage-tier countdown. The free-form `date` string isn't
+  // safe to parse so we pass createdAt through separately.
+  createdAt?: string;
 };
 
 export type ForwardingAddress = { id: string; label: string; address: string };
@@ -85,6 +91,7 @@ export type KeyReq = {
 };
 
 export type DashboardUser = {
+  id: string;
   name: string;
   email: string;
   phone: string | null;
@@ -137,32 +144,64 @@ export type DashboardProps = {
   keyRequests: KeyReq[];
   notifications?: AppNotification[];
   vaultItems?: VaultItem[];
+  junkSenders?: { id: string; sender: string }[];
+  vacation?: { startDate: string; endDate: string; digest: boolean } | null;
+  // ShippoLabel rows where userId === current member (set when admin runs
+  // Quick Ship with a member tied to the label). Surfaced via ShippingPanel.
+  shippingLabels?: Array<{
+    id: string;
+    carrier: string;
+    servicelevel: string;
+    trackingNumber: string;
+    trackingUrl: string;
+    labelUrl: string;
+    amountPaid: number;
+    status: string;
+    toName: string;
+    toCity: string;
+    toState: string;
+    toZip: string;
+    createdAt: string;
+  }>;
 };
 
-// Brand palette — blue-forward
+// Brand palette — cream + brown + blue accent (matches NOHO brand book)
+// Existing key names are preserved so all 481 inline references keep resolving;
+// only the values change to pull the dashboard into the marketing brand.
 export const BRAND = {
-  bg: "#FAFAF8",
-  bgDeep: "#F0EDE8",
+  // Surfaces — warm cream, not off-white
+  bg: "#F8F2EA",
+  bgDeep: "#F7E6C2",
   card: "#FFFFFF",
-  ink: "#1A1714",
-  inkSoft: "#6B6560",
-  inkFaint: "#A89F94",
-  blue: "#3374B5",
-  blueDeep: "#2960A0",
-  blueSoft: "rgba(51,116,181,0.08)",
-  border: "#E8E5E0",
+  // Ink — brand brown, not near-black
+  ink: "#2D100F",
+  inkSoft: "#5C4540",
+  inkFaint: "#A89484",
+  // Accents — unchanged (already brand-locked)
+  blue: "#337485",
+  blueDeep: "#23596A",
+  blueSoft: "rgba(51,116,133,0.08)",
+  border: "#E8DDD0",
+  // New keys for follow-up work
+  cream: "#F7E6C2",
+  creamDeep: "#F0DBA9",
+  brown: "#2D100F",
+  brownDeep: "#1F0807",
+  brownSoft: "rgba(45,16,15,0.06)",
 };
 
+// Brand-aligned status colors — semantic CSS vars on warm cream surfaces.
+// Each variant ships its own deep ink shade for AA-readable foreground.
 export function statusColor(status: string) {
   if (status === "Awaiting Pickup" || status === "Ready for Pickup")
-    return { bg: "rgba(51,116,181,0.14)", fg: "#1e4d8c", dot: "#3374B5" };
+    return { bg: BRAND.blueSoft, fg: BRAND.blueDeep, dot: BRAND.blue };
   if (status === "Forwarded" || status === "Picked Up")
-    return { bg: "rgba(34,139,34,0.12)", fg: "#1a8a1a", dot: "#1a8a1a" };
+    return { bg: "var(--color-success-soft)", fg: "#166534", dot: "var(--color-success)" };
   if (status.includes("Requested"))
-    return { bg: "rgba(200,150,0,0.15)", fg: "#a07800", dot: "#e0a800" };
+    return { bg: "var(--color-warning-soft)", fg: "#7C2D12", dot: "var(--color-warning)" };
   if (status === "Scanned")
-    return { bg: "rgba(120,90,200,0.14)", fg: "#5a3fa0", dot: "#7956d8" };
+    return { bg: BRAND.brownSoft, fg: BRAND.brown, dot: BRAND.brown };
   if (status === "Held")
-    return { bg: "rgba(200,50,50,0.12)", fg: "#c03030", dot: "#c03030" };
-  return { bg: "rgba(14,34,64,0.06)", fg: BRAND.inkSoft, dot: BRAND.inkFaint };
+    return { bg: "var(--color-danger-soft)", fg: "#7F1D1D", dot: "var(--color-danger)" };
+  return { bg: BRAND.brownSoft, fg: BRAND.inkSoft, dot: BRAND.inkFaint };
 }

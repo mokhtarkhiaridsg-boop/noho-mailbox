@@ -113,6 +113,21 @@ export async function syncSquarePayments(): Promise<SyncResult> {
         userId = user?.id ?? null;
       }
 
+      // On UPDATE only: don't clobber a previously-set userId with null. An
+      // admin may have manually linked a Square payment to the right user
+      // (because Square's customerId wasn't on the row at first), and a
+      // subsequent sync where Square still doesn't know the customer would
+      // overwrite that manual link with null. Preserve the existing link
+      // unless we have a fresh, non-null value to write.
+      const updateData: Record<string, unknown> = {
+        status: p.status,
+        amount: p.amount,
+        syncedAt: new Date(),
+      };
+      if (userId !== null) {
+        updateData.userId = userId;
+      }
+
       await prisma.payment.upsert({
         where: { squarePaymentId: p.id },
         create: {
@@ -126,12 +141,7 @@ export async function syncSquarePayments(): Promise<SyncResult> {
           note: p.note ?? null,
           squareCreatedAt: p.createdAt,
         },
-        update: {
-          status: p.status,
-          amount: p.amount,
-          userId,
-          syncedAt: new Date(),
-        },
+        update: updateData,
       });
       synced++;
     }

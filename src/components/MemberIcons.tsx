@@ -262,3 +262,52 @@ export function IconSparkle(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IconAlert(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v4M12 16h.01" />
+    </svg>
+  );
+}
+
+export function IconWarningTriangle(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 3 L22 20 L2 20 Z" />
+      <path d="M12 10v4M12 17h.01" />
+    </svg>
+  );
+}
+
+export function IconUmbrella(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M3 12 C3 6 7 3 12 3 C17 3 21 6 21 12" />
+      <path d="M3 12 L21 12" />
+      <path d="M12 3 L12 12" />
+      <path d="M12 14 L12 19 C12 20.5 13 21 14 21 C15 21 16 20 16 18.5" />
+    </svg>
+  );
+}
+
+export function IconUsers(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="9" cy="8" r="3" />
+      <circle cx="17" cy="9" r="2.5" />
+      <path d="M3 19 C3 15 6 13 9 13 C12 13 15 15 15 19" />
+      <path d="M15 18 C15 15.5 17 14 19 14 C20 14 21 14.5 21 14.5" />
+    </svg>
+  );
+}
+
+export function IconBlock(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M5.5 5.5 L18.5 18.5" />
+    </svg>
+  );
+}

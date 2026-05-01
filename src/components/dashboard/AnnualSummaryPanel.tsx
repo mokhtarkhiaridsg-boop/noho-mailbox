@@ -34,7 +34,7 @@ export default function AnnualSummaryPanel() {
       style={{
         background: "white",
         border: `1px solid ${BRAND.border}`,
-        boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+        boxShadow: "var(--shadow-cream-sm)",
       }}
     >
       <div className="flex items-center justify-between mb-5">

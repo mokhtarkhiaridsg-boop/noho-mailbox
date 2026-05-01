@@ -5,7 +5,7 @@ import { verifyAdmin, verifySession } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 
 function cuid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  return crypto.randomUUID();
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -13,6 +13,7 @@ function cuid() {
 export type NotificationType =
   | "mail_arrived"
   | "package_arrived"
+  | "package_picked_up"   // iter-61: in-person counter handoff confirmation
   | "plan_expiring"
   | "kyc_approved"
   | "kyc_rejected"
@@ -101,13 +102,33 @@ export async function notifyMailArrived(input: {
   type: "Letter" | "Package";
   mailItemId?: string;
 }) {
-  const icon = input.type === "Package" ? "📦" : "✉️";
   return createNotification({
     userId: input.userId,
     type: input.type === "Package" ? "package_arrived" : "mail_arrived",
-    title: `${icon} ${input.type} from ${input.from}`,
+    title: `${input.type} from ${input.from}`,
     body: `A ${input.type.toLowerCase()} from ${input.from} has arrived at NOHO Mailbox.`,
     link: "/dashboard?tab=mail",
+  });
+}
+
+// iter-61: In-app notification when admin marks a customer's package as
+// Picked Up (in-person counter handoff). Mirrors the email sent by
+// sendMailPickedUpEmail but lands in the dashboard bell so the customer
+// sees it the next time they log in (and on push if they enabled it).
+export async function notifyMailPickedUp(input: {
+  userId: string;
+  carrier?: string | null;
+  trackingNumber?: string | null;
+}) {
+  const detail = [input.carrier, input.trackingNumber].filter(Boolean).join(" · ");
+  return createNotification({
+    userId: input.userId,
+    type: "package_picked_up",
+    title: "Package picked up ✓",
+    body: detail
+      ? `Your ${detail} package was handed to you in person.`
+      : "Your package was handed to you in person at NOHO Mailbox.",
+    link: "/dashboard?tab=packages",
   });
 }
 
@@ -121,7 +142,7 @@ export async function notifyPlanExpiring(input: {
   return createNotification({
     userId: input.userId,
     type: "plan_expiring",
-    title: `⚠️ Plan renewal due in ${input.daysLeft} days`,
+    title: `Plan renewal due in ${input.daysLeft} days`,
     body: `Your mailbox plan is due on ${input.planDueDate}. Renew early to avoid interruption.`,
     link: "/dashboard?tab=settings",
   });
@@ -138,7 +159,7 @@ export async function notifyKycStatus(input: {
   return createNotification({
     userId: input.userId,
     type: approved ? "kyc_approved" : "kyc_rejected",
-    title: approved ? "✅ Identity Verified" : "❌ Identity Verification Issue",
+    title: approved ? "Identity Verified" : "Identity Verification Issue",
     body: approved
       ? "Your identity has been verified. Your mailbox is fully activated."
       : `There was an issue with your verification${input.notes ? ": " + input.notes : ". Please resubmit."}`,
@@ -159,7 +180,7 @@ export async function notifyOversizePackage(input: {
   return createNotification({
     userId: input.userId,
     type: "package_arrived",
-    title: "📦 Oversize Package Arrived",
+    title: "Oversize Package Arrived",
     body: `An oversize package from ${input.from} has arrived${sizeNote}${weightNote}. Additional storage fees may apply after 30 days.`,
     link: "/dashboard?tab=mail",
   });
@@ -170,11 +191,10 @@ export async function notifyDeliveryUpdate(input: {
   status: "Picked Up" | "In Transit" | "Delivered";
   destination: string;
 }) {
-  const icons: Record<string, string> = { "Picked Up": "🚗", "In Transit": "🚚", "Delivered": "✅" };
   return createNotification({
     userId: input.userId,
     type: "delivery_update",
-    title: `${icons[input.status]} Delivery ${input.status}`,
+    title: `Delivery ${input.status}`,
     body: `Your delivery to ${input.destination} is now ${input.status.toLowerCase()}.`,
     link: "/dashboard?tab=deliveries",
   });

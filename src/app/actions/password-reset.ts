@@ -5,7 +5,7 @@ import { sendPasswordResetEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
 
-export type ResetState = { error?: string; success?: boolean };
+export type ResetState = { error?: string; success?: boolean; manualLink?: string };
 
 // ─── Step 1: Request a password reset link ────────────────────────────────────
 export async function requestPasswordReset(
@@ -33,7 +33,18 @@ export async function requestPasswordReset(
     data: { userId: user.id, token, expiresAt },
   });
 
-  await sendPasswordResetEmail(user.email, user.name ?? "there", token);
+  const result = await sendPasswordResetEmail(user.email, user.name ?? "there", token);
+
+  // If email delivery failed (or provider unconfigured), surface the link
+  // so the user/admin can complete the reset manually. Without this, an
+  // unverified Resend domain or a Gmail spam-strip silently breaks the flow.
+  if (result.status !== "sent") {
+    const base = process.env.AUTH_URL ?? "https://nohomailbox.org";
+    return {
+      success: true,
+      manualLink: `${base}/reset-password?token=${token}`,
+    };
+  }
 
   return { success: true };
 }

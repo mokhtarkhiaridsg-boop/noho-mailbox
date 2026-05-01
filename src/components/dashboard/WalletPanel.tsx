@@ -51,40 +51,54 @@ export default function WalletPanel({
 
   return (
     <div className="space-y-6">
-      {/* Security Deposit */}
+      {/* Security Deposit — brand brown card matching address card */}
       <section
         className="rounded-3xl p-6 relative overflow-hidden"
         style={{
-          background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
-          color: "white",
-          boxShadow: "0 20px 50px rgba(51,116,181,0.32)",
+          background: `linear-gradient(135deg, ${BRAND.brown} 0%, ${BRAND.brownDeep} 100%)`,
+          color: BRAND.cream,
+          boxShadow: "0 20px 50px rgba(45,16,15,0.32)",
         }}
       >
-        <IconShield className="absolute -top-6 -right-6 w-36 h-36 opacity-15" />
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">
+        <IconShield
+          className="absolute -top-6 -right-6 w-36 h-36 opacity-15"
+          style={{ color: BRAND.cream }}
+        />
+        <p
+          className="text-[11px] font-black uppercase tracking-[0.18em]"
+          style={{ color: "rgba(247,230,194,0.70)" }}
+        >
           Security Deposit
         </p>
-        <p className="text-4xl font-black mt-2">
+        <p className="text-4xl font-black mt-2" style={{ color: BRAND.cream }}>
           ${(user.securityDepositCents / 100).toFixed(2)}
         </p>
-        <p className="text-xs mt-1 text-white/80">
+        <p className="text-xs mt-1" style={{ color: "rgba(247,230,194,0.80)" }}>
           of ${(user.securityDepositTotalCents / 100).toFixed(2)} on file
         </p>
-        <div className="mt-4 h-2 w-full max-w-xs rounded-full bg-white/20 overflow-hidden">
+        <div
+          className="mt-4 h-2 w-full max-w-xs rounded-full overflow-hidden"
+          style={{ background: "rgba(247,230,194,0.20)" }}
+        >
           <div
-            className="h-full bg-white"
-            style={{ width: `${depositPct}%` }}
+            className="h-full"
+            style={{ width: `${depositPct}%`, background: BRAND.cream }}
           />
         </div>
         <button
           disabled={isPending}
           onClick={() =>
             startTransition(async () => {
-              await requestDepositRefund();
+              const res = await requestDepositRefund();
+              if (res && "error" in res && res.error) {
+                refresh(`Couldn't request refund: ${res.error}`);
+                return;
+              }
               refresh("Refund request submitted");
             })
           }
-          className="mt-5 inline-flex items-center gap-2 text-[11px] font-black px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 disabled:opacity-50"
+          className="mt-5 inline-flex items-center gap-2 text-[11px] font-black px-4 py-2 rounded-full disabled:opacity-50 transition-colors"
+          style={{ background: "rgba(247,230,194,0.15)", color: BRAND.cream }}
         >
           Request Refund
         </button>
@@ -96,7 +110,7 @@ export default function WalletPanel({
         style={{
           background: "white",
           border: `1px solid ${BRAND.border}`,
-          boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+          boxShadow: "var(--shadow-cream-sm)",
         }}
       >
         <div className="flex items-center justify-between">
@@ -164,7 +178,7 @@ export default function WalletPanel({
                     className="font-black"
                     style={{
                       color:
-                        t.amountCents >= 0 ? "#1a8a1a" : "#c03030",
+                        t.amountCents >= 0 ? "var(--color-success)" : "var(--color-danger)",
                     }}
                   >
                     {t.amountCents >= 0 ? "+" : "−"}$
@@ -183,7 +197,7 @@ export default function WalletPanel({
         style={{
           background: "white",
           border: `1px solid ${BRAND.border}`,
-          boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+          boxShadow: "var(--shadow-cream-sm)",
         }}
       >
         <div className="flex items-center gap-2.5 mb-4">
@@ -226,7 +240,11 @@ export default function WalletPanel({
                     disabled={isPending}
                     onClick={() =>
                       startTransition(async () => {
-                        await setDefaultCard(c.id);
+                        const res = await setDefaultCard(c.id);
+                        if (res && "error" in res && res.error) {
+                          refresh(`Couldn't set default: ${res.error}`);
+                          return;
+                        }
                         refresh("Default card set");
                       })
                     }
@@ -240,12 +258,16 @@ export default function WalletPanel({
                   disabled={isPending}
                   onClick={() =>
                     startTransition(async () => {
-                      await removeCard(c.id);
+                      const res = await removeCard(c.id);
+                      if (res && "error" in res && res.error) {
+                        refresh(`Couldn't remove card: ${res.error}`);
+                        return;
+                      }
                       refresh("Card removed");
                     })
                   }
                   className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ color: "#c03030" }}
+                  style={{ color: "var(--color-danger)" }}
                   aria-label="Remove card"
                 >
                   <IconTrash className="w-3.5 h-3.5" />
@@ -337,7 +359,7 @@ export default function WalletPanel({
             style={{
               color: BRAND.blueDeep,
               border: `1px dashed ${BRAND.blue}`,
-              background: "rgba(51,116,181,0.04)",
+              background: BRAND.bgDeep,
             }}
           >
             <IconPlus className="w-4 h-4" />

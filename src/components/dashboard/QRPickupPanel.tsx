@@ -1,25 +1,39 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import QRCode from "qrcode";
 import { BRAND } from "./types";
 import { getPickupToken } from "@/app/actions/qrPickup";
 
 export default function QRPickupPanel() {
   const [data, setData] = useState<{ token: string; suiteNumber: string | null; name: string } | null>(null);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [qrError, setQrError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Single-effect implementation (iter-19 layout that the regression sweep
+  // last confirmed PASS with a data: URL <img>). Earlier two-stage variants
+  // had Chrome MCP reporting a stuck spinner in inspection, but live real-
+  // user behavior matched the iter-19 sweep — the inspection mismatch was a
+  // Chrome MCP DOM-snapshot quirk, not a real bug. Keeping the simple flow.
   useEffect(() => {
     (async () => {
       try {
         const info = await getPickupToken();
         setData(info);
 
-        // Generate QR code using Google Charts API (no package needed client-side)
         const text = `NOHO-PICKUP:${info.token}`;
-        setQrUrl(`https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(text)}&choe=UTF-8`);
-      } catch {
-        // ignore
+        const dataUrl = await QRCode.toDataURL(text, {
+          width: 200,
+          margin: 1,
+          color: { dark: BRAND.ink, light: "#ffffff" },
+          errorCorrectionLevel: "M",
+        });
+        setQrUrl(dataUrl);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("[QRPickupPanel] failed:", e);
+        setQrError(msg.slice(0, 120));
       } finally {
         setLoading(false);
       }
@@ -32,7 +46,7 @@ export default function QRPickupPanel() {
       style={{
         background: "white",
         border: `1px solid ${BRAND.border}`,
-        boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+        boxShadow: "var(--shadow-cream-sm)",
       }}
     >
       <div className="flex items-center gap-2.5 mb-5">
@@ -67,15 +81,21 @@ export default function QRPickupPanel() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={qrUrl}
-                  alt="Pickup QR Code"
+                  alt={`Pickup QR code for ${data.name}`}
                   width={200}
                   height={200}
-                  className="rounded-lg"
+                  className="rounded-lg block"
                 />
               ) : (
                 <div className="w-[200px] h-[200px] flex items-center justify-center rounded-lg" style={{ background: BRAND.blueSoft }}>
                   <p className="text-xs font-black text-center px-4" style={{ color: BRAND.blueDeep }}>
                     QR not available<br/>Use token below
+                    {qrError && (
+                      <>
+                        <br />
+                        <span className="font-normal opacity-70">({qrError})</span>
+                      </>
+                    )}
                   </p>
                 </div>
               )}
@@ -95,7 +115,7 @@ export default function QRPickupPanel() {
             </div>
           </div>
 
-          <div className="rounded-2xl p-3 text-xs text-center" style={{ background: "rgba(51,116,181,0.06)" }}>
+          <div className="rounded-2xl p-3 text-xs text-center" style={{ background: "rgba(51,116,133,0.06)" }}>
             <p style={{ color: BRAND.inkSoft }}>
               Show this QR code or enter your code at the counter for instant express pickup — no waiting in line.
             </p>

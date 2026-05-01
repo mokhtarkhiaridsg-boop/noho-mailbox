@@ -22,13 +22,22 @@ type Props = {
 
 const KINDS = ["All", "Scan", "Invoice", "Receipt", "Form1583", "POD", "Other"];
 
+// Display labels for the filter pills — keys (e.g. "Form1583") match the
+// schema/DB value so we don't break filtering, but we render them with the
+// space humans expect ("Form 1583").
+const KIND_LABELS: Record<string, string> = {
+  Form1583: "Form 1583",
+};
+
+// Brand-aligned: blue accent for digital scans, semantic colors for billing/legal,
+// cream/brown for catch-all. All AA-readable on white.
 const KIND_COLORS: Record<string, { bg: string; text: string }> = {
-  Scan:     { bg: "#EBF2FA", text: "#2060A0" },
-  Invoice:  { bg: "#F0FDF4", text: "#16A34A" },
-  Receipt:  { bg: "#FEF9C3", text: "#CA8A04" },
-  Form1583: { bg: "#F5F3FF", text: "#7C3AED" },
-  POD:      { bg: "#FEE2E2", text: "#DC2626" },
-  Other:    { bg: "#F0EDE8", text: "#6B6560" },
+  Scan:     { bg: "rgba(51,116,133,0.10)",  text: "#23596A" },
+  Invoice:  { bg: "var(--color-success-soft)", text: "#166534" },
+  Receipt:  { bg: "var(--color-warning-soft)", text: "#7C2D12" },
+  Form1583: { bg: "rgba(45,16,15,0.08)",     text: "#2D100F" },
+  POD:      { bg: "var(--color-danger-soft)",  text: "#7F1D1D" },
+  Other:    { bg: "#F0DBA9",                  text: "#5C4540" },
 };
 
 function formatBytes(bytes: number): string {
@@ -48,6 +57,7 @@ export default function VaultPanel({ vaultItems }: Props) {
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [vaultErr, setVaultErr] = useState<string | null>(null);
 
   const filtered = filter === "All" ? vaultItems : vaultItems.filter((v) => v.kind === filter);
 
@@ -75,7 +85,8 @@ export default function VaultPanel({ vaultItems }: Props) {
       router.refresh();
       setTimeout(() => { setUploadSuccess(false); setShowUpload(false); }, 1500);
     } catch {
-      alert("Upload failed — please try again");
+      setVaultErr("Upload failed — please try again");
+      setTimeout(() => setVaultErr(null), 4000);
     } finally {
       setUploading(false);
     }
@@ -99,13 +110,16 @@ export default function VaultPanel({ vaultItems }: Props) {
         style={{
           background: "white",
           border: `1px solid ${BRAND.border}`,
-          boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+          boxShadow: "var(--shadow-cream-sm)",
         }}
       >
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="font-black text-sm uppercase tracking-[0.16em]" style={{ color: BRAND.ink }}>
-              📁 Document Vault
+            <h2 className="font-black text-sm uppercase tracking-[0.16em] inline-flex items-center gap-2" style={{ color: BRAND.ink }}>
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={BRAND.blue} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 7 C3 6 4 5 5 5 L9 5 L11 7 L19 7 C20 7 21 8 21 9 L21 18 C21 19 20 20 19 20 L5 20 C4 20 3 19 3 18 Z" />
+              </svg>
+              Document Vault
             </h2>
             <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkFaint }}>
               {vaultItems.length} document{vaultItems.length !== 1 ? "s" : ""} stored securely
@@ -120,12 +134,22 @@ export default function VaultPanel({ vaultItems }: Props) {
           </button>
         </div>
 
+        {/* Upload error toast */}
+        {vaultErr && (
+          <div className="mb-3 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: "rgba(231,0,19,0.06)", color: "#b91c1c", border: "1px solid rgba(231,0,19,0.2)" }}>
+            {vaultErr}
+          </div>
+        )}
+
         {/* Upload form */}
         {showUpload && (
           <div className="mb-5 rounded-2xl p-4 space-y-3" style={{ background: BRAND.bgDeep, border: `1px solid ${BRAND.border}` }}>
             {uploadSuccess ? (
               <div className="text-center py-3">
-                <p className="text-xl mb-1">✅</p>
+                <svg viewBox="0 0 24 24" className="w-6 h-6 mx-auto mb-1" fill="none" stroke="var(--color-success)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M7 12 L11 16 L17 9" />
+                </svg>
                 <p className="font-bold text-sm" style={{ color: BRAND.ink }}>Uploaded to vault!</p>
               </div>
             ) : (
@@ -154,7 +178,11 @@ export default function VaultPanel({ vaultItems }: Props) {
                     </div>
                   ) : (
                     <div>
-                      <p className="text-xl mb-1">📄</p>
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 mx-auto mb-1" fill="none" stroke={BRAND.blue} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round">
+                        <path d="M14 3 L7 3 C5.5 3 5 3.5 5 5 L5 19 C5 20.5 5.5 21 7 21 L17 21 C18.5 21 19 20.5 19 19 L19 8 Z" />
+                        <path d="M14 3 L14 8 L19 8" />
+                        <path d="M9 14 L15 14 M9 17 L13 17" />
+                      </svg>
                       <p className="font-bold text-sm" style={{ color: BRAND.ink }}>Click to browse</p>
                       <p className="text-[11px]" style={{ color: BRAND.inkFaint }}>PDF, PNG, JPG, DOC</p>
                     </div>
@@ -181,7 +209,7 @@ export default function VaultPanel({ vaultItems }: Props) {
                       className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none bg-white"
                       style={{ border: `1px solid ${BRAND.border}` }}
                     >
-                      {KINDS.filter((k) => k !== "All").map((k) => <option key={k}>{k}</option>)}
+                      {KINDS.filter((k) => k !== "All").map((k) => <option key={k} value={k}>{KIND_LABELS[k] ?? k}</option>)}
                     </select>
                   </div>
                 </div>
@@ -210,7 +238,7 @@ export default function VaultPanel({ vaultItems }: Props) {
                 ? { background: BRAND.blue, color: "white" }
                 : { background: BRAND.bgDeep, color: BRAND.inkSoft }}
             >
-              {k}
+              {KIND_LABELS[k] ?? k}
             </button>
           ))}
         </div>
@@ -218,7 +246,13 @@ export default function VaultPanel({ vaultItems }: Props) {
         {/* Items */}
         {filtered.length === 0 ? (
           <div className="text-center py-10">
-            <p className="text-3xl mb-3">🗄️</p>
+            <svg viewBox="0 0 32 32" className="w-10 h-10 mx-auto mb-3 opacity-60" fill="none" stroke={BRAND.blue} strokeWidth="2" strokeLinejoin="round">
+              <rect x="4" y="6" width="24" height="20" rx="2" />
+              <path d="M4 12 L28 12 M4 18 L28 18" />
+              <rect x="13" y="8" width="6" height="2" rx="0.5" fill="currentColor" stroke="none" />
+              <rect x="13" y="14" width="6" height="2" rx="0.5" fill="currentColor" stroke="none" />
+              <rect x="13" y="20" width="6" height="2" rx="0.5" fill="currentColor" stroke="none" />
+            </svg>
             <p className="font-bold text-sm" style={{ color: BRAND.ink }}>
               {filter === "All" ? "No documents yet" : `No ${filter} documents`}
             </p>
@@ -239,10 +273,22 @@ export default function VaultPanel({ vaultItems }: Props) {
                 >
                   {/* Icon */}
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
-                    style={{ background: colors.bg }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: colors.bg, color: colors.text }}
                   >
-                    {isImg ? "🖼️" : item.kind === "Invoice" ? "🧾" : item.kind === "Form1583" ? "📋" : item.kind === "Scan" ? "📷" : item.kind === "POD" ? "✅" : "📄"}
+                    {isImg ? (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="1.5" fill="currentColor" /><path d="M3 17 L9 12 L13 16 L17 12 L21 16" /></svg>
+                    ) : item.kind === "Invoice" ? (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"><path d="M5 3 L19 3 L19 21 L17 19 L15 21 L13 19 L11 21 L9 19 L7 21 L5 21 Z" /><path d="M9 9 L15 9 M9 13 L15 13" /></svg>
+                    ) : item.kind === "Form1583" ? (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"><rect x="6" y="3" width="12" height="18" rx="1.5" /><path d="M9 8 L15 8 M9 12 L15 12 M9 16 L13 16" /></svg>
+                    ) : item.kind === "Scan" ? (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"><rect x="3" y="6" width="18" height="14" rx="2" /><circle cx="12" cy="13" r="3.5" /><circle cx="12" cy="13" r="1.5" fill="currentColor" /><path d="M9 6 L9 4 L15 4 L15 6" /></svg>
+                    ) : item.kind === "POD" ? (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 12 L11 15 L16 9" /></svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"><path d="M14 3 L7 3 C5.5 3 5 3.5 5 5 L5 19 C5 20.5 5.5 21 7 21 L17 21 C18.5 21 19 20.5 19 19 L19 8 Z" /><path d="M14 3 L14 8 L19 8" /></svg>
+                    )}
                   </div>
 
                   {/* Info */}

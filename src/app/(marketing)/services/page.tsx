@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MailboxIcon, EnvelopeIcon, HeartBubbleIcon } from "@/components/BrandIcons";
+import { AiMailbox, AiEnvelope, AiHeart, AiBox } from "@/components/AnimatedIcons";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -16,42 +16,41 @@ export const metadata: Metadata = {
 
 const services = [
   {
-    icon: <EnvelopeIcon className="w-12 h-12" />,
+    icon: <AiEnvelope className="w-12 h-12" />,
     title: "Mail Scanning & Digital Dashboard",
     desc: "Receive high-resolution scans of every piece of incoming mail in your secure online dashboard. View, download, or take action on each piece from any device — phone, tablet, or desktop.",
   },
   {
-    icon: <MailboxIcon className="w-12 h-12" />,
+    icon: <AiMailbox className="w-12 h-12" />,
     title: "Mail Forwarding",
     desc: "Save one or more forwarding addresses to your account. With a single click, physical mail is re-routed and shipped to any saved address — domestically or internationally.",
   },
   {
     icon: (
-      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
-        <rect x="8" y="8" width="48" height="48" rx="8" fill="#EBF2FA" stroke="#110E0B" strokeWidth="3" />
-        <path d="M22 22 L42 42 M42 22 L22 42" stroke="#3374B5" strokeWidth="4" strokeLinecap="round" />
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="ai-icon w-12 h-12">
+        <rect x="8" y="14" width="48" height="38" rx="6" fill="#EBF2FA" stroke="#2D100F" strokeWidth="3" />
+        <path d="M8 28 L56 28" stroke="#2D100F" strokeWidth="2.5" />
+        <path d="M16 36 L20 36 M26 36 L30 36 M36 36 L40 36 M46 36 L50 36" stroke="#E70013" strokeWidth="2.5" strokeLinecap="round" className="ai-bolt" />
+        <path d="M16 44 L48 44" stroke="#337485" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
       </svg>
     ),
     title: "Mail Discard & Shredding",
     desc: "Don't want it? Request secure shredding and disposal of any mail item directly from your dashboard. No clutter, no hassle — certified destruction on demand.",
   },
   {
-    icon: (
-      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
-        <rect x="6" y="20" width="52" height="36" rx="6" fill="#EBF2FA" stroke="#110E0B" strokeWidth="3" />
-        <path d="M6 32 L32 32 L58 32" stroke="#110E0B" strokeWidth="2" />
-        <rect x="20" y="8" width="24" height="16" rx="3" fill="#3374B5" stroke="#110E0B" strokeWidth="2.5" />
-      </svg>
-    ),
+    icon: <AiBox className="w-12 h-12" />,
     title: "Package Pickup & Notifications",
     desc: "Get an instant SMS and email alert the moment a package arrives. Pick it up at your convenience during business hours — held securely until you're ready.",
   },
   {
     icon: (
-      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
-        <path d="M14 52 L32 8 L50 52" stroke="#110E0B" strokeWidth="3" fill="none" strokeLinejoin="round" />
-        <circle cx="32" cy="16" r="6" fill="#3374B5" stroke="#110E0B" strokeWidth="2.5" />
-        <path d="M24 42 L40 42" stroke="#3374B5" strokeWidth="3" strokeLinecap="round" />
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="ai-icon w-12 h-12">
+        <rect x="14" y="6" width="36" height="44" rx="3" fill="#FFF9F3" stroke="#2D100F" strokeWidth="3" />
+        <path d="M22 18 L42 18 M22 26 L42 26 M22 34 L36 34" stroke="#337485" strokeWidth="2" strokeLinecap="round" />
+        <g className="ai-pin">
+          <circle cx="44" cy="44" r="10" fill="#E70013" stroke="#2D100F" strokeWidth="2.5" />
+          <path d="M40 44 L43 47 L48 41" stroke="#FFF9F3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
       </svg>
     ),
     title: "Notary Services",
@@ -59,7 +58,7 @@ const services = [
     cta: { label: "Learn More", href: "/notary" },
   },
   {
-    icon: <HeartBubbleIcon className="w-12 h-12" />,
+    icon: <AiHeart className="w-12 h-12" />,
     title: "Business Solutions",
     desc: "Full-service LLC formation, brand identity, website, SEO, and 12 months of mail service. Everything to launch your business under one roof.",
     cta: { label: "Learn More", href: "/business-solutions" },
@@ -117,7 +116,7 @@ export default function ServicesPage() {
               <div className="mb-5 text-4xl">{s.icon}</div>
               <h2
                 className="font-extrabold tracking-tight text-xl mb-3"
-                style={{ color: s.gold ? "#FFE4A0" : "#2D1D0F" }}
+                style={{ color: s.gold ? "#FFE4A0" : "#2D100F" }}
               >
                 {s.title}
               </h2>
@@ -131,7 +130,7 @@ export default function ServicesPage() {
                 <Link
                   href={s.cta.href}
                   className="mt-5 inline-flex items-center gap-2 font-bold text-sm hover:gap-3 transition-all"
-                  style={{ color: s.gold ? "#FFE4A0" : "#3374B5" }}
+                  style={{ color: s.gold ? "#FFE4A0" : "#337485" }}
                 >
                   {s.cta.label} <span>→</span>
                 </Link>
@@ -150,7 +149,7 @@ export default function ServicesPage() {
             <Link
               href="/signup"
               className="text-white font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-1"
-              style={{ background: "#3374B5", boxShadow: "var(--shadow-md)" }}
+              style={{ background: "#337485", boxShadow: "var(--shadow-md)" }}
             >
               Get a Mailbox
             </Link>

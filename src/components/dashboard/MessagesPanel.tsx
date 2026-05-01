@@ -35,7 +35,7 @@ export default function MessagesPanel({
       style={{
         background: "white",
         border: `1px solid ${BRAND.border}`,
-        boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+        boxShadow: "var(--shadow-cream-sm)",
       }}
     >
       <div
@@ -56,7 +56,7 @@ export default function MessagesPanel({
           className="text-[11px] font-black px-3 py-1.5 rounded-full text-white"
           style={{
             background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
-            boxShadow: "0 4px 14px rgba(51,116,181,0.32)",
+            boxShadow: "0 4px 14px rgba(51,116,133,0.32)",
           }}
         >
           Compose
@@ -103,19 +103,24 @@ export default function MessagesPanel({
             style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}`, color: BRAND.ink }}
           />
           <p className="text-[10px]" style={{ color: BRAND.inkFaint }}>
-            Attach images, videos, or PDFs by uploading after sending — feature
-            available shortly.
+            Need to attach a file? Reply to the email confirmation we send you and we&apos;ll add it to the thread.
           </p>
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={isPending}
-              className="px-4 py-2 rounded-xl text-xs font-black text-white disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black text-white disabled:opacity-60 disabled:cursor-wait"
               style={{
                 background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
               }}
             >
-              Send to staff
+              {isPending && (
+                <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+                  <path d="M21 12 a9 9 0 0 0 -9 -9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+              )}
+              {isPending ? "Sending…" : "Send to staff"}
             </button>
             <button
               type="button"
@@ -148,7 +153,7 @@ export default function MessagesPanel({
           {threads.map((t, i) => (
             <li
               key={t.id}
-              className="px-6 py-4 hover:bg-[#3374B5]/4 transition-colors flex items-start justify-between gap-4"
+              className="px-6 py-4 hover:bg-[#337485]/4 transition-colors flex items-start justify-between gap-4"
               style={{
                 borderBottom:
                   i < threads.length - 1 ? `1px solid ${BRAND.border}` : "none",

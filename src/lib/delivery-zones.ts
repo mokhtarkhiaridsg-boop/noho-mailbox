@@ -25,7 +25,7 @@ export const DELIVERY_ZONES: DeliveryZone[] = [
     rushMultiplier: 1.5,
     whiteGloveMultiplier: 2.2,
     etaWindow: "30–60 min",
-    color: "#3374B5",
+    color: "#337485",
   },
   {
     id: 2,
@@ -36,7 +36,7 @@ export const DELIVERY_ZONES: DeliveryZone[] = [
     rushMultiplier: 1.5,
     whiteGloveMultiplier: 2.2,
     etaWindow: "45–90 min",
-    color: "#2960A0",
+    color: "#23596A",
   },
   {
     id: 3,
@@ -69,7 +69,7 @@ export const DELIVERY_ZONES: DeliveryZone[] = [
     rushMultiplier: 1.6,
     whiteGloveMultiplier: 2.5,
     etaWindow: "2–4 hours",
-    color: "#2D1D0F",
+    color: "#2D100F",
   },
   {
     id: 6,

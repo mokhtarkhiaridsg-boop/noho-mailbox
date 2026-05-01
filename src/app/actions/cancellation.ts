@@ -11,7 +11,7 @@ import { revalidatePath } from "next/cache";
 import { createNotification } from "@/app/actions/notifications";
 
 function cuid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  return crypto.randomUUID();
 }
 
 // Member submits cancellation request
@@ -89,7 +89,7 @@ export async function getCancellationRequests() {
 
 // Admin: approve cancellation — starts 30-day grace period
 export async function approveCancellation(requestId: string, adminNotes?: string) {
-  await verifyAdmin();
+  const admin = await verifyAdmin();
 
   const req = await (prisma as any).cancellationRequest.findUnique({
     where: { id: requestId },
@@ -98,22 +98,42 @@ export async function approveCancellation(requestId: string, adminNotes?: string
   if (!req) return { error: "Request not found" };
   if (req.status !== "Pending") return { error: "Request is not in Pending state" };
 
-  const gracePeriodEnd = new Date();
-  gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 30);
+  // UTC-safe 30-day grace: was using local-TZ setDate which drifts at DST.
+  const gracePeriodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-  await (prisma as any).cancellationRequest.update({
-    where: { id: requestId },
-    data: {
-      status: "Approved",
-      gracePeriodEnd,
-      adminNotes: adminNotes ?? null,
-    },
-  });
-
-  await prisma.user.update({
-    where: { id: req.userId },
-    data: { status: "Cancelling" },
-  });
+  // Atomic: request status flip + user status flip + audit log all commit
+  // together. Was two separate awaits; partial failure left customer in a
+  // half-cancelled state with no record of who approved it.
+  await prisma.$transaction([
+    (prisma as any).cancellationRequest.update({
+      where: { id: requestId },
+      data: {
+        status: "Approved",
+        gracePeriodEnd,
+        adminNotes: adminNotes ?? null,
+      },
+    }),
+    prisma.user.update({
+      where: { id: req.userId },
+      data: { status: "Cancelling" },
+    }),
+    prisma.auditLog.create({
+      data: {
+        id: cuid(),
+        actorId: admin.id ?? "unknown",
+        actorRole: "ADMIN",
+        action: "cancellation.approve",
+        entityType: "User",
+        entityId: req.userId,
+        metadata: JSON.stringify({
+          cancellationRequestId: requestId,
+          gracePeriodEnd: gracePeriodEnd.toISOString(),
+          adminNotes: adminNotes ?? null,
+          customerReason: req.reason ?? null,
+        }),
+      },
+    }),
+  ]);
 
   await createNotification({
     userId: req.userId,
@@ -128,7 +148,7 @@ export async function approveCancellation(requestId: string, adminNotes?: string
 
 // Admin: complete cancellation — releases mailbox, marks record
 export async function completeCancellation(requestId: string) {
-  await verifyAdmin();
+  const admin = await verifyAdmin();
 
   const req = await (prisma as any).cancellationRequest.findUnique({
     where: { id: requestId },
@@ -137,7 +157,11 @@ export async function completeCancellation(requestId: string) {
   if (!req) return { error: "Request not found" };
   if (req.status !== "Approved") return { error: "Request must be Approved before completing" };
 
-  await Promise.all([
+  // Atomic: was Promise.all — partial failure left an inconsistent customer
+  // state (e.g. user still Active but request marked Completed). Now adds an
+  // audit row to the same transaction so account closures always have a
+  // record of who triggered them and when.
+  await prisma.$transaction([
     (prisma as any).cancellationRequest.update({
       where: { id: requestId },
       data: { status: "Completed", completedAt: new Date() },
@@ -148,6 +172,21 @@ export async function completeCancellation(requestId: string) {
         status: "Cancelled",
         mailboxStatus: "Inactive",
         planAutoRenew: false,
+      },
+    }),
+    prisma.auditLog.create({
+      data: {
+        id: cuid(),
+        actorId: admin.id ?? "unknown",
+        actorRole: "ADMIN",
+        action: "cancellation.complete",
+        entityType: "User",
+        entityId: req.userId,
+        metadata: JSON.stringify({
+          cancellationRequestId: requestId,
+          finalStatus: "Cancelled",
+          mailboxStatus: "Inactive",
+        }),
       },
     }),
   ]);

@@ -249,8 +249,8 @@ export default function PaymentForm({ amount, description, onSuccess, onError }:
           disabled={processing}
           className="w-full py-3.5 rounded-xl text-white font-black text-sm disabled:opacity-50 transition-opacity"
           style={{
-            background: "linear-gradient(135deg, #3374B5, #2055A0)",
-            boxShadow: "0 2px 10px rgba(51,116,181,0.3)",
+            background: "linear-gradient(135deg, #337485, #23596A)",
+            boxShadow: "0 2px 10px rgba(51,116,133,0.3)",
           }}
         >
           {processing ? "Processing..." : `Pay $${(amount / 100).toFixed(2)}`}

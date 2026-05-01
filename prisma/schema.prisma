@@ -43,8 +43,22 @@ model User {
   kycIdImage2Url            String?   // Second ID for CMRA compliance
   idPrimaryExpDate          String?   // e.g. "2027-03-15"
   idSecondaryExpDate        String?   // e.g. "2028-01-01"
+  idPrimaryType             String?   // "DL" | "Passport" | "State ID" | "Military" | etc.
+  idSecondaryType           String?
+  idPrimaryNumber           String?   // license #, passport #, policy #, lease #, etc. — free-form
+  idSecondaryNumber         String?
+  idPrimaryIssuer           String?   // optional: state / country / issuing authority
+  idSecondaryIssuer         String?
   planExpiresAt             DateTime?
   planAutoRenew             Boolean   @default(false)
+
+  // Box ownership type — required for CMRA compliance.
+  // A company cannot exist as an individual; if Business, an Owner must be on file.
+  boxType                   String?   // "Personal" | "Business"
+  businessName              String?   // Legal business name (only when boxType=Business)
+  businessOwnerName         String?   // Individual personally responsible
+  businessOwnerRelation     String?   // "Owner" | "Officer" | "Member" | "Director" | etc.
+  businessOwnerPhone        String?
 
   cardLast4         String?   // Last 4 digits of card on file
   cardBrand         String?   // "Visa" | "Mastercard" | "Amex" | "Discover"
@@ -69,8 +83,11 @@ model User {
   keyRequests         KeyRequest[]
   shippoLabels        ShippoLabel[]
   labelUploads        LabelUpload[]
+  labelOrders         LabelOrder[]
+  mailboxRenewals     MailboxRenewal[]
+  customerNotes       CustomerNote[]
   notifications       Notification[]
-  pickupToken             String?   // short token for QR express pickup
+  pickupToken             String?   @unique // short token for QR express pickup; unique because admin scans by token to find user
   referrals               Referral[] @relation("ReferrerReferrals")
   recurringDeliveries     RecurringDelivery[]
   cancellationRequests    CancellationRequest[]
@@ -80,6 +97,7 @@ model User {
   scheduledForwardings    ScheduledForwarding[]
   sharedAccessGranted     SharedMailboxAccess[] @relation("PrimaryUser")
   sharedAccessReceived    SharedMailboxAccess[] @relation("SharedUser")
+  posSales                POSSale[]
 }
 
 model SharedMailboxAccess {
@@ -150,6 +168,12 @@ model MailItem {
 
   user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   requests MailRequest[]
+
+  // Hot-path indexes — dashboard reads /admin reads scan by these constantly.
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([date])
 }
 
 model JunkSender {
@@ -282,6 +306,11 @@ model Payment {
 
   user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   invoices Invoice[]
+
+  // Admin payments view sorts by syncedAt + filters by status. Refund-cap
+  // computation reads sum(amount) by userId + status.
+  @@index([userId, status])
+  @@index([status, syncedAt])
 }
 
 model CatalogItem {
@@ -359,6 +388,11 @@ model WalletTransaction {
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   invoice Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  // Late-fee idempotency check (`billing.ts:runLateFeesBatch`) hits this
+  // index every batch. Dashboard wallet history sorts by createdAt.
+  @@index([userId, createdAt])
+  @@index([userId, kind, createdAt])
 }
 
 model MessageThread {
@@ -453,6 +487,14 @@ model AuditLog {
   metadata   String?  // JSON
   ipAddress  String?
   createdAt  DateTime @default(now())
+
+  // AuditLog grows fast and is read by entity (e.g. all logs for one user)
+  // and by action (e.g. all wallet topups in last 24h — used for the rolling
+  // cap in adminAddWalletCredit). No indexes meant a full-table scan.
+  @@index([entityType, entityId, createdAt])
+  @@index([action, entityId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([createdAt])
 }
 
 model Organization {
@@ -560,6 +602,48 @@ model Referral {
   creditedAt   DateTime?
 
   referrer User @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
+
+  // Referrer's "find my own pending code" query (referral.ts) filters by
+  // referrerId + refereeId IS NULL. Index speeds the lookup at scale.
+  @@index([referrerId, refereeId])
+  @@index([refereeId])
+}
+
+model BusinessClient {
+  id             String    @id @default(cuid())
+  name           String
+  email          String
+  phone          String?
+  package        String    @default("Custom")     // "Full Package" | "Formation Only" | "Branding Only" | "Website Only" | "Brand Management" | "Custom"
+  stage          String    @default("Intake")      // "Intake" | "In Progress" | "Review" | "Completed" | "Paused"
+  progress       Int       @default(0)             // 0-100
+  priceCents     Int       @default(0)             // total package price
+  paidCents      Int       @default(0)             // what's been paid so far
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model EmailLog {
+  id          String    @id @default(cuid())
+  userId      String?   // null if sent to non-user (e.g. contact form reply)
+  toEmail     String
+  fromEmail   String    @default("noreply@nohomailbox.org")
+  subject     String
+  body        String    // plain-text or HTML body
+  kind        String    // "password_reset" | "mail_arrived" | "receipt" | "welcome" | "contact_reply" | "notification" | "other"
+  status      String    @default("queued") // "queued" | "sent" | "failed" | "bounced"
+  provider    String?   // "resend" | "smtp" | null
+  providerId  String?   // provider's message id
+  error       String?   // error message if failed
+  createdAt   DateTime  @default(now())
+  sentAt      DateTime?
+
+  // Member dashboard email-history panel + admin email-logs panel both
+  // sort by createdAt scoped to a userId. Failed-delivery diagnostic
+  // queries filter by status.
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
 }
 
 model CancellationRequest {
@@ -573,4 +657,431 @@ model CancellationRequest {
   adminNotes     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Member requests credits — admin texts a Square payment link, then marks it
+// "Paid" which credits the wallet and records a WalletTransaction.
+model CreditRequest {
+  id            String    @id @default(cuid())
+  userId        String
+  amountCents   Int       // requested top-up amount
+  status        String    @default("Pending") // "Pending" | "LinkSent" | "Paid" | "Cancelled"
+  squareLink    String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  linkSentAt    DateTime?
+  paidAt        DateTime?
+}
+
+// CMRA quarterly customer-record certification: every 90 days, admin uploads
+// a signed PDF (or stores a generated one) per customer attesting that the
+// IDs / Form 1583 on file are still valid and mail is being delivered.
+model QuarterlyStatement {
+  id          String   @id @default(cuid())
+  userId      String
+  year        Int
+  quarter     Int      // 1, 2, 3, 4
+  fileUrl     String?  // PDF / image of the signed statement
+  periodStart String?  // "2026-01-01"
+  periodEnd   String?  // "2026-03-31"
+  notes       String?
+  uploadedBy  String?  // admin user id
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, year, quarter])
+  @@index([userId])
+}
+
+// Customer pre-pays for a shipping label via the public /shipping page.
+// Customer sees Shippo cost + 10% margin. Admin texts a Square link, marks
+// paid, then prints the actual Shippo label which is linked back here.
+model LabelOrder {
+  id                  String    @id @default(cuid())
+  userId              String?   // null for guest orders
+
+  // Customer contact (always required)
+  customerName        String
+  customerEmail       String
+  customerPhone       String?
+
+  // Origin: defaults to NOHO store; customers can also have us pick up
+  fromKind            String    @default("store") // "store" | "customer"
+  fromName            String?
+  fromCompany         String?
+  fromStreet          String?
+  fromCity            String?
+  fromState           String?
+  fromZip             String?
+
+  // Destination
+  toName              String
+  toCompany           String?
+  toStreet            String
+  toCity              String
+  toState             String
+  toZip               String
+
+  // Parcel
+  lengthIn            Float
+  widthIn             Float
+  heightIn            Float
+  weightOz            Float
+
+  // Selected rate snapshot (rate id may expire after ~7 days; we re-fetch if so)
+  rateObjectId        String?
+  carrier             String    // "USPS" | "UPS" | "FedEx" | "DHL"
+  servicelevel        String    // "Priority Mail" | "Ground" etc
+  shippoCostCents     Int       // raw Shippo cost (in cents)
+  customerPriceCents  Int       // what we charge (Shippo cost x 1.10, rounded)
+  marginCents         Int       // customerPriceCents - shippoCostCents
+  estimatedDays       Int?
+
+  // Status flow
+  status              String    @default("AwaitingPayment") // "AwaitingPayment" | "LinkSent" | "Paid" | "Printed" | "Cancelled"
+  squareLink          String?
+  linkSentAt          DateTime?
+  paidAt              DateTime?
+  printedAt           DateTime?
+  cancelledAt         DateTime?
+
+  // Linked Shippo label after admin prints (no FK relation to keep schema simple)
+  shippoLabelId       String?
+
+  notes               String?
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([userId])
+}
+
+
+// Admin-driven mailbox renewal — captures one renewal event with full snapshot
+// of plan + dates so receipts can be regenerated and the renewal cleanly
+// audited. Receipt is sent via Resend at process time.
+model MailboxRenewal {
+  id                 String    @id @default(cuid())
+  userId             String
+  termMonths         Int
+  planAtRenewal      String    // snapshot: "Basic" | "Business" | "Premium" etc
+  amountCents        Int
+  paymentMethod      String    // "Square" | "Cash" | "CardOnFile"
+  paidAt             DateTime
+  prevPlanDueDate    String?
+  newPlanDueDate     String
+  prevPlanExpiresAt  DateTime?
+  newPlanExpiresAt   DateTime
+  receiptSentAt      DateTime?
+  receiptEmailLogId  String?
+  notes              String?
+  createdById        String?
+  createdAt          DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Admin-authored notes attached to a customer — daily CRM activity log.
+// "kind" is free-form so admins can categorize ("call", "visit", "compliance",
+// "billing", "issue") without locking a taxonomy.
+model CustomerNote {
+  id          String   @id @default(cuid())
+  userId      String
+  authorId    String?  // admin user id
+  authorName  String?  // snapshot in case admin deleted later
+  kind        String   @default("note") // "note" | "call" | "visit" | "compliance" | "billing" | "issue" | "system"
+  body        String
+  pinned      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+// Physical key inventory — every issued / returned / lost key tracked.
+// One customer can have multiple keys (master + spare); one key belongs to
+// one suite at a time but may be reissued to a new tenant after return.
+model MailboxKey {
+  id            String    @id @default(cuid())
+  keyTag        String    @unique  // physical tag/etching e.g. "K-0142"
+  suiteNumber   String
+  status        String    @default("InStock") // "InStock" | "Issued" | "Returned" | "Lost" | "Retired"
+  issuedToId    String?   // user
+  issuedAt      DateTime?
+  returnedAt    DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([suiteNumber])
+  @@index([status])
+}
+
+// External referral partner — CPAs, attorneys, web designers, insurance agents.
+// Distinct from the customer-to-customer Referral model (above).
+model Partner {
+  id              String              @id @default(cuid())
+  businessName    String
+  contactName     String
+  email           String              @unique
+  phone           String?
+  category        String              // "CPA / Bookkeeper" | "Immigration Attorney" | "Business / Corporate Attorney" | "Web Designer / Developer" | "Brand Designer / Agency" | "Insurance Agent" | "Real Estate Agent / Broker" | "Coach / Consultant" | "Other"
+  code            String              @unique  // referral code partners share with their clients
+  commissionRate  Float               @default(0.15)  // 15% default
+  status          String              @default("pending")  // "pending" | "active" | "paused" | "terminated"
+  notes           String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  commissions     PartnerCommission[]
+
+  @@index([code])
+  @@index([status])
+  @@index([category])
+}
+
+// ─── SaaS multi-tenancy ──────────────────────────────────────────────────────
+// These three models support licensing the platform to other CMRA operators.
+// Initially they exist standalone (no tenantId on existing models yet — v1
+// SaaS customers run side-by-side with NOHO Mailbox direct customers).
+// Phase 2 will add `tenantId` to User, MailItem, DeliveryOrder, etc.
+
+// A licensed CMRA operator running on the platform.
+model Tenant {
+  id              String              @id @default(cuid())
+  // Display name + slug for subdomain (e.g. "acme" → acme.nohomailbox.org)
+  name            String
+  slug            String              @unique
+  // Owner contact
+  ownerName       String
+  ownerEmail      String              @unique
+  ownerPhone      String?
+  // Storefront + branding
+  legalAddress    String?             // operator&apos;s storefront address
+  legalCity       String?
+  legalState      String?
+  legalZip        String?
+  brandPrimary    String?             // primary brand color hex
+  brandLogoUrl    String?             // hosted logo URL (Vercel Blob)
+  // Operator status
+  status          String              @default("trial") // "trial" | "active" | "paused" | "terminated"
+  trialEndsAt     DateTime?
+  // SaaS commercial
+  tier            String              @default("Solo") // "Solo" | "Multi-Location" | "Enterprise"
+  pricePerMonthCents  Int             @default(29900)  // $299 default
+  customerCount       Int             @default(0)      // # of CMRA-end-customers (their customers, not ours)
+  locationCount       Int             @default(1)
+  // Stripe / billing
+  stripeCustomerId    String?         @unique
+  stripeSubscriptionId String?        @unique
+  // Notes
+  notes           String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  subscriptions   TenantSubscription[]
+  billingEvents   TenantBillingEvent[]
+
+  @@index([status])
+  @@index([tier])
+}
+
+// One row per Stripe subscription state-change for audit trail.
+model TenantSubscription {
+  id                String   @id @default(cuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  stripeSubscriptionId String?
+  status            String   // "trialing" | "active" | "past_due" | "canceled" | "unpaid"
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAt          DateTime?
+  canceledAt        DateTime?
+  // Snapshot pricing at the time
+  tier              String
+  pricePerMonthCents Int
+  createdAt         DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+// Per-tenant billing event log (charges, refunds, failures).
+model TenantBillingEvent {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  kind        String   // "charge_succeeded" | "charge_failed" | "refund" | "subscription_updated" | "subscription_canceled"
+  amountCents Int      @default(0)
+  currency    String   @default("USD")
+  stripeId    String?  // Stripe event/charge id for traceability
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([kind])
+}
+
+// Newsletter subscriber list — opt-in only, captured from footer / resources / popup.
+model NewsletterSubscriber {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  source          String    // "footer" | "resources" | "exit-intent" | "blog" | "manual"
+  subscribedAt    DateTime  @default(now())
+  confirmedAt     DateTime?
+  unsubscribedAt  DateTime?
+  notes           String?
+
+  @@index([email])
+  @@index([subscribedAt])
+}
+
+// iter-57: External (non-customer) carrier-pickup dropoffs. The bureau
+// acts as an access point for people who already have a pre-paid label
+// (USPS Click-N-Ship, FedEx Drop & Go, UPS My Choice, etc.) and just
+// need somewhere to leave the package for the carrier to pick up. Not
+// a MailItem — it never enters our customer's inbound flow; the package
+// belongs to the dropper-offer who brought it in already labeled.
+//
+// Lifecycle:
+//   "Awaiting Carrier" → admin holds it on the outgoing shelf
+//   "Picked Up by Carrier" → terminal; carrier swept it that day
+//   "Returned" → terminal; couldn't be sent (rare)
+//
+// All fields beyond tracking + carrier are optional — a typical drop is
+// "USPS · 9400 1112 ..." and that's it. Sender/receiver names + photo
+// are useful for high-value packages or when the dropper-offer wants a
+// printable receipt as proof.
+model ExternalDropoff {
+  id                String    @id @default(cuid())
+  trackingNumber    String
+  carrier           String
+  senderName        String?    // optional — who's shipping
+  senderPhone       String?    // optional — for follow-up if package goes missing
+  receiverName      String?    // optional — destination recipient
+  destination       String?    // optional free-form: "Phoenix, AZ 85001"
+  exteriorImageUrl  String?    // optional Vercel Blob URL
+  notes             String?    // free-form admin notes
+  status            String     @default("Awaiting Carrier")
+  loggedById        String     // admin user who took the dropoff
+  carrierPickedUpAt DateTime?  // null until carrier sweep
+  createdAt         DateTime   @default(now())
+
+  @@index([status, createdAt])
+  @@index([trackingNumber])
+  @@index([createdAt])
+}
+
+// Each closed referral that earns a partner commission.
+model PartnerCommission {
+  id              String    @id @default(cuid())
+  partnerId       String
+  partner         Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  prospectName    String
+  prospectEmail   String?
+  prospectPhone   String?
+  product         String    // "Bundle" | "Retainer" | "Mailbox" | "Delivery" | "Other"
+  invoiceCents    Int       @default(0)     // what the customer paid
+  commissionCents Int       @default(0)     // what the partner earns
+  status          String    @default("lead")  // "lead" | "quoted" | "closed" | "cancelled" | "paid"
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  closedAt        DateTime?
+  paidAt          DateTime?
+
+  @@index([partnerId])
+  @@index([status])
+}
+
+// ─── POS / Cash Register ─────────────────────────────────────────────────
+// Counter-side point-of-sale for one-off, walk-in, or augmenting transactions
+// (mailbox renewals, supplies, notary, key replacement, custom items, tips).
+// Distinct from MailboxRenewal (renewal-only flow) and Payment (Square sync
+// snapshot) so the register has its own auditable line-item ledger.
+model POSSale {
+  id              String        @id @default(cuid())
+  number          Int           @unique   // human-friendly receipt # — assigned at create time
+  cashierId       String?       // admin who rang it up (snapshot)
+  cashierName     String?
+  customerId      String?       // optional — links to User (for member discount, wallet credit)
+  customerName    String?       // snapshot for receipt
+  customerPhone   String?
+  customerEmail   String?
+  customerSuite   String?
+
+  // Money — all in cents
+  subtotalCents   Int           @default(0)
+  discountCents   Int           @default(0)
+  taxCents        Int           @default(0)
+  tipCents        Int           @default(0)
+  totalCents      Int           @default(0)
+
+  // Cash specifics
+  cashTenderedCents Int?         // amount handed over (for change calc)
+  cashChangeCents   Int?         // change due back
+
+  // Payment
+  paymentMethod   String        // "Cash" | "Zelle" | "Square" | "CardOnFile" | "Wallet" | "Custom"
+  customMethodLabel String?     // when paymentMethod = "Custom" (e.g. "Venmo", "Check #1042", "ACH")
+  paymentRef      String?       // Square payment id / Zelle confirm code / check #
+  zelleEmail      String?       // snapshot of nohomailbox@gmail.com for receipt copy
+
+  // Lifecycle
+  status          String        @default("Open")  // "Open" | "Paid" | "Voided" | "Refunded"
+  paidAt          DateTime?
+  voidedAt        DateTime?
+  voidReason      String?
+  refundedAt      DateTime?
+  refundReason    String?
+
+  // Receipt copies
+  receiptPrintedAt DateTime?
+  receiptEmailedAt DateTime?
+  receiptSmsedAt   DateTime?
+
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  customer User?         @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  items    POSLineItem[]
+
+  @@index([customerId])
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([cashierId])
+}
+
+model POSLineItem {
+  id            String   @id @default(cuid())
+  saleId        String
+  // Product snapshot
+  sku           String?  // optional SKU for catalog item; null for custom line
+  name          String   // display name on receipt
+  category      String?  // "Mailbox" | "Supplies" | "Service" | "Notary" | "Shipping" | "Custom" | "Tip"
+  unitPriceCents Int     // price per unit at time of sale
+  quantity      Int      @default(1)
+  discountCents Int      @default(0) // line-level discount
+  taxCents      Int      @default(0)
+  totalCents    Int      // (unitPriceCents * quantity) - discountCents + taxCents
+  // For mailbox renewals rung up via POS, link back to the renewal record
+  linkedRenewalId String?
+  // Original notes / serial / variant
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  sale POSSale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@index([saleId])
+  @@index([sku])
 }

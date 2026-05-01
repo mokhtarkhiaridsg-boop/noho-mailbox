@@ -32,7 +32,7 @@ export default function InvoicesPanel({
       style={{
         background: "white",
         border: `1px solid ${BRAND.border}`,
-        boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+        boxShadow: "var(--shadow-cream-sm)",
       }}
     >
       <div
@@ -85,10 +85,10 @@ export default function InvoicesPanel({
                   style={{
                     background:
                       inv.status === "Paid"
-                        ? "rgba(34,139,34,0.12)"
+                        ? "var(--color-success-soft)"
                         : BRAND.blueSoft,
                     color:
-                      inv.status === "Paid" ? "#1a8a1a" : BRAND.blueDeep,
+                      inv.status === "Paid" ? "#166534" : BRAND.blueDeep,
                   }}
                 >
                   {inv.status}

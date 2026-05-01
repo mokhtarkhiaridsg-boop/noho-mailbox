@@ -99,9 +99,9 @@ function TwoFactorPanel({ enabled }: { enabled: boolean }) {
           </p>
         </div>
         <span
-          className="text-[10px] font-black px-2 py-0.5 rounded-full"
+          className="text-[11px] font-black px-2 py-0.5 rounded-full uppercase tracking-[0.10em]"
           style={{
-            background: isEnabled ? "#dcfce7" : "rgba(14,34,64,0.08)",
+            background: isEnabled ? "var(--color-success-soft)" : BRAND.brownSoft,
             color: isEnabled ? "#166534" : BRAND.inkSoft,
           }}
         >
@@ -120,7 +120,7 @@ function TwoFactorPanel({ enabled }: { enabled: boolean }) {
             className="text-xs font-black px-4 py-2 rounded-xl text-white disabled:opacity-50"
             style={{
               background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
-              boxShadow: "0 4px 14px rgba(51,116,181,0.32)",
+              boxShadow: "0 4px 14px rgba(51,116,133,0.32)",
             }}
           >
             Enable 2FA
@@ -228,7 +228,11 @@ function SharedAccessCard({ setToast }: { setToast: (s: string) => void }) {
 
   function revoke(id: string) {
     startTransition(async () => {
-      await revokeSharedAccess(id);
+      const res = await revokeSharedAccess(id);
+      if (res && "error" in res && res.error) {
+        setToast(`Couldn't revoke: ${res.error}`);
+        return;
+      }
       setToast("Access revoked");
       load();
     });
@@ -238,7 +242,10 @@ function SharedAccessCard({ setToast }: { setToast: (s: string) => void }) {
     <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>👥 Shared Mailbox Access</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="6" r="2.5" /><circle cx="11" cy="7" r="2" /><path d="M2 13 C2 10 4 9 6 9 C8 9 10 10 10 13" /><path d="M10 12 C10 10 11 9 13 9 C14 9 14.5 9.5 14.5 9.5" /></svg>
+            Shared Mailbox Access
+          </p>
           <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Let another NOHO member view your mail</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="text-xs font-black px-3 py-1 rounded-lg text-white" style={{ background: BRAND.blue }}>
@@ -316,7 +323,11 @@ function GuestPickupCard({ setToast }: { setToast: (s: string) => void }) {
 
   function revoke(id: string) {
     startTransition(async () => {
-      await revokeGuestPickup(id);
+      const res = await revokeGuestPickup(id);
+      if (res && "error" in res && res.error) {
+        setToast(`Couldn't revoke: ${res.error}`);
+        return;
+      }
       setToast("Authorization revoked");
       load();
     });
@@ -326,7 +337,10 @@ function GuestPickupCard({ setToast }: { setToast: (s: string) => void }) {
     <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>👤 Guest Pickup</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="6" r="3" /><path d="M2 14 C2 11 5 10 8 10 C11 10 14 11 14 14" /></svg>
+            Guest Pickup
+          </p>
           <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Authorize someone else to pick up your mail</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="text-xs font-black px-3 py-1 rounded-lg text-white" style={{ background: BRAND.blue }}>
@@ -417,11 +431,14 @@ function ScheduledForwardingCard({ addresses, setToast }: { addresses: Forwardin
     <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>📅 Scheduled Forwarding</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="12" height="11" rx="1.5" /><path d="M2 6 L14 6 M5 1.5 L5 4 M11 1.5 L11 4" /><circle cx="8" cy="10" r="0.8" fill="currentColor" /></svg>
+            Scheduled Forwarding
+          </p>
           <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Auto-forward all mail on a regular schedule</p>
         </div>
         {sf?.frequency && (
-          <span className="text-[10px] font-black px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(51,116,181,0.15)", color: BRAND.blueDeep }}>
+          <span className="text-[10px] font-black px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(51,116,133,0.15)", color: BRAND.blueDeep }}>
             {sf.frequency}
           </span>
         )}
@@ -523,11 +540,14 @@ function VacationHoldCard({ setToast }: { setToast: (s: string) => void }) {
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>🏖️ Vacation Hold</p>
-          <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Auto-hold all mail while you're away</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 8 C2 4 5 2 8 2 C11 2 14 4 14 8" /><path d="M2 8 L14 8" /><path d="M8 2 L8 8" /><path d="M8 9 L8 13 C8 14 8.5 14.5 9.5 14.5 C10.5 14.5 11 13.5 11 12.5" /></svg>
+            Vacation Hold
+          </p>
+          <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Auto-hold all mail while you&apos;re away</p>
         </div>
         {hold?.active && (
-          <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: "rgba(234,179,8,0.15)", color: "#92400e" }}>
+          <span className="text-[11px] font-black px-2 py-0.5 rounded-full uppercase tracking-[0.10em]" style={{ background: "var(--color-warning-soft)", color: "#7C2D12" }}>
             Active
           </span>
         )}
@@ -591,6 +611,7 @@ function VacationHoldCard({ setToast }: { setToast: (s: string) => void }) {
 function JunkSendersCard() {
   const [senders, setSenders] = useState<{ id: string; sender: string }[] | null>(null);
   const [pending, startTransition] = useTransition();
+  const [unblockErr, setUnblockErr] = useState<string | null>(null);
 
   async function load() {
     const data = await getMyJunkSenders();
@@ -601,7 +622,13 @@ function JunkSendersCard() {
 
   function unblock(id: string) {
     startTransition(async () => {
-      await removeJunkSender(id);
+      const res = await removeJunkSender(id);
+      if (res && "error" in res && res.error) {
+        setUnblockErr(`Couldn't unblock: ${res.error}`);
+        setTimeout(() => setUnblockErr(null), 3000);
+        return;
+      }
+      setUnblockErr(null);
       load();
     });
   }
@@ -613,7 +640,13 @@ function JunkSendersCard() {
       className="rounded-2xl p-4 space-y-3"
       style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}
     >
-      <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>🚫 Blocked Senders ({senders.length})</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="8" cy="8" r="6" /><path d="M3.5 3.5 L12.5 12.5" /></svg>
+        Blocked Senders ({senders.length})
+      </p>
+      {unblockErr && (
+        <p className="text-[11px] font-bold" style={{ color: "#b91c1c" }}>{unblockErr}</p>
+      )}
       <div className="space-y-1.5">
         {senders.map((s) => (
           <div key={s.id} className="flex items-center justify-between gap-2 rounded-xl px-3 py-2" style={{ background: "white" }}>
@@ -652,6 +685,11 @@ export default function SettingsPanel({
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [loadingCode, setLoadingCode] = useState(false);
   const [copied, setCopied] = useState(false);
+  // Inline forms for key + cancel — replaces the window.prompt() flow
+  const [keyFormOpen, setKeyFormOpen] = useState(false);
+  const [keyReason, setKeyReason] = useState("Lost key");
+  const [cancelFormOpen, setCancelFormOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   async function handleGetCode() {
     setLoadingCode(true);
@@ -673,7 +711,7 @@ export default function SettingsPanel({
       style={{
         background: "white",
         border: `1px solid ${BRAND.border}`,
-        boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+        boxShadow: "var(--shadow-cream-sm)",
       }}
     >
       <div className="flex items-center gap-2.5 mb-5">
@@ -799,24 +837,57 @@ export default function SettingsPanel({
               Latest request: <strong>{keyRequests[0].status}</strong>
             </p>
           )}
-          <button
-            disabled={isPending}
-            onClick={() => {
-              const reason = window.prompt(
-                "Briefly describe why you need a new key:",
-                "Lost key"
-              );
-              if (!reason) return;
-              runAction("Key request submitted", () => requestNewKey(reason));
-            }}
-            className="text-xs font-black px-4 py-2 rounded-xl text-white disabled:opacity-50"
-            style={{
-              background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
-              boxShadow: "0 4px 14px rgba(51,116,181,0.32)",
-            }}
-          >
-            Request New Key
-          </button>
+          {!keyFormOpen ? (
+            <button
+              disabled={isPending}
+              onClick={() => setKeyFormOpen(true)}
+              className="text-xs font-black px-4 py-2 rounded-xl text-white disabled:opacity-50"
+              style={{
+                background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
+                boxShadow: "0 4px 14px rgba(51,116,133,0.32)",
+              }}
+            >
+              Request New Key
+            </button>
+          ) : (
+            <div className="space-y-2 rounded-xl p-3" style={{ background: BRAND.bg, border: `1px solid ${BRAND.border}` }}>
+              <label className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>
+                Reason for new key
+              </label>
+              <textarea
+                value={keyReason}
+                onChange={(e) => setKeyReason(e.target.value)}
+                rows={2}
+                placeholder="e.g. Lost key, broken key, etc."
+                className="w-full text-sm rounded-lg px-3 py-2 focus:outline-none resize-none"
+                style={{ background: "white", border: `1px solid ${BRAND.border}`, color: BRAND.ink }}
+              />
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => { setKeyFormOpen(false); setKeyReason("Lost key"); }}
+                  disabled={isPending}
+                  className="text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-50"
+                  style={{ color: BRAND.inkSoft, background: "transparent" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={isPending || !keyReason.trim()}
+                  onClick={() => {
+                    const reason = keyReason.trim();
+                    if (!reason) return;
+                    runAction("Key request submitted", () => requestNewKey(reason));
+                    setKeyFormOpen(false);
+                    setKeyReason("Lost key");
+                  }}
+                  className="text-xs font-black px-3 py-1.5 rounded-lg text-white disabled:opacity-50"
+                  style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+                >
+                  Submit Request
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <TwoFactorPanel enabled={user.totpEnabled} />
@@ -824,7 +895,13 @@ export default function SettingsPanel({
         {/* Referral Program */}
         <div className="rounded-2xl p-5 space-y-3" style={{ background: BRAND.bgDeep, border: `1px solid ${BRAND.border}` }}>
           <div className="flex items-center gap-2">
-            <span className="text-lg">🎁</span>
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#E70013" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round">
+              <rect x="3" y="9" width="18" height="12" rx="1.5" />
+              <rect x="2" y="6" width="20" height="4" rx="1" />
+              <path d="M12 6 L12 21" />
+              <path d="M7 6 C7 3 9 2 11 2 C12 2 12 6 12 6" />
+              <path d="M17 6 C17 3 15 2 13 2 C12 2 12 6 12 6" />
+            </svg>
             <div>
               <p className="font-black text-sm" style={{ color: BRAND.ink }}>Refer a Friend — Get $10</p>
               <p className="text-[11px]" style={{ color: BRAND.inkFaint }}>You both get $10 in wallet credit when they sign up with your code</p>
@@ -876,21 +953,55 @@ export default function SettingsPanel({
           <p className="text-xs text-gray-500">
             Request to close your mailbox. After approval you&apos;ll have 30 days to collect remaining mail.
           </p>
-          <button
-            disabled={isPending}
-            onClick={() => {
-              const reason = window.prompt("Please tell us why you want to cancel:");
-              if (!reason) return;
-              startTransition(async () => {
-                const res = await requestCancellation(reason);
-                if ("error" in res && res.error) setToast(res.error);
-                else setToast("Cancellation request submitted. We'll review it shortly.");
-              });
-            }}
-            className="text-xs font-black px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40 transition-colors"
-          >
-            Request Cancellation
-          </button>
+          {!cancelFormOpen ? (
+            <button
+              disabled={isPending}
+              onClick={() => setCancelFormOpen(true)}
+              className="text-xs font-black px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40 transition-colors"
+            >
+              Request Cancellation
+            </button>
+          ) : (
+            <div className="space-y-2 rounded-xl p-3 mt-2" style={{ background: "rgba(231,0,19,0.04)", border: "1px solid rgba(231,0,19,0.18)" }}>
+              <label className="text-[10px] font-black uppercase tracking-[0.16em] text-red-700">
+                Tell us why you&apos;re leaving
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                rows={3}
+                placeholder="Optional — but helpful for us to improve the service…"
+                className="w-full text-sm rounded-lg px-3 py-2 focus:outline-none resize-none"
+                style={{ background: "white", border: `1px solid ${BRAND.border}`, color: BRAND.ink }}
+              />
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => { setCancelFormOpen(false); setCancelReason(""); }}
+                  disabled={isPending}
+                  className="text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-50"
+                  style={{ color: BRAND.inkSoft, background: "transparent" }}
+                >
+                  Never mind
+                </button>
+                <button
+                  disabled={isPending}
+                  onClick={() => {
+                    const reason = cancelReason.trim() || "(no reason provided)";
+                    startTransition(async () => {
+                      const res = await requestCancellation(reason);
+                      if ("error" in res && res.error) setToast(res.error);
+                      else setToast("Cancellation request submitted. We'll review it shortly.");
+                    });
+                    setCancelFormOpen(false);
+                    setCancelReason("");
+                  }}
+                  className="text-xs font-black px-3 py-1.5 rounded-lg border border-red-400 text-red-700 hover:bg-red-100 disabled:opacity-50 transition-colors"
+                >
+                  Submit Cancellation
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <button

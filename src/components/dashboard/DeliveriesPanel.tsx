@@ -44,11 +44,14 @@ function RecurringDeliveryCard({ addresses }: { addresses?: { id: string; label:
     <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>🔄 Recurring Delivery</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 8 C2 4.5 5 2 8 2 C10.5 2 12.5 3.5 13.5 5.5" /><path d="M14 8 C14 11.5 11 14 8 14 C5.5 14 3.5 12.5 2.5 10.5" /><path d="M11 5.5 L13.5 5.5 L13.5 3 M5 10.5 L2.5 10.5 L2.5 13" /></svg>
+            Recurring Delivery
+          </p>
           <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Auto-delivery on a set schedule</p>
         </div>
         {current?.frequency && (
-          <span className="text-[10px] font-black px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(51,116,181,0.15)", color: BRAND.blueDeep }}>
+          <span className="text-[10px] font-black px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(51,116,133,0.15)", color: BRAND.blueDeep }}>
             {current.frequency}
           </span>
         )}
@@ -193,7 +196,7 @@ export default function DeliveriesPanel({
         style={{
           background: "white",
           border: `1px solid ${BRAND.border}`,
-          boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+          boxShadow: "var(--shadow-cream-sm)",
         }}
       >
         <div className="flex items-center justify-between mb-4">
@@ -316,7 +319,7 @@ export default function DeliveriesPanel({
         style={{
           background: "white",
           border: `1px solid ${BRAND.border}`,
-          boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+          boxShadow: "var(--shadow-cream-sm)",
         }}
       >
         <div
@@ -362,9 +365,9 @@ export default function DeliveriesPanel({
                     style={{
                       background:
                         d.status === "Delivered"
-                          ? "rgba(34,139,34,0.12)"
+                          ? "var(--color-success-soft)"
                           : BRAND.blueSoft,
-                      color: d.status === "Delivered" ? "#1a8a1a" : BRAND.blueDeep,
+                      color: d.status === "Delivered" ? "#166534" : BRAND.blueDeep,
                     }}
                   >
                     {d.status}
@@ -379,7 +382,7 @@ export default function DeliveriesPanel({
                       <div
                         className="w-2 h-2 rounded-full"
                         style={{
-                          background: s.done ? BRAND.blue : "rgba(14,34,64,0.15)",
+                          background: s.done ? BRAND.blue : BRAND.brownSoft,
                         }}
                       />
                       {idx < 3 && (
@@ -388,7 +391,7 @@ export default function DeliveriesPanel({
                           style={{
                             background: s.done
                               ? BRAND.blue
-                              : "rgba(14,34,64,0.1)",
+                              : BRAND.brownSoft,
                           }}
                         />
                       )}
@@ -418,13 +421,14 @@ export default function DeliveriesPanel({
         style={{
           background: "white",
           border: `1px solid ${BRAND.border}`,
-          boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+          boxShadow: "var(--shadow-cream-sm)",
         }}
       >
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="font-black text-xs uppercase tracking-[0.16em]" style={{ color: BRAND.ink }}>
-              📦 Drop Off a Pre-Paid Label
+            <h2 className="font-black text-xs uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.ink }}>
+              <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"><path d="M8 1 L14 4 L14 12 L8 15 L2 12 L2 4 Z" /><path d="M2 4 L8 7 L14 4" /><path d="M8 7 L8 15" /></svg>
+              Drop Off a Pre-Paid Label
             </h2>
             <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkFaint }}>
               Print your label at home, drop it off — we handle the rest.
@@ -457,7 +461,7 @@ export default function DeliveriesPanel({
                 className="rounded-2xl border-2 border-dashed p-6 text-center cursor-pointer transition-colors"
                 style={{
                   borderColor: labelFile ? BRAND.blue : BRAND.border,
-                  background: labelFile ? "rgba(51,116,181,0.04)" : BRAND.bgDeep,
+                  background: labelFile ? BRAND.bgDeep : BRAND.bgDeep,
                 }}
                 onClick={() => document.getElementById("label-file-input")?.click()}
               >
@@ -535,12 +539,24 @@ export default function DeliveriesPanel({
         {!showLabelUpload && (
           <div className="grid grid-cols-3 gap-3">
             {[
-              { icon: "🖨️", title: "Print at Home", desc: "Print your prepaid label from any printer" },
-              { icon: "🏪", title: "Drop Off", desc: "Bring it to NOHO Mailbox — we scan & submit" },
-              { icon: "📬", title: "We Ship It", desc: "Your package is handed off to the carrier same day" },
+              {
+                title: "Print at Home",
+                desc: "Print your prepaid label from any printer",
+                svg: <svg viewBox="0 0 24 24" className="w-6 h-6 mx-auto" fill="none" stroke="#337485" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="3" width="12" height="6" /><rect x="3" y="9" width="18" height="9" rx="1.5" /><rect x="6" y="14" width="12" height="6" /><circle cx="17" cy="12" r="0.8" fill="currentColor" /></svg>,
+              },
+              {
+                title: "Drop Off",
+                desc: "Bring it to NOHO Mailbox — we scan & submit",
+                svg: <svg viewBox="0 0 24 24" className="w-6 h-6 mx-auto" fill="none" stroke="#337485" strokeWidth="1.8" strokeLinejoin="round"><path d="M3 9 L4 4 L20 4 L21 9" /><rect x="3" y="9" width="18" height="12" /><rect x="10" y="13" width="4" height="8" /></svg>,
+              },
+              {
+                title: "We Ship It",
+                desc: "Your package is handed off to the carrier same day",
+                svg: <svg viewBox="0 0 24 24" className="w-6 h-6 mx-auto" fill="none" stroke="#337485" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"><rect x="2" y="9" width="13" height="9" rx="1" /><path d="M15 12 L19 12 L21 14 L21 18 L15 18" /><circle cx="6" cy="19" r="1.5" /><circle cx="18" cy="19" r="1.5" /></svg>,
+              },
             ].map((s) => (
               <div key={s.title} className="rounded-2xl p-3 text-center" style={{ background: BRAND.bgDeep }}>
-                <p className="text-xl mb-1">{s.icon}</p>
+                <div className="mb-1">{s.svg}</div>
                 <p className="font-black text-[11px]" style={{ color: BRAND.ink }}>{s.title}</p>
                 <p className="text-[10px] mt-0.5" style={{ color: BRAND.inkFaint }}>{s.desc}</p>
               </div>

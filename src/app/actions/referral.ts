@@ -5,7 +5,7 @@ import { verifySession } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 
 function cuid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  return crypto.randomUUID();
 }
 
 const REFERRAL_CREDIT_CENTS = 1000; // $10
@@ -29,7 +29,7 @@ export async function getOrCreateMyReferralCode(): Promise<{ code: string }> {
   });
 
   const base = (user?.suiteNumber ?? user?.name?.slice(0, 4) ?? "noho").toUpperCase();
-  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+  const suffix = crypto.randomUUID().replace(/-/g, "").slice(0, 4).toUpperCase();
   const code = `${base}-${suffix}`;
 
   await prisma.referral.create({
@@ -70,58 +70,8 @@ export async function getMyReferralStats() {
   };
 }
 
-// ─── Apply a referral code at signup ─────────────────────────────────────────
-// Called during registration when user enters a referral code
-
-export async function applyReferralCode(code: string, newUserId: string): Promise<boolean> {
-  const referral = await prisma.referral.findFirst({
-    where: { code: code.toUpperCase().trim(), refereeId: null, status: "pending" },
-  });
-
-  if (!referral) return false;
-  if (referral.referrerId === newUserId) return false; // can't refer yourself
-
-  // Credit both users
-  await Promise.all([
-    // Link the referral to the new user
-    prisma.referral.update({
-      where: { id: referral.id },
-      data: { refereeId: newUserId, status: "credited", creditedAt: new Date() },
-    }),
-    // Credit the referrer
-    prisma.user.update({
-      where: { id: referral.referrerId },
-      data: { walletBalanceCents: { increment: REFERRAL_CREDIT_CENTS } },
-    }),
-    // Credit the new user
-    prisma.user.update({
-      where: { id: newUserId },
-      data: { walletBalanceCents: { increment: REFERRAL_CREDIT_CENTS } },
-    }),
-    // Wallet transactions for referrer
-    prisma.walletTransaction.create({
-      data: {
-        id: cuid(),
-        userId: referral.referrerId,
-        kind: "Referral",
-        amountCents: REFERRAL_CREDIT_CENTS,
-        description: `Referral bonus — new member signed up with your code`,
-        balanceAfterCents: 0, // will be slightly off, acceptable
-      },
-    }),
-    // Wallet transaction for referee
-    prisma.walletTransaction.create({
-      data: {
-        id: cuid(),
-        userId: newUserId,
-        kind: "Referral",
-        amountCents: REFERRAL_CREDIT_CENTS,
-        description: `Welcome bonus — referral code applied`,
-        balanceAfterCents: REFERRAL_CREDIT_CENTS,
-      },
-    }),
-  ]);
-
-  revalidatePath("/dashboard");
-  return true;
-}
+// `applyReferralCode` was moved to `src/lib/referral-internal.ts`. It used
+// to be a server action exported from this file with `(code, newUserId)`,
+// which any logged-in user could call to credit a stranger's wallet $10
+// (and their own). The internal version is now imported by `auth.ts`
+// during signup only and is not RPC-exposed.

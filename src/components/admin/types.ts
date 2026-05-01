@@ -22,6 +22,33 @@ export type Customer = {
   cardExpiry?: string | null;
   cardholderName?: string | null;
   cardDiscountPct?: number;
+  kycNotes?: string | null;
+  // CMRA / ID details
+  idPrimaryType?: string | null;
+  idSecondaryType?: string | null;
+  idPrimaryExpDate?: string | null;
+  idSecondaryExpDate?: string | null;
+  idPrimaryNumber?: string | null;
+  idSecondaryNumber?: string | null;
+  idPrimaryIssuer?: string | null;
+  idSecondaryIssuer?: string | null;
+  // Box ownership
+  boxType?: string | null;
+  businessName?: string | null;
+  businessOwnerName?: string | null;
+  businessOwnerRelation?: string | null;
+  businessOwnerPhone?: string | null;
+};
+
+export type QuarterlyStatementRow = {
+  id: string;
+  year: number;
+  quarter: number;
+  fileUrl: string | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+  notes: string | null;
+  createdAt: string;
 };
 
 export type ComplianceRow = {
@@ -175,4 +202,22 @@ export type EditForm = {
   cardExpiry: string;
   cardholderName: string;
   cardDiscountPct: number;
+  // CMRA ID details
+  kycForm1583Url: string | null;
+  kycIdImageUrl: string | null;
+  kycIdImage2Url: string | null;
+  idPrimaryType: string;
+  idSecondaryType: string;
+  idPrimaryExpDate: string;
+  idSecondaryExpDate: string;
+  idPrimaryNumber: string;
+  idSecondaryNumber: string;
+  idPrimaryIssuer: string;
+  idSecondaryIssuer: string;
+  // Box ownership
+  boxType: string;
+  businessName: string;
+  businessOwnerName: string;
+  businessOwnerRelation: string;
+  businessOwnerPhone: string;
 };

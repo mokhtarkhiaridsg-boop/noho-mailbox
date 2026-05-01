@@ -2,19 +2,20 @@
 
 import Link from "next/link";
 import { MailboxIcon } from "@/components/BrandIcons";
+import { AiHeart, AiSparkle } from "@/components/AnimatedIcons";
 import { useState } from "react";
 
 /* ─────────────────────────────────────────────────────────────
    BRANDED SVG ICONS — every icon is unique, uses brand palette
-   Light #EBF2FA · Blue #3374B5 · Ink #1A1714
+   Light #EBF2FA · Blue #337485 · Ink #1A1714
    ───────────────────────────────────────────────────────────── */
 
 /* 1 – LLC Document with badge */
 const IconLLC = ({ className = "w-11 h-11" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <rect x="6" y="8" width="36" height="32" rx="5" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <path d="M13 20 H35 M13 27 H28" stroke="#3374B5" strokeWidth="2" strokeLinecap="round" />
-    <circle cx="36" cy="14" r="7" fill="#3374B5" stroke="#1A1714" strokeWidth="1.5" />
+    <path d="M13 20 H35 M13 27 H28" stroke="#337485" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="36" cy="14" r="7" fill="#337485" stroke="#1A1714" strokeWidth="1.5" />
     <path d="M33 14 L35.5 16.5 L39 11.5" stroke="#EBF2FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
@@ -23,8 +24,8 @@ const IconLLC = ({ className = "w-11 h-11" }: { className?: string }) => (
 const IconEIN = ({ className = "w-11 h-11" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <rect x="8" y="6" width="32" height="36" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <rect x="12" y="12" width="24" height="6" rx="2" fill="#3374B5" opacity="0.25" />
-    <text x="24" y="33" textAnchor="middle" fill="#3374B5" fontSize="13" fontWeight="bold">EIN</text>
+    <rect x="12" y="12" width="24" height="6" rx="2" fill="#337485" opacity="0.25" />
+    <text x="24" y="33" textAnchor="middle" fill="#337485" fontSize="13" fontWeight="bold">EIN</text>
     <path d="M12 22 H36" stroke="#1A1714" strokeWidth="1" opacity="0.15" />
   </svg>
 );
@@ -33,8 +34,8 @@ const IconEIN = ({ className = "w-11 h-11" }: { className?: string }) => (
 const IconFiling = ({ className = "w-11 h-11" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <rect x="6" y="10" width="36" height="30" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <rect x="10" y="4" width="12" height="10" rx="3" fill="#3374B5" stroke="#1A1714" strokeWidth="1.5" />
-    <rect x="26" y="4" width="12" height="10" rx="3" fill="#3374B5" stroke="#1A1714" strokeWidth="1.5" />
+    <rect x="10" y="4" width="12" height="10" rx="3" fill="#337485" stroke="#1A1714" strokeWidth="1.5" />
+    <rect x="26" y="4" width="12" height="10" rx="3" fill="#337485" stroke="#1A1714" strokeWidth="1.5" />
     <path d="M12 20 H36 M12 26 H30 M12 32 H34" stroke="#1A1714" strokeWidth="1.5" strokeLinecap="round" opacity="0.35" />
   </svg>
 );
@@ -43,10 +44,10 @@ const IconFiling = ({ className = "w-11 h-11" }: { className?: string }) => (
 const IconBrandBook = ({ className = "w-11 h-11" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <path d="M10 6 C10 4 12 2 14 2 L38 2 C40 2 42 4 42 6 L42 42 C42 44 40 46 38 46 L14 46 C12 46 10 44 10 42 Z" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <path d="M10 6 L10 42" stroke="#3374B5" strokeWidth="4" />
-    <circle cx="26" cy="18" r="6" fill="#3374B5" opacity="0.6" />
-    <rect x="18" y="28" width="18" height="3" rx="1.5" fill="#3374B5" opacity="0.35" />
-    <rect x="20" y="34" width="14" height="3" rx="1.5" fill="#3374B5" opacity="0.2" />
+    <path d="M10 6 L10 42" stroke="#337485" strokeWidth="4" />
+    <circle cx="26" cy="18" r="6" fill="#337485" opacity="0.6" />
+    <rect x="18" y="28" width="18" height="3" rx="1.5" fill="#337485" opacity="0.35" />
+    <rect x="20" y="34" width="14" height="3" rx="1.5" fill="#337485" opacity="0.2" />
   </svg>
 );
 
@@ -54,10 +55,10 @@ const IconBrandBook = ({ className = "w-11 h-11" }: { className?: string }) => (
 const IconBrandAssets = ({ className = "w-11 h-11" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <rect x="2" y="8" width="28" height="22" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <circle cx="13" cy="16" r="4" fill="#3374B5" opacity="0.5" />
-    <path d="M4 26 L12 20 L19 25 L26 18 L29 22" stroke="#3374B5" strokeWidth="2" strokeLinejoin="round" fill="none" />
+    <circle cx="13" cy="16" r="4" fill="#337485" opacity="0.5" />
+    <path d="M4 26 L12 20 L19 25 L26 18 L29 22" stroke="#337485" strokeWidth="2" strokeLinejoin="round" fill="none" />
     <rect x="20" y="20" width="26" height="22" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <path d="M26 28 H40 M26 33 H36 M26 38 H34" stroke="#3374B5" strokeWidth="1.5" strokeLinecap="round" opacity="0.45" />
+    <path d="M26 28 H40 M26 33 H36 M26 38 H34" stroke="#337485" strokeWidth="1.5" strokeLinecap="round" opacity="0.45" />
   </svg>
 );
 
@@ -66,11 +67,11 @@ const IconWebsite = ({ className = "w-11 h-11" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <rect x="4" y="8" width="40" height="28" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
     <path d="M4 15 H44" stroke="#1A1714" strokeWidth="1.5" />
-    <circle cx="10" cy="11.5" r="2" fill="#3374B5" />
-    <circle cx="16" cy="11.5" r="2" fill="#3374B5" opacity="0.5" />
-    <circle cx="22" cy="11.5" r="2" fill="#3374B5" opacity="0.25" />
-    <rect x="8" y="18" width="14" height="8" rx="2" fill="#3374B5" opacity="0.2" />
-    <path d="M26 19 H40 M26 23 H36 M26 27 H32" stroke="#3374B5" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
+    <circle cx="10" cy="11.5" r="2" fill="#337485" />
+    <circle cx="16" cy="11.5" r="2" fill="#337485" opacity="0.5" />
+    <circle cx="22" cy="11.5" r="2" fill="#337485" opacity="0.25" />
+    <rect x="8" y="18" width="14" height="8" rx="2" fill="#337485" opacity="0.2" />
+    <path d="M26 19 H40 M26 23 H36 M26 27 H32" stroke="#337485" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
     <path d="M20 36 L24 40 L28 36" stroke="#1A1714" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
@@ -80,8 +81,8 @@ const IconSEO = ({ className = "w-11 h-11" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <circle cx="20" cy="20" r="13" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
     <path d="M30 30 L42 42" stroke="#1A1714" strokeWidth="3.5" strokeLinecap="round" />
-    <path d="M14 20 L20 14 L26 20" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M20 14 L20 27" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M14 20 L20 14 L26 20" stroke="#337485" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 14 L20 27" stroke="#337485" strokeWidth="2.5" strokeLinecap="round" />
   </svg>
 );
 
@@ -89,9 +90,9 @@ const IconSEO = ({ className = "w-11 h-11" }: { className?: string }) => (
 const IconSocial = ({ className = "w-11 h-11" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <rect x="6" y="6" width="36" height="36" rx="10" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <circle cx="16" cy="18" r="4" fill="#3374B5" />
-    <circle cx="32" cy="18" r="4" fill="#3374B5" opacity="0.55" />
-    <circle cx="24" cy="34" r="4" fill="#3374B5" opacity="0.35" />
+    <circle cx="16" cy="18" r="4" fill="#337485" />
+    <circle cx="32" cy="18" r="4" fill="#337485" opacity="0.55" />
+    <circle cx="24" cy="34" r="4" fill="#337485" opacity="0.35" />
     <path d="M19.5 20 L29 20 M30 21.5 L26 31 M20 21.5 L22 31" stroke="#1A1714" strokeWidth="1.5" />
   </svg>
 );
@@ -100,9 +101,9 @@ const IconSocial = ({ className = "w-11 h-11" }: { className?: string }) => (
 const IconGoogle = ({ className = "w-11 h-11" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <circle cx="24" cy="24" r="18" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <path d="M24 12 A12 12 0 1 0 36 24 L24 24" fill="#3374B5" stroke="#1A1714" strokeWidth="1.5" />
+    <path d="M24 12 A12 12 0 1 0 36 24 L24 24" fill="#337485" stroke="#1A1714" strokeWidth="1.5" />
     <circle cx="24" cy="24" r="5" fill="#EBF2FA" stroke="#1A1714" strokeWidth="1.5" />
-    <path d="M17 9 L17 5 M31 9 L31 5 M11 17 L7 17 M11 31 L7 31" stroke="#3374B5" strokeWidth="2" strokeLinecap="round" opacity="0.35" />
+    <path d="M17 9 L17 5 M31 9 L31 5 M11 17 L7 17 M11 31 L7 31" stroke="#337485" strokeWidth="2" strokeLinecap="round" opacity="0.35" />
   </svg>
 );
 
@@ -111,7 +112,7 @@ const IconMail12 = ({ className = "w-11 h-11" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <rect x="4" y="12" width="40" height="26" rx="5" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
     <path d="M6 14 L24 26 L42 14" stroke="#1A1714" strokeWidth="2" strokeLinejoin="round" />
-    <circle cx="38" cy="12" r="7" fill="#3374B5" stroke="#1A1714" strokeWidth="1.5" />
+    <circle cx="38" cy="12" r="7" fill="#337485" stroke="#1A1714" strokeWidth="1.5" />
     <text x="38" y="15.5" textAnchor="middle" fill="#EBF2FA" fontSize="9" fontWeight="bold">12</text>
   </svg>
 );
@@ -121,8 +122,8 @@ const IconMail12 = ({ className = "w-11 h-11" }: { className?: string }) => (
 const IconTarget = ({ className = "w-10 h-10" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <circle cx="24" cy="24" r="20" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <circle cx="24" cy="24" r="13" stroke="#3374B5" strokeWidth="2" opacity="0.4" />
-    <circle cx="24" cy="24" r="6" fill="#3374B5" />
+    <circle cx="24" cy="24" r="13" stroke="#337485" strokeWidth="2" opacity="0.4" />
+    <circle cx="24" cy="24" r="6" fill="#337485" />
     <path d="M36 12 L28 20 M36 12 L36 18 M36 12 L30 12" stroke="#1A1714" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
@@ -130,9 +131,9 @@ const IconTarget = ({ className = "w-10 h-10" }: { className?: string }) => (
 const IconPalette = ({ className = "w-10 h-10" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <path d="M24 4 C12 4 4 14 4 24 C4 34 12 44 24 44 C26 44 28 42 28 40 C28 39 27.5 38 27 37.5 C26.5 37 26 36 26 35 C26 33 28 31 30 31 L34 31 C39.5 31 44 26.5 44 21 C44 11.6 35 4 24 4Z" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <circle cx="14" cy="20" r="3" fill="#3374B5" />
-    <circle cx="22" cy="12" r="3" fill="#3374B5" opacity="0.7" />
-    <circle cx="32" cy="14" r="3" fill="#3374B5" opacity="0.45" />
+    <circle cx="14" cy="20" r="3" fill="#337485" />
+    <circle cx="22" cy="12" r="3" fill="#337485" opacity="0.7" />
+    <circle cx="32" cy="14" r="3" fill="#337485" opacity="0.45" />
     <circle cx="14" cy="30" r="3" fill="#1A1714" opacity="0.3" />
   </svg>
 );
@@ -140,10 +141,10 @@ const IconPalette = ({ className = "w-10 h-10" }: { className?: string }) => (
 const IconMegaphone = ({ className = "w-10 h-10" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <path d="M36 8 L36 40 L14 30 L14 18 Z" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" strokeLinejoin="round" />
-    <rect x="8" y="18" width="6" height="12" rx="3" fill="#3374B5" stroke="#1A1714" strokeWidth="2" />
-    <path d="M14 30 L16 40 L20 40 L18 30" fill="#3374B5" stroke="#1A1714" strokeWidth="1.5" strokeLinejoin="round" />
-    <circle cx="40" cy="10" r="3" fill="#3374B5" opacity="0.4" />
-    <circle cx="42" cy="20" r="2" fill="#3374B5" opacity="0.25" />
+    <rect x="8" y="18" width="6" height="12" rx="3" fill="#337485" stroke="#1A1714" strokeWidth="2" />
+    <path d="M14 30 L16 40 L20 40 L18 30" fill="#337485" stroke="#1A1714" strokeWidth="1.5" strokeLinejoin="round" />
+    <circle cx="40" cy="10" r="3" fill="#337485" opacity="0.4" />
+    <circle cx="42" cy="20" r="2" fill="#337485" opacity="0.25" />
   </svg>
 );
 
@@ -152,17 +153,17 @@ const IconPrinter = ({ className = "w-10 h-10" }: { className?: string }) => (
     <rect x="6" y="18" width="36" height="18" rx="3" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
     <path d="M12 18 L12 6 L36 6 L36 18" stroke="#1A1714" strokeWidth="2" />
     <rect x="12" y="26" width="24" height="16" rx="2" fill="white" stroke="#1A1714" strokeWidth="1.5" />
-    <path d="M16 31 H32 M16 35 H28 M16 39 H24" stroke="#3374B5" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
-    <circle cx="36" cy="22" r="2.5" fill="#3374B5" />
+    <path d="M16 31 H32 M16 35 H28 M16 39 H24" stroke="#337485" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+    <circle cx="36" cy="22" r="2.5" fill="#337485" />
   </svg>
 );
 
 const IconChart = ({ className = "w-10 h-10" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <rect x="6" y="6" width="36" height="36" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <rect x="12" y="26" width="5" height="10" rx="1" fill="#3374B5" opacity="0.35" />
-    <rect x="21" y="18" width="5" height="18" rx="1" fill="#3374B5" opacity="0.6" />
-    <rect x="30" y="12" width="5" height="24" rx="1" fill="#3374B5" />
+    <rect x="12" y="26" width="5" height="10" rx="1" fill="#337485" opacity="0.35" />
+    <rect x="21" y="18" width="5" height="18" rx="1" fill="#337485" opacity="0.6" />
+    <rect x="30" y="12" width="5" height="24" rx="1" fill="#337485" />
     <path d="M12 16 L20 20 L28 12 L36 8" stroke="#1A1714" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" />
   </svg>
 );
@@ -170,10 +171,10 @@ const IconChart = ({ className = "w-10 h-10" }: { className?: string }) => (
 const IconRefresh = ({ className = "w-10 h-10" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} fill="none">
     <circle cx="24" cy="24" r="18" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <path d="M16 18 A10 10 0 0 1 34 20" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" />
-    <path d="M32 30 A10 10 0 0 1 14 28" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" />
-    <path d="M34 16 L34 22 L28 22" stroke="#3374B5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M14 26 L14 32 L20 32" stroke="#3374B5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M16 18 A10 10 0 0 1 34 20" stroke="#337485" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M32 30 A10 10 0 0 1 14 28" stroke="#337485" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M34 16 L34 22 L28 22" stroke="#337485" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 26 L14 32 L20 32" stroke="#337485" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -182,16 +183,16 @@ const IconRefresh = ({ className = "w-10 h-10" }: { className?: string }) => (
 const IconFormation = ({ className = "w-14 h-14" }: { className?: string }) => (
   <svg viewBox="0 0 56 56" className={className} fill="none">
     <rect x="8" y="12" width="40" height="32" rx="5" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" />
-    <path d="M16 24 H40 M16 30 H32 M16 36 H28" stroke="#3374B5" strokeWidth="2" strokeLinecap="round" />
-    <path d="M40 8 L44 12 L40 16" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M16 24 H40 M16 30 H32 M16 36 H28" stroke="#337485" strokeWidth="2" strokeLinecap="round" />
+    <path d="M40 8 L44 12 L40 16" stroke="#337485" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const IconBrandCircle = ({ className = "w-14 h-14" }: { className?: string }) => (
   <svg viewBox="0 0 56 56" className={className} fill="none">
     <circle cx="28" cy="28" r="22" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" />
-    <path d="M20 22 L28 16 L36 22 L36 34 L28 40 L20 34 Z" fill="#3374B5" opacity="0.2" stroke="#3374B5" strokeWidth="1.5" strokeLinejoin="round" />
-    <circle cx="28" cy="28" r="5" fill="#3374B5" />
+    <path d="M20 22 L28 16 L36 22 L36 34 L28 40 L20 34 Z" fill="#337485" opacity="0.2" stroke="#337485" strokeWidth="1.5" strokeLinejoin="round" />
+    <circle cx="28" cy="28" r="5" fill="#337485" />
   </svg>
 );
 
@@ -199,20 +200,20 @@ const IconCode = ({ className = "w-14 h-14" }: { className?: string }) => (
   <svg viewBox="0 0 56 56" className={className} fill="none">
     <rect x="6" y="10" width="44" height="32" rx="5" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" />
     <path d="M6 18 H50" stroke="#1A1714" strokeWidth="2" />
-    <circle cx="13" cy="14" r="2.5" fill="#3374B5" />
-    <circle cx="20" cy="14" r="2.5" fill="#3374B5" opacity="0.5" />
-    <path d="M18 28 L14 32 L18 36" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M34 28 L38 32 L34 36" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M28 26 L24 38" stroke="#3374B5" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="13" cy="14" r="2.5" fill="#337485" />
+    <circle cx="20" cy="14" r="2.5" fill="#337485" opacity="0.5" />
+    <path d="M18 28 L14 32 L18 36" stroke="#337485" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M34 28 L38 32 L34 36" stroke="#337485" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M28 26 L24 38" stroke="#337485" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
 const IconShare = ({ className = "w-14 h-14" }: { className?: string }) => (
   <svg viewBox="0 0 56 56" className={className} fill="none">
     <rect x="6" y="6" width="44" height="44" rx="12" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" />
-    <circle cx="28" cy="18" r="5" fill="#3374B5" />
-    <circle cx="16" cy="36" r="5" fill="#3374B5" opacity="0.55" />
-    <circle cx="40" cy="36" r="5" fill="#3374B5" opacity="0.35" />
+    <circle cx="28" cy="18" r="5" fill="#337485" />
+    <circle cx="16" cy="36" r="5" fill="#337485" opacity="0.55" />
+    <circle cx="40" cy="36" r="5" fill="#337485" opacity="0.35" />
     <path d="M26 22 L19 32 M30 22 L37 32" stroke="#1A1714" strokeWidth="1.5" />
   </svg>
 );
@@ -222,8 +223,8 @@ const IconPrintLarge = ({ className = "w-14 h-14" }: { className?: string }) => 
     <rect x="6" y="20" width="44" height="22" rx="4" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" />
     <path d="M14 20 L14 10 L42 10 L42 20" stroke="#1A1714" strokeWidth="2.5" />
     <rect x="14" y="28" width="28" height="18" rx="3" fill="white" stroke="#1A1714" strokeWidth="1.5" />
-    <circle cx="42" cy="24" r="3" fill="#3374B5" />
-    <path d="M18 33 H38 M18 37 H34 M18 41 H30" stroke="#3374B5" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+    <circle cx="42" cy="24" r="3" fill="#337485" />
+    <path d="M18 33 H38 M18 37 H34 M18 41 H30" stroke="#337485" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
   </svg>
 );
 
@@ -232,26 +233,26 @@ const IconPrintLarge = ({ className = "w-14 h-14" }: { className?: string }) => 
 const IconQuestion = () => (
   <svg viewBox="0 0 48 48" className="w-12 h-12 mx-auto mb-4" fill="none">
     <circle cx="24" cy="24" r="20" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <path d="M17 24 Q17 16 24 16 Q31 16 31 21 Q31 26 24 26 L24 30" stroke="#3374B5" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-    <circle cx="24" cy="36" r="2" fill="#3374B5" />
+    <path d="M17 24 Q17 16 24 16 Q31 16 31 21 Q31 26 24 26 L24 30" stroke="#337485" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+    <circle cx="24" cy="36" r="2" fill="#337485" />
   </svg>
 );
 
 const IconChecklist = () => (
   <svg viewBox="0 0 48 48" className="w-12 h-12 mx-auto mb-4" fill="none">
     <rect x="8" y="8" width="32" height="32" rx="8" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" />
-    <path d="M16 20 L21 25 L32 14" stroke="#3374B5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M16 30 L21 35 L32 24" stroke="#3374B5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.35" />
+    <path d="M16 20 L21 25 L32 14" stroke="#337485" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M16 30 L21 35 L32 24" stroke="#337485" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.35" />
   </svg>
 );
 
 const IconRocket = () => (
   <svg viewBox="0 0 48 48" className="w-12 h-12 mx-auto mb-4" fill="none">
     <path d="M24 6 C24 6 16 14 16 28 L20 32 L24 30 L28 32 L32 28 C32 14 24 6 24 6Z" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2" strokeLinejoin="round" />
-    <circle cx="24" cy="20" r="4" fill="#3374B5" />
-    <path d="M16 28 L10 30 L14 34 L16 28Z" fill="#3374B5" opacity="0.3" stroke="#1A1714" strokeWidth="1.5" />
-    <path d="M32 28 L38 30 L34 34 L32 28Z" fill="#3374B5" opacity="0.3" stroke="#1A1714" strokeWidth="1.5" />
-    <path d="M20 36 L24 42 L28 36" stroke="#3374B5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="24" cy="20" r="4" fill="#337485" />
+    <path d="M16 28 L10 30 L14 34 L16 28Z" fill="#337485" opacity="0.3" stroke="#1A1714" strokeWidth="1.5" />
+    <path d="M32 28 L38 30 L34 34 L32 28Z" fill="#337485" opacity="0.3" stroke="#1A1714" strokeWidth="1.5" />
+    <path d="M20 36 L24 42 L28 36" stroke="#337485" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -323,7 +324,14 @@ export default function BusinessSolutionsPage() {
         <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 glass-dark rounded-full px-5 py-2 mb-8 animate-fade-up">
+          {/* Family-owned heritage pill — Tunisian red, restrained */}
+          <div className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 mb-4 animate-fade-up text-[11px] font-bold uppercase tracking-[0.14em]"
+               style={{ background: "rgba(231,0,19,0.12)", color: "#FFB4BB", border: "1px solid rgba(231,0,19,0.28)" }}>
+            <AiHeart className="w-3.5 h-3.5" />
+            Family-owned in NoHo
+          </div>
+
+          <div className="inline-flex items-center gap-2 glass-dark rounded-full px-5 py-2 mb-8 animate-fade-up delay-100">
             <span className="w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
             <span className="text-text-dark-muted text-xs font-bold uppercase tracking-widest">
               Formation &middot; Branding &middot; Launch
@@ -332,7 +340,7 @@ export default function BusinessSolutionsPage() {
 
           <h1
             className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-transparent bg-clip-text animate-gradient animate-scale-in leading-[1.05]"
-            style={{ backgroundImage: "linear-gradient(135deg, #EBF2FA 0%, #fff 30%, #3374B5 55%, #fff 80%, #EBF2FA 100%)", backgroundSize: "200% 200%" }}
+            style={{ backgroundImage: "linear-gradient(135deg, #EBF2FA 0%, #fff 30%, #337485 55%, #fff 80%, #EBF2FA 100%)", backgroundSize: "200% 200%" }}
           >
             Your Business,
             <br />
@@ -376,12 +384,12 @@ export default function BusinessSolutionsPage() {
           {/* Price Card */}
           <div className="flex justify-center mb-16">
             <div className="card-3d neon-edge rounded-[2rem] px-14 md:px-16 py-10 md:py-12 text-center animate-scale-in delay-300 relative"
-              style={{ background: "linear-gradient(160deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)", boxShadow: "0 30px 80px rgba(51,116,181,0.3), 0 0 0 1px rgba(255,255,255,0.1) inset" }}
+              style={{ background: "linear-gradient(160deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)", boxShadow: "0 30px 80px rgba(51,116,133,0.3), 0 0 0 1px rgba(255,255,255,0.1) inset" }}
             >
               <div className="absolute inset-0 rounded-[2rem] overflow-hidden"><div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/10 to-transparent rotate-12" /></div>
               <div className="relative z-10">
                 <div className="inline-flex items-center gap-2 bg-surface-light/10 rounded-full px-4 py-1.5 mb-5">
-                  <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none"><path d="M8 1 L10 5.5 L15 6 L11.5 9.5 L12.5 15 L8 12 L3.5 15 L4.5 9.5 L1 6 L6 5.5Z" fill="#EBF2FA"/></svg>
+                  <AiSparkle className="w-4 h-4" />
                   <span className="text-xs font-bold text-white/80 uppercase tracking-wider">Best Value</span>
                 </div>
                 <p className="text-xs uppercase tracking-[0.2em] font-bold text-white/50 mb-2">All 10 Services Included</p>
@@ -432,7 +440,7 @@ export default function BusinessSolutionsPage() {
             <div className="inline-flex items-center gap-2 glass-dark rounded-full px-5 py-2 mb-6 animate-fade-up">
               <span className="text-accent text-xs font-bold uppercase tracking-widest">Standalone or Bundled</span>
             </div>
-            <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text animate-gradient animate-slide-up-3d" style={{ backgroundImage: "linear-gradient(135deg, #EBF2FA, #fff, #3374B5, #EBF2FA)", backgroundSize: "200% 200%" }}>
+            <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text animate-gradient animate-slide-up-3d" style={{ backgroundImage: "linear-gradient(135deg, #EBF2FA, #fff, #337485, #EBF2FA)", backgroundSize: "200% 200%" }}>
               Brand Management
             </h2>
             <p className="text-text-dark-muted/60 max-w-xl mx-auto mt-6 animate-fade-up delay-200">
@@ -444,7 +452,7 @@ export default function BusinessSolutionsPage() {
           {/* Price Card */}
           <div className="flex justify-center mb-16">
             <div className="card-3d neon-edge rounded-[2rem] px-14 md:px-16 py-10 md:py-12 text-center animate-scale-in delay-300 relative"
-              style={{ background: "linear-gradient(160deg, var(--color-bg-dark) 0%, var(--color-bg-dark) 100%)", boxShadow: "0 30px 80px rgba(51,116,181,0.25), 0 0 0 1px rgba(247,230,194,0.15) inset" }}
+              style={{ background: "linear-gradient(160deg, var(--color-bg-dark) 0%, var(--color-bg-dark) 100%)", boxShadow: "0 30px 80px rgba(51,116,133,0.25), 0 0 0 1px rgba(247,230,194,0.15) inset" }}
             >
               <div className="absolute inset-0 rounded-[2rem] overflow-hidden"><div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-accent/15 to-transparent rotate-12" /></div>
               <div className="relative z-10">
@@ -592,7 +600,7 @@ export default function BusinessSolutionsPage() {
         <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
 
         <div className="max-w-3xl mx-auto relative z-10 text-center">
-          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text animate-gradient" style={{ backgroundImage: "linear-gradient(135deg, #EBF2FA, #fff, #3374B5, #EBF2FA)", backgroundSize: "200% 200%" }}>
+          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text animate-gradient" style={{ backgroundImage: "linear-gradient(135deg, #EBF2FA, #fff, #337485, #EBF2FA)", backgroundSize: "200% 200%" }}>
             Let&apos;s Build Something
           </h2>
           <p className="text-text-dark-muted/60 mt-6 mb-3 max-w-md mx-auto">

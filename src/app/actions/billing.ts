@@ -24,7 +24,7 @@ const GRACE_PERIOD_DAYS = 10;
 const WARNING_DAYS = 14;
 
 function cuid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  return crypto.randomUUID();
 }
 
 // ─── Apply late fee to a single customer ─────────────────────────────────────
@@ -46,7 +46,9 @@ export async function applyLateFee(userId: string) {
 
   const newBal = Math.max(0, user.walletBalanceCents - LATE_FEE_CENTS);
 
-  await Promise.all([
+  // Atomic: wallet debit + ledger row must commit together so the wallet
+  // balance never drifts from the transaction history.
+  await prisma.$transaction([
     prisma.user.update({
       where: { id: userId },
       data: { walletBalanceCents: newBal },
@@ -99,15 +101,22 @@ export async function runAutoRenewal(userId: string) {
     return { error: `Insufficient wallet balance — needs $${(chargeAmount / 100).toFixed(2)}, has $${(user.walletBalanceCents / 100).toFixed(2)}` };
   }
 
-  // Extend due date
+  // Extend due date — UTC-safe so the date doesn't drift across DST/timezone.
+  // Using setUTCMonth avoids the local-TZ trap of setMonth() on a UTC-parsed Date.
   const currentDue = new Date(user.planDueDate + "T00:00:00Z");
   const nextDue = new Date(currentDue);
-  nextDue.setMonth(nextDue.getMonth() + termMonths);
-  const nextDueStr = nextDue.toISOString().split("T")[0];
+  const dueDay = nextDue.getUTCDate();
+  nextDue.setUTCMonth(nextDue.getUTCMonth() + termMonths);
+  // Handle Feb-overflow (e.g. Mar 31 + 1mo = May 1 → snap back to Apr 30)
+  if (nextDue.getUTCDate() < dueDay) nextDue.setUTCDate(0);
+  const nextDueStr = `${nextDue.getUTCFullYear()}-${String(nextDue.getUTCMonth() + 1).padStart(2, "0")}-${String(nextDue.getUTCDate()).padStart(2, "0")}`;
 
   const newBal = user.walletBalanceCents - chargeAmount;
 
-  await Promise.all([
+  // Atomic: due-date advance + wallet debit + ledger entry. If any one fails
+  // the whole renewal must roll back; otherwise we'd extend the plan without
+  // charging (or charge without extending), both nightmares to reconcile.
+  await prisma.$transaction([
     prisma.user.update({
       where: { id: userId },
       data: {
@@ -166,7 +175,10 @@ export async function sendExpiryWarnings() {
           planDueDate: c.planDueDate,
         });
         notified++;
-      } catch { /* non-fatal */ }
+      } catch (e) {
+        // Non-fatal — keep batch going — but log so we notice when warnings stop.
+        console.error(`[sendExpiryWarnings] failed for user ${c.id} (${daysLeft}d):`, e);
+      }
     }
   }
 
@@ -200,11 +212,27 @@ export async function runLateFeesBatch() {
     const due = new Date(c.planDueDate + "T00:00:00Z");
     const daysOverdue = Math.floor((today.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Apply fee at exactly day 10 (end of grace period)
-    if (daysOverdue === GRACE_PERIOD_DAYS) {
+    // Apply fee starting at the grace-period cutoff and beyond, but only if
+    // we haven't already charged a late fee for this overdue cycle. Without
+    // this idempotency guard a single missed cron day means the fee never
+    // fires (== day 10 was the old, fragile rule), and a doubled cron run
+    // would double-charge. We treat "any late-fee txn since the planDueDate"
+    // as proof of charge for this cycle.
+    if (daysOverdue >= GRACE_PERIOD_DAYS) {
       try {
+        const sincePlanDue = await prisma.walletTransaction.findFirst({
+          where: {
+            userId: c.id,
+            kind: "Charge",
+            description: { contains: "Late fee" },
+            createdAt: { gte: due },
+          },
+          select: { id: true },
+        });
+        if (sincePlanDue) continue;
+
         const newBal = Math.max(0, c.walletBalanceCents - LATE_FEE_CENTS);
-        await Promise.all([
+        await prisma.$transaction([
           prisma.user.update({
             where: { id: c.id },
             data: { walletBalanceCents: newBal, status: "Expired" },
@@ -280,4 +308,68 @@ export async function getBillingOverview() {
   }
 
   return { overdue, warning, upToDate };
+}
+
+// ─── Auto-renewal batch — runs all due/overdue auto-renew customers in one shot
+// Designed for the Mailbox Center "Run today's auto-renewals" button. Each
+// renewal uses the customer's wallet balance (already-paid credits). Returns
+// per-customer outcomes so admin sees which succeeded vs. why others failed.
+export async function runDueAutoRenewals() {
+  await verifyAdmin();
+
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+
+  const due = await prisma.user.findMany({
+    where: {
+      planAutoRenew: true,
+      planDueDate: { not: null, lte: todayStr },
+      status: { in: ["Active", "Expired"] },
+    },
+    select: { id: true, name: true, suiteNumber: true, planDueDate: true },
+    orderBy: { planDueDate: "asc" },
+    take: 200,
+  });
+
+  const results: Array<{
+    userId: string;
+    name: string;
+    suiteNumber: string | null;
+    success: boolean;
+    error?: string;
+  }> = [];
+
+  for (const u of due) {
+    try {
+      const res = await runAutoRenewal(u.id);
+      const failed = "error" in res && !!res.error;
+      results.push({
+        userId: u.id,
+        name: u.name,
+        suiteNumber: u.suiteNumber,
+        success: !failed,
+        error: failed ? (res as { error: string }).error : undefined,
+      });
+    } catch (e) {
+      results.push({
+        userId: u.id,
+        name: u.name,
+        suiteNumber: u.suiteNumber,
+        success: false,
+        error: e instanceof Error ? e.message : "unknown error",
+      });
+    }
+  }
+
+  const succeeded = results.filter((r) => r.success).length;
+  const failed = results.filter((r) => !r.success).length;
+
+  revalidatePath("/admin");
+  return {
+    success: true as const,
+    candidates: due.length,
+    succeeded,
+    failed,
+    results,
+  };
 }

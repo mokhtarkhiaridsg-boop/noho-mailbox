@@ -23,7 +23,7 @@ export default function Error({
         <div className="flex items-center justify-center gap-4">
           <button
             onClick={reset}
-            className="px-6 py-3 rounded-xl font-semibold text-white text-sm bg-accent hover:bg-accent-hover transition-all shadow-[0_2px_10px_rgba(51,116,181,0.3)]"
+            className="px-6 py-3 rounded-xl font-semibold text-white text-sm bg-accent hover:bg-accent-hover transition-all shadow-[0_2px_10px_rgba(51,116,133,0.3)]"
           >
             Try Again
           </button>

@@ -101,3 +101,25 @@ export async function deleteForwardingAddress(id: string) {
   revalidatePath("/dashboard");
   return { success: true };
 }
+
+/**
+ * Member: list emails sent to them (password resets, mail-arrived notices,
+ * receipts, etc.). Used by the dashboard "Email History" panel.
+ */
+export async function getMyEmailHistory(limit = 50) {
+  const user = await verifySession();
+  return prisma.emailLog.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+    take: Math.min(limit, 200),
+    select: {
+      id: true,
+      toEmail: true,
+      subject: true,
+      kind: true,
+      status: true,
+      createdAt: true,
+      sentAt: true,
+    },
+  });
+}

@@ -26,8 +26,13 @@ function CostEstimator() {
         className="w-full px-4 py-3 flex items-center justify-between text-sm font-black"
         style={{ background: BRAND.blueSoft, color: BRAND.blueDeep }}
       >
-        <span>📦 Forwarding Cost Estimator</span>
-        <span>{expanded ? "▲" : "▼"}</span>
+        <span className="inline-flex items-center gap-1.5">
+          <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"><path d="M8 1 L14 4 L14 12 L8 15 L2 12 L2 4 Z" /><path d="M2 4 L8 7 L14 4" /></svg>
+          Forwarding Cost Estimator
+        </span>
+        <svg viewBox="0 0 16 16" className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 6 L8 11 L13 6" />
+        </svg>
       </button>
       {expanded && (
         <div className="p-4 space-y-3 bg-white">
@@ -82,7 +87,7 @@ export default function ForwardingPanel({
       style={{
         background: "white",
         border: `1px solid ${BRAND.border}`,
-        boxShadow: "0 1px 0 rgba(51,116,181,0.04), 0 12px 32px rgba(14,34,64,0.06)",
+        boxShadow: "var(--shadow-cream-sm)",
       }}
     >
       <div className="flex items-center gap-2.5 mb-5">
@@ -125,7 +130,7 @@ export default function ForwardingPanel({
               }
               disabled={isPending}
               className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:bg-red-50 disabled:opacity-40"
-              style={{ color: "#c03030" }}
+              style={{ color: "var(--color-danger)" }}
               aria-label="Remove address"
             >
               <IconTrash className="w-4 h-4" />
@@ -189,7 +194,7 @@ export default function ForwardingPanel({
               className="flex-1 py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-40 transition-transform hover:-translate-y-0.5"
               style={{
                 background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
-                boxShadow: "0 4px 14px rgba(51,116,181,0.32)",
+                boxShadow: "0 4px 14px rgba(51,116,133,0.32)",
               }}
             >
               {isPending ? "Adding..." : "Add Address"}
@@ -215,7 +220,7 @@ export default function ForwardingPanel({
           style={{
             color: BRAND.blueDeep,
             border: `1px dashed ${BRAND.blue}`,
-            background: "rgba(51,116,181,0.04)",
+            background: BRAND.bgDeep,
           }}
         >
           <IconPlus className="w-4 h-4" />

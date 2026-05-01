@@ -41,8 +41,8 @@ function ProductIcon({ category }: { category: string }) {
     default: return (
       <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none">
         <rect x="4" y="4" width="40" height="40" rx="8" fill="#EBF2FA" stroke="#1A1714" strokeWidth="2.5" />
-        <circle cx="24" cy="20" r="6" fill="#3374B5" />
-        <path d="M12 36 Q12 28 24 28 Q36 28 36 36" fill="#3374B5" opacity="0.4" />
+        <circle cx="24" cy="20" r="6" fill="#337485" />
+        <path d="M12 36 Q12 28 24 28 Q36 28 36 36" fill="#337485" opacity="0.4" />
       </svg>
     );
   }

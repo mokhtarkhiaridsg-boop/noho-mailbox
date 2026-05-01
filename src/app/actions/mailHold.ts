@@ -110,7 +110,7 @@ export async function runMailHoldCheck() {
         await createNotification({
           userId,
           type: "general",
-          title: "⚠️ Mail Hold Expired — Action Required",
+          title: "Mail Hold Expired — Action Required",
           body: `${overdueItems.length} item${overdueItems.length !== 1 ? "s have" : " has"} been held for ${HOLD_MAX_DAYS}+ days. These items have been flagged. Please contact us immediately to arrange pickup or forwarding, or they may be returned to sender.`,
           link: "/dashboard",
         });
@@ -171,7 +171,11 @@ export async function getMailHoldReport() {
 export async function releaseHeldItem(mailItemId: string, action: "return" | "forward") {
   await verifyAdmin();
 
-  const newStatus = action === "return" ? "Forwarded" : "Forwarded"; // Both mark as Forwarded; admin handles physical action
+  // RTS and Forwarded are different lifecycle outcomes — bug had collapsed
+  // both to "Forwarded", so RTS items showed up in the customer's history
+  // as forwarded (wrong stats, wrong reconciliation). Map each to its own
+  // status now.
+  const newStatus = action === "return" ? "Returned" : "Forwarded";
   await prisma.mailItem.update({
     where: { id: mailItemId },
     data: { status: newStatus },
