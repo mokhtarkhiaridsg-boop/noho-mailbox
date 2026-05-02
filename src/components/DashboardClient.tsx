@@ -56,6 +56,7 @@ import EmailHistoryPanel from "./dashboard/EmailHistoryPanel";
 import ServicesPanel from "./dashboard/ServicesPanel";
 import OverviewPanel from "./dashboard/OverviewPanel";
 import CommandPalette from "./dashboard/CommandPalette";
+import IdExpiringBanner from "./dashboard/IdExpiringBanner";
 
 type NavItem = {
   Icon: (props: import("react").SVGProps<SVGSVGElement>) => import("react").ReactElement;
@@ -853,49 +854,74 @@ export default function DashboardClient({
             </div>
           )}
 
-          {/* Plan expiration banner */}
+          {/* Plan expiration banner — refined: lighter ground, accent stripe
+              on the left edge, motion entrance, quieter typography */}
           {planMsg && (() => {
-            const tone = isBlocked ? "danger" : planStatus === "grace" ? "warning" : "warning";
-            const colorVar = tone === "danger" ? "var(--color-danger)" : "var(--color-warning)";
-            const bgVar = tone === "danger" ? "var(--color-danger-soft)" : "var(--color-warning-soft)";
-            const borderVar = tone === "danger" ? "rgba(239,68,68,0.30)" : "rgba(245,158,11,0.30)";
+            const colorVar = isBlocked ? "var(--color-danger)" : "var(--color-warning)";
+            const tintRgb = isBlocked ? "239,68,68" : "245,158,11";
             return (
-              <div
+              <motion.div
                 role="alert"
-                className="mb-5 rounded-2xl p-4 flex gap-3 items-start"
-                style={{ background: bgVar, border: `1px solid ${borderVar}` }}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="mb-5 rounded-2xl p-4 sm:p-5 flex gap-3.5 items-start relative overflow-hidden"
+                style={{
+                  background: "white",
+                  border: `1px solid rgba(${tintRgb},0.20)`,
+                }}
               >
-                <span className="leading-none mt-0.5 shrink-0">
+                {/* 3px accent stripe on the left edge */}
+                <span
+                  aria-hidden
+                  className="absolute left-0 top-0 bottom-0 w-[3px]"
+                  style={{ background: colorVar }}
+                />
+                <span
+                  className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center"
+                  style={{ background: `rgba(${tintRgb},0.10)`, color: colorVar }}
+                >
                   {isBlocked ? (
-                    <IconAlert className="w-5 h-5" style={{ color: colorVar }} />
+                    <IconAlert className="w-[18px] h-[18px]" strokeWidth={1.7} />
                   ) : planStatus === "grace" ? (
-                    <IconWarningTriangle className="w-5 h-5" style={{ color: colorVar }} />
+                    <IconWarningTriangle className="w-[18px] h-[18px]" strokeWidth={1.7} />
                   ) : (
-                    <IconClock className="w-5 h-5" style={{ color: colorVar }} />
+                    <IconClock className="w-[18px] h-[18px]" strokeWidth={1.7} />
                   )}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold" style={{ color: BRAND.ink }}>
+                  <p
+                    className="text-[14px] tracking-tight"
+                    style={{
+                      color: "#2D1D0F",
+                      fontFamily: "var(--font-baloo), system-ui, sans-serif",
+                      fontWeight: 700,
+                    }}
+                  >
                     {isBlocked
                       ? "Service suspended"
                       : planStatus === "grace"
                       ? "Grace period active"
                       : "Plan renewing soon"}
                   </p>
-                  <p className="text-[12px] mt-0.5" style={{ color: BRAND.inkSoft }}>
+                  <p className="text-[12.5px] mt-1 leading-relaxed" style={{ color: "rgba(45,29,15,0.65)" }}>
                     {planMsg}
                   </p>
                   <Link
                     href="/contact"
-                    className="inline-block mt-2 text-[12px] font-bold underline underline-offset-2"
+                    className="inline-flex items-center gap-1 mt-2.5 text-[12px] font-semibold transition-opacity hover:opacity-80"
                     style={{ color: colorVar }}
                   >
-                    Contact us to renew →
+                    Contact us to renew
+                    <IconChevron className="w-3 h-3" strokeWidth={2} />
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             );
           })()}
+
+          {/* iter-102 — ID expiring banner. Mounts on every tab. */}
+          <IdExpiringBanner />
 
           {/* Panel routing */}
           {activeTab === "overview" && (
@@ -912,28 +938,49 @@ export default function DashboardClient({
 
           {activeTab === "mail" && (
             <>
-              {/* Quick discovery row — surface vacation, shared access, forwarding */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-4">
+              {/* Quick discovery row — modernized: motion stagger entrance,
+                  refined hover-lift (whileHover y:-2 instead of scale), no
+                  drop shadow on idle, brand-blue icon chip pattern */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-5">
                 {[
-                  { Icon: IconUmbrella, title: "Vacation Hold", sub: "Pause mail while away", target: "settings" },
-                  { Icon: IconUsers,    title: "Add Family Member", sub: "Share your mailbox", target: "settings" },
-                  { Icon: IconForward,  title: "Forward Anywhere",  sub: "Send mail to any address", target: "forwarding" },
-                  { Icon: IconBlock,    title: "Block Junk Mail",   sub: "Auto-reject senders", target: "settings" },
-                ].map((q) => (
-                  <button
+                  { Icon: IconUmbrella, title: "Vacation Hold",    sub: "Pause mail while away",   target: "settings" },
+                  { Icon: IconUsers,    title: "Family Access",    sub: "Share your mailbox",      target: "settings" },
+                  { Icon: IconForward,  title: "Forward Anywhere", sub: "Send mail to any address", target: "forwarding" },
+                  { Icon: IconBlock,    title: "Block Junk Mail",  sub: "Auto-reject senders",     target: "settings" },
+                ].map((q, idx) => (
+                  <motion.button
                     key={q.title}
                     onClick={() => setActiveTab(q.target)}
-                    className="group text-left rounded-2xl p-3.5 transition-all hover:scale-[1.02]"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.28, delay: 0.04 * idx, ease: [0.22, 1, 0.36, 1] }}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="group text-left rounded-2xl p-4 transition-colors"
                     style={{
                       background: "white",
-                      border: `1px solid ${BRAND.border}`,
-                      boxShadow: "var(--shadow-cream-sm)",
+                      border: "1px solid rgba(45,29,15,0.08)",
                     }}
                   >
-                    <q.Icon className="w-6 h-6 mb-1.5 transition-transform duration-300 group-hover:scale-110" style={{ color: BRAND.blue }} />
-                    <p className="text-[12px] font-black leading-tight" style={{ color: BRAND.ink }}>{q.title}</p>
-                    <p className="text-[11px] mt-0.5 leading-tight" style={{ color: BRAND.inkSoft }}>{q.sub}</p>
-                  </button>
+                    <span
+                      className="inline-flex items-center justify-center w-9 h-9 rounded-lg mb-3"
+                      style={{ background: "rgba(51,116,133,0.08)" }}
+                    >
+                      <q.Icon className="w-[16px] h-[16px]" style={{ color: "#337485" }} strokeWidth={1.7} />
+                    </span>
+                    <p
+                      className="text-[13px] tracking-tight leading-tight"
+                      style={{ color: "#2D1D0F", fontWeight: 700 }}
+                    >
+                      {q.title}
+                    </p>
+                    <p
+                      className="text-[11.5px] mt-0.5 leading-tight"
+                      style={{ color: "rgba(45,29,15,0.55)" }}
+                    >
+                      {q.sub}
+                    </p>
+                  </motion.button>
                 ))}
               </div>
 
