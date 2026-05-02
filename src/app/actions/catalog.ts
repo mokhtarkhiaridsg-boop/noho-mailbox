@@ -57,10 +57,20 @@ const D_SVC: ServiceItem[] = [
   { id:"key", name:"Key Replacement", description:"Replacement mailbox key", price:"$25", discountPct:0, unit:"flat fee" },
 ];
 
-export const getPlans = () => getCfg<PlanItem[]>("plans", D_PLANS);
-export const getShopItems = () => getCfg<ShopItem[]>("shopItems", D_SHOP);
-export const getServiceItems = () => getCfg<ServiceItem[]>("serviceItems", D_SVC);
-export const getMailboxSlots = () => getCfg<MailboxSlot[]>("mailboxSlots", []);
+// "use server" requires explicit `export async function` — arrow consts
+// (even ones that return Promises) trip the build's strict export check.
+export async function getPlans() {
+  return getCfg<PlanItem[]>("plans", D_PLANS);
+}
+export async function getShopItems() {
+  return getCfg<ShopItem[]>("shopItems", D_SHOP);
+}
+export async function getServiceItems() {
+  return getCfg<ServiceItem[]>("serviceItems", D_SVC);
+}
+export async function getMailboxSlots() {
+  return getCfg<MailboxSlot[]>("mailboxSlots", []);
+}
 
 export async function savePlans(plans: PlanItem[]) {
   await verifyAdmin(); await setCfg("plans", plans);

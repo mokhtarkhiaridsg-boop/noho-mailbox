@@ -3,7 +3,9 @@
 import { useState } from "react";
 import type { TransitionStartFunction } from "react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { motion, AnimatePresence } from "motion/react";
 import { BRAND, type Delivery } from "./types";
+import { EmptyState } from "./ui";
 import { IconTruck, IconClock } from "@/components/MemberIcons";
 import { scheduleDelivery } from "@/app/actions/delivery";
 import { uploadMemberLabel } from "@/app/actions/shippo";
@@ -190,34 +192,46 @@ export default function DeliveriesPanel({
   }
 
   return (
-    <div className="space-y-6">
-      <section
-        className="rounded-3xl p-6"
+    <div className="space-y-5">
+      {/* Schedule Same-Day Delivery */}
+      <motion.section
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="rounded-3xl p-5 sm:p-6"
         style={{
           background: "white",
-          border: `1px solid ${BRAND.border}`,
-          boxShadow: "var(--shadow-cream-sm)",
+          border: "1px solid rgba(45,29,15,0.08)",
         }}
       >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <IconTruck className="w-4 h-4" style={{ color: BRAND.blue }} />
-            <h2
-              className="font-black text-xs uppercase tracking-[0.16em]"
-              style={{ color: BRAND.ink }}
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: "rgba(51,116,133,0.10)" }}
             >
-              Schedule Same-Day Delivery
-            </h2>
+              <IconTruck className="w-3.5 h-3.5" style={{ color: "#337485" }} strokeWidth={1.7} />
+            </span>
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.22em]"
+              style={{ color: "rgba(45,29,15,0.55)" }}
+            >
+              Same-day delivery
+            </p>
           </div>
-          <button
+          <motion.button
             onClick={() => setShowForm(!showForm)}
-            className="text-[11px] font-black px-3 py-1.5 rounded-full text-white"
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            className="text-[11.5px] font-semibold px-3.5 h-8 rounded-full transition-colors"
             style={{
-              background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
+              background: showForm ? "white" : "#337485",
+              color: showForm ? "#337485" : "#F7EEC2",
+              border: showForm ? "1px solid rgba(51,116,133,0.20)" : "none",
             }}
           >
-            {showForm ? "Close" : "New Delivery"}
-          </button>
+            {showForm ? "Close" : "New delivery"}
+          </motion.button>
         </div>
 
         {showForm && (
@@ -299,45 +313,65 @@ export default function DeliveriesPanel({
               className="rounded-xl px-4 py-2.5 text-sm sm:col-span-2"
               style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}`, color: BRAND.ink }}
             />
-            <button
+            <motion.button
               type="submit"
               disabled={isPending}
-              className="sm:col-span-2 py-3 rounded-xl text-sm font-black text-white disabled:opacity-50"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              className="sm:col-span-2 h-11 rounded-full text-[13px] font-semibold disabled:opacity-50 transition-colors"
               style={{
-                background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
+                background: "#337485",
+                color: "#F7EEC2",
               }}
             >
-              Schedule Delivery
-            </button>
+              Schedule delivery
+            </motion.button>
           </form>
         )}
-      </section>
+      </motion.section>
 
       {/* History */}
-      <section
+      <motion.section
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
         className="rounded-3xl overflow-hidden"
         style={{
           background: "white",
-          border: `1px solid ${BRAND.border}`,
-          boxShadow: "var(--shadow-cream-sm)",
+          border: "1px solid rgba(45,29,15,0.08)",
         }}
       >
         <div
-          className="px-6 py-4 flex items-center gap-2.5"
-          style={{ borderBottom: `1px solid ${BRAND.border}` }}
+          className="px-5 py-3.5 flex items-center gap-2"
+          style={{ borderBottom: "1px solid rgba(45,29,15,0.06)" }}
         >
-          <IconClock className="w-4 h-4" style={{ color: BRAND.blue }} />
-          <h3
-            className="font-black text-xs uppercase tracking-[0.16em]"
-            style={{ color: BRAND.ink }}
+          <span
+            className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background: "rgba(51,116,133,0.10)" }}
           >
-            Delivery History
-          </h3>
+            <IconClock className="w-3.5 h-3.5" style={{ color: "#337485" }} strokeWidth={1.7} />
+          </span>
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.22em]"
+            style={{ color: "rgba(45,29,15,0.55)" }}
+          >
+            Delivery history
+          </p>
+          {deliveries.length > 0 && (
+            <span
+              className="ml-auto text-[10.5px] font-semibold px-2 py-0.5 rounded-full tabular-nums"
+              style={{ background: "rgba(45,29,15,0.05)", color: "rgba(45,29,15,0.65)" }}
+            >
+              {deliveries.length}
+            </span>
+          )}
         </div>
         {deliveries.length === 0 ? (
-          <p className="p-12 text-center text-sm" style={{ color: BRAND.inkSoft }}>
-            No deliveries yet.
-          </p>
+          <EmptyState
+            tone="calm"
+            title="No deliveries yet"
+            body="Schedule a same-day delivery and we'll handle pickup, transit, and proof of delivery."
+          />
         ) : (
           <ul>
             {deliveries.map((d, i) => (
@@ -413,34 +447,56 @@ export default function DeliveriesPanel({
             ))}
           </ul>
         )}
-      </section>
+      </motion.section>
 
       {/* Label-from-Home Upload */}
-      <section
-        className="rounded-3xl p-6"
+      <motion.section
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+        className="rounded-3xl p-5 sm:p-6"
         style={{
           background: "white",
-          border: `1px solid ${BRAND.border}`,
-          boxShadow: "var(--shadow-cream-sm)",
+          border: "1px solid rgba(45,29,15,0.08)",
         }}
       >
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="font-black text-xs uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.ink }}>
-              <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"><path d="M8 1 L14 4 L14 12 L8 15 L2 12 L2 4 Z" /><path d="M2 4 L8 7 L14 4" /><path d="M8 7 L8 15" /></svg>
-              Drop Off a Pre-Paid Label
-            </h2>
-            <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkFaint }}>
-              Print your label at home, drop it off — we handle the rest.
-            </p>
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: "rgba(51,116,133,0.10)" }}
+            >
+              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="#337485" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round">
+                <path d="M8 1 L14 4 L14 12 L8 15 L2 12 L2 4 Z" />
+                <path d="M2 4 L8 7 L14 4" />
+                <path d="M8 7 L8 15" />
+              </svg>
+            </span>
+            <div className="min-w-0">
+              <p
+                className="text-[10px] font-semibold uppercase tracking-[0.22em]"
+                style={{ color: "rgba(45,29,15,0.55)" }}
+              >
+                Pre-paid label drop-off
+              </p>
+              <p className="text-[11.5px] mt-0.5" style={{ color: "rgba(45,29,15,0.45)" }}>
+                Print at home, drop off — we handle the rest.
+              </p>
+            </div>
           </div>
-          <button
+          <motion.button
             onClick={() => { setShowLabelUpload(!showLabelUpload); setLabelSuccess(false); }}
-            className="text-[11px] font-black px-3 py-1.5 rounded-full text-white"
-            style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            className="text-[11.5px] font-semibold px-3.5 h-8 rounded-full transition-colors shrink-0"
+            style={{
+              background: showLabelUpload ? "white" : "#337485",
+              color: showLabelUpload ? "#337485" : "#F7EEC2",
+              border: showLabelUpload ? "1px solid rgba(51,116,133,0.20)" : "none",
+            }}
           >
-            {showLabelUpload ? "Close" : "Upload Label"}
-          </button>
+            {showLabelUpload ? "Close" : "Upload label"}
+          </motion.button>
         </div>
 
         {showLabelUpload && (
@@ -563,7 +619,7 @@ export default function DeliveriesPanel({
             ))}
           </div>
         )}
-      </section>
+      </motion.section>
 
       {/* Recurring Delivery */}
       <RecurringDeliveryCard />
