@@ -10,8 +10,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "motion/react";
 import { BRAND } from "./types";
 import { IconForward } from "@/components/MemberIcons";
+import { EmptyState } from "./ui";
 
 export type MemberShippoLabel = {
   id: string;
@@ -63,67 +65,85 @@ export default function ShippingPanel({ labels }: Props) {
   }, [labels, query, sort]);
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className="rounded-3xl overflow-hidden"
       style={{
         background: "white",
-        border: `1px solid ${BRAND.border}`,
-        boxShadow: "var(--shadow-cream-sm)",
+        border: "1px solid rgba(45,29,15,0.08)",
       }}
     >
       <div
-        className="px-6 py-4 flex items-center justify-between gap-2.5 flex-wrap"
-        style={{ borderBottom: `1px solid ${BRAND.border}` }}
+        className="px-5 py-3.5 flex items-center justify-between gap-3 flex-wrap"
+        style={{ borderBottom: "1px solid rgba(45,29,15,0.06)" }}
       >
-        <div className="flex items-center gap-2.5">
-          <IconForward className="w-4 h-4" style={{ color: BRAND.blue }} />
-          <h2
-            className="font-black text-xs uppercase tracking-[0.16em]"
-            style={{ color: BRAND.ink }}
-          >
-            Shipping
-          </h2>
+        <div className="flex items-center gap-2 min-w-0">
           <span
-            className="text-[10px] font-black px-2 py-0.5 rounded-full"
-            style={{ background: BRAND.blueSoft, color: BRAND.blueDeep }}
+            className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: "rgba(51,116,133,0.10)" }}
           >
-            {query ? `${filtered.length} of ${labels.length}` : `${labels.length} label${labels.length === 1 ? "" : "s"}`}
+            <IconForward className="w-3.5 h-3.5" style={{ color: "#337485" }} strokeWidth={1.7} />
           </span>
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.22em]"
+            style={{ color: "rgba(45,29,15,0.55)" }}
+          >
+            Shipping labels
+          </p>
+          {labels.length > 0 && (
+            <span
+              className="text-[10.5px] font-semibold tabular-nums px-2 py-0.5 rounded-full"
+              style={{ background: "rgba(45,29,15,0.05)", color: "rgba(45,29,15,0.65)" }}
+            >
+              {query ? `${filtered.length}/${labels.length}` : labels.length}
+            </span>
+          )}
         </div>
-        <Link
-          href="/shipping"
-          className="text-[11px] font-black px-3 py-1.5 rounded-lg text-white transition-all hover:scale-[1.02]"
-          style={{ background: BRAND.blue, boxShadow: "0 4px 14px rgba(51,116,133,0.30)" }}
-        >
-          Get a quote →
-        </Link>
+        <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
+          <Link
+            href="/shipping"
+            className="text-[11.5px] font-semibold px-3.5 h-8 rounded-full inline-flex items-center gap-1 transition-colors"
+            style={{
+              background: "#337485",
+              color: "#F7EEC2",
+            }}
+          >
+            Get a quote
+            <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 6 L9 6 M6 3 L9 6 L6 9" />
+            </svg>
+          </Link>
+        </motion.div>
       </div>
 
-      {/* Filter + sort — only shows when there are enough labels to bother.
-          Same UX pattern as the admin Labels list (search by name / tracking
-          / city), plus a sort dropdown for power users. */}
+      {/* Filter + sort — refined hairline inputs, only shows when worth it */}
       {labels.length > 4 && (
-        <div className="px-6 py-3 border-b flex items-center gap-2 flex-wrap" style={{ borderColor: BRAND.border }}>
+        <div
+          className="px-5 py-3 flex items-center gap-2 flex-wrap"
+          style={{ borderBottom: "1px solid rgba(45,29,15,0.06)" }}
+        >
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search recipient · tracking · city · carrier"
-            className="flex-1 min-w-[200px] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-colors"
+            className="flex-1 min-w-[200px] rounded-lg px-3.5 h-9 text-[12.5px] focus:outline-none focus:border-[#337485] transition-colors"
             style={{
-              border: `1px solid ${BRAND.border}`,
-              background: "#FFF9F3",
-              color: BRAND.ink,
+              border: "1px solid rgba(45,29,15,0.10)",
+              background: "white",
+              color: "#2D1D0F",
             }}
           />
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 transition-colors"
+            className="rounded-lg px-3 h-9 text-[12.5px] font-medium focus:outline-none focus:border-[#337485] transition-colors"
             style={{
-              border: `1px solid ${BRAND.border}`,
+              border: "1px solid rgba(45,29,15,0.10)",
               background: "white",
-              color: BRAND.ink,
+              color: "#2D1D0F",
             }}
             aria-label="Sort shipments"
           >
@@ -135,44 +155,62 @@ export default function ShippingPanel({ labels }: Props) {
       )}
 
       {labels.length === 0 ? (
-        <div className="p-12 text-center">
-          <CarrierGlyphDecorative />
-          <h3 className="mt-3 text-sm font-black" style={{ color: BRAND.ink }}>
-            No shipping labels yet
-          </h3>
-          <p className="text-xs mt-1" style={{ color: BRAND.inkSoft }}>
-            When we ship something for you at the storefront — or you order a label online — it&apos;ll show up here with live tracking.
-          </p>
-          <Link
-            href="/shipping"
-            className="inline-block mt-4 text-[12px] font-black px-4 py-2 rounded-xl text-white"
-            style={{ background: BRAND.blue, boxShadow: "0 4px 14px rgba(51,116,133,0.30)" }}
-          >
-            Get a shipping quote →
-          </Link>
-        </div>
+        <EmptyState
+          tone="calm"
+          title="No shipping labels yet"
+          body="When we ship something at the storefront — or you order a label online — it'll show up here with live tracking."
+          action={
+            <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
+              <Link
+                href="/shipping"
+                className="text-[12.5px] font-semibold px-4 h-10 rounded-full inline-flex items-center gap-1.5 transition-colors"
+                style={{
+                  background: "#337485",
+                  color: "#F7EEC2",
+                }}
+              >
+                Get a shipping quote
+                <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6 L9 6 M6 3 L9 6 L6 9" />
+                </svg>
+              </Link>
+            </motion.div>
+          }
+        />
       ) : filtered.length === 0 ? (
-        <div className="p-12 text-center">
-          <p className="text-sm font-bold" style={{ color: BRAND.inkSoft }}>
-            No shipments match &ldquo;{query}&rdquo;
-          </p>
-          <button
-            type="button"
-            onClick={() => setQuery("")}
-            className="mt-3 text-[11px] font-bold underline"
-            style={{ color: BRAND.blueDeep }}
-          >
-            Clear filter
-          </button>
-        </div>
+        <EmptyState
+          tone="neutral"
+          title="No matches"
+          body={`No shipments match "${query}".`}
+          action={
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="inline-flex items-center px-4 h-9 rounded-full text-[12px] font-semibold transition-colors"
+              style={{ background: "#337485", color: "#F7EEC2" }}
+            >
+              Clear filter
+            </button>
+          }
+        />
       ) : (
         <ul>
-          {filtered.map((l) => (
-            <ShippingRow key={l.id} label={l} />
-          ))}
+          <AnimatePresence initial={false}>
+            {filtered.map((l, idx) => (
+              <motion.div
+                key={l.id}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.26, delay: 0.04 * idx, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <ShippingRow label={l} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </ul>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -191,27 +229,30 @@ function ShippingRow({ label: l }: { label: MemberShippoLabel }) {
 
   return (
     <li
-      className="px-6 py-4 flex items-start justify-between gap-4 flex-wrap"
-      style={{ borderBottom: `1px solid ${BRAND.border}` }}
+      className="px-5 py-4 flex items-start justify-between gap-4 flex-wrap transition-colors hover:bg-[rgba(45,29,15,0.02)]"
+      style={{ borderBottom: "1px solid rgba(45,29,15,0.05)" }}
     >
       <div className="flex items-start gap-3 min-w-0 flex-1">
         <CarrierGlyph carrier={l.carrier} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-black" style={{ color: BRAND.ink }}>
+            <p
+              className="text-[13.5px] tracking-tight"
+              style={{ color: "#2D1D0F", fontWeight: 700 }}
+            >
               {l.toName}
             </p>
             <span
-              className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+              className="text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full"
               style={{
-                background: isRefunded ? "rgba(231,0,19,0.10)" : BRAND.blueSoft,
-                color: isRefunded ? "#991b1b" : BRAND.blueDeep,
+                background: isRefunded ? "rgba(231,0,19,0.08)" : "rgba(51,116,133,0.10)",
+                color: isRefunded ? "#991b1b" : "#337485",
               }}
             >
               {isRefunded ? "Refunded" : `${l.carrier} ${l.servicelevel}`}
             </span>
           </div>
-          <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>
+          <p className="text-[12px] mt-0.5" style={{ color: "rgba(45,29,15,0.55)" }}>
             {l.toCity}, {l.toState} {l.toZip}
           </p>
           <div className="mt-1 flex items-center gap-2 flex-wrap">
@@ -219,17 +260,17 @@ function ShippingRow({ label: l }: { label: MemberShippoLabel }) {
               href={l.trackingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-[11px] hover:underline"
-              style={{ color: BRAND.blue }}
+              className="font-mono text-[11.5px] hover:underline"
+              style={{ color: "#337485" }}
             >
               {l.trackingNumber}
             </a>
-            <span style={{ color: BRAND.inkFaint }}>·</span>
-            <span className="text-[11px]" style={{ color: BRAND.inkSoft }}>
+            <span style={{ color: "rgba(45,29,15,0.30)" }}>·</span>
+            <span className="text-[11.5px] tabular-nums" style={{ color: "rgba(45,29,15,0.55)", fontWeight: 600 }}>
               ${l.amountPaid.toFixed(2)}
             </span>
-            <span style={{ color: BRAND.inkFaint }}>·</span>
-            <span className="text-[10px]" style={{ color: BRAND.inkFaint }}>{l.createdAt}</span>
+            <span style={{ color: "rgba(45,29,15,0.30)" }}>·</span>
+            <span className="text-[10.5px]" style={{ color: "rgba(45,29,15,0.45)" }}>{l.createdAt}</span>
           </div>
         </div>
       </div>
@@ -237,26 +278,34 @@ function ShippingRow({ label: l }: { label: MemberShippoLabel }) {
       <div className="flex flex-wrap gap-1.5 shrink-0">
         <Link
           href={`/r/${l.id}`}
-          className="px-2.5 py-1.5 rounded-lg text-[11px] font-black text-white transition-colors"
-          style={{ background: BRAND.blue }}
+          className="px-3 h-8 rounded-full text-[11.5px] font-semibold inline-flex items-center transition-colors"
+          style={{ background: "#337485", color: "#F7EEC2" }}
         >
           Track
         </Link>
         <button
           type="button"
           onClick={copyPublicLink}
-          className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-colors"
-          style={{ borderColor: BRAND.border, color: BRAND.ink, background: "white" }}
+          className="px-3 h-8 rounded-full text-[11.5px] font-semibold transition-colors inline-flex items-center"
+          style={{
+            background: "white",
+            color: copied ? "#15803d" : "#337485",
+            border: copied ? "1px solid rgba(34,197,94,0.30)" : "1px solid rgba(51,116,133,0.20)",
+          }}
           title="Copy the branded NOHO tracking URL to share"
         >
-          {copied ? "Copied ✓" : "Share"}
+          {copied ? "Copied" : "Share"}
         </button>
         <a
           href={l.labelUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-colors"
-          style={{ borderColor: BRAND.border, color: BRAND.ink, background: "white" }}
+          className="px-3 h-8 rounded-full text-[11.5px] font-semibold inline-flex items-center transition-colors"
+          style={{
+            background: "white",
+            color: "rgba(45,29,15,0.65)",
+            border: "1px solid rgba(45,29,15,0.10)",
+          }}
         >
           Label
         </a>
