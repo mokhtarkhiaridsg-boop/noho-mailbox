@@ -2,8 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
 import { deleteVaultItem, uploadVaultItem } from "@/app/actions/vault";
 import { BRAND } from "./types";
+import { EmptyState } from "./ui";
 
 type VaultItem = {
   id: string;
@@ -104,34 +106,49 @@ export default function VaultPanel({ vaultItems }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Header */}
+      {/* Header — refined: standard icon-chip pattern, brand-blue solid CTA */}
       <section
-        className="rounded-3xl p-6"
+        className="rounded-3xl p-5 sm:p-6"
         style={{
           background: "white",
-          border: `1px solid ${BRAND.border}`,
-          boxShadow: "var(--shadow-cream-sm)",
+          border: "1px solid rgba(45,29,15,0.08)",
         }}
       >
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="font-black text-sm uppercase tracking-[0.16em] inline-flex items-center gap-2" style={{ color: BRAND.ink }}>
-              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={BRAND.blue} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <div className="flex items-center justify-between mb-5 gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: "rgba(51,116,133,0.10)" }}
+            >
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="#337485" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 7 C3 6 4 5 5 5 L9 5 L11 7 L19 7 C20 7 21 8 21 9 L21 18 C21 19 20 20 19 20 L5 20 C4 20 3 19 3 18 Z" />
               </svg>
-              Document Vault
-            </h2>
-            <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkFaint }}>
-              {vaultItems.length} document{vaultItems.length !== 1 ? "s" : ""} stored securely
-            </p>
+            </span>
+            <div className="min-w-0">
+              <p
+                className="text-[10px] font-semibold uppercase tracking-[0.22em]"
+                style={{ color: "rgba(45,29,15,0.55)" }}
+              >
+                Document vault
+              </p>
+              <p className="text-[11.5px] mt-0.5" style={{ color: "rgba(45,29,15,0.45)" }}>
+                {vaultItems.length} document{vaultItems.length !== 1 ? "s" : ""} stored securely
+              </p>
+            </div>
           </div>
-          <button
+          <motion.button
             onClick={() => { setShowUpload(!showUpload); setUploadSuccess(false); }}
-            className="text-[11px] font-black px-3 py-1.5 rounded-full text-white"
-            style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            className="text-[11.5px] font-semibold px-3.5 h-8 rounded-full transition-colors"
+            style={{
+              background: showUpload ? "white" : "#337485",
+              color: showUpload ? "#337485" : "#F7EEC2",
+              border: showUpload ? "1px solid rgba(51,116,133,0.20)" : "none",
+            }}
           >
-            {showUpload ? "Close" : "Upload Document"}
-          </button>
+            {showUpload ? "Close" : "Upload"}
+          </motion.button>
         </div>
 
         {/* Upload error toast */}
@@ -214,62 +231,78 @@ export default function VaultPanel({ vaultItems }: Props) {
                   </div>
                 </div>
 
-                <button
+                <motion.button
                   disabled={!uploadFile || uploading}
                   onClick={handleUpload}
-                  className="w-full py-2.5 rounded-xl text-white font-black text-sm disabled:opacity-40"
-                  style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full h-11 rounded-full text-[13px] font-semibold disabled:opacity-40 transition-colors"
+                  style={{
+                    background: "#337485",
+                    color: "#F7EEC2",
+                  }}
                 >
-                  {uploading ? "Uploading…" : "Save to Vault"}
-                </button>
+                  {uploading ? "Uploading…" : "Save to vault"}
+                </motion.button>
               </>
             )}
           </div>
         )}
 
-        {/* Filter pills */}
-        <div className="flex gap-2 flex-wrap mb-5">
-          {KINDS.map((k) => (
-            <button
-              key={k}
-              onClick={() => setFilter(k)}
-              className="text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors"
-              style={filter === k
-                ? { background: BRAND.blue, color: "white" }
-                : { background: BRAND.bgDeep, color: BRAND.inkSoft }}
-            >
-              {KIND_LABELS[k] ?? k}
-            </button>
-          ))}
+        {/* Filter pills — motion shared layoutId, brand-blue active */}
+        <div className="flex gap-1 flex-wrap mb-5">
+          {KINDS.map((k) => {
+            const active = filter === k;
+            return (
+              <motion.button
+                key={k}
+                onClick={() => setFilter(k)}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className="relative text-[11.5px] font-medium px-3 h-8 rounded-full"
+                style={{
+                  color: active ? "#F7EEC2" : "#2D1D0F",
+                  background: active ? "transparent" : "white",
+                  border: active ? "none" : "1px solid rgba(45,29,15,0.10)",
+                  zIndex: 1,
+                }}
+                aria-pressed={active}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="vault-filter-pill"
+                    className="absolute inset-0 rounded-full"
+                    style={{ background: "#337485" }}
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  />
+                )}
+                <span className="relative">{KIND_LABELS[k] ?? k}</span>
+              </motion.button>
+            );
+          })}
         </div>
 
         {/* Items */}
         {filtered.length === 0 ? (
-          <div className="text-center py-10">
-            <svg viewBox="0 0 32 32" className="w-10 h-10 mx-auto mb-3 opacity-60" fill="none" stroke={BRAND.blue} strokeWidth="2" strokeLinejoin="round">
-              <rect x="4" y="6" width="24" height="20" rx="2" />
-              <path d="M4 12 L28 12 M4 18 L28 18" />
-              <rect x="13" y="8" width="6" height="2" rx="0.5" fill="currentColor" stroke="none" />
-              <rect x="13" y="14" width="6" height="2" rx="0.5" fill="currentColor" stroke="none" />
-              <rect x="13" y="20" width="6" height="2" rx="0.5" fill="currentColor" stroke="none" />
-            </svg>
-            <p className="font-bold text-sm" style={{ color: BRAND.ink }}>
-              {filter === "All" ? "No documents yet" : `No ${filter} documents`}
-            </p>
-            <p className="text-[11px] mt-1" style={{ color: BRAND.inkFaint }}>
-              Upload your first document using the button above
-            </p>
-          </div>
+          <EmptyState
+            tone="calm"
+            title={filter === "All" ? "No documents yet" : `No ${filter} documents`}
+            body="Upload your first document with the button above. Form 1583, IDs, scans, invoices — all stored securely."
+          />
         ) : (
-          <div className="space-y-2">
-            {filtered.map((item) => {
+          <div className="space-y-1.5">
+            {filtered.map((item, idx) => {
               const colors = KIND_COLORS[item.kind] ?? KIND_COLORS.Other;
               const isImg = item.mimeType.startsWith("image/");
               return (
-                <div
+                <motion.div
                   key={item.id}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.26, delay: 0.04 * idx, ease: [0.22, 1, 0.36, 1] }}
+                  whileHover={{ y: -1 }}
                   className="flex items-center gap-3 p-3 rounded-2xl transition-colors"
-                  style={{ border: `1px solid ${BRAND.border}`, background: BRAND.bg }}
+                  style={{ border: "1px solid rgba(45,29,15,0.08)", background: "white" }}
                 >
                   {/* Icon */}
                   <div
@@ -293,38 +326,60 @@ export default function VaultPanel({ vaultItems }: Props) {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[13px] truncate" style={{ color: BRAND.ink }}>{item.title}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <p
+                      className="text-[13px] tracking-tight truncate"
+                      style={{ color: "#2D1D0F", fontWeight: 700 }}
+                    >
+                      {item.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       <span
-                        className="text-[10px] font-black px-2 py-0.5 rounded-full"
+                        className="text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full"
                         style={{ background: colors.bg, color: colors.text }}
-                      >{item.kind}</span>
-                      <span className="text-[11px]" style={{ color: BRAND.inkFaint }}>{formatBytes(item.sizeBytes)}</span>
-                      <span className="text-[11px]" style={{ color: BRAND.inkFaint }}>
+                      >
+                        {item.kind}
+                      </span>
+                      <span className="text-[11px] tabular-nums" style={{ color: "rgba(45,29,15,0.45)" }}>
+                        {formatBytes(item.sizeBytes)}
+                      </span>
+                      <span className="text-[11px]" style={{ color: "rgba(45,29,15,0.45)" }}>
                         {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </span>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2 shrink-0">
-                    <a
+                  <div className="flex gap-1.5 shrink-0">
+                    <motion.a
                       href={item.blobUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors"
-                      style={{ background: BRAND.blueSoft, color: BRAND.blue }}
-                    >View</a>
-                    <button
+                      whileTap={{ scale: 0.97 }}
+                      className="px-3 h-8 rounded-full text-[11.5px] font-semibold inline-flex items-center transition-colors"
+                      style={{
+                        background: "white",
+                        color: "#337485",
+                        border: "1px solid rgba(51,116,133,0.20)",
+                      }}
+                    >
+                      View
+                    </motion.a>
+                    <motion.button
                       onClick={() => handleDelete(item.id)}
                       disabled={deletingId === item.id || isPending}
-                      className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors disabled:opacity-40"
-                      style={{ background: "#FEE2E2", color: "#DC2626" }}
+                      whileTap={{ scale: 0.97 }}
+                      className="w-8 h-8 rounded-full text-[11.5px] font-semibold transition-colors disabled:opacity-40 inline-flex items-center justify-center hover:bg-[rgba(231,0,19,0.08)]"
+                      style={{ color: "rgba(45,29,15,0.45)" }}
+                      aria-label="Delete document"
                     >
-                      {deletingId === item.id ? "…" : "Delete"}
-                    </button>
+                      {deletingId === item.id ? "…" : (
+                        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+                          <path d="M3 4 H13 M6 4 V3 a1 1 0 0 1 1-1 h2 a1 1 0 0 1 1 1 V4 M5 4 V13 a1 1 0 0 0 1 1 h4 a1 1 0 0 0 1-1 V4" />
+                        </svg>
+                      )}
+                    </motion.button>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
