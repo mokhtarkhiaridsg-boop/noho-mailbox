@@ -50,6 +50,7 @@ import ShippingPanel, { type MemberShippoLabel } from "./dashboard/ShippingPanel
 import NotificationBell from "./NotificationBell";
 import VaultPanel from "./dashboard/VaultPanel";
 import QRPickupPanel from "./dashboard/QRPickupPanel";
+import GuestPickupCard from "./dashboard/GuestPickupCard";
 import AnnualSummaryPanel from "./dashboard/AnnualSummaryPanel";
 import EmailHistoryPanel from "./dashboard/EmailHistoryPanel";
 import ServicesPanel from "./dashboard/ServicesPanel";
@@ -391,118 +392,122 @@ export default function DashboardClient({
           <Link href="/" className="flex items-center">
             <Logo className="h-7 sm:h-8 w-auto" />
           </Link>
-          <div
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-            style={{
-              background: BRAND.blueSoft,
-              border: `1px solid ${BRAND.border}`,
-            }}
+          {/* Member badge — refined: smaller, more typographic, no chip bg */}
+          <span
+            className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
+            style={{ color: "rgba(51,116,133,0.85)" }}
           >
-            <IconShield className="w-3 h-3" style={{ color: BRAND.blue }} />
             <span
-              className="text-[10px] font-black uppercase tracking-[0.18em]"
-              style={{ color: BRAND.blueDeep }}
-            >
-              Member
-            </span>
-          </div>
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: "#337485" }}
+            />
+            Member
+          </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {user.role === "ADMIN" && (
             <Link
               href="/admin"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black text-white transition-transform hover:-translate-y-0.5"
+              className="hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-full text-[11px] font-semibold transition-colors"
               style={{
-                background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
-                boxShadow: "0 4px 14px rgba(51,116,133,0.35)",
+                background: "white",
+                color: "#337485",
+                border: "1px solid rgba(51,116,133,0.20)",
               }}
             >
               <IconShield className="w-3 h-3" />
-              Admin Panel
+              Admin
             </Link>
           )}
           <NotificationBell notifications={notifications} />
           <div className="relative" ref={profileRef}>
-            <button
+            <motion.button
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-              className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full transition-all hover:bg-[#337485]/8"
+              whileTap={{ scale: 0.94 }}
+              className="flex items-center gap-1.5 pl-1 pr-2 py-0.5 rounded-full transition-colors hover:bg-[rgba(45,29,15,0.06)]"
               aria-label="Account menu"
             >
               <div
-                className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-black text-white shadow-lg"
-                style={{
-                  background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
-                  boxShadow: "0 3px 10px rgba(51,116,133,0.4)",
-                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
+                style={{ background: "#337485" }}
               >
                 {initials}
               </div>
               <IconChevron
-                className={`w-3 h-3 transition-transform ${profileMenuOpen ? "rotate-90" : ""}`}
-                style={{ color: BRAND.inkFaint }}
-              />
-            </button>
-            {profileMenuOpen && (
-              <div
-                className="absolute right-0 mt-2 w-64 rounded-2xl overflow-hidden z-50 origin-top-right"
+                className="w-3 h-3 transition-transform"
                 style={{
-                  background: "white",
-                  border: `1px solid ${BRAND.border}`,
-                  boxShadow: "0 16px 48px rgba(45,16,15,0.18)",
-                  animation: "popIn 160ms ease-out",
+                  color: "rgba(45,29,15,0.45)",
+                  transform: profileMenuOpen ? "rotate(90deg)" : "rotate(0deg)",
                 }}
-              >
-                <div
-                  className="px-4 py-3"
+              />
+            </motion.button>
+            <AnimatePresence>
+              {profileMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.97 }}
+                  transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+                  className="absolute right-0 mt-2 w-64 rounded-2xl overflow-hidden z-50 origin-top-right"
                   style={{
-                    background: `linear-gradient(135deg, ${BRAND.bgDeep}, transparent)`,
-                    borderBottom: `1px solid ${BRAND.border}`,
+                    background: "white",
+                    border: "1px solid rgba(45,29,15,0.10)",
+                    boxShadow: "0 24px 48px -8px rgba(45,29,15,0.18), 0 4px 12px rgba(45,29,15,0.08)",
                   }}
                 >
-                  <p
-                    className="text-sm font-black truncate"
-                    style={{ color: BRAND.ink }}
-                  >
-                    {user.name}
-                  </p>
-                  <p
-                    className="text-xs truncate"
-                    style={{ color: BRAND.inkSoft }}
-                  >
-                    {user.email}
-                  </p>
-                </div>
-                <Link
-                  href="/"
-                  onClick={() => setProfileMenuOpen(false)}
-                  className="flex items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors hover:bg-[#337485]/8"
-                  style={{ color: BRAND.ink }}
-                >
-                  <IconHome className="w-4 h-4" style={{ color: BRAND.blue }} />
-                  Public Site
-                </Link>
-                {user.role === "ADMIN" && (
+                  <div className="px-4 py-3.5" style={{ borderBottom: "1px solid rgba(45,29,15,0.08)" }}>
+                    <p
+                      className="text-[14px] tracking-tight truncate"
+                      style={{
+                        color: "#2D1D0F",
+                        fontFamily: "var(--font-baloo), system-ui, sans-serif",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {user.name}
+                    </p>
+                    <p
+                      className="text-[11.5px] truncate mt-0.5"
+                      style={{ color: "rgba(45,29,15,0.55)" }}
+                    >
+                      {user.email}
+                    </p>
+                  </div>
                   <Link
-                    href="/admin"
+                    href="/"
                     onClick={() => setProfileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-3 text-sm font-bold transition-colors hover:bg-[#337485]/8"
-                    style={{ color: BRAND.ink }}
+                    className="flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-[rgba(45,29,15,0.03)]"
+                    style={{ color: "#2D1D0F" }}
                   >
-                    <IconShield className="w-4 h-4" style={{ color: BRAND.blue }} />
-                    Admin Console
+                    <IconHome className="w-[15px] h-[15px]" style={{ color: "#337485" }} strokeWidth={1.7} />
+                    Public site
                   </Link>
-                )}
-                <button
-                  onClick={() => logout()}
-                  className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors text-left"
-                  style={{ borderTop: `1px solid ${BRAND.border}` }}
-                >
-                  <IconLogout className="w-4 h-4" />
-                  Sign Out
-                </button>
-              </div>
-            )}
+                  {user.role === "ADMIN" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setProfileMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-[rgba(45,29,15,0.03)]"
+                      style={{ color: "#2D1D0F" }}
+                    >
+                      <IconShield className="w-[15px] h-[15px]" style={{ color: "#337485" }} strokeWidth={1.7} />
+                      Admin console
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => logout()}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-left transition-colors hover:bg-[rgba(231,0,19,0.04)]"
+                    style={{
+                      color: "#dc2626",
+                      borderTop: "1px solid rgba(45,29,15,0.08)",
+                    }}
+                  >
+                    <IconLogout className="w-[15px] h-[15px]" strokeWidth={1.7} />
+                    Sign out
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </header>
@@ -728,6 +733,34 @@ export default function DashboardClient({
           {/* Welcome lockup — formal, light. Brand script for the friendly
               prefix, brand sans for the name. Address is now an inline
               chip-strip beside the heading, not a chunky sidebar card. */}
+          {/* iter-89: Vacation hold banner — top of every tab when active. */}
+          {vacation && (
+            <div
+              className="mb-4 rounded-2xl border-2 px-4 py-3 flex items-center gap-3 flex-wrap"
+              style={{
+                borderColor: "rgba(245,166,35,0.35)",
+                background: "linear-gradient(180deg, rgba(245,166,35,0.10), rgba(245,166,35,0.04))",
+              }}
+            >
+              <span className="inline-block w-7 h-7 rounded-full flex items-center justify-center text-sm font-black text-white shrink-0" style={{ background: "#F5A623" }}>✈︎</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "#92400e" }}>
+                  Vacation hold active
+                </p>
+                <p className="text-[12px] font-bold mt-0.5" style={{ color: "#2D100F" }}>
+                  Through <strong>{vacation.endDate}</strong> — incoming mail goes to the Held shelf and resumes automatically.
+                  {vacation.digest && <span style={{ color: "rgba(45,16,15,0.55)", marginLeft: 6 }}>· daily digest on</span>}
+                </p>
+              </div>
+              <a
+                href="/dashboard?tab=settings"
+                className="px-3 py-1.5 rounded-lg text-[11px] font-black border shrink-0"
+                style={{ borderColor: "#F5A623", color: "#92400e", background: "white", textDecoration: "none" }}
+              >
+                Manage hold →
+              </a>
+            </div>
+          )}
           {activeTab === "overview" ? (
             <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
@@ -1010,7 +1043,12 @@ export default function DashboardClient({
           {activeTab === "vault" && (
             <VaultPanel vaultItems={vaultItems} />
           )}
-          {activeTab === "qrpickup" && <QRPickupPanel />}
+          {activeTab === "qrpickup" && (
+            <div className="space-y-3">
+              <QRPickupPanel />
+              <GuestPickupCard />
+            </div>
+          )}
           {activeTab === "annual" && <AnnualSummaryPanel />}
           {activeTab === "emails" && <EmailHistoryPanel />}
           {activeTab === "services" && (

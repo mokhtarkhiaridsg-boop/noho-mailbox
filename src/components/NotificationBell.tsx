@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
 import { markNotificationRead, markAllNotificationsRead } from "@/app/actions/notifications";
 
 type Notification = {
@@ -122,139 +123,177 @@ export default function NotificationBell({ notifications }: Props) {
 
   return (
     <div className="relative" ref={panelRef}>
-      {/* Bell button */}
-      <button
+      {/* Bell button — refined with motion press feedback + pulse on unread */}
+      <motion.button
         onClick={() => setOpen(!open)}
-        className="relative w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-[#2D100F]/8"
+        whileTap={{ scale: 0.92 }}
+        className="relative w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-[rgba(45,29,15,0.06)]"
         style={{ color: INK }}
         aria-label={`Notifications${unread > 0 ? ` (${unread} unread)` : ""}`}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
         {unread > 0 && (
-          <span
-            className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-black text-white px-1"
-            style={{ background: "var(--color-danger)" }}
-          >
-            {unread > 99 ? "99+" : unread}
-          </span>
+          <>
+            {/* Pulsing halo ring */}
+            <motion.span
+              className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full pointer-events-none"
+              style={{ background: BLUE, opacity: 0.5 }}
+              animate={{ scale: [1, 1.6, 1], opacity: [0.5, 0, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+            />
+            <span
+              className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1 tabular-nums"
+              style={{ background: BLUE }}
+            >
+              {unread > 99 ? "99+" : unread}
+            </span>
+          </>
         )}
-      </button>
+      </motion.button>
 
-      {/* Dropdown panel */}
-      {open && (
-        <div
-          className="absolute right-0 top-11 w-80 rounded-2xl overflow-hidden z-50"
-          style={{
-            background: "white",
-            boxShadow: "var(--shadow-cream-lg)",
-            border: `1px solid ${BORDER}`,
-          }}
-        >
-          {/* Header */}
-          <div
-            className="flex items-center justify-between px-4 py-3"
-            style={{ borderBottom: `1px solid ${BORDER}`, background: CREAM }}
+      {/* Dropdown panel — smooth motion entrance with origin-top-right scale */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.97 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute right-0 top-11 w-[340px] rounded-2xl overflow-hidden z-50 origin-top-right"
+            style={{
+              background: "white",
+              boxShadow: "0 24px 48px -8px rgba(45,29,15,0.18), 0 4px 12px rgba(45,29,15,0.08)",
+              border: `1px solid rgba(45,29,15,0.10)`,
+            }}
           >
-            <h3 className="font-black text-sm" style={{ color: INK }}>
-              Notifications{" "}
-              {unread > 0 && <span style={{ color: BLUE }}>({unread})</span>}
-            </h3>
-            {unread > 0 && (
-              <button
-                onClick={handleMarkAll}
-                disabled={markingAll}
-                className="text-[11px] font-bold hover:underline disabled:opacity-50"
-                style={{ color: BLUE }}
-              >
-                Mark all read
-              </button>
-            )}
-          </div>
-
-          {errMsg && (
-            <div className="px-4 py-2 text-[11px] font-bold" style={{ background: "rgba(231,0,19,0.06)", color: "#b91c1c", borderBottom: `1px solid ${BORDER}` }}>
-              {errMsg}
-            </div>
-          )}
-
-          {/* Notifications list */}
-          <div className="max-h-[420px] overflow-y-auto">
-            {localNotifs.length === 0 ? (
-              <div className="px-4 py-10 text-center">
-                <span
-                  className="ai-icon inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3"
-                  style={{ background: BG_CREAM, color: BLUE }}
+            {/* Header — light, with brand-blue unread chip */}
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid rgba(45,29,15,0.08)` }}>
+              <div className="flex items-center gap-2">
+                <h3
+                  className="text-[13px] tracking-tight"
+                  style={{ color: INK, fontFamily: "var(--font-baloo), system-ui, sans-serif", fontWeight: 800 }}
                 >
-                  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                  </svg>
-                </span>
-                <p className="text-sm font-bold" style={{ color: INK_SOFT }}>
-                  No notifications yet
-                </p>
-                <p className="text-[11px] mt-0.5" style={{ color: INK_FAINT }}>
-                  We&apos;ll let you know when mail arrives
+                  Notifications
+                </h3>
+                {unread > 0 && (
+                  <span
+                    className="text-[10px] font-bold tabular-nums px-1.5 h-5 rounded-full inline-flex items-center"
+                    style={{ background: "rgba(51,116,133,0.10)", color: BLUE }}
+                  >
+                    {unread} new
+                  </span>
+                )}
+              </div>
+              {unread > 0 && (
+                <button
+                  onClick={handleMarkAll}
+                  disabled={markingAll}
+                  className="text-[11.5px] font-semibold hover:underline disabled:opacity-50 transition-opacity"
+                  style={{ color: BLUE }}
+                >
+                  Mark all read
+                </button>
+              )}
+            </div>
+
+            {errMsg && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="px-4 py-2 text-[11px] font-medium"
+                style={{ background: "rgba(231,0,19,0.05)", color: "#b91c1c", borderBottom: `1px solid rgba(45,29,15,0.08)` }}
+              >
+                {errMsg}
+              </motion.div>
+            )}
+
+            {/* Notifications list */}
+            <div className="max-h-[440px] overflow-y-auto">
+              {localNotifs.length === 0 ? (
+                <div className="px-4 py-10 text-center">
+                  <span
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-2xl mb-3"
+                    style={{ background: "rgba(51,116,133,0.08)", color: BLUE }}
+                  >
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="6" width="18" height="13" rx="2" />
+                      <path d="M3 8 L12 14 L21 8" />
+                    </svg>
+                  </span>
+                  <p
+                    className="text-[13.5px] tracking-tight"
+                    style={{ color: INK, fontFamily: "var(--font-baloo), system-ui, sans-serif", fontWeight: 700 }}
+                  >
+                    All caught up
+                  </p>
+                  <p className="text-[11.5px] mt-1" style={{ color: INK_SOFT }}>
+                    We&apos;ll let you know when mail arrives
+                  </p>
+                </div>
+              ) : (
+                localNotifs.map((notif, idx) => {
+                  const colors = TYPE_COLORS[notif.type] ?? TYPE_COLORS.general;
+                  return (
+                    <motion.button
+                      key={notif.id}
+                      onClick={() => handleClick(notif)}
+                      initial={{ opacity: 0, x: -4 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.18, delay: 0.02 * idx }}
+                      className="w-full text-left px-4 py-3 flex gap-3 items-start transition-colors hover:bg-[rgba(45,29,15,0.03)]"
+                      style={{
+                        background: notif.read ? "transparent" : colors.bg,
+                        borderBottom: `1px solid rgba(45,29,15,0.05)`,
+                      }}
+                    >
+                      <div className="mt-1.5 shrink-0">
+                        <div
+                          className="w-2 h-2 rounded-full"
+                          style={{ background: notif.read ? "transparent" : colors.dot }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-[12.5px] leading-tight tracking-tight"
+                          style={{
+                            color: notif.read ? INK_SOFT : INK,
+                            fontWeight: notif.read ? 600 : 700,
+                          }}
+                        >
+                          {notif.title}
+                        </p>
+                        <p
+                          className="text-[11.5px] mt-0.5 leading-snug line-clamp-2"
+                          style={{ color: INK_SOFT }}
+                        >
+                          {notif.body}
+                        </p>
+                        <p className="text-[10.5px] mt-1" style={{ color: INK_FAINT }}>
+                          {timeAgo(notif.createdAt)}
+                        </p>
+                      </div>
+                    </motion.button>
+                  );
+                })
+              )}
+            </div>
+
+            {localNotifs.length > 0 && (
+              <div
+                className="px-4 py-2"
+                style={{ borderTop: `1px solid rgba(45,29,15,0.08)`, background: "rgba(251,250,246,0.6)" }}
+              >
+                <p className="text-[10.5px] text-center" style={{ color: INK_FAINT }}>
+                  Showing {Math.min(localNotifs.length, 50)} of {localNotifs.length}
                 </p>
               </div>
-            ) : (
-              localNotifs.map((notif) => {
-                const colors = TYPE_COLORS[notif.type] ?? TYPE_COLORS.general;
-                return (
-                  <button
-                    key={notif.id}
-                    onClick={() => handleClick(notif)}
-                    className="w-full text-left px-4 py-3 flex gap-3 items-start transition-colors hover:bg-[#F8F2EA] last:border-0"
-                    style={{
-                      background: notif.read ? "transparent" : colors.bg,
-                      borderBottom: `1px solid ${BORDER}`,
-                    }}
-                  >
-                    <div className="mt-1 shrink-0">
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ background: notif.read ? "transparent" : colors.dot }}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-[13px] leading-tight ${notif.read ? "font-semibold" : "font-black"}`}
-                        style={{ color: notif.read ? INK_SOFT : INK }}
-                      >
-                        {notif.title}
-                      </p>
-                      <p
-                        className="text-[12px] mt-0.5 leading-snug line-clamp-2"
-                        style={{ color: INK_SOFT }}
-                      >
-                        {notif.body}
-                      </p>
-                      <p className="text-[11px] mt-1" style={{ color: INK_FAINT }}>
-                        {timeAgo(notif.createdAt)}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })
             )}
-          </div>
-
-          {/* Footer */}
-          {localNotifs.length > 0 && (
-            <div
-              className="px-4 py-2.5"
-              style={{ borderTop: `1px solid ${BORDER}`, background: BG_CREAM }}
-            >
-              <p className="text-[11px] text-center" style={{ color: INK_FAINT }}>
-                Showing {Math.min(localNotifs.length, 50)} of {localNotifs.length} notifications
-              </p>
-            </div>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
