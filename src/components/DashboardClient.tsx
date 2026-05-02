@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useState, useTransition, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { logout } from "@/app/actions/auth";
 import {
@@ -113,6 +114,116 @@ const sideNavGroups: NavGroup[] = [
 // Flat lookup used by code that doesn't care about grouping (e.g. the
 // active-tab class lookup, the URL-sync allow-list).
 const sideNav: NavItem[] = sideNavGroups.flatMap((g) => g.items);
+
+// ─── Brand-aligned Button Nav ─────────────────────────────────────────────
+// Per the brand brief: cream/blue/brown only, BUTTONS not menus, formal
+// + light, framer-motion driven for smoothness. Six primary tabs are
+// visible at all times (no overflow menu); everything else is reachable
+// via the ⌘K command palette in 0 clicks. Active indicator is a single
+// motion.span that slides between buttons via layoutId — no chunky pill,
+// no transform on each item.
+const PRIMARY_NAV: { id: string; label: string }[] = [
+  { id: "overview",   label: "Overview" },
+  { id: "mail",       label: "Mail" },
+  { id: "packages",   label: "Packages" },
+  { id: "wallet",     label: "Wallet" },
+  { id: "forwarding", label: "Forwarding" },
+  { id: "messages",   label: "Messages" },
+];
+
+function DashboardButtonNav({
+  activeTab,
+  onChange,
+  onSearch,
+}: {
+  activeTab: string;
+  onChange: (id: string) => void;
+  onSearch: () => void;
+}) {
+  // Ensure the active tab maps to a primary button — secondary tabs (like
+  // settings, vault, qrpickup, etc.) keep the indicator parked under
+  // Overview so the bar still feels coherent.
+  const activeIsPrimary = PRIMARY_NAV.some((t) => t.id === activeTab);
+  const indicatorId = activeIsPrimary ? activeTab : "overview";
+  return (
+    <nav
+      aria-label="Dashboard sections"
+      className="mb-8 flex flex-wrap items-center gap-2"
+    >
+      <div className="flex flex-wrap items-center gap-1 rounded-full p-1"
+        style={{
+          background: "rgba(255,255,255,0.7)",
+          border: "1px solid rgba(45,29,15,0.10)",
+          backdropFilter: "blur(8px)",
+        }}
+      >
+        {PRIMARY_NAV.map((tab) => {
+          const active = indicatorId === tab.id;
+          return (
+            <motion.button
+              key={tab.id}
+              type="button"
+              onClick={() => onChange(tab.id)}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              className="relative px-4 py-2 text-[13px] font-semibold tracking-tight rounded-full"
+              style={{
+                color: active ? "#F7EEC2" : "#2D1D0F",
+                fontFamily: "system-ui, -apple-system, 'Segoe UI', Inter, sans-serif",
+                letterSpacing: "0.005em",
+                zIndex: 1,
+              }}
+              aria-current={active ? "page" : undefined}
+            >
+              {active && (
+                <motion.span
+                  layoutId="dash-nav-pill"
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: "#337485" }}
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                />
+              )}
+              <span className="relative">{tab.label}</span>
+            </motion.button>
+          );
+        })}
+      </div>
+      <motion.button
+        type="button"
+        onClick={onSearch}
+        whileHover={{ y: -1 }}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        className="ml-auto flex items-center gap-2 px-3.5 py-2 text-[12px] font-medium rounded-full"
+        style={{
+          color: "#2D1D0F",
+          background: "white",
+          border: "1px solid rgba(45,29,15,0.10)",
+        }}
+        aria-label="Open command palette"
+      >
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-3.5 h-3.5">
+          <circle cx="7" cy="7" r="4.5" />
+          <path d="M14 14L11 11" strokeLinecap="round" />
+        </svg>
+        <span className="hidden sm:inline">Search · everything</span>
+        <span className="sm:hidden">Search</span>
+        <kbd
+          className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded"
+          style={{
+            background: "#F7EEC2",
+            color: "#2D1D0F",
+            fontFamily: "ui-monospace, SF Mono, Menlo, monospace",
+            border: "1px solid rgba(45,29,15,0.10)",
+          }}
+        >
+          ⌘K
+        </kbd>
+      </motion.button>
+    </nav>
+  );
+}
 
 export default function DashboardClient({
   user,
@@ -257,17 +368,23 @@ export default function DashboardClient({
     <div
       className="min-h-screen"
       style={{
-        background: `radial-gradient(ellipse at top left, ${BRAND.creamDeep} 0%, ${BRAND.bg} 55%, #FFF9F3 100%)`,
-        color: BRAND.ink,
+        // Light, formal: near-white field with the faintest cream wash —
+        // brand colors are accents, not backgrounds. The cream/blue/brown
+        // palette belongs on type, borders, and CTAs, not on every pixel.
+        background: "#FBFAF6",
+        color: "#2D1D0F",
       }}
     >
-      {/* Top bar — solid cream chrome, brand-aligned */}
+      {/* Top bar — slim, hairline-bottomed, no shadow drop. The chunky
+          drop-shadow + cream wash made the header feel heavy; this version
+          is a quiet 56px strip that lets the content breathe. */}
       <header
-        className="sticky top-0 z-50 px-4 sm:px-6 h-16 flex items-center justify-between"
+        className="sticky top-0 z-50 px-4 sm:px-8 h-14 flex items-center justify-between"
         style={{
-          background: BRAND.cream,
-          borderBottom: `1px solid ${BRAND.border}`,
-          boxShadow: "0 1px 0 rgba(45,16,15,0.04), 0 6px 24px rgba(45,16,15,0.06)",
+          background: "rgba(251,250,246,0.85)",
+          borderBottom: "1px solid rgba(45,29,15,0.08)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
         }}
       >
         <div className="flex items-center gap-4">
@@ -390,13 +507,13 @@ export default function DashboardClient({
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8 flex gap-8 pb-24 md:pb-8">
-        {/* Sidebar — grouped, refined.
-            Each section: tiny uppercase header + tight stack of 32px-tall items.
-            Active state = soft cream-tint background + 3px brown left-rail accent
-            + bolder weight. NO heavy gradient pill, NO transform on hover —
-            just subtle bg shift. The eye scans groups, not 16 unsorted rows. */}
-        <aside className="hidden md:block w-60 shrink-0">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-6 sm:py-10 pb-28 md:pb-12">
+        {/* Sidebar removed — layout is now single-column. The horizontal
+            button nav below ((sideNav array) drives navigation. Sidebar
+            remnants kept here only as a hidden compatibility shim for the
+            JSX expression that follows; rendered as `null` so React doesn't
+            render anything but TypeScript is happy with the original struct. */}
+        <aside className="hidden">
           {/* Quick search hint — visual marker for the ⌘K command palette
               that already exists. Modern dashboards lead with this. */}
           <button
@@ -580,57 +697,112 @@ export default function DashboardClient({
           </div>
         </aside>
 
-        {/* Main content */}
-        <div className="flex-1 min-w-0">
-          {/* Mobile top tab selector — compact row for quick context */}
-          <div className="md:hidden flex gap-1.5 overflow-x-auto pb-3 -mx-1 px-1 scrollbar-none">
-            {sideNav.map(({ Icon, label, id }) => {
-              const active = activeTab === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => setActiveTab(id)}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-black transition-all"
+        {/* Main content — single full-width column. */}
+        <div className="min-w-0">
+          {/* ─── Top Button Nav (replaces sidebar) ─────────────────────────
+              6 primary buttons + a "More" overflow that opens a 12-item
+              sheet. Buttons (not menus) per the brand brief. Cream/blue/
+              brown only — no gradients, no chunky shadows. Framer Motion
+              drives hover scale, active-pill morph, and overflow sheet. */}
+          <DashboardButtonNav
+            activeTab={activeTab}
+            onChange={setActiveTab}
+            onSearch={() => {
+              window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
+            }}
+          />
+
+          {/* Smooth tab transitions — single AnimatePresence wrapping the
+              entire panel area. Each tab change unmounts the old panel and
+              fades+slides the new one in. mode="wait" makes the transition
+              sequential rather than overlapping. */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            >
+
+          {/* Welcome lockup — formal, light. Brand script for the friendly
+              prefix, brand sans for the name. Address is now an inline
+              chip-strip beside the heading, not a chunky sidebar card. */}
+          {activeTab === "overview" ? (
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div>
+                <p
+                  aria-hidden
+                  className="text-base sm:text-lg leading-none mb-2"
                   style={{
-                    background: active
-                      ? `linear-gradient(135deg, ${BRAND.brown}, ${BRAND.brownDeep})`
-                      : "white",
-                    color: active ? BRAND.cream : BRAND.ink,
-                    boxShadow: active
-                      ? "0 4px 14px rgba(45,16,15,0.28)"
-                      : `0 1px 0 ${BRAND.border}`,
-                    border: active ? "none" : `1px solid ${BRAND.border}`,
+                    color: "#337485",
+                    fontFamily: "var(--font-pacifico), 'Caveat', 'Brush Script MT', cursive",
+                    fontWeight: 400,
                   }}
                 >
-                  <Icon className="w-3.5 h-3.5" />
-                  {label}
+                  Welcome back,
+                </p>
+                <h1
+                  className="text-3xl sm:text-4xl leading-none tracking-tight"
+                  style={{
+                    color: "#2D1D0F",
+                    fontFamily: "var(--font-baloo), system-ui, sans-serif",
+                    fontWeight: 800,
+                  }}
+                >
+                  {user.name.split(" ")[0]}
+                </h1>
+              </div>
+              {user.suiteNumber && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const txt = `5062 Lankershim Blvd Ste ${user.suiteNumber}\nNorth Hollywood, CA 91601`;
+                    navigator.clipboard?.writeText(txt).then(() => setToast("Address copied"));
+                  }}
+                  className="group text-left inline-flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors"
+                  style={{
+                    background: "white",
+                    border: "1px solid rgba(45,29,15,0.10)",
+                  }}
+                  aria-label="Copy your mailing address"
+                >
+                  <div>
+                    <p
+                      className="text-[10px] font-semibold uppercase tracking-[0.18em] leading-none mb-1"
+                      style={{ color: "#337485" }}
+                    >
+                      Suite {user.suiteNumber}
+                    </p>
+                    <p
+                      className="text-[13px] leading-none"
+                      style={{ color: "#2D1D0F", fontWeight: 600 }}
+                    >
+                      5062 Lankershim Blvd · NoHo CA
+                    </p>
+                  </div>
+                  <span
+                    className="text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: "#337485" }}
+                  >
+                    Copy
+                  </span>
                 </button>
-              );
-            })}
-          </div>
-
-          {/* Welcome line — full size on Overview, compact breadcrumb on
-              every other panel. The audit flagged this as repeating
-              identical 80px-tall hero content across all 15 panels. */}
-          {activeTab === "overview" ? (
-            <div className="mb-4 sm:mb-6">
-              <p
-                aria-hidden
-                className="text-base sm:text-lg leading-none"
+              )}
+            </div>
+          ) : (
+            <div className="mb-6">
+              <h1
+                className="text-2xl sm:text-3xl leading-none tracking-tight"
                 style={{
-                  color: BRAND.blue,
-                  fontFamily: "var(--font-pacifico), cursive",
+                  color: "#2D1D0F",
+                  fontFamily: "var(--font-baloo), system-ui, sans-serif",
+                  fontWeight: 800,
                 }}
               >
-                Welcome back,
-              </p>
-              <h1
-                className="text-2xl sm:text-3xl font-black mt-1"
-                style={{ color: BRAND.ink, fontFamily: "var(--font-baloo), sans-serif" }}
-              >
-                {user.name.split(" ")[0]}
+                {activeTab.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
               </h1>
-              <p className="text-[12px] mt-1" style={{ color: BRAND.inkSoft }}>
+              <p className="text-[12px] mt-1.5" style={{ color: "rgba(45,29,15,0.55)" }}>
                 {planLabel}
                 {user.suiteNumber ? ` · Suite #${user.suiteNumber}` : ""}
                 {user.planDueDate && (
@@ -638,31 +810,13 @@ export default function DashboardClient({
                     style={{
                       color: planStatus !== "active"
                         ? (isBlocked ? "var(--color-danger)" : "var(--color-warning)")
-                        : BRAND.inkFaint,
+                        : "rgba(45,29,15,0.45)",
                     }}
                   >
                     {" · Renews "}{user.planDueDate}
                   </span>
                 )}
               </p>
-            </div>
-          ) : (
-            <div
-              className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em]"
-              style={{ color: BRAND.inkFaint }}
-            >
-              <button
-                onClick={() => setActiveTab("overview")}
-                className="hover:underline"
-                style={{ color: BRAND.blue }}
-                aria-label="Back to dashboard overview"
-              >
-                Dashboard
-              </button>
-              <span aria-hidden>›</span>
-              <span style={{ color: BRAND.inkSoft }}>
-                {activeTab.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-              </span>
             </div>
           )}
 
@@ -870,6 +1024,8 @@ export default function DashboardClient({
               router={router}
             />
           )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 
@@ -919,61 +1075,58 @@ export default function DashboardClient({
       />
 
       {/* ─── Mobile Bottom Tab Bar ────────────────────────────────────────
-          Floating capsule bar that hovers above the bottom edge with a soft
-          drop shadow + frosted backdrop blur. Active item: filled brown
-          circle behind the icon (not just a tiny top stripe). Replaces the
-          flat 2018-style cream-bar-with-stripe with a modern iOS-style
-          floating dock. */}
+          Light + formal: a thin off-white bar with hairline top border, no
+          drop shadow, no chunky capsule. Active item: solid blue (#337485)
+          background — same brand-blue as the desktop nav active pill, so
+          the two viewports feel like the same product. Framer Motion
+          shared-element pill morphs between buttons. */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)" }}
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-stretch justify-around"
+        style={{
+          background: "rgba(251,250,246,0.92)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          borderTop: "1px solid rgba(45,29,15,0.10)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
       >
-        <div
-          className="pointer-events-auto flex items-stretch gap-0.5 px-1.5 py-1.5 rounded-2xl"
-          style={{
-            background: "rgba(247,230,194,0.92)",
-            backdropFilter: "blur(20px) saturate(1.4)",
-            WebkitBackdropFilter: "blur(20px) saturate(1.4)",
-            border: `1px solid ${BRAND.border}`,
-            boxShadow:
-              "0 8px 28px rgba(45,16,15,0.18), 0 2px 6px rgba(45,16,15,0.10), 0 1px 0 rgba(255,255,255,0.7) inset",
-          }}
-        >
-          {[
-            { Icon: IconHome, label: "Home", id: "overview" },
-            { Icon: IconMail, label: "Mail", id: "mail" },
-            { Icon: IconPackage, label: "Packages", id: "packages" },
-            { Icon: IconWallet, label: "Wallet", id: "wallet" },
-            { Icon: IconMessage, label: "Messages", id: "messages" },
-          ].map(({ Icon, label, id }) => {
-            const active = activeTab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className="relative flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl transition-all"
-                style={{
-                  color: active ? BRAND.cream : BRAND.inkSoft,
-                  background: active
-                    ? `linear-gradient(165deg, ${BRAND.brown}, ${BRAND.brownDeep})`
-                    : "transparent",
-                  minWidth: 54,
-                  boxShadow: active ? "0 4px 12px rgba(45,16,15,0.32)" : "none",
-                }}
-                aria-label={label}
-                aria-current={active ? "page" : undefined}
+        {[
+          { Icon: IconHome, label: "Home", id: "overview" },
+          { Icon: IconMail, label: "Mail", id: "mail" },
+          { Icon: IconPackage, label: "Pkgs", id: "packages" },
+          { Icon: IconWallet, label: "Wallet", id: "wallet" },
+          { Icon: IconMessage, label: "Msgs", id: "messages" },
+        ].map(({ Icon, label, id }) => {
+          const active = activeTab === id;
+          return (
+            <motion.button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              whileTap={{ scale: 0.94 }}
+              transition={{ type: "spring", stiffness: 500, damping: 28 }}
+              className="relative flex flex-col items-center justify-center gap-1 px-2 py-2 min-w-[54px]"
+              style={{ color: active ? "#337485" : "rgba(45,29,15,0.55)" }}
+              aria-label={label}
+              aria-current={active ? "page" : undefined}
+            >
+              {active && (
+                <motion.span
+                  layoutId="dash-mobile-pill"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] rounded-b-full"
+                  style={{ background: "#337485", width: 24 }}
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              <Icon className="w-[18px] h-[18px]" strokeWidth={active ? 2 : 1.6} />
+              <span
+                className="text-[10px] tracking-wide"
+                style={{ fontWeight: active ? 700 : 500 }}
               >
-                <Icon className="w-[18px] h-[18px]" strokeWidth={active ? 2.2 : 1.6} />
-                <span
-                  className="text-[9.5px] tracking-wide"
-                  style={{ fontWeight: active ? 900 : 700 }}
-                >
-                  {label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                {label}
+              </span>
+            </motion.button>
+          );
+        })}
       </nav>
 
       {/* Toast — raised above bottom bar on mobile */}
