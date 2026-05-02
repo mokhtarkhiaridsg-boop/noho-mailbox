@@ -29,6 +29,9 @@ import {
   IconUmbrella,
   IconUsers,
   IconBlock,
+  IconLock,
+  IconScan,
+  IconStar,
 } from "@/components/MemberIcons";
 import { getPlanStatus, planStatusMessage } from "@/lib/plan";
 import { BRAND, type DashboardProps } from "./dashboard/types";
@@ -52,24 +55,64 @@ import ServicesPanel from "./dashboard/ServicesPanel";
 import OverviewPanel from "./dashboard/OverviewPanel";
 import CommandPalette from "./dashboard/CommandPalette";
 
-const sideNav = [
-  { Icon: IconHome, label: "Overview", id: "overview" },
-  { Icon: IconMail, label: "Mail", id: "mail" },
-  { Icon: IconSparkle, label: "Services", id: "services" },
-  { Icon: IconPackage, label: "Packages", id: "packages" },
-  { Icon: IconWallet, label: "Wallet", id: "wallet" },
-  { Icon: IconMessage, label: "Messages", id: "messages" },
-  { Icon: IconBell, label: "Emails", id: "emails" },
-  { Icon: IconTruck, label: "Deliveries", id: "deliveries" },
-  { Icon: IconForward, label: "Shipping", id: "shipping" },
-  { Icon: IconReceipt, label: "Invoices", id: "invoices" },
-  { Icon: IconForward, label: "Forwarding", id: "forwarding" },
-  { Icon: IconNotary, label: "Notary", id: "notary" },
-  { Icon: IconSettings, label: "Settings", id: "settings" },
-  { Icon: IconShield, label: "Vault", id: "vault" },
-  { Icon: IconSparkle, label: "QR Pickup", id: "qrpickup" },
-  { Icon: IconReceipt, label: "Year in Review", id: "annual" },
+type NavItem = {
+  Icon: (props: import("react").SVGProps<SVGSVGElement>) => import("react").ReactElement;
+  label: string;
+  id: string;
+};
+type NavGroup = { label: string; items: NavItem[] };
+
+// Sidebar nav, grouped by domain. Sections render with a tiny uppercase
+// header and a tighter line-height inside each group. Total of 16 items
+// across 5 groups — same items as before, just organized so the eye can
+// land on the right area in 2 hops instead of scanning a flat list.
+const sideNavGroups: NavGroup[] = [
+  {
+    label: "Mailbox",
+    items: [
+      { Icon: IconHome,    label: "Overview",  id: "overview" },
+      { Icon: IconMail,    label: "Mail",      id: "mail" },
+      { Icon: IconPackage, label: "Packages",  id: "packages" },
+      { Icon: IconForward, label: "Forwarding", id: "forwarding" },
+      { Icon: IconNotary,  label: "Notary",    id: "notary" },
+      { Icon: IconLock,    label: "Vault",     id: "vault" },
+      { Icon: IconScan,    label: "QR Pickup", id: "qrpickup" },
+    ],
+  },
+  {
+    label: "Money",
+    items: [
+      { Icon: IconWallet,  label: "Wallet",         id: "wallet" },
+      { Icon: IconReceipt, label: "Invoices",       id: "invoices" },
+      { Icon: IconStar,    label: "Year in Review", id: "annual" },
+    ],
+  },
+  {
+    label: "Communications",
+    items: [
+      { Icon: IconMessage, label: "Messages",   id: "messages" },
+      { Icon: IconBell,    label: "Email Logs", id: "emails" },
+    ],
+  },
+  {
+    label: "Shipping",
+    items: [
+      { Icon: IconTruck,   label: "Shipping Labels", id: "shipping" },
+      { Icon: IconClock,   label: "Deliveries",      id: "deliveries" },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { Icon: IconSparkle,  label: "Services", id: "services" },
+      { Icon: IconSettings, label: "Settings", id: "settings" },
+    ],
+  },
 ];
+
+// Flat lookup used by code that doesn't care about grouping (e.g. the
+// active-tab class lookup, the URL-sync allow-list).
+const sideNav: NavItem[] = sideNavGroups.flatMap((g) => g.items);
 
 export default function DashboardClient({
   user,
@@ -348,101 +391,185 @@ export default function DashboardClient({
       </header>
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8 flex gap-8 pb-24 md:pb-8">
-        {/* Sidebar */}
+        {/* Sidebar — grouped, refined.
+            Each section: tiny uppercase header + tight stack of 32px-tall items.
+            Active state = soft cream-tint background + 3px brown left-rail accent
+            + bolder weight. NO heavy gradient pill, NO transform on hover —
+            just subtle bg shift. The eye scans groups, not 16 unsorted rows. */}
         <aside className="hidden md:block w-60 shrink-0">
-          <nav className="space-y-1.5">
-            {sideNav.map(({ Icon, label, id }) => {
-              const active = activeTab === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => setActiveTab(id)}
-                  className="group w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-left relative transition-all duration-300 hover:-translate-y-0.5"
-                  style={{
-                    background: active
-                      ? `linear-gradient(135deg, ${BRAND.brown}, ${BRAND.brownDeep})`
-                      : "rgba(255,255,255,0.7)",
-                    color: active ? BRAND.cream : BRAND.ink,
-                    boxShadow: active
-                      ? "0 6px 20px rgba(45,16,15,0.28)"
-                      : "0 1px 0 rgba(45,16,15,0.04)",
-                    border: active ? "none" : `1px solid ${BRAND.border}`,
-                  }}
+          {/* Quick search hint — visual marker for the ⌘K command palette
+              that already exists. Modern dashboards lead with this. */}
+          <button
+            onClick={() => {
+              const evt = new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true });
+              window.dispatchEvent(evt);
+            }}
+            className="w-full mb-5 flex items-center gap-2.5 px-3 h-9 rounded-lg text-xs text-left transition-colors hover:bg-white/60"
+            style={{
+              background: "rgba(255,255,255,0.45)",
+              border: `1px solid ${BRAND.border}`,
+              color: BRAND.inkSoft,
+              backdropFilter: "blur(6px)",
+            }}
+            aria-label="Open command palette"
+          >
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-3.5 h-3.5 shrink-0">
+              <circle cx="7" cy="7" r="4.5" />
+              <path d="M14 14L11 11" strokeLinecap="round" />
+            </svg>
+            <span className="flex-1 truncate font-medium">Quick search</span>
+            <kbd
+              className="text-[10px] font-black px-1.5 py-0.5 rounded"
+              style={{
+                background: BRAND.cream,
+                color: BRAND.inkSoft,
+                border: `1px solid ${BRAND.border}`,
+                fontFamily: "ui-monospace, SF Mono, Menlo, monospace",
+              }}
+            >
+              ⌘K
+            </kbd>
+          </button>
+
+          <nav className="space-y-5">
+            {sideNavGroups.map((group) => (
+              <div key={group.label}>
+                <div
+                  className="px-3 mb-1.5 text-[10px] font-black uppercase tracking-[0.18em]"
+                  style={{ color: BRAND.inkFaint }}
                 >
-                  <Icon
-                    className="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
-                    style={{ color: active ? BRAND.cream : BRAND.blue }}
-                    strokeWidth={active ? 2 : 1.7}
-                  />
-                  {label}
-                  {active && (
-                    <IconChevron className="w-3 h-3 ml-auto" style={{ color: BRAND.cream }} />
-                  )}
-                </button>
-              );
-            })}
+                  {group.label}
+                </div>
+                <div className="space-y-0.5">
+                  {group.items.map(({ Icon, label, id }) => {
+                    const active = activeTab === id;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => setActiveTab(id)}
+                        className="group relative w-full flex items-center gap-2.5 pl-3 pr-3 h-8 rounded-md text-[13px] text-left transition-colors duration-150"
+                        style={{
+                          background: active ? "rgba(247,230,194,0.65)" : "transparent",
+                          color: active ? BRAND.brown : BRAND.ink,
+                          fontWeight: active ? 800 : 600,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!active) e.currentTarget.style.background = "rgba(255,255,255,0.7)";
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!active) e.currentTarget.style.background = "transparent";
+                        }}
+                      >
+                        {/* Left-rail accent for active item — replaces the
+                            heavy chunky pill of the old design with a clean
+                            modern indicator.  */}
+                        {active && (
+                          <span
+                            aria-hidden
+                            className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full"
+                            style={{ background: BRAND.brown }}
+                          />
+                        )}
+                        <Icon
+                          className="w-[15px] h-[15px] shrink-0"
+                          style={{ color: active ? BRAND.brown : BRAND.inkSoft }}
+                          strokeWidth={active ? 2.1 : 1.6}
+                        />
+                        <span className="flex-1 truncate">{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
-          {/* Address card — brand brown, cream ink */}
+          {/* Address card — refined. Brand brown still, but cleaner type +
+              tighter spacing + a subtle frosted highlight at the top, not a
+              big radial blob. The "Your Address" lockup now reads like a
+              proper postal label rather than a marketing card. */}
           <div
-            className="mt-6 rounded-3xl p-5 relative overflow-hidden"
+            className="mt-6 rounded-2xl p-4 relative overflow-hidden"
             style={{
-              background: `linear-gradient(135deg, ${BRAND.brown} 0%, ${BRAND.brownDeep} 100%)`,
-              boxShadow: "0 12px 40px rgba(45,16,15,0.32)",
+              background: `linear-gradient(165deg, ${BRAND.brown} 0%, ${BRAND.brownDeep} 100%)`,
+              boxShadow:
+                "0 1px 0 rgba(255,255,255,0.04) inset, 0 12px 32px rgba(45,16,15,0.28), 0 1px 2px rgba(0,0,0,0.3)",
               color: BRAND.cream,
             }}
           >
             <div
-              className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-25"
+              aria-hidden
+              className="absolute inset-0 opacity-30 pointer-events-none"
               style={{
-                background: `radial-gradient(circle, ${BRAND.cream} 0%, transparent 70%)`,
+                background:
+                  "linear-gradient(180deg, rgba(247,230,194,0.18) 0%, transparent 35%)",
               }}
-            />
-            <IconSparkle
-              className="absolute top-4 right-4 w-4 h-4"
-              style={{ color: "rgba(247,230,194,0.55)" }}
-              strokeWidth={1.4}
             />
             {user.suiteNumber ? (
               <>
+                <div className="flex items-center justify-between mb-3 relative">
+                  <span
+                    className="text-[9.5px] font-black uppercase tracking-[0.22em]"
+                    style={{ color: "rgba(247,230,194,0.55)" }}
+                  >
+                    Your Address
+                  </span>
+                  <span
+                    className="text-[9.5px] font-black uppercase tracking-[0.22em] px-1.5 py-0.5 rounded"
+                    style={{
+                      background: "rgba(247,230,194,0.12)",
+                      color: "rgba(247,230,194,0.85)",
+                    }}
+                  >
+                    Suite #{user.suiteNumber}
+                  </span>
+                </div>
                 <p
-                  className="text-[11px] font-black uppercase tracking-[0.18em] mb-2"
-                  style={{ color: "rgba(247,230,194,0.65)" }}
+                  className="text-[15px] font-black leading-tight relative"
+                  style={{
+                    color: BRAND.cream,
+                    fontFamily: "Georgia, serif",
+                    letterSpacing: "0.005em",
+                  }}
                 >
-                  Your Address
+                  5062 Lankershim Blvd
                 </p>
                 <p
-                  className="text-sm font-black leading-snug mb-1"
-                  style={{ color: BRAND.cream }}
+                  className="text-[13px] font-bold leading-tight mt-0.5 relative"
+                  style={{ color: "rgba(247,230,194,0.78)" }}
                 >
-                  NOHO Mailbox
+                  Ste {user.suiteNumber} · North Hollywood, CA 91601
                 </p>
-                <p
-                  className="text-xs font-bold leading-relaxed"
-                  style={{ color: "rgba(247,230,194,0.88)" }}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const txt = `5062 Lankershim Blvd Ste ${user.suiteNumber}\nNorth Hollywood, CA 91601`;
+                    navigator.clipboard?.writeText(txt).then(() => setToast("Address copied"));
+                  }}
+                  className="mt-3 inline-flex items-center gap-1.5 text-[10.5px] font-black uppercase tracking-[0.14em] relative transition-opacity hover:opacity-100"
+                  style={{ color: "rgba(247,230,194,0.7)" }}
                 >
-                  Suite #{user.suiteNumber}
-                  <br />
-                  North Hollywood, CA
-                </p>
+                  <IconCheck className="w-3 h-3" />
+                  Copy address
+                </button>
               </>
             ) : (
               <>
                 <p
-                  className="text-[11px] font-black uppercase tracking-[0.18em] mb-2"
-                  style={{ color: "rgba(247,230,194,0.65)" }}
+                  className="text-[10px] font-black uppercase tracking-[0.22em] mb-2 relative"
+                  style={{ color: "rgba(247,230,194,0.55)" }}
                 >
                   Free Member
                 </p>
                 <p
-                  className="text-sm font-bold leading-snug mb-3"
+                  className="text-[13px] font-bold leading-snug mb-3 relative"
                   style={{ color: BRAND.cream }}
                 >
                   Add a mailbox to get a real street address.
                 </p>
                 <Link
                   href="/pricing"
-                  className="inline-flex items-center gap-1.5 text-xs font-black rounded-full px-3 py-1.5 transition-transform hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-1 text-[11px] font-black rounded-md px-2.5 py-1.5 transition-transform hover:-translate-y-0.5 relative"
                   style={{ background: BRAND.cream, color: BRAND.brown }}
                 >
                   See Plans
@@ -791,45 +918,62 @@ export default function DashboardClient({
         setActiveTab={setActiveTab}
       />
 
-      {/* ─── Mobile Bottom Tab Bar — cream chrome, brown active ─── */}
+      {/* ─── Mobile Bottom Tab Bar ────────────────────────────────────────
+          Floating capsule bar that hovers above the bottom edge with a soft
+          drop shadow + frosted backdrop blur. Active item: filled brown
+          circle behind the icon (not just a tiny top stripe). Replaces the
+          flat 2018-style cream-bar-with-stripe with a modern iOS-style
+          floating dock. */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-stretch justify-around"
-        style={{
-          background: BRAND.cream,
-          borderTop: `1px solid ${BRAND.border}`,
-          boxShadow: "0 -4px 20px rgba(45,16,15,0.08)",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        }}
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 12px)" }}
       >
-        {[
-          { Icon: IconHome, label: "Home", id: "overview" },
-          { Icon: IconMail, label: "Mail", id: "mail" },
-          { Icon: IconPackage, label: "Pkgs", id: "packages" },
-          { Icon: IconWallet, label: "Wallet", id: "wallet" },
-          { Icon: IconMessage, label: "Msgs", id: "messages" },
-        ].map(({ Icon, label, id }) => {
-          const active = activeTab === id;
-          return (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className="relative flex flex-col items-center justify-center gap-0.5 py-2 px-3 min-w-[56px] transition-colors"
-              style={{ color: active ? BRAND.brown : BRAND.inkSoft }}
-            >
-              <Icon className="w-5 h-5" strokeWidth={active ? 2.2 : 1.6} />
-              <span className={`text-[10px] font-bold ${active ? "font-black" : ""}`}>
-                {label}
-              </span>
-              {active && (
+        <div
+          className="pointer-events-auto flex items-stretch gap-0.5 px-1.5 py-1.5 rounded-2xl"
+          style={{
+            background: "rgba(247,230,194,0.92)",
+            backdropFilter: "blur(20px) saturate(1.4)",
+            WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+            border: `1px solid ${BRAND.border}`,
+            boxShadow:
+              "0 8px 28px rgba(45,16,15,0.18), 0 2px 6px rgba(45,16,15,0.10), 0 1px 0 rgba(255,255,255,0.7) inset",
+          }}
+        >
+          {[
+            { Icon: IconHome, label: "Home", id: "overview" },
+            { Icon: IconMail, label: "Mail", id: "mail" },
+            { Icon: IconPackage, label: "Packages", id: "packages" },
+            { Icon: IconWallet, label: "Wallet", id: "wallet" },
+            { Icon: IconMessage, label: "Messages", id: "messages" },
+          ].map(({ Icon, label, id }) => {
+            const active = activeTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className="relative flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl transition-all"
+                style={{
+                  color: active ? BRAND.cream : BRAND.inkSoft,
+                  background: active
+                    ? `linear-gradient(165deg, ${BRAND.brown}, ${BRAND.brownDeep})`
+                    : "transparent",
+                  minWidth: 54,
+                  boxShadow: active ? "0 4px 12px rgba(45,16,15,0.32)" : "none",
+                }}
+                aria-label={label}
+                aria-current={active ? "page" : undefined}
+              >
+                <Icon className="w-[18px] h-[18px]" strokeWidth={active ? 2.2 : 1.6} />
                 <span
-                  aria-hidden
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
-                  style={{ background: BRAND.brown }}
-                />
-              )}
-            </button>
-          );
-        })}
+                  className="text-[9.5px] tracking-wide"
+                  style={{ fontWeight: active ? 900 : 700 }}
+                >
+                  {label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Toast — raised above bottom bar on mobile */}
