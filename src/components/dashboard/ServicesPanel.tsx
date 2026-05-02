@@ -12,6 +12,7 @@
 import { useState } from "react";
 import type { TransitionStartFunction } from "react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { motion } from "motion/react";
 import { BRAND, type DashboardUser } from "./types";
 import { requestCredits } from "@/app/actions/credits";
 import {
@@ -90,51 +91,100 @@ export default function ServicesPanel({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Credits — wallet balance + add credits */}
-      <section
-        className="rounded-3xl p-6"
+    <div className="space-y-5">
+      {/* Credits — refined hero. Light cream-tinted background instead of
+          chunky blue gradient + 50px shadow. Brand-blue accents, animated
+          number counter, motion preset pills with shared layoutId. */}
+      <motion.section
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="rounded-3xl p-6 sm:p-7"
         style={{
-          background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
-          color: "white",
-          boxShadow: "0 20px 50px rgba(51,116,133,0.32)",
+          background: "linear-gradient(180deg, #FFFCF3 0%, #FBFAF6 100%)",
+          border: "1px solid rgba(45,29,15,0.08)",
         }}
       >
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">
-          Credits
-        </p>
-        <div className="flex items-end justify-between flex-wrap gap-4 mt-2">
+        <div className="flex items-start justify-between gap-4 mb-1">
           <div>
-            <p className="text-4xl font-black">
-              ${(user.walletBalanceCents / 100).toFixed(2)}
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.22em]"
+              style={{ color: "#337485" }}
+            >
+              Credits balance
             </p>
-            <p className="text-xs text-white/80 mt-1">
+            <div
+              className="text-3xl sm:text-4xl tabular-nums tracking-tight mt-2"
+              style={{
+                color: "#2D1D0F",
+                fontFamily: "var(--font-baloo), system-ui, sans-serif",
+                fontWeight: 800,
+              }}
+            >
+              ${(user.walletBalanceCents / 100).toFixed(2)}
+            </div>
+            <p
+              className="text-[12.5px] mt-1.5 max-w-md"
+              style={{ color: "rgba(45,29,15,0.55)" }}
+            >
               Use credits to pay for scans, forwarding, deliveries, and notary.
             </p>
           </div>
+          <span
+            className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ background: "rgba(51,116,133,0.10)" }}
+            aria-hidden
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#337485" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="6" width="18" height="12" rx="2" />
+              <path d="M3 10 L21 10" />
+              <path d="M7 14 L11 14" />
+            </svg>
+          </span>
         </div>
 
         <div className="mt-5">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-white/70 mb-2">
-            Add Credits
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.18em] mb-2"
+            style={{ color: "rgba(45,29,15,0.55)" }}
+          >
+            Add credits
           </p>
-          <div className="flex flex-wrap gap-2">
-            {CREDIT_PRESETS.map((amt) => (
-              <button
-                key={amt}
-                onClick={() => setCreditAmt(amt)}
-                className={`px-3 py-2 rounded-lg text-xs font-black transition-all ${
-                  creditAmt === amt
-                    ? "bg-white text-[#23596A]"
-                    : "bg-white/15 text-white hover:bg-white/25"
-                }`}
-              >
-                ${amt / 100}
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-1.5">
+            {CREDIT_PRESETS.map((amt) => {
+              const active = creditAmt === amt;
+              return (
+                <motion.button
+                  key={amt}
+                  onClick={() => setCreditAmt(amt)}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="relative px-3.5 h-9 rounded-full text-[12.5px] font-semibold tabular-nums"
+                  style={{
+                    color: active ? "#F7EEC2" : "#337485",
+                    border: active ? "none" : "1px solid rgba(51,116,133,0.20)",
+                    background: active ? "transparent" : "white",
+                    zIndex: 1,
+                  }}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="credits-pill"
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: "#337485" }}
+                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative">${amt / 100}</span>
+                </motion.button>
+              );
+            })}
           </div>
-          <button
+          <motion.button
             disabled={isPending}
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
             onClick={() =>
               startTransition(async () => {
                 const res = await requestCredits(creditAmt);
@@ -147,95 +197,127 @@ export default function ServicesPanel({
                 );
               })
             }
-            className="mt-3 inline-flex items-center gap-2 text-xs font-black px-4 py-2.5 rounded-xl bg-white hover:bg-white/90 disabled:opacity-50"
-            style={{ color: BRAND.blueDeep }}
+            className="mt-3 inline-flex items-center gap-2 text-[12.5px] font-semibold px-4 h-10 rounded-full disabled:opacity-50"
+            style={{
+              background: "#337485",
+              color: "#F7EEC2",
+            }}
           >
-            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="6" width="18" height="12" rx="2" />
               <path d="M3 10 L21 10" />
-              <path d="M7 14 L11 14" />
             </svg>
-            {`Request $${creditAmt / 100} credits — we'll text you a Square link`}
-          </button>
-          <p className="text-[10px] text-white/60 mt-2 leading-relaxed">
-            We&apos;ll text a <strong>secure Square payment link</strong> to{" "}
+            Request ${creditAmt / 100} via Square link
+          </motion.button>
+          <p
+            className="text-[10.5px] mt-2.5 leading-relaxed"
+            style={{ color: "rgba(45,29,15,0.45)" }}
+          >
+            We&apos;ll text a <strong style={{ color: "rgba(45,29,15,0.65)" }}>secure Square payment link</strong> to{" "}
             {user.phone ?? "your phone on file"}. Once paid, credits land in
             your wallet automatically.
           </p>
         </div>
-      </section>
+      </motion.section>
 
-      {/* À-la-carte services */}
-      <section
-        className="rounded-3xl p-6"
+      {/* À-la-carte services — refined list with motion staggered rows */}
+      <motion.section
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
+        className="rounded-3xl p-5 sm:p-6"
         style={{
           background: "white",
-          border: `1px solid ${BRAND.border}`,
-          boxShadow: "var(--shadow-cream-sm)",
+          border: "1px solid rgba(45,29,15,0.08)",
         }}
       >
-        <h3
-          className="font-black text-xs uppercase tracking-[0.16em]"
-          style={{ color: BRAND.ink }}
-        >
-          À-la-carte Services
-        </h3>
-        <p className="text-[11px] mt-1" style={{ color: BRAND.inkFaint }}>
+        <div className="flex items-center gap-2 mb-1">
+          <span
+            className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background: "rgba(51,116,133,0.10)" }}
+          >
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="#337485" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2 L15 8 L21 9 L16.5 13.5 L18 20 L12 17 L6 20 L7.5 13.5 L3 9 L9 8 Z" />
+            </svg>
+          </span>
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.22em]"
+            style={{ color: "rgba(45,29,15,0.55)" }}
+          >
+            À-la-carte services
+          </p>
+        </div>
+        <p className="text-[12px] mb-1" style={{ color: "rgba(45,29,15,0.55)" }}>
           Pay-as-you-go from your credits balance. No surprise charges.
         </p>
 
-        <ul className="mt-4 divide-y" style={{ borderColor: BRAND.border }}>
-          {SERVICES.map((s) => (
-            <li
+        <ul className="mt-3 -mx-1">
+          {SERVICES.map((s, idx) => (
+            <motion.li
               key={s.id}
-              className="py-4 flex items-start justify-between gap-3 flex-wrap"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.26, delay: 0.04 * idx, ease: [0.22, 1, 0.36, 1] }}
+              className="px-1 py-3.5 flex items-start justify-between gap-3 flex-wrap transition-colors hover:bg-[rgba(45,29,15,0.02)] rounded-lg"
+              style={{
+                borderBottom:
+                  idx < SERVICES.length - 1 ? "1px solid rgba(45,29,15,0.05)" : "none",
+              }}
             >
               <div className="flex items-start gap-3 flex-1 min-w-0">
-                <span className="shrink-0 mt-0.5">{s.svg}</span>
+                <span
+                  className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center"
+                  style={{ background: "rgba(51,116,133,0.08)" }}
+                  aria-hidden
+                >
+                  {s.svg}
+                </span>
                 <div className="min-w-0">
-                  <p
-                    className="text-sm font-black"
-                    style={{ color: BRAND.ink }}
-                  >
-                    {s.title}{" "}
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
+                    <p
+                      className="text-[13.5px] tracking-tight"
+                      style={{ color: "#2D1D0F", fontWeight: 700 }}
+                    >
+                      {s.title}
+                    </p>
                     <span
-                      className="text-[11px] font-bold ml-1"
-                      style={{ color: BRAND.blue }}
+                      className="text-[11.5px] tabular-nums"
+                      style={{ color: "#337485", fontWeight: 700 }}
                     >
                       {s.price}
                     </span>
-                  </p>
-                  <p
-                    className="text-[11px] mt-0.5"
-                    style={{ color: BRAND.inkSoft }}
-                  >
+                  </div>
+                  <p className="text-[12px] mt-0.5 leading-snug" style={{ color: "rgba(45,29,15,0.55)" }}>
                     {s.desc}
                   </p>
                 </div>
               </div>
-              <a
+              <motion.a
                 href={`#${s.href}`}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={(e) => {
                   e.preventDefault();
-                  // Reuse existing tab nav by emitting a custom event the
-                  // dashboard listens to. Falls back to in-page anchor.
                   window.dispatchEvent(
                     new CustomEvent("noho:navTab", { detail: s.href }),
                   );
                 }}
-                className="text-[11px] font-black px-3 py-1.5 rounded-lg shrink-0"
+                className="text-[11.5px] font-semibold px-3 h-8 rounded-full inline-flex items-center gap-1 shrink-0 transition-colors"
                 style={{
-                  background: BRAND.blueSoft,
-                  color: BRAND.blueDeep,
-                  border: `1px solid ${BRAND.border}`,
+                  background: "white",
+                  color: "#337485",
+                  border: "1px solid rgba(51,116,133,0.20)",
                 }}
               >
-                {s.cta} →
-              </a>
-            </li>
+                {s.cta}
+                <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6 L9 6 M6 3 L9 6 L6 9" />
+                </svg>
+              </motion.a>
+            </motion.li>
           ))}
         </ul>
-      </section>
+      </motion.section>
 
       {/* Vacation Mode */}
       <section
