@@ -48,7 +48,9 @@ import DeliveriesPanel from "./dashboard/DeliveriesPanel";
 import InvoicesPanel from "./dashboard/InvoicesPanel";
 import ShippingPanel, { type MemberShippoLabel } from "./dashboard/ShippingPanel";
 import NotificationBell from "./NotificationBell";
+import LanguageSwitcher from "./LanguageSwitcher";
 import VaultPanel from "./dashboard/VaultPanel";
+import PhotosPanel from "./dashboard/PhotosPanel";
 import QRPickupPanel from "./dashboard/QRPickupPanel";
 import GuestPickupCard from "./dashboard/GuestPickupCard";
 import AnnualSummaryPanel from "./dashboard/AnnualSummaryPanel";
@@ -80,6 +82,7 @@ const sideNavGroups: NavGroup[] = [
       { Icon: IconNotary,  label: "Notary",    id: "notary" },
       { Icon: IconLock,    label: "Vault",     id: "vault" },
       { Icon: IconScan,    label: "QR Pickup", id: "qrpickup" },
+      { Icon: IconStar,    label: "Photos",    id: "photos" },
     ],
   },
   {
@@ -256,7 +259,7 @@ export default function DashboardClient({
   const ALL_TAB_IDS = [
     "overview", "mail", "services", "packages", "wallet", "messages",
     "emails", "deliveries", "shipping", "invoices", "forwarding", "notary", "settings",
-    "vault", "qrpickup", "annual",
+    "vault", "qrpickup", "annual", "photos",
   ];
   function normalizeTabSlug(raw: string | null): string {
     if (!raw) return "overview";
@@ -421,6 +424,8 @@ export default function DashboardClient({
               Admin
             </Link>
           )}
+          {/* iter-110: language switcher (en/fr/ar with RTL). */}
+          <LanguageSwitcher compact />
           <NotificationBell notifications={notifications} />
           <div className="relative" ref={profileRef}>
             <motion.button
@@ -1087,6 +1092,7 @@ export default function DashboardClient({
               runAction={runAction}
             />
           )}
+          {activeTab === "photos" && <PhotosPanel />}
           {activeTab === "vault" && (
             <VaultPanel vaultItems={vaultItems} />
           )}
@@ -1214,21 +1220,35 @@ export default function DashboardClient({
         })}
       </nav>
 
-      {/* Toast — raised above bottom bar on mobile */}
-      {toast && (
-        <div
-          className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2.5 px-4 py-3 rounded-2xl"
-          style={{
-            background: BRAND.ink,
-            color: BRAND.cream,
-            boxShadow: "0 12px 36px rgba(45,16,15,0.4)",
-            animation: "slideUp 220ms ease-out",
-          }}
-        >
-          <IconCheck className="w-4 h-4" style={{ color: "var(--color-success)" }} />
-          <span className="text-xs font-black">{toast}</span>
-        </div>
-      )}
+      {/* Toast — refined: framer motion entrance/exit, lighter chrome,
+          brand-blue success check, raised above mobile bottom bar */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2.5 px-4 py-2.5 rounded-full"
+            style={{
+              background: "#2D1D0F",
+              color: "#F7EEC2",
+              boxShadow:
+                "0 16px 36px -8px rgba(45,29,15,0.45), 0 4px 12px rgba(45,29,15,0.18)",
+            }}
+            role="status"
+            aria-live="polite"
+          >
+            <span
+              className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+              style={{ background: "rgba(247,238,194,0.18)" }}
+            >
+              <IconCheck className="w-3 h-3" style={{ color: "#F7EEC2" }} strokeWidth={2.4} />
+            </span>
+            <span className="text-[12.5px] font-medium tracking-tight">{toast}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <style jsx>{`
         @keyframes popIn {

@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import type { TransitionStartFunction } from "react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { BRAND, type DashboardUser, type KeyReq, type ForwardingAddress } from "./types";
+import NotificationPrefsCard from "./NotificationPrefsCard";
+import TotpEnrollmentCard from "./TotpEnrollmentCard";
+import ReferAndEarnCard from "./ReferAndEarnCard";
+import SharedMailboxCard from "./SharedMailboxCard";
+import PickupAppointmentCard from "./PickupAppointmentCard";
+import AutoRenewCard from "./AutoRenewCard";
+import WalletAutoTopUpCard from "./WalletAutoTopUpCard";
 import {
   IconSettings,
   IconKey,
@@ -52,7 +59,7 @@ function TwoFactorPanel({ enabled }: { enabled: boolean }) {
     startTransition(async () => {
       setMessage(null);
       const res = await enable2FA();
-      if (res.success) setSetup({ secret: res.secret, uri: res.uri });
+      if (res.success && res.secret && res.uri) setSetup({ secret: res.secret, uri: res.uri });
       else setMessage("Failed to start setup");
     });
 
@@ -92,7 +99,7 @@ function TwoFactorPanel({ enabled }: { enabled: boolean }) {
         <div className="flex items-center gap-2.5">
           <IconLock className="w-4 h-4" style={{ color: BRAND.blueDeep }} />
           <p
-            className="text-[10px] font-black uppercase tracking-[0.16em]"
+            className="text-[10px] font-semibold uppercase tracking-[0.22em]"
             style={{ color: BRAND.blueDeep }}
           >
             Two-Factor Authentication
@@ -119,7 +126,7 @@ function TwoFactorPanel({ enabled }: { enabled: boolean }) {
             onClick={startSetup}
             className="text-xs font-black px-4 py-2 rounded-xl text-white disabled:opacity-50"
             style={{
-              background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
+              background: BRAND.blue,
               boxShadow: "0 4px 14px rgba(51,116,133,0.32)",
             }}
           >
@@ -242,7 +249,7 @@ function SharedAccessCard({ setToast }: { setToast: (s: string) => void }) {
     <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
             <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="6" r="2.5" /><circle cx="11" cy="7" r="2" /><path d="M2 13 C2 10 4 9 6 9 C8 9 10 10 10 13" /><path d="M10 12 C10 10 11 9 13 9 C14 9 14.5 9.5 14.5 9.5" /></svg>
             Shared Mailbox Access
           </p>
@@ -337,7 +344,7 @@ function GuestPickupCard({ setToast }: { setToast: (s: string) => void }) {
     <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
             <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="6" r="3" /><path d="M2 14 C2 11 5 10 8 10 C11 10 14 11 14 14" /></svg>
             Guest Pickup
           </p>
@@ -431,7 +438,7 @@ function ScheduledForwardingCard({ addresses, setToast }: { addresses: Forwardin
     <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
             <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="12" height="11" rx="1.5" /><path d="M2 6 L14 6 M5 1.5 L5 4 M11 1.5 L11 4" /><circle cx="8" cy="10" r="0.8" fill="currentColor" /></svg>
             Scheduled Forwarding
           </p>
@@ -540,7 +547,7 @@ function VacationHoldCard({ setToast }: { setToast: (s: string) => void }) {
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
             <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 8 C2 4 5 2 8 2 C11 2 14 4 14 8" /><path d="M2 8 L14 8" /><path d="M8 2 L8 8" /><path d="M8 9 L8 13 C8 14 8.5 14.5 9.5 14.5 C10.5 14.5 11 13.5 11 12.5" /></svg>
             Vacation Hold
           </p>
@@ -599,7 +606,7 @@ function VacationHoldCard({ setToast }: { setToast: (s: string) => void }) {
         <button
           onClick={() => setShowForm(true)}
           className="text-xs font-black px-4 py-2 rounded-xl text-white"
-          style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+          style={{ background: BRAND.blue }}
         >
           Set Vacation Hold
         </button>
@@ -640,7 +647,7 @@ function JunkSendersCard() {
       className="rounded-2xl p-4 space-y-3"
       style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}
     >
-      <p className="text-[10px] font-black uppercase tracking-[0.16em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
         <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="8" cy="8" r="6" /><path d="M3.5 3.5 L12.5 12.5" /></svg>
         Blocked Senders ({senders.length})
       </p>
@@ -706,6 +713,7 @@ export default function SettingsPanel({
   }
 
   return (
+    <div className="space-y-3">
     <div
       className="rounded-3xl p-6"
       style={{
@@ -745,7 +753,7 @@ export default function SettingsPanel({
           >
             <div className="flex-1 min-w-0">
               <p
-                className="text-[10px] font-black uppercase tracking-[0.16em]"
+                className="text-[10px] font-semibold uppercase tracking-[0.22em]"
                 style={{ color: BRAND.inkFaint }}
               >
                 {field.label}
@@ -822,7 +830,7 @@ export default function SettingsPanel({
           <div className="flex items-center gap-2.5 mb-2">
             <IconKey className="w-4 h-4" style={{ color: BRAND.blueDeep }} />
             <p
-              className="text-[10px] font-black uppercase tracking-[0.16em]"
+              className="text-[10px] font-semibold uppercase tracking-[0.22em]"
               style={{ color: BRAND.blueDeep }}
             >
               Mailbox Key
@@ -843,7 +851,7 @@ export default function SettingsPanel({
               onClick={() => setKeyFormOpen(true)}
               className="text-xs font-black px-4 py-2 rounded-xl text-white disabled:opacity-50"
               style={{
-                background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`,
+                background: BRAND.blue,
                 boxShadow: "0 4px 14px rgba(51,116,133,0.32)",
               }}
             >
@@ -851,7 +859,7 @@ export default function SettingsPanel({
             </button>
           ) : (
             <div className="space-y-2 rounded-xl p-3" style={{ background: BRAND.bg, border: `1px solid ${BRAND.border}` }}>
-              <label className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.blueDeep }}>
+              <label className="text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: BRAND.blueDeep }}>
                 Reason for new key
               </label>
               <textarea
@@ -881,7 +889,7 @@ export default function SettingsPanel({
                     setKeyReason("Lost key");
                   }}
                   className="text-xs font-black px-3 py-1.5 rounded-lg text-white disabled:opacity-50"
-                  style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+                  style={{ background: BRAND.blue }}
                 >
                   Submit Request
                 </button>
@@ -924,7 +932,7 @@ export default function SettingsPanel({
               onClick={handleGetCode}
               disabled={loadingCode}
               className="w-full py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-50"
-              style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})` }}
+              style={{ background: BRAND.blue }}
             >{loadingCode ? "Generating…" : "Get My Referral Code"}</button>
           )}
         </div>
@@ -949,7 +957,7 @@ export default function SettingsPanel({
           className="rounded-2xl p-4 space-y-2"
           style={{ background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.15)" }}
         >
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-red-700">Close Account</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-red-700">Close Account</p>
           <p className="text-xs text-gray-500">
             Request to close your mailbox. After approval you&apos;ll have 30 days to collect remaining mail.
           </p>
@@ -963,7 +971,7 @@ export default function SettingsPanel({
             </button>
           ) : (
             <div className="space-y-2 rounded-xl p-3 mt-2" style={{ background: "rgba(231,0,19,0.04)", border: "1px solid rgba(231,0,19,0.18)" }}>
-              <label className="text-[10px] font-black uppercase tracking-[0.16em] text-red-700">
+              <label className="text-[10px] font-semibold uppercase tracking-[0.22em] text-red-700">
                 Tell us why you&apos;re leaving
               </label>
               <textarea
@@ -1012,6 +1020,22 @@ export default function SettingsPanel({
           Sign Out
         </button>
       </div>
+    </div>
+    {/* iter-84: Notification preferences card. Placed below the main
+        settings card so it doesn't compete for the top of the panel. */}
+    <NotificationPrefsCard hasPhone={Boolean(user.phone)} />
+    {/* iter-96: Two-factor authentication enrollment + recovery codes. */}
+    <TotpEnrollmentCard />
+    {/* iter-98: Refer & earn — code, share, stats, conversions. */}
+    <ReferAndEarnCard />
+    {/* iter-100: Shared mailbox access — invite + grants list. */}
+    <SharedMailboxCard />
+    {/* iter-101: Pickup-time scheduling — book a 15-min slot. */}
+    <PickupAppointmentCard />
+    {/* iter-111: Auto-renew toggle — opt in to wallet-funded recurring billing. */}
+    <AutoRenewCard />
+    {/* iter-112: Wallet auto top-up — keeps the wallet primed for renewals. */}
+    <WalletAutoTopUpCard />
     </div>
   );
 }
