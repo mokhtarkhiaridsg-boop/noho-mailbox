@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { BRAND, type MailItem } from "./types";
 import { IconPackage, IconForward } from "@/components/MemberIcons";
 import { requestPickup, requestForward, requestQuickPeek } from "@/app/actions/mail";
+import InsuranceModal from "./InsuranceModal";
+import SharePackageButton from "./SharePackageButton";
+import { EmptyState } from "./ui";
 
 type Props = {
   packages: MailItem[];
@@ -12,6 +16,30 @@ type Props = {
   isPending: boolean;
   runAction: (label: string, fn: () => Promise<unknown>) => void;
 };
+
+// iter-94: Live carrier-tracking chip. Color + label depend on status.
+function TrackingChip({ ts }: { ts: NonNullable<MailItem["trackingStatus"]> }) {
+  const k = ts.statusKey ?? "";
+  const styles: Record<string, { bg: string; fg: string; label: string }> = {
+    delivered:        { bg: "rgba(22,163,74,0.14)",  fg: "#15803d", label: "Delivered" },
+    out_for_delivery: { bg: "rgba(245,166,35,0.16)", fg: "#92400e", label: "Out for delivery" },
+    in_transit:       { bg: "rgba(51,116,133,0.12)", fg: "#23596A", label: "In transit" },
+    pre_transit:      { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.55)", label: "Label created" },
+    exception:        { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b", label: "Exception" },
+    unknown:          { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.55)", label: ts.statusLabel ?? "Tracking" },
+  };
+  const s = styles[k] ?? { bg: "rgba(45,16,15,0.06)", fg: "rgba(45,16,15,0.55)", label: ts.statusLabel ?? k };
+  const tooltip = [s.label, ts.location, ts.etaIso ? `ETA ${new Date(ts.etaIso).toLocaleString()}` : null].filter(Boolean).join(" · ");
+  return (
+    <span
+      className="text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
+      style={{ background: s.bg, color: s.fg }}
+      title={tooltip}
+    >
+      {s.label}
+    </span>
+  );
+}
 
 // iter-80: Storage-tier countdown chip. NOHO offers 3 free days of
 // storage, then $6.50/day from day 4 (per Terms). The chip nudges
@@ -59,6 +87,11 @@ function StorageChip({ createdAtIso }: { createdAtIso?: string }) {
 }
 
 export default function PackagesPanel({ packages, recentlyPickedUp = [], isPending, runAction }: Props) {
+  // iter-91: Insurance modal opened for one package at a time. Refresh
+  // signal increments after a successful declare so the dashboard's
+  // server-data revalidates (router.refresh is run by runAction).
+  const [insureFor, setInsureFor] = useState<MailItem | null>(null);
+
   return (
     <div className="space-y-3">
     <div
@@ -79,35 +112,37 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
         </h2>
       </div>
       {packages.length === 0 ? (
-        <div className="p-10 sm:p-12 text-center">
-          <IconPackage
-            className="w-12 h-12 mx-auto mb-3"
-            style={{ color: BRAND.inkFaint }}
-            strokeWidth={1.2}
-          />
-          <p className="text-sm font-bold" style={{ color: BRAND.inkSoft }}>
-            No packages waiting
-          </p>
-          <p className="text-xs mt-1 max-w-xs mx-auto" style={{ color: BRAND.inkFaint }}>
-            We accept packages from USPS, UPS, FedEx, DHL and Amazon. Use your suite number on the address line.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-2 justify-center text-[11px] font-bold">
-            <a
-              href="/dashboard?tab=deliveries"
-              className="px-3 py-1.5 rounded-lg transition-colors"
-              style={{ background: BRAND.blueSoft, color: BRAND.blueDeep }}
-            >
-              Schedule a delivery
-            </a>
-            <a
-              href="/dashboard?tab=qrpickup"
-              className="px-3 py-1.5 rounded-lg transition-colors"
-              style={{ background: BRAND.blueSoft, color: BRAND.blueDeep }}
-            >
-              Set up QR pickup
-            </a>
-          </div>
-        </div>
+        <EmptyState
+          tone="calm"
+          title="No packages waiting"
+          body="We accept packages from USPS, UPS, FedEx, DHL and Amazon. Use your suite number on the address line."
+          action={
+            <div className="flex flex-wrap gap-2 justify-center">
+              <a
+                href="/dashboard?tab=deliveries"
+                className="px-3 py-1.5 rounded-full text-[11.5px] font-semibold transition-colors"
+                style={{
+                  background: "white",
+                  color: "#337485",
+                  border: "1px solid rgba(51,116,133,0.20)",
+                }}
+              >
+                Schedule a delivery
+              </a>
+              <a
+                href="/dashboard?tab=qrpickup"
+                className="px-3 py-1.5 rounded-full text-[11.5px] font-semibold transition-colors"
+                style={{
+                  background: "white",
+                  color: "#337485",
+                  border: "1px solid rgba(51,116,133,0.20)",
+                }}
+              >
+                Set up QR pickup
+              </a>
+            </div>
+          }
+        />
       ) : (
         packages.map((pkg) => (
           <div
@@ -148,6 +183,21 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
                       - day 0–3: "Free until day N" (green)
                       - day 4+: "Storage active · $X" (red) */}
                   <StorageChip createdAtIso={pkg.createdAt} />
+                  {/* iter-91: Insured chip — shown when declaredValueCents > 0. */}
+                  {pkg.declaredValueCents != null && pkg.declaredValueCents > 0 && (
+                    <span
+                      className="text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
+                      style={{ background: "rgba(22,163,74,0.14)", color: "#15803d" }}
+                      title={`Insured up to $${(pkg.declaredValueCents / 100).toFixed(0)}${pkg.insuranceFeeCents ? ` · paid $${(pkg.insuranceFeeCents / 100).toFixed(2)}` : ""}`}
+                    >
+                      Insured · ${(pkg.declaredValueCents / 100).toFixed(0)}
+                    </span>
+                  )}
+                  {/* iter-94: Carrier-API status chip. Only shown when
+                      we've polled this tracking #. */}
+                  {pkg.trackingStatus?.statusKey && (
+                    <TrackingChip ts={pkg.trackingStatus} />
+                  )}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: BRAND.inkSoft }}>
                   Arrived {pkg.date}
@@ -180,6 +230,23 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
                 }}
               >
                 Forward
+              </button>
+              {/* iter-93: Share a public tracking page. */}
+              <SharePackageButton mailItemId={pkg.id} packageFrom={pkg.from} />
+              {/* iter-91: Insure / declare value — opens a modal with
+                  tier picker. Updates the chip + wallet on confirm. */}
+              <button
+                disabled={isPending}
+                onClick={() => setInsureFor(pkg)}
+                className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                style={{
+                  background: pkg.declaredValueCents ? "rgba(22,163,74,0.10)" : "white",
+                  color: pkg.declaredValueCents ? "#15803d" : BRAND.blueDeep,
+                  border: `1px solid ${pkg.declaredValueCents ? "rgba(22,163,74,0.40)" : BRAND.border}`,
+                }}
+                title={pkg.declaredValueCents ? "Update declared value" : "Add insurance"}
+              >
+                {pkg.declaredValueCents ? `Insured · update` : "Insure"}
               </button>
               {/* iter-81: Quick Peek — only shown when admin didn't capture
                   an exterior photo at intake. $0.50 charged from wallet
@@ -284,6 +351,28 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
           </div>
         ))}
       </div>
+    )}
+
+    {/* iter-91: Insurance modal — single instance per panel, opened
+        from the per-row "Insure" button. */}
+    {insureFor && (
+      <InsuranceModal
+        pkg={{
+          id: insureFor.id,
+          from: insureFor.from,
+          carrier: insureFor.carrier ?? null,
+          trackingNumber: insureFor.trackingNumber ?? null,
+          declaredValueCents: insureFor.declaredValueCents ?? null,
+          insuranceFeeCents: insureFor.insuranceFeeCents ?? null,
+        }}
+        onClose={() => setInsureFor(null)}
+        onDone={() => {
+          setInsureFor(null);
+          // Trigger the dashboard's runAction-style refresh so the chip
+          // + wallet update without a full reload.
+          runAction("Insurance updated", async () => undefined);
+        }}
+      />
     )}
     </div>
   );

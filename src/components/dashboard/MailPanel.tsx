@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { motion } from "motion/react";
 import { BRAND, statusColor, type MailItem } from "./types";
+import { EmptyState } from "./ui";
 import {
   IconMail,
   IconPackage,
@@ -372,42 +374,47 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
                 {filtered.length}/{mailItems.length}
               </span>
             </div>
-            {/* Filter chips */}
-            <div className="mt-3 flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+            {/* Filter chips — brand-blue active state (matches top nav pill).
+                Active indicator is a single motion.span with shared layoutId
+                that slides between chips on filter change. */}
+            <div className="mt-3 flex items-center gap-1 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
               {FILTER_DEFS.map((f) => {
                 const c = counts[f.key];
-                if (f.key !== "all" && c === 0) return null; // hide empty chips
+                if (f.key !== "all" && c === 0) return null;
                 const active = filter === f.key;
                 return (
-                  <button
+                  <motion.button
                     key={f.key}
                     onClick={() => setFilter(f.key)}
-                    className="shrink-0 inline-flex items-center gap-1.5 px-3 h-7 rounded-full text-[11px] font-black uppercase tracking-[0.06em] transition-all"
-                    style={
-                      active
-                        ? {
-                            background: `linear-gradient(135deg, ${BRAND.brown} 0%, ${BRAND.brownDeep} 100%)`,
-                            color: BRAND.cream,
-                            boxShadow: "0 4px 14px rgba(45,16,15,0.20)",
-                          }
-                        : {
-                            background: "white",
-                            color: BRAND.ink,
-                            border: `1px solid ${BRAND.border}`,
-                          }
-                    }
+                    whileTap={{ scale: 0.97 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="relative shrink-0 inline-flex items-center gap-1.5 px-3 h-7 rounded-full text-[11.5px] font-medium tracking-tight"
+                    style={{
+                      color: active ? "#F7EEC2" : "#2D1D0F",
+                      zIndex: 1,
+                    }}
+                    aria-pressed={active}
                   >
-                    {f.label}
+                    {active && (
+                      <motion.span
+                        layoutId="mail-filter-pill"
+                        className="absolute inset-0 rounded-full"
+                        style={{ background: "#337485" }}
+                        transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                      />
+                    )}
+                    <span className="relative">{f.label}</span>
                     <span
-                      className="text-[10px] px-1 rounded"
+                      className="relative text-[10px] tabular-nums px-1 rounded"
                       style={{
-                        background: active ? "rgba(247,230,194,0.22)" : BRAND.bgDeep,
-                        color: active ? BRAND.cream : BRAND.inkSoft,
+                        background: active ? "rgba(247,238,194,0.22)" : "rgba(45,29,15,0.06)",
+                        color: active ? "rgba(247,238,194,0.85)" : "rgba(45,29,15,0.55)",
+                        fontWeight: 700,
                       }}
                     >
                       {c}
                     </span>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
@@ -882,55 +889,59 @@ function BulkButton({
 
 function EmptyMail({ hasItems, onClearFilters }: { hasItems: boolean; onClearFilters: () => void }) {
   if (hasItems) {
+    // Filter-zero state: search/filter returned nothing. Use neutral tone
+    // since this isn't a celebratory empty box — user is mid-task.
     return (
-      <div className="p-10 sm:p-12 text-center">
-        <span
-          className="ai-icon inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3"
-          style={{ background: BRAND.bgDeep, color: BRAND.blue }}
-        >
-          <svg viewBox="0 0 16 16" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="7" cy="7" r="5" />
-            <path d="M11 11 L14 14" />
-          </svg>
-        </span>
-        <p className="text-sm font-black" style={{ color: BRAND.ink }}>
-          No matches
-        </p>
-        <p className="text-[12px] mt-1 max-w-xs mx-auto" style={{ color: BRAND.inkSoft }}>
-          Try a different filter or search term.
-        </p>
-        <button
-          onClick={onClearFilters}
-          className="mt-4 inline-flex items-center px-3 h-8 rounded-full text-[11px] font-black uppercase tracking-[0.06em]"
-          style={{
-            background: BRAND.brown,
-            color: BRAND.cream,
-            boxShadow: "0 4px 14px rgba(45,16,15,0.20)",
-          }}
-        >
-          Reset filters
-        </button>
-      </div>
+      <EmptyState
+        tone="neutral"
+        title="No matches"
+        body="Try a different filter or search term."
+        action={
+          <button
+            onClick={onClearFilters}
+            className="inline-flex items-center gap-1.5 px-4 h-9 rounded-full text-[12px] font-semibold transition-colors"
+            style={{ background: "#337485", color: "#F7EEC2" }}
+          >
+            Reset filters
+          </button>
+        }
+      />
     );
   }
+  // True-empty state: branded mailbox illustration with friendly explainer
+  // and links to set up forwarding / vacation hold while waiting.
   return (
-    <div className="p-10 sm:p-12 text-center">
-      <IconMail className="w-12 h-12 mx-auto mb-3" style={{ color: BRAND.inkFaint }} strokeWidth={1.2} />
-      <p className="text-sm font-bold" style={{ color: BRAND.inkSoft }}>
-        No mail yet
-      </p>
-      <p className="text-xs mt-1 max-w-xs mx-auto" style={{ color: BRAND.inkFaint }}>
-        When mail addressed to your suite arrives, we log it here within minutes — you&apos;ll get a text and an email.
-      </p>
-      <div className="mt-5 flex flex-wrap gap-2 justify-center text-[11px] font-bold">
-        <a href="/dashboard?tab=settings" className="px-3 py-1.5 rounded-lg transition-colors" style={{ background: BRAND.blueSoft, color: BRAND.blueDeep }}>
-          Set up vacation hold
-        </a>
-        <a href="/dashboard?tab=forwarding" className="px-3 py-1.5 rounded-lg transition-colors" style={{ background: BRAND.blueSoft, color: BRAND.blueDeep }}>
-          Add forwarding address
-        </a>
-      </div>
-    </div>
+    <EmptyState
+      tone="calm"
+      title="Your mailbox is empty"
+      body="When mail arrives at your suite, we'll log it here within minutes — you'll get a text and email."
+      action={
+        <div className="flex flex-wrap gap-2 justify-center">
+          <a
+            href="/dashboard?tab=settings"
+            className="px-3 py-1.5 rounded-full text-[11.5px] font-semibold transition-colors"
+            style={{
+              background: "white",
+              color: "#337485",
+              border: "1px solid rgba(51,116,133,0.20)",
+            }}
+          >
+            Vacation hold
+          </a>
+          <a
+            href="/dashboard?tab=forwarding"
+            className="px-3 py-1.5 rounded-full text-[11.5px] font-semibold transition-colors"
+            style={{
+              background: "white",
+              color: "#337485",
+              border: "1px solid rgba(51,116,133,0.20)",
+            }}
+          >
+            Forwarding address
+          </a>
+        </div>
+      }
+    />
   );
 }
 
