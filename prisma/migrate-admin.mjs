@@ -468,3 +468,240 @@ for (const sql of phase9) {
   }
 }
 console.log("Phase 9 migration done.");
+
+// Phase 10 — MailerThread + MailerMessage + SuiteTransferRequest
+// tables. These models were added to schema.prisma without a
+// corresponding migration step, so production queries against them
+// throw "no such table" and the /admin and /dashboard error boundaries
+// surface "Something went wrong" with a long error ID.
+const phase10 = [
+  `CREATE TABLE IF NOT EXISTS MailerThread (
+     id TEXT PRIMARY KEY,
+     customerEmail TEXT NOT NULL,
+     customerUserId TEXT,
+     subject TEXT NOT NULL,
+     lastMessageAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     unreadCount INTEGER NOT NULL DEFAULT 0,
+     archived INTEGER NOT NULL DEFAULT 0,
+     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+   )`,
+  `CREATE INDEX IF NOT EXISTS MailerThread_customerEmail_idx ON MailerThread(customerEmail)`,
+  `CREATE INDEX IF NOT EXISTS MailerThread_archived_lastMessageAt_idx ON MailerThread(archived, lastMessageAt)`,
+  `CREATE INDEX IF NOT EXISTS MailerThread_customerUserId_idx ON MailerThread(customerUserId)`,
+
+  `CREATE TABLE IF NOT EXISTS MailerMessage (
+     id TEXT PRIMARY KEY,
+     threadId TEXT NOT NULL,
+     direction TEXT NOT NULL,
+     fromEmail TEXT NOT NULL,
+     toEmail TEXT NOT NULL,
+     subject TEXT NOT NULL,
+     bodyHtml TEXT NOT NULL,
+     bodyText TEXT,
+     providerId TEXT,
+     unread INTEGER NOT NULL DEFAULT 1,
+     templateId TEXT,
+     bulkBatchId TEXT,
+     sentAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+   )`,
+  `CREATE INDEX IF NOT EXISTS MailerMessage_threadId_sentAt_idx ON MailerMessage(threadId, sentAt)`,
+  `CREATE INDEX IF NOT EXISTS MailerMessage_bulkBatchId_idx ON MailerMessage(bulkBatchId)`,
+
+  `CREATE TABLE IF NOT EXISTS SuiteTransferRequest (
+     id TEXT PRIMARY KEY,
+     userId TEXT NOT NULL,
+     fromSuite TEXT NOT NULL,
+     toSuite TEXT NOT NULL,
+     reason TEXT NOT NULL,
+     status TEXT NOT NULL DEFAULT 'Pending',
+     decidedAt DATETIME,
+     decidedById TEXT,
+     decisionNote TEXT,
+     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+   )`,
+  `CREATE INDEX IF NOT EXISTS SuiteTransferRequest_userId_status_idx ON SuiteTransferRequest(userId, status)`,
+  `CREATE INDEX IF NOT EXISTS SuiteTransferRequest_status_createdAt_idx ON SuiteTransferRequest(status, createdAt)`,
+];
+
+for (const sql of phase10) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60).replace(/\s+/g, " "));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60).replace(/\s+/g, " "));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 10 migration done.");
+
+// Phase 11 — all remaining tables that exist in schema.prisma but not
+// in production. Discovered via prisma/probe-admin-queries.mjs after
+// /admin and /dashboard were 500-ing on cold queries.
+const phase11 = [
+  // StorageFeeDispute
+  `CREATE TABLE IF NOT EXISTS StorageFeeDispute (
+     id TEXT PRIMARY KEY,
+     mailItemId TEXT NOT NULL,
+     filedById TEXT NOT NULL,
+     feeCents INTEGER NOT NULL,
+     reason TEXT NOT NULL,
+     status TEXT NOT NULL DEFAULT 'Open',
+     resolution TEXT,
+     resolvedAt DATETIME,
+     resolvedById TEXT,
+     refundCents INTEGER,
+     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+   )`,
+  `CREATE INDEX IF NOT EXISTS StorageFeeDispute_mailItemId_idx ON StorageFeeDispute(mailItemId)`,
+  `CREATE INDEX IF NOT EXISTS StorageFeeDispute_status_createdAt_idx ON StorageFeeDispute(status, createdAt)`,
+  `CREATE INDEX IF NOT EXISTS StorageFeeDispute_filedById_createdAt_idx ON StorageFeeDispute(filedById, createdAt)`,
+
+  // WebhookEndpoint
+  `CREATE TABLE IF NOT EXISTS WebhookEndpoint (
+     id TEXT PRIMARY KEY,
+     label TEXT NOT NULL,
+     url TEXT NOT NULL,
+     format TEXT NOT NULL DEFAULT 'slack',
+     events TEXT NOT NULL,
+     active INTEGER NOT NULL DEFAULT 1,
+     secret TEXT,
+     createdBy TEXT,
+     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     lastFiredAt DATETIME,
+     lastStatus TEXT
+   )`,
+  `CREATE INDEX IF NOT EXISTS WebhookEndpoint_active_idx ON WebhookEndpoint(active)`,
+
+  // WebhookDelivery
+  `CREATE TABLE IF NOT EXISTS WebhookDelivery (
+     id TEXT PRIMARY KEY,
+     endpointId TEXT NOT NULL,
+     event TEXT NOT NULL,
+     payload TEXT NOT NULL,
+     status TEXT NOT NULL,
+     httpStatus INTEGER,
+     error TEXT,
+     durationMs INTEGER,
+     sentAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+   )`,
+  `CREATE INDEX IF NOT EXISTS WebhookDelivery_endpointId_sentAt_idx ON WebhookDelivery(endpointId, sentAt)`,
+
+  // PickupAppointment
+  `CREATE TABLE IF NOT EXISTS PickupAppointment (
+     id TEXT PRIMARY KEY,
+     userId TEXT NOT NULL,
+     scheduledAt DATETIME NOT NULL,
+     durationMin INTEGER NOT NULL DEFAULT 15,
+     status TEXT NOT NULL DEFAULT 'Scheduled',
+     packageCount INTEGER,
+     guestName TEXT,
+     notes TEXT,
+     checkedInAt DATETIME,
+     completedAt DATETIME,
+     cancelledAt DATETIME,
+     cancelledBy TEXT,
+     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+   )`,
+  `CREATE INDEX IF NOT EXISTS PickupAppointment_scheduledAt_status_idx ON PickupAppointment(scheduledAt, status)`,
+  `CREATE INDEX IF NOT EXISTS PickupAppointment_userId_scheduledAt_idx ON PickupAppointment(userId, scheduledAt)`,
+
+  // IdExpiryAlert
+  `CREATE TABLE IF NOT EXISTS IdExpiryAlert (
+     id TEXT PRIMARY KEY,
+     userId TEXT NOT NULL,
+     document TEXT NOT NULL,
+     threshold TEXT NOT NULL,
+     expDate TEXT NOT NULL,
+     sentAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     UNIQUE(userId, document, threshold, expDate)
+   )`,
+  `CREATE INDEX IF NOT EXISTS IdExpiryAlert_userId_idx ON IdExpiryAlert(userId)`,
+  `CREATE INDEX IF NOT EXISTS IdExpiryAlert_sentAt_idx ON IdExpiryAlert(sentAt)`,
+
+  // TrackingEvent
+  `CREATE TABLE IF NOT EXISTS TrackingEvent (
+     id TEXT PRIMARY KEY,
+     mailItemId TEXT NOT NULL,
+     eventTimeIso TEXT NOT NULL,
+     statusKey TEXT NOT NULL,
+     statusDetails TEXT NOT NULL,
+     location TEXT,
+     source TEXT NOT NULL,
+     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     UNIQUE(mailItemId, eventTimeIso, statusKey)
+   )`,
+  `CREATE INDEX IF NOT EXISTS TrackingEvent_mailItemId_createdAt_idx ON TrackingEvent(mailItemId, createdAt)`,
+
+  // SmsLog
+  `CREATE TABLE IF NOT EXISTS SmsLog (
+     id TEXT PRIMARY KEY,
+     userId TEXT,
+     toPhone TEXT NOT NULL,
+     fromPhone TEXT,
+     body TEXT NOT NULL,
+     kind TEXT NOT NULL,
+     status TEXT NOT NULL DEFAULT 'queued',
+     provider TEXT,
+     providerId TEXT,
+     error TEXT,
+     segments INTEGER,
+     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     sentAt DATETIME
+   )`,
+  `CREATE INDEX IF NOT EXISTS SmsLog_userId_createdAt_idx ON SmsLog(userId, createdAt)`,
+  `CREATE INDEX IF NOT EXISTS SmsLog_status_createdAt_idx ON SmsLog(status, createdAt)`,
+
+  // ExternalDropoff
+  `CREATE TABLE IF NOT EXISTS ExternalDropoff (
+     id TEXT PRIMARY KEY,
+     trackingNumber TEXT NOT NULL,
+     carrier TEXT NOT NULL,
+     senderName TEXT,
+     senderPhone TEXT,
+     receiverName TEXT,
+     destination TEXT,
+     exteriorImageUrl TEXT,
+     notes TEXT,
+     status TEXT NOT NULL DEFAULT 'Awaiting Carrier',
+     loggedById TEXT NOT NULL,
+     carrierPickedUpAt DATETIME,
+     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+   )`,
+  `CREATE INDEX IF NOT EXISTS ExternalDropoff_status_createdAt_idx ON ExternalDropoff(status, createdAt)`,
+  `CREATE INDEX IF NOT EXISTS ExternalDropoff_trackingNumber_idx ON ExternalDropoff(trackingNumber)`,
+  `CREATE INDEX IF NOT EXISTS ExternalDropoff_createdAt_idx ON ExternalDropoff(createdAt)`,
+
+  // PickupSurvey
+  `CREATE TABLE IF NOT EXISTS PickupSurvey (
+     id TEXT PRIMARY KEY,
+     mailItemId TEXT NOT NULL UNIQUE,
+     userId TEXT NOT NULL,
+     token TEXT NOT NULL UNIQUE,
+     rating INTEGER,
+     comment TEXT,
+     submittedAt DATETIME,
+     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+   )`,
+  `CREATE INDEX IF NOT EXISTS PickupSurvey_userId_createdAt_idx ON PickupSurvey(userId, createdAt)`,
+  `CREATE INDEX IF NOT EXISTS PickupSurvey_submittedAt_idx ON PickupSurvey(submittedAt)`,
+];
+
+for (const sql of phase11) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60).replace(/\s+/g, " "));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60).replace(/\s+/g, " "));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 11 migration done.");

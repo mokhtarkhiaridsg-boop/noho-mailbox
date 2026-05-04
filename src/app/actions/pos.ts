@@ -475,13 +475,20 @@ export async function createSale(input: CreateSaleInput): Promise<
             data: { walletBalanceCents: { decrement: totalCents } },
           });
           if (u.count === 0) throw new Error("Wallet balance changed — please retry.");
+          // Read fresh balance for balanceAfterCents snapshot. updateMany
+          // already decremented, so this read sees the post-decrement value.
+          const after = await tx.user.findUnique({
+            where: { id: customer.id },
+            select: { walletBalanceCents: true },
+          });
           await (tx as any).walletTransaction.create({
             data: {
               id: crypto.randomUUID(),
               userId: customer.id,
               kind: "Charge",
               amountCents: -totalCents,
-              note: `POS sale #${candidateNumber}`,
+              description: `POS sale #${candidateNumber}`,
+              balanceAfterCents: after?.walletBalanceCents ?? 0,
             },
           });
         }
@@ -517,12 +524,14 @@ export async function createSale(input: CreateSaleInput): Promise<
           select: { id: true, number: true },
         });
 
-        // Audit log
+        // Audit log — required fields per schema: actorId, actorRole,
+        // action, entityType. (actorName isn't a column; admin name goes
+        // into metadata for the receipt audit context.)
         await (tx as any).auditLog.create({
           data: {
             id: crypto.randomUUID(),
-            actorId: admin.id ?? null,
-            actorName: admin.name ?? null,
+            actorId: admin.id ?? "",
+            actorRole: "ADMIN",
             action: "pos.sale.create",
             entityType: "POSSale",
             entityId: sale.id,
@@ -532,6 +541,7 @@ export async function createSale(input: CreateSaleInput): Promise<
               method: input.paymentMethod,
               customLabel: input.customMethodLabel ?? null,
               customerId: customer?.id ?? null,
+              actorName: admin.name ?? null,
               lines: lines.length,
             }),
           },
@@ -694,25 +704,30 @@ export async function voidSale(input: { saleId: string; reason: string }): Promi
         where: { id: sale.customerId },
         data: { walletBalanceCents: { increment: sale.totalCents } },
       });
+      const after = await tx.user.findUnique({
+        where: { id: sale.customerId },
+        select: { walletBalanceCents: true },
+      });
       await (tx as any).walletTransaction.create({
         data: {
           id: crypto.randomUUID(),
           userId: sale.customerId,
           kind: "Refund",
           amountCents: sale.totalCents,
-          note: `POS sale #${sale.number} voided — ${input.reason}`,
+          description: `POS sale #${sale.number} voided — ${input.reason}`,
+          balanceAfterCents: after?.walletBalanceCents ?? 0,
         },
       });
     }
     await (tx as any).auditLog.create({
       data: {
         id: crypto.randomUUID(),
-        actorId: admin.id ?? null,
-        actorName: admin.name ?? null,
+        actorId: admin.id ?? "",
+        actorRole: "ADMIN",
         action: "pos.sale.void",
         entityType: "POSSale",
         entityId: sale.id,
-        metadata: JSON.stringify({ number: sale.number, reason: input.reason }),
+        metadata: JSON.stringify({ number: sale.number, reason: input.reason, actorName: admin.name ?? null }),
       },
     });
   });

@@ -14,7 +14,7 @@ import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 
 const TEST_EMAIL = "claude-test@noho.local";
-const TEST_PASSWORD = "NohoTest2026!";
+const TEST_PASSWORD = "nohotest2026";
 
 const c = createClient({
   url: process.env.TURSO_DATABASE_URL,
