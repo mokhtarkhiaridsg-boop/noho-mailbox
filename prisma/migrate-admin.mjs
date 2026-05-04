@@ -705,3 +705,26 @@ for (const sql of phase11) {
   }
 }
 console.log("Phase 11 migration done.");
+
+// Phase 12 — MailItem columns that schema.prisma added without
+// matching ALTER TABLE rows. The /dashboard SELECT requests
+// aiAnalysisJson; without the column, Prisma 500s and the entire
+// member dashboard hits the error boundary. publicShareToken is also
+// in the schema for the (recent) public-mail-item share link feature.
+const phase12 = [
+  `ALTER TABLE MailItem ADD COLUMN aiAnalysisJson TEXT`,
+  `ALTER TABLE MailItem ADD COLUMN publicShareToken TEXT`,
+];
+for (const sql of phase12) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 12 migration done.");

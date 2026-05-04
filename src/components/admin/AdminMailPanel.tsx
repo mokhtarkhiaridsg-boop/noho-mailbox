@@ -432,31 +432,45 @@ export function AdminMailPanel({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full gap-3">
+      {/* ─── Branded title row — Baloo + Pacifico script accent ─── */}
+      <div className="shrink-0 flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: T.ink,
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Mail &amp; Packages
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: T.blue,
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          today's intake
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: T.inkFaint, ...TAB_NUM }}>
+          · {recentMail.length} recent · {todayCount} today · {buckets.action.length} need action
+        </span>
+      </div>
+
       {/* ─── Hero metric strip ─── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+      <div className="shrink-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
         {heroTiles.map((tile) => (
           <MailHeroTile key={tile.id} {...tile} />
         ))}
       </div>
 
       {/* ─── Header strip ───────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2
-            className="text-[10px] font-bold uppercase tracking-[0.16em]"
-            style={{ color: T.ink }}
-          >
-            Mail & packages
-          </h2>
-          <p
-            className="text-[11px] mt-1"
-            style={{ color: T.inkFaint, ...TAB_NUM }}
-          >
-            {recentMail.length} recent · {todayCount} today ·{" "}
-            {buckets.action.length} need action
-          </p>
-        </div>
+      <div className="shrink-0 flex items-center justify-between flex-wrap gap-3">
+        <div />
         <div className="flex gap-2 items-center flex-wrap">
           {/* Board / List segmented control — flat, hairline. */}
           <div

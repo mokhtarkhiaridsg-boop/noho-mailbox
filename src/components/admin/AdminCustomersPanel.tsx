@@ -13,6 +13,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { StatusBadge } from "./StatusBadge";
 import type { Customer } from "./types";
+import { AiHeart } from "@/components/AnimatedIcons";
 
 type Props = {
   customers: Customer[];
@@ -215,6 +216,35 @@ export function AdminCustomersPanel({
 
   return (
     <div className="flex flex-col h-full gap-3">
+      {/* ─── Branded title row — Baloo for the heading + Pacifico script
+          accent. Same calm Apple layout, NOHO presence. */}
+      <div className="shrink-0 flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: T.ink,
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Customers
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: T.blue,
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          your neighborhood
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: T.inkFaint }}>
+          · {counts.total} members · {counts.active} active
+        </span>
+      </div>
+
       {/* ─── Hero metric strip ─── 5-up animated counters that double as
           shortcuts to common segments. */}
       <div className="shrink-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
@@ -352,19 +382,13 @@ export function AdminCustomersPanel({
       {/* ─── Empty state ───────────────────────────────────────────── */}
       {filtered.length === 0 && (
         <div
-          className="rounded-xl p-12 text-center"
+          className="rounded-xl p-10 text-center"
           style={{ background: T.surface, border: `1px solid ${T.border}` }}
         >
-          <span
-            className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-3"
-            style={{ background: T.surfaceAlt, color: T.inkFaint }}
-          >
-            <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="9" r="3.5" />
-              <path d="M5 20 C5 15.5 8.5 13 12 13 C15.5 13 19 15.5 19 20" />
-              <circle cx="12" cy="12" r="10.5" strokeDasharray="2 4" opacity="0.4" />
-            </svg>
-          </span>
+          {/* Branded empty state — animated NOHO heart instead of generic
+              avatar silhouette. Respects prefers-reduced-motion via
+              the .ai-icon class in globals.css. */}
+          <AiHeart className="w-16 h-14 mx-auto mb-3" />
           <p className="text-sm font-bold" style={{ color: T.ink }}>
             No customers found
           </p>

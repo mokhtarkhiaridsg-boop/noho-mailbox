@@ -21,19 +21,9 @@
 
 import type { Stats, MailItem, NotaryItem } from "./types";
 import {
-  IconRegister,
   IconSignup,
   IconCredit,
-  IconCustomers,
-  IconBox,
-  IconCompliance,
-  IconMail,
-  IconClipboard,
-  IconHold,
   IconKey,
-  IconTruck,
-  IconQR,
-  IconNotary,
   IconShipping,
   IconShop,
   IconReceipt,
@@ -46,6 +36,21 @@ import {
   IconBuilding,
   IconSettings,
 } from "./AdminIcons";
+// Branded NOHO motifs — mailbox + flag, envelope + heart, community heart,
+// truck, box, shield, stamp. Used for the high-visibility tiles so the
+// Launchpad reads as NOHO rather than generic Apple line-art.
+import {
+  BiMailbox,
+  BiEnvelope,
+  BiCommunity,
+  BiTruck,
+  BiBox,
+  BiShield,
+  BiStamp,
+  BiPin,
+  BiQR,
+  BiRegister,
+} from "./BrandTileIcons";
 
 type Props = {
   stats: Stats;
@@ -84,30 +89,34 @@ type Tile = {
 };
 
 const TILES: Tile[] = [
-  { id: "register",      label: "Cash Register",   Icon: IconRegister,   tint: "#EBF6FF", iconBg: "#1976FF", iconColor: "#FFFFFF" },
+  // Row 1 — TODAY ops. NOHO blue accent dominant.
+  { id: "register",      label: "Cash Register",   Icon: BiRegister,     tint: "#EBF6FF", iconBg: "#337485", iconColor: "#FFFFFF" },
   { id: "signups",       label: "Signups",         Icon: IconSignup,     tint: "#FFF4EB", iconBg: "#FF8A1F", iconColor: "#FFFFFF", badgeKey: "signups" },
   { id: "credits",       label: "Credits",         Icon: IconCredit,     tint: "#EAFBEF", iconBg: "#22C55E", iconColor: "#FFFFFF", badgeKey: "credits" },
-  { id: "customers",     label: "Customers",       Icon: IconCustomers,  tint: "#F0EBFF", iconBg: "#7C4DFF", iconColor: "#FFFFFF" },
-  { id: "mailboxcenter", label: "Mailbox Center",  Icon: IconBox,        tint: "#FFF1F0", iconBg: "#EF4444", iconColor: "#FFFFFF" },
-  { id: "compliance",    label: "Compliance",      Icon: IconCompliance, tint: "#FFFAEB", iconBg: "#F5A623", iconColor: "#FFFFFF" },
+  { id: "customers",     label: "Customers",       Icon: BiCommunity,    tint: "#F0EBFF", iconBg: "#7C4DFF", iconColor: "#FFFFFF" },
+  { id: "mailboxcenter", label: "Mailbox Center",  Icon: BiMailbox,      tint: "#FFF1F0", iconBg: "#EF4444", iconColor: "#FFFFFF" },
+  { id: "compliance",    label: "Compliance",      Icon: BiShield,       tint: "#FFFAEB", iconBg: "#F5A623", iconColor: "#FFFFFF" },
 
-  { id: "mail",          label: "Mail & Pkgs",     Icon: IconMail,       tint: "#EBF2FF", iconBg: "#0F5BD9", iconColor: "#FFFFFF" },
-  { id: "requests",      label: "Mail Requests",   Icon: IconClipboard,  tint: "#FFF4EB", iconBg: "#FF8A1F", iconColor: "#FFFFFF", badgeKey: "requests" },
-  { id: "mailhold",      label: "Mail Hold",       Icon: IconHold,       tint: "#FAF6FF", iconBg: "#9F7AEA", iconColor: "#FFFFFF" },
+  // Row 2 — Operations: postal/mailbox motifs.
+  { id: "mail",          label: "Mail & Pkgs",     Icon: BiEnvelope,     tint: "#EBF2FF", iconBg: "#337485", iconColor: "#FFFFFF" },
+  { id: "requests",      label: "Mail Requests",   Icon: BiEnvelope,     tint: "#FFF4EB", iconBg: "#FF8A1F", iconColor: "#FFFFFF", badgeKey: "requests" },
+  { id: "mailhold",      label: "Mail Hold",       Icon: BiPin,          tint: "#FAF6FF", iconBg: "#9F7AEA", iconColor: "#FFFFFF" },
   { id: "keys",          label: "Keys",            Icon: IconKey,        tint: "#FFFAEB", iconBg: "#F59E0B", iconColor: "#FFFFFF", badgeKey: "keys" },
-  { id: "deliveries",    label: "Deliveries",      Icon: IconTruck,      tint: "#EAF7FF", iconBg: "#0EA5E9", iconColor: "#FFFFFF" },
-  { id: "qrpickup",      label: "QR Pickup",       Icon: IconQR,         tint: "#F0F4FF", iconBg: "#5B6CFF", iconColor: "#FFFFFF" },
+  { id: "deliveries",    label: "Deliveries",      Icon: BiTruck,        tint: "#EAF7FF", iconBg: "#0EA5E9", iconColor: "#FFFFFF" },
+  { id: "qrpickup",      label: "QR Pickup",       Icon: BiQR,           tint: "#F0F4FF", iconBg: "#5B6CFF", iconColor: "#FFFFFF" },
 
-  { id: "notary",        label: "Notary",          Icon: IconNotary,     tint: "#FFF7F0", iconBg: "#D97706", iconColor: "#FFFFFF" },
-  { id: "shippingcenter",label: "Shipping",        Icon: IconShipping,   tint: "#EAFAF4", iconBg: "#0F9F6E", iconColor: "#FFFFFF" },
+  // Row 3 — Money & services.
+  { id: "notary",        label: "Notary",          Icon: BiStamp,        tint: "#FFF7F0", iconBg: "#D97706", iconColor: "#FFFFFF" },
+  { id: "shippingcenter",label: "Shipping",        Icon: BiBox,          tint: "#EAFAF4", iconBg: "#0F9F6E", iconColor: "#FFFFFF" },
   { id: "shop",          label: "Shop",            Icon: IconShop,       tint: "#FFEFEF", iconBg: "#E11D48", iconColor: "#FFFFFF" },
-  { id: "billing",       label: "Billing",         Icon: IconReceipt,    tint: "#EBF6FF", iconBg: "#1976FF", iconColor: "#FFFFFF" },
+  { id: "billing",       label: "Billing",         Icon: IconReceipt,    tint: "#EBF6FF", iconBg: "#337485", iconColor: "#FFFFFF" },
   { id: "revenue",       label: "Revenue",         Icon: IconReport,     tint: "#EAFBEF", iconBg: "#16A34A", iconColor: "#FFFFFF" },
   { id: "cancellations", label: "Cancellations",   Icon: IconCancel,     tint: "#FFF1F0", iconBg: "#DC2626", iconColor: "#FFFFFF" },
 
+  // Row 4 — System & comms.
   { id: "square",        label: "Square",          Icon: IconSquare,     tint: "#F4F4F4", iconBg: "#1A1D23", iconColor: "#FFFFFF" },
   { id: "quarterly",     label: "Quarterly",       Icon: IconCalendar,   tint: "#FFFAEB", iconBg: "#CA8A04", iconColor: "#FFFFFF" },
-  { id: "messages",      label: "Messages",        Icon: IconChat,       tint: "#EBF2FF", iconBg: "#1976FF", iconColor: "#FFFFFF" },
+  { id: "messages",      label: "Messages",        Icon: IconChat,       tint: "#EBF2FF", iconBg: "#337485", iconColor: "#FFFFFF" },
   { id: "emails",        label: "Email Logs",      Icon: IconEmail,      tint: "#FAF6FF", iconBg: "#7C4DFF", iconColor: "#FFFFFF" },
   { id: "tenants",       label: "Tenants",         Icon: IconBuilding,   tint: "#F4F4F4", iconBg: "#3B4252", iconColor: "#FFFFFF" },
   { id: "settings",      label: "Settings",        Icon: IconSettings,   tint: "#F4F5F7", iconBg: "#7A8290", iconColor: "#FFFFFF" },
