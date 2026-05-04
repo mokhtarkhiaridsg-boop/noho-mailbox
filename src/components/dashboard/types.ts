@@ -19,6 +19,27 @@ export type MailItem = {
   // for the storage-tier countdown. The free-form `date` string isn't
   // safe to parse so we pass createdAt through separately.
   createdAt?: string;
+  // iter-91: Member-declared value + paid insurance fee. Both null when
+  // customer hasn't declared.
+  declaredValueCents?: number | null;
+  insuranceFeeCents?: number | null;
+  // iter-105: Storage fee charged at pickup (only set after admin marks
+  // Picked Up via iter-87 logic). Triggers the "Dispute fee" CTA on the
+  // recently-picked-up row.
+  feeChargedCents?: number | null;
+  // iter-108: AI photo analysis warnings. Parsed from MailItem.aiAnalysisJson;
+  // null when no analysis was run (no API key, no photo, or older items).
+  aiWarnings?: string[] | null;
+  aiNotes?: string | null;
+  // iter-94: Latest carrier-API tracking summary. Populated by the
+  // dashboard page when MailItemTrackingState exists for this item.
+  trackingStatus?: {
+    statusKey: string | null;
+    statusLabel: string | null;
+    location: string | null;
+    etaIso: string | null;
+    polledAtIso: string | null;
+  } | null;
 };
 
 export type ForwardingAddress = { id: string; label: string; address: string };

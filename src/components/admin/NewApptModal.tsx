@@ -16,7 +16,7 @@ type Props = {
 export function NewApptModal({ apptForm, setApptForm, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 space-y-4" style={{ boxShadow: "0 8px 40px rgba(26,23,20,0.2)" }}>
+      <div className="bg-white rounded-md p-5 w-full max-w-md mx-4 space-y-4" style={{ border: "1px solid #E5DACA", boxShadow: "0 12px 36px rgba(26,23,20,0.18)" }}>
         <h3 className="font-black text-lg uppercase tracking-wide text-text-light">New Notary Appointment</h3>
         <div className="space-y-3">
           <div>
@@ -49,12 +49,12 @@ export function NewApptModal({ apptForm, setApptForm, onClose }: Props) {
           <button
             onClick={() => { onClose(); setApptForm({ customer: "", date: "", time: "", type: "Acknowledgment" }); }}
             disabled={!apptForm.customer || !apptForm.date || !apptForm.time}
-            className="flex-1 px-4 py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-40"
-            style={{ background: "linear-gradient(135deg, #337485, #23596A)", boxShadow: "0 2px 10px rgba(51,116,133,0.3)" }}
+            className="flex-1 px-4 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] text-white disabled:opacity-40 transition-colors"
+            style={{ background: "#2D100F", border: "1px solid #2D100F" }}
           >
-            Schedule Appointment
+            Schedule appointment
           </button>
-          <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-text-light" style={{ border: "1px solid rgba(232,229,224,0.7)" }}>
+          <button onClick={onClose} className="flex-1 px-4 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] transition-colors" style={{ background: "#FFFFFF", color: "#5C4540", border: "1px solid #E5DACA" }}>
             Cancel
           </button>
         </div>

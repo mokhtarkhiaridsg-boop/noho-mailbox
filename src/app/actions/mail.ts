@@ -4,8 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { verifySession, verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 import { getPlanStatus } from "@/lib/plan";
-import { sendMailArrivedEmail, sendMailPickedUpEmail } from "@/lib/email";
+import { sendMailArrivedEmail, sendMailPickedUpEmail, sendStorageFeeChargedEmail } from "@/lib/email";
+import { sendMailArrivedSms, sendMailPickedUpSms } from "@/lib/sms";
+import { parsePrefs, getChannelPrefs } from "@/lib/notifPrefs";
 import { notifyMailArrived, notifyMailPickedUp, notifyOversizePackage } from "@/app/actions/notifications";
+import { fireWebhooks } from "@/lib/webhooks";
+import { analyzeMailItemPhoto } from "@/app/actions/aiPhotoAnalysis";
 
 // ─── Scan-and-log inbound package ────────────────────────────────────────────
 // Optimized for the storefront scan workflow: admin scans the carrier
@@ -39,16 +43,16 @@ export async function logScannedInbound(input: {
 
   // Resolve customer — userId wins, then suite#.
   let userId = input.userId;
-  let user: { id: string; name: string | null; email: string; suiteNumber: string | null } | null = null;
+  let user: { id: string; name: string | null; email: string; suiteNumber: string | null; phone: string | null; notifPrefs: string | null } | null = null;
   if (userId) {
     user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, suiteNumber: true },
+      select: { id: true, name: true, email: true, suiteNumber: true, phone: true, notifPrefs: true },
     });
   } else if (input.suiteNumber) {
     user = await prisma.user.findFirst({
       where: { suiteNumber: input.suiteNumber.trim() },
-      select: { id: true, name: true, email: true, suiteNumber: true },
+      select: { id: true, name: true, email: true, suiteNumber: true, phone: true, notifPrefs: true },
     });
     if (user) userId = user.id;
   }
@@ -108,7 +112,10 @@ export async function logScannedInbound(input: {
   // logMail. Errors logged via EmailLog but don't block the print path.
   // Photo is included so the customer can confirm the package is theirs at
   // a glance from the email itself.
-  if (user.email) {
+  // iter-84: gated by per-channel notifPrefs (defaults: email + in-app on,
+  // sms opt-in only).
+  const arrivedPrefs = getChannelPrefs(parsePrefs(user.notifPrefs), "mailArrived");
+  if (arrivedPrefs.email && user.email) {
     void sendMailArrivedEmail({
       email: user.email,
       name: user.name ?? "",
@@ -119,11 +126,45 @@ export async function logScannedInbound(input: {
       photoUrl: input.exteriorImageUrl ?? null,
     }).catch((e) => console.error("[logScannedInbound] email failed:", e));
   }
-  void notifyMailArrived({
-    userId,
-    type: "Package",
-    from: input.carrier || "Unknown",
-  }).catch((e) => console.error("[logScannedInbound] notification failed:", e));
+  if (arrivedPrefs.inApp) {
+    void notifyMailArrived({
+      userId,
+      type: "Package",
+      from: input.carrier || "Unknown",
+    }).catch((e) => console.error("[logScannedInbound] notification failed:", e));
+  }
+  if (arrivedPrefs.sms && user.phone) {
+    void sendMailArrivedSms({
+      userId,
+      toPhone: user.phone,
+      firstName: (user.name ?? "").split(" ")[0] || "there",
+      suiteNumber: user.suiteNumber ?? "—",
+      type: "Package",
+      from: input.carrier || "Unknown",
+    }).catch((e) => console.error("[logScannedInbound] sms failed:", e));
+  }
+
+  // iter-108: AI photo analysis (Claude Vision). No-op if no API key
+  // or no photo. Persists warnings on the MailItem so member + admin
+  // see "🚸 fragile / ☢️ hazmat" chips on the row.
+  if (input.exteriorImageUrl) {
+    void analyzeMailItemPhoto({ mailItemId: newMailItemId })
+      .catch((e) => console.error("[logScannedInbound] ai analysis failed:", e));
+  }
+
+  // iter-103: outbound webhook bridge (Slack/Discord). No-op if no
+  // endpoints configured.
+  void fireWebhooks("mail.arrived", {
+    text: `Package arrived for *${user.name ?? "(unknown)"}* (suite #${user.suiteNumber ?? "—"}) — ${input.carrier} ${input.trackingNumber}`,
+    emoji: "📦",
+    detail: {
+      userId,
+      suiteNumber: user.suiteNumber ?? null,
+      carrier: input.carrier,
+      trackingNumber: input.trackingNumber,
+      recipientName: input.recipientName ?? user.name ?? null,
+    },
+  });
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");
@@ -813,6 +854,429 @@ const MAIL_STATUS_TRANSITIONS: Record<string, string[]> = {
   Discarded: [],
 };
 
+// iter-93 — Public share token for /p/[id] tracking page. Lazy-mints
+// the token on first share. Idempotent — re-share returns the same
+// token. Member-only — guests can't share other people's packages.
+
+const PUBLIC_SHARE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+
+export async function ensureMailPublicShareToken(mailItemId: string): Promise<{ error?: string; token?: string }> {
+  const session = await verifySession();
+  const item = await prisma.mailItem.findUnique({
+    where: { id: mailItemId },
+    select: { id: true, userId: true, publicShareToken: true },
+  });
+  if (!item) return { error: "Mail item not found" };
+  if (item.userId !== session.id && session.role !== "ADMIN") return { error: "Not authorized" };
+  if (item.publicShareToken) return { token: item.publicShareToken };
+
+  const bytes = crypto.getRandomValues(new Uint8Array(20));
+  const token = Array.from(bytes, (b) => PUBLIC_SHARE_ALPHABET[b % PUBLIC_SHARE_ALPHABET.length]).join("");
+
+  await prisma.$transaction([
+    prisma.mailItem.update({
+      where: { id: mailItemId },
+      data: { publicShareToken: token },
+    }),
+    prisma.auditLog.create({
+      data: {
+        actorId: session.id,
+        actorRole: session.role,
+        action: "mail.share_token_created",
+        entityType: "MailItem",
+        entityId: mailItemId,
+        metadata: JSON.stringify({ tokenTail: token.slice(-6) }),
+      },
+    }),
+  ]);
+  return { token };
+}
+
+// Public read by mailItemId + token (no auth). Returns enough to render
+// the public tracking page without exposing other customer data. The
+// status timeline is built from the AuditLog (every status flip writes
+// `mail.status.{newStatus}` so we can reconstruct what happened).
+// iter-94: also returns carrier API events + summary state.
+export async function getMailPublicShareView(mailItemId: string, token: string): Promise<{
+  error?: string;
+  view?: {
+    id: string;
+    from: string;
+    type: string;
+    status: string;
+    carrier: string | null;
+    trackingNumber: string | null;
+    exteriorImageUrl: string | null;
+    recipientName: string | null;
+    weightOz: number | null;
+    dimensions: string | null;
+    createdAtIso: string;
+    suiteNumber: string | null;
+    customerInitials: string;
+    timeline: Array<{ id: string; action: string; createdAtIso: string; metadata: string | null }>;
+    trackingEvents: Array<{ id: string; eventTimeIso: string; statusKey: string; statusDetails: string; location: string | null; source: string }>;
+    trackingState: { statusKey: string | null; statusLabel: string | null; location: string | null; etaIso: string | null; polledAtIso: string | null } | null;
+  };
+}> {
+  const t = (token ?? "").trim();
+  if (!t || t.length < 10) return { error: "Invalid share link" };
+  const item = await prisma.mailItem.findUnique({
+    where: { id: mailItemId },
+    select: {
+      id: true,
+      from: true,
+      type: true,
+      status: true,
+      carrier: true,
+      trackingNumber: true,
+      exteriorImageUrl: true,
+      recipientName: true,
+      weightOz: true,
+      dimensions: true,
+      createdAt: true,
+      publicShareToken: true,
+      user: { select: { name: true, suiteNumber: true } },
+    },
+  });
+  if (!item) return { error: "Package not found" };
+  if (!item.publicShareToken || item.publicShareToken !== t) return { error: "Invalid share link" };
+
+  const [timeline, trackingEvents, trackingState] = await Promise.all([
+    prisma.auditLog.findMany({
+      where: {
+        entityType: "MailItem",
+        entityId: mailItemId,
+        action: { startsWith: "mail." },
+      },
+      orderBy: { createdAt: "asc" },
+      take: 30,
+      select: { id: true, action: true, createdAt: true, metadata: true },
+    }),
+    // iter-94: include carrier API events for the public timeline.
+    prisma.trackingEvent.findMany({
+      where: { mailItemId },
+      orderBy: { eventTimeIso: "asc" },
+      take: 50,
+      select: { id: true, eventTimeIso: true, statusKey: true, statusDetails: true, location: true, source: true },
+    }),
+    prisma.mailItemTrackingState.findUnique({
+      where: { mailItemId },
+      select: { lastStatusKey: true, lastStatusLabel: true, lastLocation: true, etaIso: true, lastPolledAt: true },
+    }),
+  ]);
+
+  const initials = (item.user?.name ?? "")
+    .split(" ")
+    .map((n) => n[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "—";
+
+  return {
+    view: {
+      id: item.id,
+      from: item.from,
+      type: item.type,
+      status: item.status,
+      carrier: item.carrier,
+      trackingNumber: item.trackingNumber,
+      exteriorImageUrl: item.exteriorImageUrl,
+      recipientName: item.recipientName,
+      weightOz: item.weightOz,
+      dimensions: item.dimensions,
+      createdAtIso: item.createdAt.toISOString(),
+      suiteNumber: item.user?.suiteNumber ?? null,
+      customerInitials: initials,
+      timeline: timeline.map((t) => ({
+        id: t.id,
+        action: t.action,
+        createdAtIso: t.createdAt.toISOString(),
+        metadata: t.metadata,
+      })),
+      trackingEvents: trackingEvents.map((e) => ({
+        id: e.id,
+        eventTimeIso: e.eventTimeIso,
+        statusKey: e.statusKey,
+        statusDetails: e.statusDetails,
+        location: e.location,
+        source: e.source,
+      })),
+      trackingState: trackingState ? {
+        statusKey: trackingState.lastStatusKey,
+        statusLabel: trackingState.lastStatusLabel,
+        location: trackingState.lastLocation,
+        etaIso: trackingState.etaIso,
+        polledAtIso: trackingState.lastPolledAt?.toISOString() ?? null,
+      } : null,
+    },
+  };
+}
+
+// iter-91 — Insurance / declared-value workflow.
+//
+// Customer self-declares value on a package they're tracking. Server
+// computes the cheapest tier that covers it, debits wallet for the fee
+// (clamps to balance — residual not allowed for insurance, must be
+// paid in full), records declaredValueCents + insuranceFeeCents on the
+// MailItem, audits + emails. Fully idempotent — re-declares replace
+// the previous record (and we refund/charge the difference).
+
+import { INSURANCE_TIERS, pickTier, MAX_INSURED_VALUE_CENTS } from "@/lib/insurance";
+import { sendPackageInsuredEmail } from "@/lib/email";
+
+export async function declareInsuranceValue(input: { mailItemId: string; declaredValueCents: number }): Promise<{
+  error?: string;
+  success?: boolean;
+  tier?: { id: string; label: string; feeCents: number };
+  walletBalanceCents?: number;
+}> {
+  const session = await verifySession();
+  const value = Math.max(0, Math.floor(input.declaredValueCents));
+  if (value > MAX_INSURED_VALUE_CENTS) {
+    return { error: `Maximum insured value is $${(MAX_INSURED_VALUE_CENTS / 100).toFixed(0)}.` };
+  }
+  const tier = pickTier(value);
+  if (!tier) return { error: "Could not pick a coverage tier for that amount." };
+
+  const item = await prisma.mailItem.findUnique({
+    where: { id: input.mailItemId },
+    select: { id: true, userId: true, status: true, carrier: true, trackingNumber: true, insuranceFeeCents: true },
+  });
+  if (!item) return { error: "Mail item not found" };
+  if (item.userId !== session.id && session.role !== "ADMIN") return { error: "Not authorized" };
+  // Insurance only applies while the package is in our custody.
+  if (["Picked Up", "Forwarded", "Returned", "Discarded"].includes(item.status)) {
+    return { error: "Can't add insurance to a closed package." };
+  }
+
+  // Compute net change: refund any previous fee, charge the new tier's fee.
+  const previousFee = item.insuranceFeeCents ?? 0;
+  const netChargeCents = tier.feeCents - previousFee;
+
+  const owner = await prisma.user.findUnique({
+    where: { id: item.userId },
+    select: { walletBalanceCents: true, email: true, name: true, suiteNumber: true },
+  });
+  if (!owner) return { error: "Customer not found" };
+
+  if (netChargeCents > 0 && owner.walletBalanceCents < netChargeCents) {
+    return { error: `Need ${(netChargeCents / 100).toFixed(2)} in wallet — current balance ${(owner.walletBalanceCents / 100).toFixed(2)}. Top up and try again.` };
+  }
+
+  const newBalance = owner.walletBalanceCents - netChargeCents;
+
+  await prisma.$transaction([
+    prisma.mailItem.update({
+      where: { id: item.id },
+      data: { declaredValueCents: value, insuranceFeeCents: tier.feeCents },
+    }),
+    prisma.user.update({
+      where: { id: item.userId },
+      data: { walletBalanceCents: newBalance },
+    }),
+    prisma.walletTransaction.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: item.userId,
+        kind: netChargeCents >= 0 ? "Charge" : "Refund",
+        amountCents: -netChargeCents,
+        description: netChargeCents === 0
+          ? `Insurance updated · ${tier.label} (no charge)`
+          : netChargeCents > 0
+          ? `Package insurance · ${tier.label} (declared $${(value / 100).toFixed(2)})`
+          : `Insurance refund · adjusted to ${tier.label}`,
+        balanceAfterCents: newBalance,
+      },
+    }),
+    prisma.auditLog.create({
+      data: {
+        actorId: session.id,
+        actorRole: session.role,
+        action: "mail.insurance_declared",
+        entityType: "MailItem",
+        entityId: item.id,
+        metadata: JSON.stringify({
+          declaredValueCents: value,
+          tierId: tier.id,
+          tierLabel: tier.label,
+          feeCents: tier.feeCents,
+          previousFeeCents: previousFee,
+          netChargeCents,
+          newWalletBalance: newBalance,
+        }),
+      },
+    }),
+  ]);
+
+  // Receipt email — best-effort.
+  if (owner.email) {
+    void sendPackageInsuredEmail({
+      email: owner.email,
+      name: owner.name ?? "",
+      suiteNumber: owner.suiteNumber ?? "—",
+      carrier: item.carrier,
+      trackingNumber: item.trackingNumber,
+      declaredValueCents: value,
+      tierLabel: tier.label,
+      feeCents: tier.feeCents,
+      newWalletBalanceCents: newBalance,
+    }).catch((e) => console.error("[declareInsuranceValue] email failed:", e));
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin");
+  return {
+    success: true,
+    tier: { id: tier.id, label: tier.label, feeCents: tier.feeCents },
+    walletBalanceCents: newBalance,
+  };
+}
+
+// Public read of the tier ladder so the UI can render a picker without
+// re-importing the lib client-side. (The lib is pure, but co-locating
+// keeps the component import surface tidy.)
+export async function getInsuranceTiers() {
+  return INSURANCE_TIERS;
+}
+
+// iter-87 — Storage-fee billing on pickup confirm.
+//
+// Per Terms: $6.50/day starts day 4 of shelf storage. This helper:
+//   - is idempotent via MailItem.feeChargedCents (skip if already set)
+//   - computes billable = max(0, daysOnShelf - 3) × $6.50
+//   - debits wallet up to balance; residual becomes an open Invoice
+//   - writes WalletTransaction + AuditLog atomically
+//   - fires the storage-fee receipt email (best-effort)
+//
+// Returns a small shape so the caller can log + decide whether to surface
+// the charge in the response. Errors are swallowed so a billing outage
+// never blocks the pickup status flip.
+
+const STORAGE_FREE_DAYS = 3;
+const STORAGE_RATE_CENTS = 650;
+
+async function applyStorageFeeOnPickup(args: {
+  mailItem: { id: string; createdAt: Date; feeChargedCents: number | null };
+  ownerId: string;
+  ownerName: string | null;
+  ownerEmail: string;
+  ownerSuiteNumber: string | null;
+  actorId: string;
+  actorRole: string;
+}): Promise<{ skipped?: boolean; chargedCents?: number; walletDebitCents?: number; invoiceCents?: number }> {
+  const m = args.mailItem;
+  if (m.feeChargedCents != null) return { skipped: true }; // idempotency
+
+  const daysOnShelf = Math.floor((Date.now() - m.createdAt.getTime()) / (24 * 60 * 60 * 1000));
+  const billableDays = daysOnShelf - STORAGE_FREE_DAYS;
+  if (billableDays <= 0) return { skipped: true };
+
+  const totalCents = billableDays * STORAGE_RATE_CENTS;
+
+  // Read wallet balance INSIDE the transaction to avoid a race with
+  // any concurrent debit — Prisma's $transaction gives us serialization.
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const owner = await tx.user.findUnique({
+        where: { id: args.ownerId },
+        select: { walletBalanceCents: true },
+      });
+      const walletBalance = owner?.walletBalanceCents ?? 0;
+      const walletDebit = Math.min(totalCents, walletBalance);
+      const invoiceCents = totalCents - walletDebit;
+      const newBalance = walletBalance - walletDebit;
+
+      // Mark the MailItem so the next tick can't re-charge.
+      await tx.mailItem.update({
+        where: { id: m.id },
+        data: { feeChargedCents: totalCents },
+      });
+
+      if (walletDebit > 0) {
+        await tx.user.update({
+          where: { id: args.ownerId },
+          data: { walletBalanceCents: newBalance },
+        });
+        await tx.walletTransaction.create({
+          data: {
+            id: crypto.randomUUID(),
+            userId: args.ownerId,
+            kind: "Charge",
+            amountCents: -walletDebit,
+            description: `Storage fee · ${billableDays} day${billableDays === 1 ? "" : "s"} × $${(STORAGE_RATE_CENTS / 100).toFixed(2)} (suite #${args.ownerSuiteNumber ?? "—"})`,
+            balanceAfterCents: newBalance,
+          },
+        });
+      }
+
+      if (invoiceCents > 0) {
+        // Number scheme matches the existing convention (timestamp-based).
+        const invNumber = `STO-${Date.now().toString(36).toUpperCase()}-${m.id.slice(0, 4)}`;
+        await tx.invoice.create({
+          data: {
+            id: crypto.randomUUID(),
+            userId: args.ownerId,
+            number: invNumber,
+            kind: "Storage",
+            description: `Storage fee residual · ${billableDays} day${billableDays === 1 ? "" : "s"} on shelf for suite #${args.ownerSuiteNumber ?? "—"}`,
+            amountCents: invoiceCents,
+            taxCents: 0,
+            totalCents: invoiceCents,
+            status: "Sent",
+            sentAt: new Date(),
+          },
+        });
+      }
+
+      await tx.auditLog.create({
+        data: {
+          actorId: args.actorId,
+          actorRole: args.actorRole,
+          action: "mail.storage_fee_charged",
+          entityType: "MailItem",
+          entityId: m.id,
+          metadata: JSON.stringify({
+            daysOnShelf,
+            billableDays,
+            ratePerDayCents: STORAGE_RATE_CENTS,
+            totalCents,
+            walletDebit,
+            invoiceCents,
+            newWalletBalance: newBalance,
+          }),
+        },
+      });
+
+      return { totalCents, walletDebit, invoiceCents, newBalance };
+    });
+
+    // Receipt email (best-effort, outside the transaction).
+    if (args.ownerEmail) {
+      try {
+        await sendStorageFeeChargedEmail({
+          email: args.ownerEmail,
+          name: args.ownerName ?? "",
+          suiteNumber: args.ownerSuiteNumber ?? "—",
+          daysOnShelf,
+          billableDays,
+          ratePerDayCents: STORAGE_RATE_CENTS,
+          walletDebitCents: result.walletDebit,
+          invoiceCents: result.invoiceCents,
+          newWalletBalanceCents: result.newBalance,
+        });
+      } catch (e) {
+        console.error("[applyStorageFeeOnPickup] email failed:", e);
+      }
+    }
+
+    return { chargedCents: result.totalCents, walletDebitCents: result.walletDebit, invoiceCents: result.invoiceCents };
+  } catch (e) {
+    console.error("[applyStorageFeeOnPickup] charge failed:", e);
+    return {};
+  }
+}
+
 export async function updateMailStatus(mailItemId: string, newStatus: string) {
   const user = await verifySession();
 
@@ -868,14 +1332,51 @@ export async function updateMailStatus(mailItemId: string, newStatus: string) {
   // outage doesn't fail the status flip. The customer just got their
   // package in person; the email is a paper-trail courtesy.
   // iter-61: + in-app Notification (dashboard bell + push if enabled).
+  // iter-84: + SMS via Twilio when customer opted in. Each channel gated
+  // independently by parsePrefs(owner.notifPrefs).packagePickedUp.
   if (newStatus === "Picked Up") {
     void (async () => {
+      const owner = await prisma.user.findUnique({
+        where: { id: item.userId },
+        select: { name: true, email: true, phone: true, suiteNumber: true, notifPrefs: true },
+      });
+      if (!owner) return;
+
+      // iter-87: Auto-bill storage fee if the package was on the shelf
+      // > 3 days. Idempotent (skips if MailItem.feeChargedCents already
+      // set). Runs FIRST so the receipt email follows the pickup-confirm
+      // email naturally (one is "you got your package", the other is
+      // "and here's the storage charge"). Re-fetch the item to get
+      // current feeChargedCents value (item from line 970+ may be stale).
       try {
-        const owner = await prisma.user.findUnique({
-          where: { id: item.userId },
-          select: { name: true, email: true, suiteNumber: true },
+        const fresh = await prisma.mailItem.findUnique({
+          where: { id: mailItemId },
+          select: { id: true, createdAt: true, feeChargedCents: true },
         });
-        if (owner?.email) {
+        if (fresh && owner.email) {
+          await applyStorageFeeOnPickup({
+            mailItem: fresh,
+            ownerId: item.userId,
+            ownerName: owner.name,
+            ownerEmail: owner.email,
+            ownerSuiteNumber: owner.suiteNumber,
+            actorId: user.id,
+            actorRole: user.role,
+          });
+        }
+      } catch (e) { console.error("[updateMailStatus] applyStorageFeeOnPickup failed:", e); }
+
+      const prefs = getChannelPrefs(parsePrefs(owner.notifPrefs), "packagePickedUp");
+      // iter-92: Mint a feedback token + include the link in the email.
+      let feedbackToken: string | undefined;
+      try {
+        const { ensurePickupSurveyToken } = await import("@/app/actions/pickupSurvey");
+        const r = await ensurePickupSurveyToken({ mailItemId, userId: item.userId });
+        feedbackToken = r.token;
+      } catch (e) { console.error("[updateMailStatus] ensurePickupSurveyToken failed:", e); }
+
+      if (prefs.email && owner.email) {
+        try {
           await sendMailPickedUpEmail({
             email: owner.email,
             name: owner.name ?? "",
@@ -883,20 +1384,44 @@ export async function updateMailStatus(mailItemId: string, newStatus: string) {
             carrier: item.carrier,
             trackingNumber: item.trackingNumber,
             pickedUpAt: new Date(),
+            feedbackToken,
           });
-        }
-      } catch (e) {
-        console.error("[updateMailStatus] sendMailPickedUpEmail failed:", e);
+        } catch (e) { console.error("[updateMailStatus] sendMailPickedUpEmail failed:", e); }
       }
+      if (prefs.inApp) {
+        try {
+          await notifyMailPickedUp({
+            userId: item.userId,
+            carrier: item.carrier,
+            trackingNumber: item.trackingNumber,
+          });
+        } catch (e) { console.error("[updateMailStatus] notifyMailPickedUp failed:", e); }
+      }
+      if (prefs.sms && owner.phone) {
+        try {
+          await sendMailPickedUpSms({
+            userId: item.userId,
+            toPhone: owner.phone,
+            firstName: (owner.name ?? "").split(" ")[0] || "there",
+            suiteNumber: owner.suiteNumber ?? "—",
+            carrier: item.carrier,
+            trackingNumber: item.trackingNumber,
+          });
+        } catch (e) { console.error("[updateMailStatus] sendMailPickedUpSms failed:", e); }
+      }
+      // iter-103: outbound webhook bridge.
       try {
-        await notifyMailPickedUp({
-          userId: item.userId,
-          carrier: item.carrier,
-          trackingNumber: item.trackingNumber,
+        await fireWebhooks("mail.picked_up", {
+          text: `*${owner.name ?? "(unknown)"}* (suite #${owner.suiteNumber ?? "—"}) picked up ${item.carrier ?? "package"} ${item.trackingNumber ?? ""}`.trim(),
+          emoji: "✅",
+          detail: {
+            userId: item.userId,
+            suiteNumber: owner.suiteNumber ?? null,
+            carrier: item.carrier ?? null,
+            trackingNumber: item.trackingNumber ?? null,
+          },
         });
-      } catch (e) {
-        console.error("[updateMailStatus] notifyMailPickedUp failed:", e);
-      }
+      } catch (e) { console.error("[updateMailStatus] fireWebhooks failed:", e); }
     })();
   }
 

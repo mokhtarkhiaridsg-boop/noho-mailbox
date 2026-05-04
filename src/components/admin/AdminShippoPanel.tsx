@@ -929,10 +929,10 @@ function QuickShipPane(props: {
       <button
         disabled={isPending || !rateForm.toStreet || !rateForm.toCity || !rateForm.toZip}
         onClick={fetchRates}
-        className="w-full py-3 rounded-xl text-white font-black disabled:opacity-40"
-        style={{ background: "linear-gradient(135deg, #337485, #23596A)" }}
+        className="w-full h-11 rounded-md text-white text-sm font-bold uppercase tracking-[0.10em] disabled:opacity-40 transition-colors"
+        style={{ background: "#2D100F", border: "1px solid #2D100F" }}
       >
-        {isPending ? "Getting rates…" : "Get Live Rates"}
+        {isPending ? "Getting rates…" : "Get live rates"}
       </button>
 
       {/* Rates list — grouped by carrier with CHEAPEST / FASTEST badges and a
@@ -1495,11 +1495,10 @@ function LabelsPane({
 function SummaryTile({ label, value, sub, accent, margin }: { label: string; value: string; sub: string; accent?: boolean; margin?: boolean }) {
   return (
     <div
-      className="rounded-xl px-3 py-2.5 border"
+      className="rounded-md px-3 py-2.5"
       style={{
-        background: accent ? "linear-gradient(135deg, #337485, #23596A)" : margin ? "linear-gradient(135deg, rgba(22,163,74,0.10), rgba(22,163,74,0.0))" : "#fff",
-        borderColor: accent ? "transparent" : margin ? "rgba(22,163,74,0.30)" : "#e8e5e0",
-        boxShadow: accent ? "0 6px 18px rgba(51,116,133,0.30)" : "0 1px 2px rgba(45,16,15,0.04)",
+        background: accent ? "#2D100F" : margin ? "rgba(22,163,74,0.06)" : "#FFFFFF",
+        border: `1px solid ${accent ? "#2D100F" : margin ? "rgba(22,163,74,0.30)" : "#E5DACA"}`,
       }}
     >
       <p className="text-[9px] font-black uppercase tracking-[0.18em]" style={{ color: accent ? "rgba(247,230,194,0.75)" : margin ? "#15803d" : "rgba(45,16,15,0.45)" }}>
@@ -2647,8 +2646,8 @@ function RecipientNameAutocomplete({
       />
       {open && matches.length > 0 && (
         <div
-          className="absolute left-0 right-0 mt-1 rounded-xl bg-white border border-[#e8e5e0] z-20 max-h-72 overflow-auto"
-          style={{ boxShadow: "0 12px 32px rgba(45,16,15,0.16)" }}
+          className="absolute left-0 right-0 mt-1 rounded-md bg-white z-20 max-h-72 overflow-auto"
+          style={{ border: "1px solid #E5DACA", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
           role="listbox"
         >
           {matches.map((r, i) => {

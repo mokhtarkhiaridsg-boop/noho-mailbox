@@ -1,6 +1,22 @@
 "use client";
 
-import { useState } from "react";
+/**
+ * Admin Mail & Packages — formal hairline rewrite.
+ *
+ * Was a four-column rainbow kanban with orange/blue/purple/green column
+ * tints plus gradient action buttons — read as "circus" against the rest
+ * of the admin shell. This rewrite uses the same neutral T-token system
+ * as AdminCashRegister, AdminOverviewPanel, and AdminCustomersPanel:
+ * white surfaces, hairline borders, monospace numerals, color used only
+ * as a 6×6px status dot per column.
+ *
+ * Iter 6: added a hero metric row above the header strip — five animated
+ * counters (Total / Action / Scanned / Awaiting / Today) that double as
+ * one-tap segment filters. Click a tile to switch to list view filtered
+ * to that bucket; click again to clear.
+ */
+
+import { useEffect, useState } from "react";
 import { StatusBadge } from "./StatusBadge";
 import type { MailItem, Customer } from "./types";
 
@@ -27,9 +43,61 @@ type Props = {
   handleScanUpload: (mailItemId: string, file: File) => Promise<void>;
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+// Shared formal-token palette (mirrors AdminCashRegister / AdminOverviewPanel).
+const T = {
+  bg: "#FAF7F2",
+  surface: "#FFFFFF",
+  surfaceAlt: "#F4EEE3",
+  border: "#E5DACA",
+  ink: "#1A1614",
+  inkSoft: "#5C4540",
+  inkFaint: "#998877",
+  accent: "#2D100F",
+  blue: "#337485",
+  success: "#16A34A",
+  danger: "#B91C1C",
+  warning: "#B07030",
+};
+const MONO = "ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace";
+const TAB_NUM: React.CSSProperties = {
+  fontVariantNumeric: "tabular-nums",
+  fontFeatureSettings: "'tnum' 1",
+  fontFamily: MONO,
+};
+
+// rAF count-up tween (mirrors helpers in Overview / Mailbox / Customers).
+function useAnimatedCount(target: number, duration = 800): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      setValue(target);
+      return;
+    }
+    const reduced =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setValue(target);
+      return;
+    }
+    const start = performance.now();
+    const from = value;
+    const delta = target - from;
+    if (delta === 0) return;
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const next = Math.round(from + delta * eased);
+      setValue(next);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target, duration]);
+  return value;
+}
 
 // Lifecycle bucketing — collapses every ~10 statuses into 4 board columns.
 type Bucket = "action" | "scanned" | "awaiting" | "completed";
@@ -42,85 +110,99 @@ function bucketize(status: string): Bucket {
   return "completed";
 }
 
-const BUCKET_META: Record<
-  Bucket,
-  { title: string; sub: string; accent: string; bg: string; iconStroke: string; iconPath: React.ReactNode }
-> = {
+const BUCKET_META: Record<Bucket, { title: string; sub: string; dot: string }> = {
   action: {
-    title: "Action Needed",
+    title: "Action needed",
     sub: "Requests + just-received",
-    accent: "#F5A623",
-    bg: "linear-gradient(180deg, rgba(245,166,35,0.10) 0%, rgba(245,166,35,0.02) 60%, transparent 100%)",
-    iconStroke: "#F5A623",
-    iconPath: (
-      <>
-        <path d="M12 8 L12 13" strokeLinecap="round" />
-        <circle cx="12" cy="16.5" r="1" fill="currentColor" />
-        <circle cx="12" cy="12" r="9" />
-      </>
-    ),
+    dot: T.danger,
   },
   scanned: {
     title: "Scanned",
     sub: "Image uploaded · awaiting next step",
-    accent: NOHO_BLUE,
-    bg: "linear-gradient(180deg, rgba(51,116,133,0.10) 0%, rgba(51,116,133,0.02) 60%, transparent 100%)",
-    iconStroke: NOHO_BLUE,
-    iconPath: (
-      <>
-        <rect x="3" y="6" width="18" height="12" rx="2" />
-        <path d="M3 12 L21 12" />
-      </>
-    ),
+    dot: T.blue,
   },
   awaiting: {
-    title: "Awaiting Pickup",
+    title: "Awaiting pickup",
     sub: "Sitting at the desk for the customer",
-    accent: "#7C3AED",
-    bg: "linear-gradient(180deg, rgba(124,58,237,0.10) 0%, rgba(124,58,237,0.02) 60%, transparent 100%)",
-    iconStroke: "#7C3AED",
-    iconPath: (
-      <>
-        <path d="M5 12 L5 20 L19 20 L19 12" />
-        <path d="M3 12 L21 12 L17 6 L7 6 Z" />
-      </>
-    ),
+    dot: T.warning,
   },
   completed: {
     title: "Completed",
     sub: "Picked up · forwarded · discarded",
-    accent: "#16A34A",
-    bg: "linear-gradient(180deg, rgba(22,163,74,0.08) 0%, rgba(22,163,74,0.02) 60%, transparent 100%)",
-    iconStroke: "#16A34A",
-    iconPath: <path d="M5 12 L10 17 L19 7" strokeLinecap="round" strokeLinejoin="round" />,
+    dot: T.success,
   },
 };
 
+// Tiny monochrome glyph next to each item — letter for envelope, package
+// outline for packages. No gradients.
 function MailIconBadge({ type }: { type: string }) {
   const isPackage = type === "Package";
   return (
     <div
-      className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+      className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
       style={{
-        background: isPackage
-          ? `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`
-          : "linear-gradient(135deg, #EBF2FA, #D4E4F4)",
-        boxShadow: isPackage ? `0 4px 12px rgba(51,116,133,0.32)` : "0 1px 3px rgba(45,16,15,0.06)",
+        background: T.surfaceAlt,
+        border: `1px solid ${T.border}`,
+        color: T.ink,
       }}
+      aria-hidden="true"
     >
       {isPackage ? (
-        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#fff" strokeWidth="2" strokeLinejoin="round">
+        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
           <path d="M12 3 L21 7 L21 17 L12 21 L3 17 L3 7 Z" />
           <path d="M3 7 L12 11 L21 7" />
           <path d="M12 11 L12 21" />
         </svg>
       ) : (
-        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={NOHO_BLUE} strokeWidth="2" strokeLinejoin="round">
+        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
           <rect x="3" y="6" width="18" height="13" rx="2" />
           <path d="M3 8 L12 14 L21 8" />
         </svg>
       )}
     </div>
+  );
+}
+
+// Tiny hairline action button — used for the secondary scan/forward/pickup
+// actions on each card. No gradient, no shadow.
+function ActionIcon({
+  onClick,
+  disabled,
+  title,
+  children,
+  tone = "default",
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  title: string;
+  children: React.ReactNode;
+  tone?: "default" | "success";
+}) {
+  const stroke = tone === "success" ? T.success : T.blue;
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="w-6 h-6 rounded flex items-center justify-center transition-colors disabled:opacity-40"
+      style={{
+        background: "transparent",
+        color: stroke,
+        border: `1px solid ${T.border}`,
+      }}
+      onMouseEnter={(e) => {
+        if (disabled) return;
+        e.currentTarget.style.background = T.surfaceAlt;
+        e.currentTarget.style.borderColor = stroke;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "transparent";
+        e.currentTarget.style.borderColor = T.border;
+      }}
+      title={title}
+      aria-label={title}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -137,20 +219,31 @@ function MailItemCard({
 }) {
   return (
     <div
-      className="group rounded-xl p-3 transition-all hover:-translate-y-0.5"
+      className="group rounded-md p-2.5 transition-colors"
       style={{
-        background: "white",
-        border: "1px solid rgba(232,229,224,0.7)",
-        boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 10px rgba(45,16,15,0.03)",
+        background: T.surface,
+        border: `1px solid ${T.border}`,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = T.surfaceAlt;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = T.surface;
       }}
     >
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-2">
         <MailIconBadge type={m.type} />
         <div className="flex-1 min-w-0">
-          <p className="text-[12px] font-bold truncate" style={{ color: NOHO_INK }}>
+          <p
+            className="text-[12px] font-bold truncate"
+            style={{ color: T.ink }}
+          >
             {m.from}
           </p>
-          <p className="text-[10px] truncate" style={{ color: "rgba(45,16,15,0.5)" }}>
+          <p
+            className="text-[10px] truncate"
+            style={{ color: T.inkFaint, ...TAB_NUM }}
+          >
             #{m.suiteNumber} · {m.customerName.split(" ")[0]} · {m.date}
           </p>
         </div>
@@ -172,45 +265,92 @@ function MailItemCard({
                 onAction(m.id, target);
               }}
               disabled={isPending}
-              className="px-2 h-7 rounded-md text-[9px] font-black text-white disabled:opacity-40"
-              style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}
+              className="px-2 h-6 rounded text-[9px] font-black uppercase tracking-[0.10em] disabled:opacity-40"
+              style={{
+                background: T.accent,
+                color: "#FFFFFF",
+                border: `1px solid ${T.accent}`,
+              }}
               title="Fulfill request"
             >
-              FULFILL
+              Fulfill
             </button>
           )}
           <label
             title="Upload scan image"
-            className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-blue-50 cursor-pointer"
+            className="w-6 h-6 rounded flex items-center justify-center cursor-pointer transition-colors"
+            style={{
+              border: `1px solid ${T.border}`,
+              color: T.blue,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = T.surfaceAlt;
+              e.currentTarget.style.borderColor = T.blue;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.borderColor = T.border;
+            }}
           >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke={NOHO_BLUE} strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.8}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+              />
             </svg>
-            <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onScanUpload(m.id, f); }} />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) onScanUpload(m.id, f);
+              }}
+            />
           </label>
-          <button
+          <ActionIcon
             onClick={() => onAction(m.id, "Scanned")}
             disabled={isPending}
-            className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-[#337485]/10 disabled:opacity-40"
             title="Mark Scanned"
-            aria-label="Mark Scanned"
           >
-            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke={NOHO_BLUE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <rect x="3" y="6" width="18" height="12" rx="2" />
               <path d="M3 12 L21 12" />
             </svg>
-          </button>
-          <button
+          </ActionIcon>
+          <ActionIcon
             onClick={() => onAction(m.id, "Picked Up")}
             disabled={isPending}
-            className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-[#16a34a]/10 disabled:opacity-40"
             title="Mark Picked Up"
-            aria-label="Mark Picked Up"
+            tone="success"
           >
-            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M5 12 L10 17 L19 7" />
             </svg>
-          </button>
+          </ActionIcon>
         </div>
       </div>
     </div>
@@ -240,24 +380,89 @@ export function AdminMailPanel({
   for (const m of recentMail) buckets[bucketize(m.status)].push(m);
 
   const filteredMail =
-    mailFilter === "All" ? recentMail : recentMail.filter((m) => m.status === mailFilter);
+    mailFilter === "All"
+      ? recentMail
+      : recentMail.filter((m) => m.status === mailFilter);
 
-  const todayStr = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const todayStr = new Date().toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
   const todayCount = recentMail.filter((m) => m.date === todayStr).length;
+
+  // ─── Hero metric tiles ──────────────────────────────────────────
+  // Five tiles double as segment filters. Clicking jumps to list view
+  // filtered to that bucket (or "All" for total). Active tile gets a
+  // 2px ring + colored side bar.
+  const totalCount = recentMail.length;
+  const actionCount = buckets.action.length;
+  const scannedCount = buckets.scanned.length;
+  const awaitingCount = buckets.awaiting.length;
+  // "Active" filter the user hits: when in list mode and filter == "All"
+  // we treat it as no filter; otherwise we resolve a representative status
+  // for board buckets.
+  function pickFilter(bucket: Bucket | "all" | "today") {
+    setView("list");
+    if (bucket === "all" || bucket === "today") {
+      setMailFilter("All");
+      return;
+    }
+    if (bucket === "scanned") setMailFilter("Scanned");
+    else if (bucket === "awaiting") setMailFilter("Awaiting Pickup");
+    else if (bucket === "action") setMailFilter("Scan Requested");
+  }
+
+  const heroTiles: Array<{
+    id: string;
+    label: string;
+    value: number;
+    onClick: () => void;
+    accent?: boolean;
+    warning?: boolean;
+    success?: boolean;
+    active?: boolean;
+  }> = [
+    { id: "total", label: "Total recent", value: totalCount, onClick: () => pickFilter("all") },
+    { id: "action", label: "Action needed", value: actionCount, accent: actionCount > 0, onClick: () => pickFilter("action"), active: view === "list" && mailFilter === "Scan Requested" },
+    { id: "scanned", label: "Scanned", value: scannedCount, onClick: () => pickFilter("scanned"), active: view === "list" && mailFilter === "Scanned" },
+    { id: "awaiting", label: "Awaiting", value: awaitingCount, warning: awaitingCount > 0, onClick: () => pickFilter("awaiting"), active: view === "list" && mailFilter === "Awaiting Pickup" },
+    { id: "today", label: "Today", value: todayCount, success: todayCount > 0, onClick: () => pickFilter("today") },
+  ];
 
   return (
     <div className="space-y-4">
+      {/* ─── Hero metric strip ─── */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+        {heroTiles.map((tile) => (
+          <MailHeroTile key={tile.id} {...tile} />
+        ))}
+      </div>
+
+      {/* ─── Header strip ───────────────────────────────────────────── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="font-black text-lg uppercase tracking-wide text-text-light">Mail & Packages</h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.5)" }}>
-            {recentMail.length} recent · {todayCount} today · {buckets.action.length} need action
+          <h2
+            className="text-[10px] font-bold uppercase tracking-[0.16em]"
+            style={{ color: T.ink }}
+          >
+            Mail & packages
+          </h2>
+          <p
+            className="text-[11px] mt-1"
+            style={{ color: T.inkFaint, ...TAB_NUM }}
+          >
+            {recentMail.length} recent · {todayCount} today ·{" "}
+            {buckets.action.length} need action
           </p>
         </div>
         <div className="flex gap-2 items-center flex-wrap">
+          {/* Board / List segmented control — flat, hairline. */}
           <div
-            className="inline-flex rounded-xl p-0.5"
-            style={{ background: "rgba(232,229,224,0.5)", border: "1px solid rgba(232,229,224,0.7)" }}
+            className="inline-flex rounded-md p-0.5"
+            style={{
+              background: T.surfaceAlt,
+              border: `1px solid ${T.border}`,
+            }}
           >
             {(["board", "list"] as const).map((v) => {
               const active = view === v;
@@ -265,102 +470,126 @@ export function AdminMailPanel({
                 <button
                   key={v}
                   onClick={() => setView(v)}
-                  className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.16em] transition-all"
+                  className="px-3 h-7 rounded text-[10px] font-bold uppercase tracking-[0.12em] transition-all"
                   style={{
-                    background: active ? "white" : "transparent",
-                    color: active ? NOHO_INK : "rgba(45,16,15,0.55)",
-                    boxShadow: active ? "0 1px 2px rgba(45,16,15,0.08)" : undefined,
+                    background: active ? T.surface : "transparent",
+                    color: active ? T.ink : T.inkFaint,
+                    border: active
+                      ? `1px solid ${T.border}`
+                      : "1px solid transparent",
                   }}
                   aria-pressed={active}
                 >
-                  {v === "board" ? "Board" : "List"}
+                  {v}
                 </button>
               );
             })}
           </div>
           <button
             onClick={() => {
-              setLogMailForm({ suite: "", from: "", type: "Letter", recipientName: "", recipientPhone: "", exteriorImageUrl: "", weightOz: "", dimensions: "" });
+              setLogMailForm({
+                suite: "",
+                from: "",
+                type: "Letter",
+                recipientName: "",
+                recipientPhone: "",
+                exteriorImageUrl: "",
+                weightOz: "",
+                dimensions: "",
+              });
               setShowLogMailModal(true);
             }}
-            className="px-4 py-2.5 rounded-xl text-sm font-black text-white"
-            style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`, boxShadow: "0 2px 10px rgba(51,116,133,0.3)" }}
+            className="px-3 h-8 rounded-md text-[11px] font-bold transition-colors"
+            style={{
+              background: T.accent,
+              color: "#FFFFFF",
+              border: `1px solid ${T.accent}`,
+            }}
           >
-            + Log Mail
+            + Log mail
           </button>
           <button
             onClick={() => {
-              setLogMailForm({ suite: "", from: "", type: "Package", recipientName: "", recipientPhone: "", exteriorImageUrl: "", weightOz: "", dimensions: "" });
+              setLogMailForm({
+                suite: "",
+                from: "",
+                type: "Package",
+                recipientName: "",
+                recipientPhone: "",
+                exteriorImageUrl: "",
+                weightOz: "",
+                dimensions: "",
+              });
               setShowLogMailModal(true);
             }}
-            className="px-4 py-2.5 rounded-xl text-sm font-bold text-text-light bg-white"
-            style={{ border: "1px solid rgba(232,229,224,0.7)" }}
+            className="px-3 h-8 rounded-md text-[11px] font-bold transition-colors"
+            style={{
+              background: T.surface,
+              color: T.ink,
+              border: `1px solid ${T.border}`,
+            }}
           >
-            + Log Package
+            + Log package
           </button>
         </div>
       </div>
 
       {/* ─── BOARD VIEW — kanban columns ─────────────────────────────── */}
       {view === "board" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
           {(Object.keys(BUCKET_META) as Bucket[]).map((b) => {
             const meta = BUCKET_META[b];
             const items = buckets[b];
             return (
               <section
                 key={b}
-                className="rounded-2xl p-3 flex flex-col"
+                className="rounded-md flex flex-col"
                 style={{
-                  background: meta.bg,
-                  border: `1px solid ${meta.accent}33`,
+                  background: T.surface,
+                  border: `1px solid ${T.border}`,
                   minHeight: 240,
                 }}
                 aria-labelledby={`mail-col-${b}`}
               >
-                <header className="flex items-center justify-between gap-2 mb-3 px-1.5">
-                  <div className="flex items-center gap-2">
+                <header
+                  className="flex items-center justify-between gap-2 px-3 h-10"
+                  style={{ borderBottom: `1px solid ${T.border}` }}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
                     <span
-                      className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: "white", boxShadow: `0 1px 2px ${meta.accent}33` }}
+                      aria-hidden="true"
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{
+                        background: items.length > 0 ? meta.dot : T.border,
+                      }}
+                    />
+                    <p
+                      id={`mail-col-${b}`}
+                      className="text-[10px] font-bold uppercase tracking-[0.12em] truncate"
+                      style={{ color: T.ink }}
                     >
-                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={meta.iconStroke} strokeWidth="2">
-                        {meta.iconPath}
-                      </svg>
-                    </span>
-                    <div className="min-w-0">
-                      <p
-                        id={`mail-col-${b}`}
-                        className="text-[11px] font-black uppercase tracking-[0.14em]"
-                        style={{ color: NOHO_INK }}
-                      >
-                        {meta.title}
-                      </p>
-                      <p className="text-[9px]" style={{ color: "rgba(45,16,15,0.5)" }}>
-                        {meta.sub}
-                      </p>
-                    </div>
+                      {meta.title}
+                    </p>
                   </div>
                   <span
-                    className="text-[11px] font-black px-2 py-0.5 rounded-full"
+                    className="text-[10px] font-bold"
                     style={{
-                      background: items.length > 0 ? meta.accent : "rgba(232,229,224,0.7)",
-                      color: items.length > 0 ? "white" : "rgba(45,16,15,0.55)",
-                      boxShadow: items.length > 0 ? `0 0 10px ${meta.accent}55` : undefined,
+                      ...TAB_NUM,
+                      color: items.length > 0 ? T.ink : T.inkFaint,
                     }}
                   >
                     {items.length}
                   </span>
                 </header>
 
-                <div className="space-y-2 flex-1">
+                <div className="flex-1 p-2 space-y-1.5 overflow-hidden">
                   {items.length === 0 ? (
                     <div
-                      className="rounded-xl p-4 text-center text-[11px] font-bold"
+                      className="rounded p-3 text-center text-[10px] font-medium"
                       style={{
-                        background: "rgba(255,255,255,0.5)",
-                        border: "1px dashed rgba(45,16,15,0.15)",
-                        color: "rgba(45,16,15,0.4)",
+                        background: T.surfaceAlt,
+                        border: `1px dashed ${T.border}`,
+                        color: T.inkFaint,
                       }}
                     >
                       Nothing here.
@@ -377,16 +606,31 @@ export function AdminMailPanel({
                     ))
                   )}
                 </div>
+
+                <div
+                  className="px-3 h-7 flex items-center"
+                  style={{
+                    borderTop: `1px solid ${T.border}`,
+                    background: T.surfaceAlt,
+                  }}
+                >
+                  <p
+                    className="text-[9px] truncate"
+                    style={{ color: T.inkFaint, letterSpacing: "0.04em" }}
+                  >
+                    {meta.sub}
+                  </p>
+                </div>
               </section>
             );
           })}
         </div>
       )}
 
-      {/* ─── LIST VIEW (legacy, with filter chips) ────────────────────── */}
+      {/* ─── LIST VIEW — denser, table-style ─────────────────────────── */}
       {view === "list" && (
         <>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-1.5 flex-wrap">
             {[
               "All",
               "Scan Requested",
@@ -397,49 +641,76 @@ export function AdminMailPanel({
               "Scanned",
               "Forwarded",
               "Held",
-            ].map((f) => (
-              <button
-                key={f}
-                onClick={() => setMailFilter(f)}
-                className="px-3.5 py-2 rounded-full text-xs font-bold transition-all"
-                style={{
-                  background: mailFilter === f ? "#1A1714" : "white",
-                  color: mailFilter === f ? "#FAFAF8" : "rgba(26,23,20,0.6)",
-                  boxShadow: "0 1px 3px rgba(26,23,20,0.04)",
-                }}
-              >
-                {f}
-              </button>
-            ))}
+            ].map((f) => {
+              const active = mailFilter === f;
+              return (
+                <button
+                  key={f}
+                  onClick={() => setMailFilter(f)}
+                  className="px-2.5 h-7 rounded text-[10px] font-bold uppercase tracking-[0.10em] transition-colors"
+                  style={{
+                    background: active ? T.accent : T.surface,
+                    color: active ? "#FFFFFF" : T.inkSoft,
+                    border: `1px solid ${active ? T.accent : T.border}`,
+                  }}
+                >
+                  {f}
+                </button>
+              );
+            })}
           </div>
 
           <div
-            className="rounded-2xl overflow-hidden bg-white"
-            style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+            className="rounded-md overflow-hidden"
+            style={{
+              background: T.surface,
+              border: `1px solid ${T.border}`,
+            }}
           >
             {filteredMail.length === 0 && (
-              <div className="px-5 py-12 text-center text-sm" style={{ color: "rgba(45,16,15,0.5)" }}>
-                No mail items{mailFilter !== "All" ? ` with status "${mailFilter}"` : ""}.
+              <div
+                className="px-5 py-12 text-center text-[12px]"
+                style={{ color: T.inkFaint }}
+              >
+                No mail items
+                {mailFilter !== "All" ? ` with status "${mailFilter}"` : ""}.
               </div>
             )}
             {filteredMail.map((m, i) => (
               <div
                 key={m.id}
-                className="flex items-center justify-between px-5 py-4 hover:bg-bg-light/15 transition-colors"
+                className="flex items-center justify-between px-4 py-3 transition-colors"
                 style={{
-                  borderBottom: i < filteredMail.length - 1 ? "1px solid rgba(232,229,224,0.35)" : "none",
+                  borderBottom:
+                    i < filteredMail.length - 1
+                      ? `1px solid ${T.border}`
+                      : "none",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = T.surfaceAlt;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = T.surface;
                 }}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 min-w-0">
                   <MailIconBadge type={m.type} />
-                  <div>
-                    <p className="text-sm font-bold text-text-light">{m.from}</p>
-                    <p className="text-xs text-text-light/40">
-                      To: {m.customerName} (Suite #{m.suiteNumber}) · {m.date}
+                  <div className="min-w-0">
+                    <p
+                      className="text-[12px] font-bold truncate"
+                      style={{ color: T.ink }}
+                    >
+                      {m.from}
+                    </p>
+                    <p
+                      className="text-[10px] truncate"
+                      style={{ color: T.inkFaint, ...TAB_NUM }}
+                    >
+                      To: {m.customerName} (#{m.suiteNumber}) · {m.date}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 shrink-0">
                   <StatusBadge status={m.status} />
                   <div className="flex gap-1">
                     {m.status.includes("Requested") && (
@@ -456,27 +727,68 @@ export function AdminMailPanel({
                           handleMailAction(m.id, target);
                         }}
                         disabled={isPending}
-                        className="px-3 h-8 rounded-lg text-[10px] font-black text-white hover:opacity-90 disabled:opacity-40"
-                        style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}
+                        className="px-2.5 h-7 rounded text-[10px] font-bold uppercase tracking-[0.10em] disabled:opacity-40"
+                        style={{
+                          background: T.accent,
+                          color: "#FFFFFF",
+                          border: `1px solid ${T.accent}`,
+                        }}
                         title="Fulfill request"
                       >
-                        FULFILL
+                        Fulfill
                       </button>
                     )}
-                    <label title="Upload scan image" className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-blue-50 cursor-pointer">
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke={NOHO_BLUE} strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    <label
+                      title="Upload scan image"
+                      className="w-7 h-7 rounded flex items-center justify-center cursor-pointer transition-colors"
+                      style={{
+                        border: `1px solid ${T.border}`,
+                        color: T.blue,
+                      }}
+                    >
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.8}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                        />
                       </svg>
-                      <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleScanUpload(m.id, f); }} />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleScanUpload(m.id, f);
+                        }}
+                      />
                     </label>
                     <button
                       onClick={() => handleMailAction(m.id, "Scanned")}
                       disabled={isPending}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[#337485]/10 disabled:opacity-40"
+                      className="w-7 h-7 rounded flex items-center justify-center disabled:opacity-40 transition-colors"
+                      style={{
+                        border: `1px solid ${T.border}`,
+                        color: T.blue,
+                      }}
                       title="Mark Scanned"
                       aria-label="Mark Scanned"
                     >
-                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={NOHO_BLUE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <rect x="3" y="6" width="18" height="12" rx="2" />
                         <path d="M3 12 L21 12" />
                       </svg>
@@ -484,11 +796,23 @@ export function AdminMailPanel({
                     <button
                       onClick={() => handleMailAction(m.id, "Forwarded")}
                       disabled={isPending}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[#337485]/10 disabled:opacity-40"
+                      className="w-7 h-7 rounded flex items-center justify-center disabled:opacity-40 transition-colors"
+                      style={{
+                        border: `1px solid ${T.border}`,
+                        color: T.blue,
+                      }}
                       title="Mark Forwarded"
                       aria-label="Mark Forwarded"
                     >
-                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={NOHO_BLUE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M14 6 L20 12 L14 18" />
                         <path d="M4 12 L20 12" />
                       </svg>
@@ -496,11 +820,23 @@ export function AdminMailPanel({
                     <button
                       onClick={() => handleMailAction(m.id, "Picked Up")}
                       disabled={isPending}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[#16a34a]/10 disabled:opacity-40"
+                      className="w-7 h-7 rounded flex items-center justify-center disabled:opacity-40 transition-colors"
+                      style={{
+                        border: `1px solid ${T.border}`,
+                        color: T.success,
+                      }}
                       title="Mark Picked Up"
                       aria-label="Mark Picked Up"
                     >
-                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M5 12 L10 17 L19 7" />
                       </svg>
                     </button>
@@ -512,5 +848,83 @@ export function AdminMailPanel({
         </>
       )}
     </div>
+  );
+}
+
+// ─── Hero metric tile ───────────────────────────────────────────────────
+// Subtle tinted background per tone, hairline border, count-up tween.
+// Active flag adds a 2px ring + colored side bar; accent/warning add a
+// pulsing dot when the count is >0. Mirrors the formal-hairline aesthetic.
+function MailHeroTile({
+  label,
+  value,
+  onClick,
+  accent,
+  warning,
+  success,
+  active,
+}: {
+  label: string;
+  value: number;
+  onClick: () => void;
+  accent?: boolean;
+  warning?: boolean;
+  success?: boolean;
+  active?: boolean;
+}) {
+  const animated = useAnimatedCount(value);
+  const tone = accent
+    ? { bar: T.danger,  bg: "rgba(185,28,28,0.06)",  text: T.danger,  ring: "rgba(185,28,28,0.40)" }
+    : warning
+    ? { bar: T.warning, bg: "rgba(176,112,48,0.08)", text: T.warning, ring: "rgba(176,112,48,0.40)" }
+    : success
+    ? { bar: T.success, bg: "rgba(22,163,74,0.06)",  text: T.success, ring: "rgba(22,163,74,0.40)" }
+    : { bar: T.ink,     bg: T.surface,                text: T.ink,     ring: "rgba(45,16,15,0.32)" };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="relative overflow-hidden rounded-xl text-left px-3 py-2.5 transition-all hover:-translate-y-0.5"
+      style={{
+        background: tone.bg,
+        border: `1px solid ${active ? tone.bar : T.border}`,
+        boxShadow: active
+          ? `0 0 0 2px ${tone.ring}, 0 6px 16px rgba(45,16,15,0.06), 0 1px 0 rgba(255,255,255,0.6) inset`
+          : "0 1px 0 rgba(255,255,255,0.6) inset",
+      }}
+    >
+      <span
+        aria-hidden
+        className="absolute left-0 top-0 bottom-0 w-1"
+        style={{ background: tone.bar, opacity: 0.7 }}
+      />
+      {(accent || warning) && value > 0 && (
+        <span
+          aria-hidden
+          className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full"
+          style={{
+            background: tone.bar,
+            boxShadow: `0 0 8px ${tone.bar}`,
+            animation: "mail-tile-pulse 1.8s ease-in-out infinite",
+          }}
+        />
+      )}
+      <p className="pl-2 text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: T.inkFaint }}>
+        {label}
+      </p>
+      <p
+        className="pl-2 text-[26px] font-extrabold leading-none mt-1"
+        style={{ ...TAB_NUM, color: tone.text }}
+      >
+        {animated.toLocaleString()}
+      </p>
+      <style>{`
+        @keyframes mail-tile-pulse {
+          0%, 100% { opacity: 0.55; transform: scale(1); }
+          50%      { opacity: 1;    transform: scale(1.35); }
+        }
+      `}</style>
+    </button>
   );
 }

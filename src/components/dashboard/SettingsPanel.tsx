@@ -12,6 +12,7 @@ import SharedMailboxCard from "./SharedMailboxCard";
 import PickupAppointmentCard from "./PickupAppointmentCard";
 import AutoRenewCard from "./AutoRenewCard";
 import WalletAutoTopUpCard from "./WalletAutoTopUpCard";
+import PlanUpgradeCard from "./PlanUpgradeCard";
 import {
   IconSettings,
   IconKey,
@@ -1036,6 +1037,8 @@ export default function SettingsPanel({
     <AutoRenewCard />
     {/* iter-112: Wallet auto top-up — keeps the wallet primed for renewals. */}
     <WalletAutoTopUpCard />
+    {/* iter-116: Plan upgrade — prorated diff for remaining months. */}
+    <PlanUpgradeCard />
     </div>
   );
 }

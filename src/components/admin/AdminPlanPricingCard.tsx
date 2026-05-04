@@ -107,25 +107,28 @@ export function AdminPlanPricingCard() {
 
   return (
     <div
-      className="rounded-2xl bg-white relative overflow-hidden"
+      className="rounded-md bg-white relative overflow-hidden"
       style={{
-        border: `1px solid ${NOHO_INK}11`,
-        boxShadow: "0 1px 3px rgba(45,16,15,0.05), 0 8px 22px rgba(45,16,15,0.06)",
+        border: "1px solid #E5DACA",
       }}
     >
-      {/* Branded header strip */}
+      {/* Branded header strip — Command Tower variant. */}
       <div
         className="relative px-5 py-4 overflow-hidden"
         style={{
-          background: `linear-gradient(135deg, ${NOHO_BLUE_DEEP} 0%, ${NOHO_BLUE} 50%, #1F4554 100%)`,
+          background:
+            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
         }}
       >
         <div
-          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none opacity-[0.13]"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 25% 30%, white 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
+              "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
+            backgroundSize: "44px 44px",
+            maskImage:
+              "radial-gradient(ellipse at center, black 30%, transparent 80%)",
           }}
         />
         <div className="relative flex items-center justify-between gap-3 flex-wrap">
@@ -255,13 +258,11 @@ export function AdminPlanPricingCard() {
               <button
                 disabled={isPending || !isDirty}
                 onClick={save}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-4 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] transition-colors disabled:cursor-not-allowed"
                 style={{
-                  background: isDirty
-                    ? `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`
-                    : `${NOHO_INK}22`,
-                  boxShadow: isDirty ? `0 4px 14px ${NOHO_BLUE}40` : "none",
-                  color: isDirty ? "white" : `${NOHO_INK}66`,
+                  background: isDirty ? NOHO_INK : `${NOHO_INK}11`,
+                  border: `1px solid ${isDirty ? NOHO_INK : "#E5DACA"}`,
+                  color: isDirty ? "#FFFFFF" : `${NOHO_INK}66`,
                 }}
               >
                 {isPending ? (

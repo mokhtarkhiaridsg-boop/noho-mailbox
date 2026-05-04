@@ -37,14 +37,14 @@ export default function AnnualSummaryPanel() {
         boxShadow: "var(--shadow-cream-sm)",
       }}
     >
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
         <div className="flex items-center gap-2.5">
           <span className="text-lg">📊</span>
           <h3 className="font-black text-xs uppercase tracking-[0.16em]" style={{ color: BRAND.ink }}>
             Annual Mail Summary
           </h3>
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {years.map((y) => (
             <button
               key={y}
@@ -58,6 +58,17 @@ export default function AnnualSummaryPanel() {
               {y}
             </button>
           ))}
+          {/* iter-85: Branded printable / save-as-PDF statement. Opens in
+              a new tab so the dashboard isn't lost. */}
+          <a
+            href={`/dashboard/statement/${year}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-black px-3 py-1.5 rounded-xl text-white"
+            style={{ background: `linear-gradient(135deg, ${BRAND.blue}, ${BRAND.blueDeep})`, textDecoration: "none" }}
+          >
+            Download {year} statement →
+          </a>
         </div>
       </div>
 

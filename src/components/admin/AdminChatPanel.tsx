@@ -163,12 +163,14 @@ export function AdminChatPanel({ meId, customers }: Props) {
 
   return (
     <div className="space-y-3">
-      {/* Hero strip */}
+      {/* Hero strip — Command Tower variant. */}
       <div
         className="relative overflow-hidden rounded-2xl"
         style={{
-          background: `linear-gradient(135deg, ${NOHO_BLUE_DEEP} 0%, ${NOHO_BLUE} 50%, ${NOHO_INK} 100%)`,
-          boxShadow: "0 8px 24px rgba(35,89,106,0.30)",
+          background:
+            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
+          boxShadow:
+            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
         }}
       >
         <div
@@ -352,10 +354,11 @@ export function AdminChatPanel({ meId, customers }: Props) {
                             >
                               <div className="relative shrink-0">
                                 <div
-                                  className="w-9 h-9 rounded-xl flex items-center justify-center text-[11px] font-black text-white"
+                                  className="w-9 h-9 rounded-md flex items-center justify-center text-[11px] font-bold"
                                   style={{
-                                    background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-                                    boxShadow: `0 3px 8px ${from}55`,
+                                    background: "#F4EEE3",
+                                    color: NOHO_INK,
+                                    border: "1px solid #E5DACA",
                                   }}
                                 >
                                   {initials(c.otherName)}
@@ -441,10 +444,11 @@ export function AdminChatPanel({ meId, customers }: Props) {
                               }}
                             >
                               <div
-                                className="w-7 h-7 rounded-lg flex items-center justify-center text-[9px] font-black text-white shrink-0"
+                                className="w-7 h-7 rounded-md flex items-center justify-center text-[9px] font-bold shrink-0"
                                 style={{
-                                  background: `linear-gradient(135deg, ${from}aa 0%, ${to}aa 100%)`,
-                                  opacity: 0.65,
+                                  background: "#F4EEE3",
+                                  color: NOHO_INK,
+                                  border: "1px solid #E5DACA",
                                 }}
                               >
                                 {initials(c.name)}
@@ -526,10 +530,10 @@ export function AdminChatPanel({ meId, customers }: Props) {
                 }}
               />
               <div
-                className="w-20 h-20 rounded-3xl flex items-center justify-center mb-4 relative"
+                className="w-16 h-16 rounded-md flex items-center justify-center mb-4 relative"
                 style={{
-                  background: `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`,
-                  boxShadow: `0 8px 24px ${NOHO_BLUE}40`,
+                  background: NOHO_INK,
+                  border: `1px solid ${NOHO_INK}`,
                 }}
               >
                 <svg viewBox="0 0 24 24" className="w-10 h-10" fill="none" stroke="white" strokeWidth="1.6">

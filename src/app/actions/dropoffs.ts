@@ -13,6 +13,7 @@
 import { prisma } from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
+import { fireWebhooks } from "@/lib/webhooks";
 
 export async function logExternalDropoff(input: {
   trackingNumber: string;
@@ -58,6 +59,19 @@ export async function logExternalDropoff(input: {
       },
     });
     return row;
+  });
+
+  // iter-103: outbound webhook bridge.
+  void fireWebhooks("dropoff.logged", {
+    text: `External dropoff logged · ${created.carrier} ${created.trackingNumber}${created.senderName ? ` · from ${created.senderName}` : ""}${created.receiverName ? ` → ${created.receiverName}` : ""}`,
+    emoji: "📥",
+    detail: {
+      dropoffId: created.id,
+      carrier: created.carrier,
+      trackingNumber: created.trackingNumber,
+      senderName: created.senderName,
+      receiverName: created.receiverName,
+    },
   });
 
   revalidatePath("/admin");

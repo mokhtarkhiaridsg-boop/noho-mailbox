@@ -6,6 +6,7 @@ import { IconPackage, IconForward } from "@/components/MemberIcons";
 import { requestPickup, requestForward, requestQuickPeek } from "@/app/actions/mail";
 import InsuranceModal from "./InsuranceModal";
 import SharePackageButton from "./SharePackageButton";
+import StorageFeeDisputeButton from "./StorageFeeDisputeButton";
 import { EmptyState } from "./ui";
 
 type Props = {
@@ -37,6 +38,36 @@ function TrackingChip({ ts }: { ts: NonNullable<MailItem["trackingStatus"]> }) {
       title={tooltip}
     >
       {s.label}
+    </span>
+  );
+}
+
+// iter-108: AI photo-analysis warning chip. Renders one per detected
+// warning. Tones map to severity: hazmat/leaking = danger (red),
+// fragile/damaged_box/perishable = warn (amber), rest = info (blue).
+const AI_WARNING_META: Record<string, { emoji: string; label: string; tone: "warn" | "danger" | "info" }> = {
+  fragile:         { emoji: "🚸", label: "Fragile",        tone: "warn" },
+  this_side_up:    { emoji: "↑",  label: "This side up",   tone: "info" },
+  hazmat:          { emoji: "☢️", label: "Hazmat",         tone: "danger" },
+  leaking:         { emoji: "💧", label: "Leaking",        tone: "danger" },
+  damaged_box:     { emoji: "📦", label: "Box damaged",    tone: "warn" },
+  perishable:      { emoji: "🥶", label: "Perishable",     tone: "warn" },
+  high_value:      { emoji: "💎", label: "High value",     tone: "info" },
+  irregular_shape: { emoji: "🔷", label: "Irregular shape", tone: "info" },
+};
+function AiWarningChip({ warning }: { warning: string }) {
+  const meta = AI_WARNING_META[warning];
+  if (!meta) return null;
+  const c = meta.tone === "danger" ? { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" }
+          : meta.tone === "warn"   ? { bg: "rgba(245,166,35,0.16)", fg: "#92400e" }
+          :                          { bg: "rgba(51,116,133,0.10)", fg: BRAND.blueDeep };
+  return (
+    <span
+      className="text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
+      style={{ background: c.bg, color: c.fg }}
+      title={`AI detected: ${meta.label}`}
+    >
+      {meta.emoji} {meta.label}
     </span>
   );
 }
@@ -198,6 +229,8 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
                   {pkg.trackingStatus?.statusKey && (
                     <TrackingChip ts={pkg.trackingStatus} />
                   )}
+                  {/* iter-108: AI photo-analysis warnings (Claude Vision). */}
+                  {pkg.aiWarnings?.map((w) => <AiWarningChip key={w} warning={w} />)}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: BRAND.inkSoft }}>
                   Arrived {pkg.date}
@@ -340,11 +373,18 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
                 >
                   Picked up ✓
                 </span>
+                {/* iter-105: storage-fee dispute CTA / status chip. */}
+                {pkg.feeChargedCents != null && pkg.feeChargedCents > 0 && (
+                  <StorageFeeDisputeButton mailItemId={pkg.id} feeCents={pkg.feeChargedCents} />
+                )}
               </p>
               <p className="text-xs mt-0.5" style={{ color: BRAND.inkSoft }}>
                 {pkg.date}
                 {pkg.trackingNumber && (
                   <span className="ml-2 font-mono" style={{ color: BRAND.blueDeep }}>· {pkg.trackingNumber}</span>
+                )}
+                {pkg.feeChargedCents != null && pkg.feeChargedCents > 0 && (
+                  <span className="ml-2" style={{ color: "#991b1b" }}>· storage fee ${(pkg.feeChargedCents / 100).toFixed(2)}</span>
                 )}
               </p>
             </div>

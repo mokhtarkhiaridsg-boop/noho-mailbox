@@ -86,12 +86,12 @@ export function NewClientModal({ clientForm, setClientForm, onClose }: Props) {
           <button
             onClick={handleSubmit}
             disabled={pending || !clientForm.name || !clientForm.email}
-            className="flex-1 px-4 py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-40"
-            style={{ background: "linear-gradient(135deg, #337485, #23596A)", boxShadow: "0 2px 10px rgba(51,116,133,0.3)" }}
+            className="flex-1 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] text-white disabled:opacity-40 transition-colors"
+            style={{ background: "#2D100F", border: "1px solid #2D100F" }}
           >
-            {pending ? "Adding…" : "Add Client"}
+            {pending ? "Adding…" : "Add client"}
           </button>
-          <button onClick={onClose} disabled={pending} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-text-light disabled:opacity-50" style={{ border: "1px solid rgba(232,229,224,0.7)" }}>
+          <button onClick={onClose} disabled={pending} className="flex-1 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] disabled:opacity-50 transition-colors" style={{ background: "#FFFFFF", color: "#5C4540", border: "1px solid #E5DACA" }}>
             Cancel
           </button>
         </div>

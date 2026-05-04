@@ -106,29 +106,26 @@ function ComplianceCard({
 
   return (
     <div
-      className="group rounded-2xl bg-white relative overflow-hidden transition-all hover:-translate-y-0.5"
+      className="group rounded-md bg-white relative overflow-hidden transition-colors"
       style={{
-        border: `1px solid ${meta.color}33`,
-        boxShadow:
-          "0 1px 2px rgba(45,16,15,0.04), 0 8px 22px rgba(45,16,15,0.06)",
+        border: `1px solid ${meta.color}55`,
       }}
     >
-      {/* Status accent stripe */}
+      {/* Status accent stripe — solid color, no gradient. */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{
-          background: `linear-gradient(180deg, ${meta.color} 0%, ${meta.color}66 100%)`,
-        }}
+        className="absolute left-0 top-0 bottom-0 w-0.5"
+        style={{ background: meta.color }}
       />
 
       <div className="p-4 pl-5">
         <div className="flex items-start gap-3">
-          {/* Monogram */}
+          {/* Monogram — neutral cream surface. */}
           <div
-            className="w-12 h-12 rounded-xl shrink-0 flex items-center justify-center text-white font-black text-sm"
+            className="w-10 h-10 rounded-md shrink-0 flex items-center justify-center font-bold text-[12px]"
             style={{
-              background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-              boxShadow: `0 4px 12px ${from}55`,
+              background: "#F4EEE3",
+              color: "#1A1614",
+              border: "1px solid #E5DACA",
             }}
           >
             {initials(row.name)}
@@ -218,15 +215,13 @@ function ComplianceCard({
             </span>
           </div>
 
-          {/* Progress rail */}
-          <div className="relative h-1.5 rounded-full overflow-hidden mb-2" style={{ background: `${NOHO_INK}11` }}>
+          {/* Progress rail — solid color, no gradient. */}
+          <div className="relative h-1 rounded-full overflow-hidden mb-2" style={{ background: "#E5DACA" }}>
             <div
               className="absolute inset-y-0 left-0 rounded-full transition-all"
               style={{
                 width: `${completePct}%`,
-                background: completedCount === 4
-                  ? `linear-gradient(90deg, #16A34A 0%, #22C55E 100%)`
-                  : `linear-gradient(90deg, ${NOHO_AMBER} 0%, ${NOHO_BLUE} 100%)`,
+                background: completedCount === 4 ? "#16A34A" : NOHO_AMBER,
               }}
             />
           </div>
@@ -313,18 +308,20 @@ function ComplianceCard({
           </div>
         )}
 
-        {/* Action buttons */}
+        {/* Action buttons — flat hairline. Primary action is the dark
+            "Approve" (it's the path the admin takes 95% of the time);
+            secondary are bordered hairline. */}
         <div className="mt-3 flex flex-wrap gap-1.5">
           <button
             disabled={isPending}
             onClick={() => onAction("approve")}
-            className="flex-1 flex items-center justify-center gap-1 text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-lg text-white transition-all hover:shadow-md disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-8 rounded-md text-white transition-colors disabled:opacity-50"
             style={{
-              background: `linear-gradient(180deg, #16A34A 0%, #15803d 100%)`,
-              boxShadow: "0 2px 6px rgba(22,163,74,0.30)",
+              background: "#16A34A",
+              border: "1px solid #15803d",
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M5 13l4 4L19 7" />
             </svg>
             Approve
@@ -332,13 +329,14 @@ function ComplianceCard({
           <button
             disabled={isPending}
             onClick={() => onAction("reject")}
-            className="flex-1 flex items-center justify-center gap-1 text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-lg text-white transition-all hover:shadow-md disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-8 rounded-md transition-colors disabled:opacity-50"
             style={{
-              background: `linear-gradient(180deg, ${NOHO_RED} 0%, #991b1b 100%)`,
-              boxShadow: `0 2px 6px ${NOHO_RED}40`,
+              background: "#FFFFFF",
+              color: NOHO_RED,
+              border: `1px solid ${NOHO_RED}40`,
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -347,13 +345,14 @@ function ComplianceCard({
           <button
             disabled={isPending}
             onClick={() => onAction("assign")}
-            className="flex-1 flex items-center justify-center gap-1 text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-lg text-white transition-all hover:shadow-md disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-8 rounded-md transition-colors disabled:opacity-50"
             style={{
-              background: `linear-gradient(180deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`,
-              boxShadow: `0 2px 6px ${NOHO_BLUE}40`,
+              background: "#FFFFFF",
+              color: NOHO_INK,
+              border: "1px solid #E5DACA",
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
               <rect x="3" y="6" width="18" height="14" rx="1.5" />
               <path d="M3 10h18" />
             </svg>
@@ -422,70 +421,66 @@ export function AdminCompliancePanel({ complianceQueue }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Hero strip — CMRA compliance theme */}
+      {/* Hero strip — Command Tower variant matching Overview/Signups. */}
       <div
-        className="relative overflow-hidden rounded-2xl"
+        className="relative overflow-hidden rounded-2xl px-5 sm:px-6 py-5"
         style={{
-          background: `linear-gradient(135deg, ${NOHO_BLUE_DEEP} 0%, ${NOHO_BLUE} 50%, #1F4554 100%)`,
-          boxShadow: "0 8px 28px rgba(35,89,106,0.30)",
+          background:
+            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
+          boxShadow:
+            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
         }}
       >
-        {/* Stamp pattern decoration */}
         <div
-          className="absolute inset-0 opacity-[0.07] pointer-events-none"
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none opacity-[0.13]"
           style={{
-            backgroundImage: `radial-gradient(circle at 20% 30%, white 1px, transparent 1px), radial-gradient(circle at 80% 70%, white 1px, transparent 1px)`,
-            backgroundSize: "32px 32px, 24px 24px",
+            backgroundImage:
+              "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
+            backgroundSize: "44px 44px",
+            maskImage:
+              "radial-gradient(ellipse at center, black 30%, transparent 80%)",
+            transform:
+              "perspective(800px) rotateX(58deg) translateY(20%) scale(1.4)",
+            transformOrigin: "center bottom",
           }}
         />
-        {/* Corner stamp */}
         <div
-          className="absolute -right-6 -top-6 w-32 h-32 rounded-full opacity-15 pointer-events-none"
-          style={{
-            border: `4px dashed ${NOHO_CREAM}`,
-          }}
+          aria-hidden="true"
+          className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full opacity-15 blur-3xl pointer-events-none"
+          style={{ background: NOHO_BLUE }}
         />
-        <div
-          className="absolute right-6 top-6 w-20 h-20 rounded-full opacity-15 flex items-center justify-center pointer-events-none"
-          style={{
-            border: `3px solid ${NOHO_CREAM}`,
-          }}
-        >
-          <span
-            className="text-[8px] font-black uppercase tracking-[0.2em] text-center leading-tight"
-            style={{ color: NOHO_CREAM }}
-          >
-            USPS<br />Form 1583<br />CMRA
-          </span>
-        </div>
 
-        <div className="relative p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div
-              className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: "#10B981" }}
-            />
+        <div className="relative">
+          <p
+            className="text-[10px] font-black uppercase tracking-[0.28em] mb-1"
+            style={{ color: "rgba(247,230,194,0.6)" }}
+          >
             <span
-              className="text-[10px] font-black uppercase tracking-[0.2em]"
-              style={{ color: NOHO_CREAM }}
-            >
-              CMRA Compliance · Live
-            </span>
-          </div>
+              aria-hidden
+              className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle"
+              style={{
+                background: "#16A34A",
+                boxShadow: "0 0 8px #16A34A",
+              }}
+            />
+            CMRA compliance · USPS Form 1583
+          </p>
           <h2
-            className="font-black tracking-tight mb-1"
+            className="font-bold tracking-tight"
             style={{
-              fontFamily: "var(--font-baloo, system-ui)",
-              fontSize: "clamp(1.5rem, 3vw, 2rem)",
-              color: "white",
-              textShadow: "0 2px 8px rgba(0,0,0,0.20)",
+              fontSize: "clamp(1.4rem, 2.8vw, 1.8rem)",
+              color: "#FFFFFF",
             }}
           >
-            KYC &amp; Onboarding Control
+            KYC &amp; onboarding control
           </h2>
-          <p className="text-[12px] font-medium max-w-md" style={{ color: `${NOHO_CREAM}cc` }}>
-            Review identity verification, approve Form 1583 submissions, and assign suite
-            numbers for new mailbox holders.
+          <p
+            className="text-[12px] mt-1 max-w-md"
+            style={{ color: "rgba(247,230,194,0.7)" }}
+          >
+            Review identity verification, approve Form 1583 submissions, and
+            assign suite numbers for new mailbox holders.
           </p>
         </div>
       </div>
@@ -534,15 +529,15 @@ export function AdminCompliancePanel({ complianceQueue }: Props) {
       {/* Card grid */}
       {filtered.length === 0 ? (
         <div
-          className="rounded-2xl p-12 text-center"
+          className="rounded-md p-10 text-center"
           style={{
-            background: `linear-gradient(180deg, ${NOHO_CREAM}66 0%, white 100%)`,
-            border: `1px dashed ${NOHO_INK}1a`,
+            background: "#FFFFFF",
+            border: `1px dashed ${NOHO_INK}26`,
           }}
         >
           <div
-            className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-3"
-            style={{ background: `${NOHO_BLUE}15` }}
+            className="w-14 h-14 rounded-md mx-auto flex items-center justify-center mb-3"
+            style={{ background: `${NOHO_BLUE}10`, border: `1px solid ${NOHO_BLUE}30` }}
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={NOHO_BLUE} strokeWidth="2">
               <path d="M9 11l3 3L22 4" />
@@ -597,14 +592,12 @@ function KpiTile({
       {/* Top accent line */}
       <div
         className="absolute left-0 right-0 top-0 h-0.5"
-        style={{
-          background: `linear-gradient(90deg, ${accent} 0%, ${accent}55 100%)`,
-        }}
+        style={{ background: accent }}
       />
       <div className="flex items-center justify-between mb-1">
         <span
-          className="text-[9px] font-black uppercase tracking-[0.15em]"
-          style={{ color: `${NOHO_INK}88` }}
+          className="text-[10px] font-bold uppercase tracking-[0.14em]"
+          style={{ color: "#998877" }}
         >
           {label}
         </span>

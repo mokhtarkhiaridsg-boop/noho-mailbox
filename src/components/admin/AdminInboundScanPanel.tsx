@@ -34,7 +34,9 @@ import {
   bulkMarkDropoffsPickedUpByCarrier,
 } from "@/app/actions/dropoffs";
 import { findCustomerByPickupToken } from "@/app/actions/qrPickup";
+import { findGuestPickupByToken, markGuestAuthUsed } from "@/app/actions/guestPickup";
 import { parseWeightInput } from "@/lib/units";
+import { getRecipientSuggestions, type RecipientSuggestion } from "@/app/actions/recipientSuggestions";
 
 const NOHO_BLUE = "#337485";
 const NOHO_BLUE_DEEP = "#23596A";
@@ -242,6 +244,8 @@ export function AdminInboundScanPanel() {
   const [customerMatches, setCustomerMatches] = useState<CustomerMatch[]>([]);
   const [pickedCustomer, setPickedCustomer] = useState<CustomerMatch | null>(null);
   const [recipientName, setRecipientName] = useState("");
+  // iter-119: per-customer recipient suggestions, refreshed when picker flips.
+  const [recipientSuggestions, setRecipientSuggestions] = useState<RecipientSuggestion[]>([]);
   const [weightInput, setWeightInput] = useState("");      // free-form: "2 lb 6 oz" / "36 oz" / "36"
   const [dimensions, setDimensions] = useState("");
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
@@ -259,6 +263,17 @@ export function AdminInboundScanPanel() {
   // and we render the customer + their active packages with one-tap
   // pickup buttons.
   const [pickupCustomers, setPickupCustomers] = useState<CustomerWithPackages[]>([]);
+  // iter-88: Guest pickup context. When admin scans a NOHO-GUEST: QR,
+  // we set this so the panel can show a verify-the-guest banner and
+  // mark the auth as used after at least one package is confirmed.
+  const [guestAuth, setGuestAuth] = useState<{
+    id: string;
+    guestName: string;
+    guestEmail: string | null;
+    guestPhone: string | null;
+    notes: string | null;
+    expiresAtIso: string | null;
+  } | null>(null);
   // iter-57: Dropoff-mode form state. Tracking + carrier reuse the same
   // top-level inputs the other modes use. Sender / receiver / destination
   // are all optional — typical fast drop is just tracking + carrier.
@@ -394,6 +409,16 @@ export function AdminInboundScanPanel() {
     return () => clearTimeout(handle);
   }, [customerQuery]);
 
+  // iter-119: refetch recipient suggestions when picked customer changes.
+  useEffect(() => {
+    if (!pickedCustomer) { setRecipientSuggestions([]); return; }
+    let cancel = false;
+    void getRecipientSuggestions({ userId: pickedCustomer.id })
+      .then((s) => { if (!cancel) setRecipientSuggestions(s); })
+      .catch(() => { if (!cancel) setRecipientSuggestions([]); });
+    return () => { cancel = true; };
+  }, [pickedCustomer]);
+
   function pick(c: CustomerMatch) {
     setPickedCustomer(c);
     setCustomerQuery(`Suite #${c.suiteNumber ?? "—"} · ${c.name ?? c.email}`);
@@ -487,9 +512,38 @@ export function AdminInboundScanPanel() {
     setPickupMatch(null);
     setPickupDuplicates(0);
     setPickupCustomers([]);
+    setGuestAuth(null);
     const q = tracking.trim();
     if (q.length < 2) {
       setPickupMsg("Type at least 2 characters (name), 4 (tracking), or scan a customer's QR.");
+      return;
+    }
+
+    // iter-88: Guest pickup QR — `NOHO-GUEST:{authId}`.
+    const guestMatch = q.match(/^NOHO-GUEST:([A-Za-z0-9]+)$/i);
+    if (guestMatch) {
+      const authId = guestMatch[1];
+      setPickupLooking(true);
+      void findGuestPickupByToken(authId)
+        .then((res) => {
+          const r = res as { error?: string; auth: { id: string; guestName: string; guestEmail: string | null; guestPhone: string | null; notes: string | null; expiresAtIso: string | null } | null; customer: CustomerWithPackages | null };
+          if (r.error || !r.auth || !r.customer) {
+            setPickupMsg(r.error ?? "Guest QR rejected.");
+            maybeBeep("miss");
+            return;
+          }
+          setGuestAuth(r.auth);
+          if (r.customer.activePackages.length === 0) {
+            setPickupMsg(`✓ Guest verified · ${r.auth.guestName} for ${r.customer.name ?? "customer"} (suite #${r.customer.suiteNumber ?? "—"}) — no active packages on the shelf.`);
+            maybeBeep("found");
+            return;
+          }
+          setPickupCustomers([r.customer]);
+          setPickupMsg(`✓ Guest QR verified · ${r.auth.guestName} picking up for ${r.customer.name ?? "customer"} — ${r.customer.activePackages.length} active package${r.customer.activePackages.length === 1 ? "" : "s"}`);
+          maybeBeep("found");
+        })
+        .catch(() => { setPickupMsg("Guest QR lookup failed — try again."); maybeBeep("miss"); })
+        .finally(() => setPickupLooking(false));
       return;
     }
 
@@ -570,6 +624,9 @@ export function AdminInboundScanPanel() {
 
   // iter-76: One-tap "Picked up" from a customer-search result row.
   // Same chain as confirmPickup but operates on a specific package id.
+  // iter-88: When a guest auth is in scope, also mark it used and tag
+  // the success message with the guest's name (so admin sees who they
+  // handed off to, not the customer themselves).
   function confirmCustomerPackage(mailItemId: string, recipientName: string, suiteNumber: string | null) {
     setPickupMsg(null);
     startTransition(async () => {
@@ -579,9 +636,15 @@ export function AdminInboundScanPanel() {
         maybeBeep("miss");
         return;
       }
-      setPickupMsg(`✓ Handed off to ${recipientName || "—"} · suite #${suiteNumber || "—"}`);
+      const handedTo = guestAuth ? `${guestAuth.guestName} (guest of ${recipientName || "—"})` : (recipientName || "—");
+      setPickupMsg(`✓ Handed off to ${handedTo} · suite #${suiteNumber || "—"}`);
       maybeBeep("confirm");
+      // Mark the guest auth used (best-effort, non-blocking).
+      if (guestAuth) {
+        void markGuestAuthUsed(guestAuth.id).catch(() => undefined);
+      }
       setPickupCustomers([]);
+      setGuestAuth(null);
       setTracking("");
       refreshRecentScans();
       trackingInputRef.current?.focus();
@@ -834,8 +897,7 @@ export function AdminInboundScanPanel() {
 
       {/* Tracking input + scan button */}
       <div
-        className="rounded-2xl bg-white border p-4"
-        style={{ borderColor: "#e8e5e0", boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}
+        className="rounded-md bg-white p-4" style={{ border: "1px solid #E5DACA" }}
       >
         <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
           Tracking number
@@ -958,6 +1020,7 @@ export function AdminInboundScanPanel() {
           message={pickupMsg}
           tracking={tracking}
           customers={pickupCustomers}
+          guestAuth={guestAuth}
           onConfirmCustomerPackage={confirmCustomerPackage}
           onLookup={lookupForPickup}
           onConfirm={confirmPickup}
@@ -1026,8 +1089,8 @@ export function AdminInboundScanPanel() {
       {mode === "intake" && (<>
       {/* Customer picker */}
       <div
-        className="rounded-2xl bg-white border p-4 relative"
-        style={{ borderColor: "#e8e5e0", boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}
+        className="rounded-md bg-white p-4 relative"
+        style={{ border: "1px solid #E5DACA" }}
       >
         <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
           <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
@@ -1062,8 +1125,8 @@ export function AdminInboundScanPanel() {
         />
         {customerMatches.length > 0 && !pickedCustomer && (
           <div
-            className="absolute left-4 right-4 mt-1 rounded-xl bg-white border z-20 max-h-64 overflow-auto"
-            style={{ borderColor: "#e8e5e0", boxShadow: "0 12px 32px rgba(45,16,15,0.16)" }}
+            className="absolute left-4 right-4 mt-1 rounded-md bg-white z-20 max-h-64 overflow-auto"
+            style={{ border: "1px solid #E5DACA", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
           >
             {customerMatches.map((c) => (
               <button
@@ -1089,6 +1152,28 @@ export function AdminInboundScanPanel() {
             <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
               Addressed to (optional override)
             </p>
+            {/* iter-119: chip row of past recipient names for this customer.
+                Click to fill the input. Frequency-weighted, recent first. */}
+            {recipientSuggestions.length > 0 && (
+              <div className="mt-1 mb-1.5 flex flex-wrap gap-1">
+                {recipientSuggestions.map((s) => (
+                  <button
+                    key={s.name}
+                    type="button"
+                    onClick={() => setRecipientName(s.name)}
+                    title={`${s.count} past package${s.count === 1 ? "" : "s"} · last ${new Date(s.lastUsedIso).toLocaleDateString()}`}
+                    className="px-2 py-0.5 rounded-full text-[10.5px] font-bold transition-colors"
+                    style={{
+                      background: recipientName === s.name ? "#337485" : "rgba(51,116,133,0.10)",
+                      color: recipientName === s.name ? "white" : "#23596A",
+                      border: "1px solid rgba(51,116,133,0.20)",
+                    }}>
+                    {s.name}
+                    <span className="ml-1 opacity-60 text-[9px]">×{s.count}</span>
+                  </button>
+                ))}
+              </div>
+            )}
             <input
               type="text"
               value={recipientName}
@@ -1105,8 +1190,7 @@ export function AdminInboundScanPanel() {
           customer's mail-arrived email + dashboard show real data. */}
       {pickedCustomer && (
         <div
-          className="rounded-2xl bg-white border p-4"
-          style={{ borderColor: "#e8e5e0", boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}
+          className="rounded-md bg-white p-4" style={{ border: "1px solid #E5DACA" }}
         >
           {/* Photo row */}
           <div className="flex items-start gap-3 mb-3 pb-3 border-b" style={{ borderColor: "#e8e5e0" }}>
@@ -1239,8 +1323,8 @@ export function AdminInboundScanPanel() {
           type="button"
           onClick={submit}
           disabled={isPending || !tracking || !pickedCustomer}
-          className="flex-1 py-3 rounded-xl text-white font-black disabled:opacity-40"
-          style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}
+          className="flex-1 h-10 rounded-md text-white text-sm font-bold uppercase tracking-[0.08em] disabled:opacity-40 transition-colors"
+          style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
         >
           {isPending ? "Logging…" : "Log + Print receipt →"}
         </button>
@@ -1266,7 +1350,8 @@ export function AdminInboundScanPanel() {
             // pickup mode regardless of where admin was. This makes QR
             // scanning a universal counter handoff trigger — admin doesn't
             // have to remember to switch modes first.
-            const isNohoQR = /^NOHO-PICKUP:/i.test(value.trim());
+            // iter-88: Same for guest-pickup QR (NOHO-GUEST:{authId}).
+            const isNohoQR = /^NOHO-(PICKUP|GUEST):/i.test(value.trim());
             if (isNohoQR) {
               setMode("pickup");
               setTimeout(() => lookupForPickup(), 0);
@@ -1351,8 +1436,7 @@ function DropoffForm({
   const inputStyle = { borderColor: "#e8e5e0", color: NOHO_INK, background: "white" } as const;
   return (
     <div
-      className="rounded-2xl bg-white border p-4 space-y-3"
-      style={{ borderColor: "#e8e5e0", boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}
+      className="rounded-md bg-white p-4 space-y-3" style={{ border: "1px solid #E5DACA" }}
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
@@ -1492,8 +1576,8 @@ function DropoffForm({
           type="button"
           onClick={onSubmit}
           disabled={submitting || !tracking}
-          className="flex-1 py-3 rounded-xl text-white font-black disabled:opacity-40"
-          style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}
+          className="flex-1 h-10 rounded-md text-white text-sm font-bold uppercase tracking-[0.08em] disabled:opacity-40 transition-colors"
+          style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
         >
           {submitting ? "Logging…" : "Log dropoff + Print receipt →"}
         </button>
@@ -1600,10 +1684,10 @@ function CustomerPickupCard({
   const openLightbox = useOpenLightbox();
   return (
     <div
-      className="rounded-2xl border p-4"
+      className="rounded-md p-4"
       style={{
-        borderColor: "#16A34A",
-        background: "linear-gradient(180deg, rgba(22,163,74,0.05), white)",
+        border: "1px solid #16A34A",
+        background: "rgba(22,163,74,0.04)",
       }}
     >
       <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -1696,7 +1780,7 @@ function CustomerPickupCard({
 //   4. No match → red error inline.
 
 function PickupMatchPanel({
-  match, duplicates, looking, message, tracking, customers, onConfirmCustomerPackage,
+  match, duplicates, looking, message, tracking, customers, guestAuth, onConfirmCustomerPackage,
   onLookup, onConfirm, onClear, onScanAgain, onReassigned, pending,
 }: {
   match: PickupMatch | null;
@@ -1706,6 +1790,16 @@ function PickupMatchPanel({
   tracking: string;
   // iter-76: Customer-search fallback results.
   customers: CustomerWithPackages[];
+  // iter-88: Guest pickup context — when set, render a "verify the
+  // guest" banner above the customer's package card.
+  guestAuth: {
+    id: string;
+    guestName: string;
+    guestEmail: string | null;
+    guestPhone: string | null;
+    notes: string | null;
+    expiresAtIso: string | null;
+  } | null;
   onConfirmCustomerPackage: (mailItemId: string, recipientName: string, suiteNumber: string | null) => void;
   onLookup: () => void;
   onConfirm: () => void;
@@ -1742,8 +1836,7 @@ function PickupMatchPanel({
   if (looking) {
     return (
       <div
-        className="rounded-2xl bg-white border p-4 text-center text-[12px] font-bold"
-        style={{ borderColor: "#e8e5e0", color: "rgba(45,16,15,0.65)" }}
+        className="rounded-md bg-white p-4 text-center text-[12px] font-bold" style={{ border: "1px solid #E5DACA" }}
       >
         Looking up "{tracking}"…
       </div>
@@ -1766,6 +1859,36 @@ function PickupMatchPanel({
           >
             {message}
           </p>
+        )}
+        {/* iter-88: Guest verification banner. Loud purple so admin
+            can't miss that they're handing off to a guest, not the
+            customer. Photo-ID prompt is the bureau's compliance hook. */}
+        {guestAuth && (
+          <div
+            className="rounded-md p-4"
+            style={{ border: "1px solid #7c3aed", background: "rgba(124,58,237,0.05)" }}
+          >
+            <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: "#5b21b6" }}>
+              Guest pickup · verify photo ID
+            </p>
+            <p className="text-lg font-black mt-0.5" style={{ color: NOHO_INK }}>
+              {guestAuth.guestName}
+            </p>
+            <p className="text-[11.5px] mt-1" style={{ color: "rgba(45,16,15,0.65)" }}>
+              {guestAuth.guestEmail && <span>{guestAuth.guestEmail}</span>}
+              {guestAuth.guestPhone && <span style={{ marginLeft: 8 }}>· {guestAuth.guestPhone}</span>}
+              {guestAuth.expiresAtIso && (
+                <span style={{ marginLeft: 8, color: "rgba(45,16,15,0.55)" }}>
+                  · expires {new Date(guestAuth.expiresAtIso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                </span>
+              )}
+            </p>
+            {guestAuth.notes && (
+              <p className="text-[11px] mt-1.5 italic px-2 py-1 rounded inline-block" style={{ color: "#5b21b6", background: "rgba(124,58,237,0.06)" }}>
+                Customer note: "{guestAuth.notes}"
+              </p>
+            )}
+          </div>
         )}
         {customers.map((c) => (
           <CustomerPickupCard
@@ -1825,11 +1948,10 @@ function PickupMatchPanel({
   // status pill, and a green primary button.
   return (
     <div
-      className="rounded-2xl border-2 p-4"
+      className="rounded-md p-4"
       style={{
-        borderColor: "#16A34A",
-        background: "linear-gradient(180deg, rgba(22,163,74,0.06), white)",
-        boxShadow: "0 8px 28px rgba(22,163,74,0.14)",
+        border: "1px solid #16A34A",
+        background: "rgba(22,163,74,0.04)",
       }}
     >
       <div className="flex items-start gap-3">
@@ -1890,8 +2012,8 @@ function PickupMatchPanel({
           type="button"
           onClick={onConfirm}
           disabled={pending}
-          className="flex-1 py-3 rounded-xl text-white font-black disabled:opacity-40"
-          style={{ background: "linear-gradient(135deg, #16A34A, #15803d)" }}
+          className="flex-1 h-10 rounded-md text-white text-sm font-bold uppercase tracking-[0.08em] disabled:opacity-40 transition-colors"
+          style={{ background: "#16A34A", border: "1px solid #15803d" }}
         >
           {pending ? "Confirming…" : "Confirm picked up ✓"}
         </button>
@@ -2015,7 +2137,7 @@ function RecentDropoffsList({
   }
 
   return (
-    <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0", boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}>
+    <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
       <div className="flex items-center justify-between px-4 py-3 border-b flex-wrap gap-2" style={{ borderColor: "#e8e5e0" }}>
         <div className="flex items-center gap-2">
           <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#15803d", boxShadow: "0 0 6px #15803d" }} />
@@ -2262,7 +2384,7 @@ function AwaitingShelfList({
       );
   const dotColor = oldestAgeDays >= 7 ? "#dc2626" : oldestAgeDays >= 4 ? "#F5A623" : "#16A34A";
   return (
-    <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0", boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}>
+    <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
       <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "#e8e5e0" }}>
         <div className="flex items-center gap-2">
           <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: dotColor, boxShadow: `0 0 6px ${dotColor}` }} />
@@ -2313,7 +2435,7 @@ function AwaitingShelfList({
 function RecentScansList({ rows, onRefresh }: { rows: RecentScan[]; onRefresh: () => void }) {
   if (rows.length === 0) return null;
   return (
-    <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0", boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}>
+    <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
       <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "#e8e5e0" }}>
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
@@ -2680,8 +2802,8 @@ function ReassignCustomerModal({
       aria-modal="true"
     >
       <div
-        className="rounded-2xl bg-white border w-full max-w-md p-5 shadow-2xl"
-        style={{ borderColor: "#e8e5e0" }}
+        className="rounded-md bg-white w-full max-w-md p-5"
+        style={{ border: "1px solid #E5DACA", boxShadow: "0 12px 36px rgba(26,23,20,0.18)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
@@ -2721,8 +2843,8 @@ function ReassignCustomerModal({
           />
           {matches.length > 0 && !picked && (
             <div
-              className="absolute left-0 right-0 mt-1 rounded-xl bg-white border z-10 max-h-64 overflow-auto"
-              style={{ borderColor: "#e8e5e0", boxShadow: "0 12px 32px rgba(45,16,15,0.16)" }}
+              className="absolute left-0 right-0 mt-1 rounded-md bg-white z-10 max-h-64 overflow-auto"
+              style={{ border: "1px solid #E5DACA", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
             >
               {matches.map((c) => (
                 <button
@@ -2757,8 +2879,8 @@ function ReassignCustomerModal({
             type="button"
             onClick={submit}
             disabled={pending || !picked}
-            className="flex-1 py-2.5 rounded-xl text-white font-black disabled:opacity-40"
-            style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}
+            className="flex-1 h-10 rounded-md text-white text-sm font-bold uppercase tracking-[0.08em] disabled:opacity-40 transition-colors"
+            style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
           >
             {pending ? "Reassigning…" : "Reassign →"}
           </button>

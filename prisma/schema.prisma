@@ -34,6 +34,10 @@ model User {
   mailboxAssignedAt         DateTime?
   totpSecret                String?
   totpEnabled               Boolean   @default(false)
+  // iter-96: JSON array of SHA-256-hashed one-time recovery codes.
+  // Generated alongside enrollment; codes are removed from the array
+  // as they're consumed.
+  totpRecoveryCodes         String?
   walletBalanceCents        Int       @default(0)
   defaultCardId             String?
   notifPrefs                String?
@@ -51,6 +55,13 @@ model User {
   idSecondaryIssuer         String?
   planExpiresAt             DateTime?
   planAutoRenew             Boolean   @default(false)
+  // iter-112: Wallet auto-top-up. When walletBalanceCents drops below
+  // walletTopUpThresholdCents, the cron creates a CreditRequest for
+  // walletTopUpAmountCents and notifies the customer + admin. Both null
+  // means feature disabled (default).
+  walletTopUpThresholdCents Int?
+  walletTopUpAmountCents    Int?
+  walletTopUpLastFiredAt    DateTime?  // throttle — don't re-fire within 24h
 
   // Box ownership type — required for CMRA compliance.
   // A company cannot exist as an individual; if Business, an Owner must be on file.
@@ -98,6 +109,12 @@ model User {
   sharedAccessGranted     SharedMailboxAccess[] @relation("PrimaryUser")
   sharedAccessReceived    SharedMailboxAccess[] @relation("SharedUser")
   posSales                POSSale[]
+  pickupAppointments      PickupAppointment[]
+  idExpiryAlerts          IdExpiryAlert[]
+  webhookEndpointsCreated WebhookEndpoint[] @relation("WebhookCreatedBy")
+  storageFeeDisputes      StorageFeeDispute[] @relation("DisputeFiledBy")
+  storageFeeDisputesAdmin StorageFeeDispute[] @relation("DisputeResolvedBy")
+  mailerThreads           MailerThread[]
 }
 
 model SharedMailboxAccess {
@@ -163,6 +180,19 @@ model MailItem {
   junkBlocked      Boolean   @default(false) // auto-blocked by junk sender rule
   trackingNumber   String?   // package tracking number
   carrier          String?   // "UPS" | "USPS" | "FedEx" | "DHL" | "Amazon"
+  // iter-91: Member-declared package value + the insurance fee they
+  // paid for it. Free up to $100 declared, then tiered. Both null when
+  // customer hasn't declared.
+  declaredValueCents Int?
+  insuranceFeeCents  Int?
+  // iter-93: Public-share token for /p/[id]?t={token} — null until the
+  // owner clicks "Share" on the dashboard. Anyone with the link can see
+  // the package's photo + status timeline (no other PII).
+  publicShareToken   String?  @unique
+  // iter-108: AI photo analysis (Claude Vision). JSON blob with detected
+  // attributes (fragile, hazmat, leaking, etc.) + raw model output. Null
+  // until the post-intake analysis completes (or never set if no API key).
+  aiAnalysisJson     String?
 
   createdAt    DateTime @default(now())
 
@@ -195,6 +225,173 @@ model VacationHold {
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// iter-101 — Pickup-time scheduling.
+// Customers book a 15-minute pickup slot from the member dashboard;
+// admin sees a sorted queue + can check them in / mark complete / no-show.
+// Slots are derived from OperatingHoursConfig (skips break window + holidays).
+model PickupAppointment {
+  id           String    @id @default(cuid())
+  userId       String
+  scheduledAt  DateTime  // slot start in UTC
+  durationMin  Int       @default(15)
+  status       String    @default("Scheduled") // "Scheduled" | "Checked-In" | "Completed" | "Cancelled" | "No-Show"
+  packageCount Int?      // member's estimate ("how many packages?")
+  guestName    String?   // optional — guest doing the pickup
+  notes        String?   // member-provided note
+  checkedInAt  DateTime?
+  completedAt  DateTime?
+  cancelledAt  DateTime?
+  cancelledBy  String?   // "user" | "admin"
+  createdAt    DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledAt, status])
+  @@index([userId, scheduledAt])
+}
+
+// iter-118 — Apple-Mail-style mailer with inbox + replies + notices.
+//
+// MailerThread groups outbound + inbound messages between the bureau
+// and one customer email. Replies (inbound) get ingested via the
+// `/api/email/inbound` webhook (Resend / SendGrid / Postmark all
+// support a similar POST shape). Outbound reply or notice sends create
+// new MailerMessage rows tagged direction="out" + write to EmailLog
+// for delivery audit.
+model MailerThread {
+  id              String          @id @default(cuid())
+  customerEmail   String                          // canonical lowercase email
+  customerUserId  String?                         // resolved User.id when we know them
+  subject         String                          // most recent subject line, used as thread title
+  lastMessageAt   DateTime        @default(now())
+  unreadCount     Int             @default(0)     // count of inbound messages not yet read
+  archived        Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  customerUser    User?           @relation(fields: [customerUserId], references: [id], onDelete: SetNull)
+  messages        MailerMessage[]
+
+  @@index([customerEmail])
+  @@index([archived, lastMessageAt])
+  @@index([customerUserId])
+}
+
+model MailerMessage {
+  id          String   @id @default(cuid())
+  threadId    String
+  direction   String                       // "in" | "out"
+  fromEmail   String
+  toEmail     String
+  subject     String
+  bodyHtml    String                       // sanitized HTML or plain wrapped
+  bodyText    String?                      // optional plaintext fallback
+  providerId  String?                      // Resend / SMTP message-id for outbound; webhook id for inbound
+  unread      Boolean  @default(true)
+  templateId  String?                      // when admin sent from a notice template
+  bulkBatchId String?                      // when part of a bulk notice (groups outbound rows)
+  sentAt      DateTime @default(now())
+
+  thread MailerThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, sentAt])
+  @@index([bulkBatchId])
+}
+
+// iter-105 — Storage-fee dispute workflow.
+// Customer files a dispute against an applied storage fee (set in
+// MailItem.feeChargedCents by iter-87). Admin reviews and either waives
+// (refund to wallet) or upholds (no change). One open dispute per
+// MailItem at a time — enforced via @@unique on (mailItemId, status="Open").
+// We model "Open" via a partial constraint trick: store status NULL when
+// resolved so the unique index slot frees up. SQLite supports this.
+model StorageFeeDispute {
+  id            String    @id @default(cuid())
+  mailItemId    String                       // disputed item
+  filedById     String                       // member who filed
+  feeCents      Int                          // snapshot of fee at file time
+  reason        String                       // member's explanation
+  status        String    @default("Open")   // "Open" | "Waived" | "Upheld"
+  resolution    String?                      // admin note on close
+  resolvedAt    DateTime?
+  resolvedById  String?                      // admin who resolved
+  refundCents   Int?                         // amount refunded if Waived
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  filedBy    User @relation("DisputeFiledBy", fields: [filedById], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("DisputeResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([mailItemId])
+  @@index([status, createdAt])
+  @@index([filedById, createdAt])
+}
+
+// iter-103 — Slack/Discord/generic webhook bridge.
+// Admin-configured outbound webhooks fire on operational events (package
+// arrived, pickup completed, dropoff logged, appointment booked). Each
+// endpoint has a per-event filter so a Slack channel can subscribe to
+// only "package arrived" while a Discord ops channel gets everything.
+// `format` lets us emit Slack-flavored, Discord-flavored, or generic JSON
+// without a separate model per provider.
+model WebhookEndpoint {
+  id          String   @id @default(cuid())
+  label       String                    // human label, e.g. "Front desk Slack"
+  url         String                    // POST target
+  format      String   @default("slack") // "slack" | "discord" | "generic"
+  events      String                    // JSON array of event keys, e.g. ["mail.arrived","mail.picked_up"]
+  active      Boolean  @default(true)
+  secret      String?                   // optional shared secret, sent in X-NOHO-Signature header (HMAC-SHA256)
+  createdBy   String?                   // admin User.id
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastFiredAt DateTime?
+  lastStatus  String?                   // "ok" | "failed:<status>"
+
+  creator    User?               @relation("WebhookCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  deliveries WebhookDelivery[]
+
+  @@index([active])
+}
+
+// One row per delivery attempt so admin can see what fired, when, and
+// any HTTP error returned. Capped — only last ~200 retained per endpoint
+// (we trim on insert to keep storage bounded).
+model WebhookDelivery {
+  id         String   @id @default(cuid())
+  endpointId String
+  event      String                     // event key
+  payload    String                     // JSON snapshot of what was sent
+  status     String                     // "ok" | "failed"
+  httpStatus Int?
+  error      String?
+  durationMs Int?
+  sentAt     DateTime @default(now())
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([endpointId, sentAt])
+}
+
+// iter-102 — ID-document expiry alerts.
+// One row per (user × document × threshold) once the alert email has fired.
+// Threshold values: "90d", "30d", "7d", "expired" — covers the staircase
+// of urgency. The cron sweeps daily; existing rows mean we don't re-send.
+model IdExpiryAlert {
+  id        String   @id @default(cuid())
+  userId    String
+  document  String   // "primary" | "secondary"
+  threshold String   // "90d" | "30d" | "7d" | "expired"
+  expDate   String   // snapshot of the expiry date the alert was for
+  sentAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, document, threshold, expDate])
+  @@index([userId])
+  @@index([sentAt])
 }
 
 model RecurringDelivery {
@@ -238,6 +435,9 @@ model DeliveryOrder {
   itemType     String
   instructions String?
   courier      String?
+  // iter-97: Admin user assigned as the driver. /driver route shows
+  // only deliveries where this matches the current admin's id.
+  assignedDriverId String?
   status       String   @default("Pending") // "Pending" | "Picked Up" | "In Transit" | "Delivered"
   date         String
 
@@ -369,6 +569,10 @@ model Invoice {
   sentAt      DateTime?
   paidAt      DateTime?
   dueAt       DateTime?
+  /// JSON blob with line items, discount, recipient override, paid-via,
+  /// and any other custom-invoice fields beyond the flat columns. Schema
+  /// in src/lib/invoice-builder.ts.
+  meta        String?
   createdAt   DateTime  @default(now())
 
   user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -642,6 +846,29 @@ model EmailLog {
   // Member dashboard email-history panel + admin email-logs panel both
   // sort by createdAt scoped to a userId. Failed-delivery diagnostic
   // queries filter by status.
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+// iter-84: Per-message SMS log. Mirrors EmailLog shape so tooling can
+// reason about both delivery channels uniformly. SMS uses Twilio when
+// TWILIO_* env vars are configured; otherwise we still log so admin sees
+// the attempt + the body that would've gone out.
+model SmsLog {
+  id          String    @id @default(cuid())
+  userId      String?
+  toPhone     String    // E.164 if normalized; raw otherwise
+  fromPhone   String?
+  body        String
+  kind        String    // "mail_arrived" | "package_picked_up" | "storage_warning" | "bulk" | "verification" | ...
+  status      String    @default("queued") // "queued" | "sent" | "failed" | "not_sent"
+  provider    String?   // "twilio" | null
+  providerId  String?   // Twilio SID
+  error       String?
+  segments    Int?      // Twilio reports segment count for billing
+  createdAt   DateTime  @default(now())
+  sentAt      DateTime?
+
   @@index([userId, createdAt])
   @@index([status, createdAt])
 }
@@ -942,6 +1169,61 @@ model NewsletterSubscriber {
 
   @@index([email])
   @@index([subscribedAt])
+}
+
+// iter-94: Per-package carrier tracking events polled from Shippo.
+// One row per (mailItemId, eventTimeIso, statusKey) so a re-poll
+// doesn't insert duplicates. Used for member dashboard "out for
+// delivery" + public timeline + admin row signal.
+model TrackingEvent {
+  id            String   @id @default(cuid())
+  mailItemId    String
+  eventTimeIso  String   // raw timestamp from carrier (string for dedup key reliability)
+  statusKey     String   // normalized: "delivered" | "out_for_delivery" | "in_transit" | "exception" | ...
+  statusDetails String   // human-friendly label, e.g. "Out for delivery"
+  location      String?  // "Burbank, CA"
+  source        String   // "shippo" | "manual" | future "usps" | "ups" | "fedex"
+  createdAt     DateTime @default(now())
+
+  @@unique([mailItemId, eventTimeIso, statusKey])
+  @@index([mailItemId, createdAt])
+}
+
+// Per-MailItem polling state — when did we last hit the carrier API.
+// Separate from TrackingEvent so polling cadence isn't coupled to
+// whether new events were returned.
+model MailItemTrackingState {
+  mailItemId         String    @id
+  lastPolledAt       DateTime?
+  lastStatusKey      String?
+  lastStatusLabel    String?
+  lastLocation       String?
+  etaIso             String?   // ISO timestamp from carrier ETA
+  pollErrorCount     Int       @default(0)
+  pollLastError      String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([lastPolledAt])
+}
+
+// iter-92: One-tap NPS-ish pickup feedback. Created when admin marks a
+// MailItem as Picked Up. The customer gets a unique token-gated URL in
+// the pickup-confirm email; submitting flips submittedAt and stores
+// rating + comment. Anonymous submission allowed (we know the userId
+// from the token).
+model PickupSurvey {
+  id          String    @id @default(cuid())
+  mailItemId  String    @unique
+  userId      String
+  token       String    @unique  // long random URL-safe token
+  rating      Int?      // 1..5, null until submitted
+  comment     String?
+  submittedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([submittedAt])
 }
 
 // iter-57: External (non-customer) carrier-pickup dropoffs. The bureau

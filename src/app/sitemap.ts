@@ -4,6 +4,7 @@ import { getAllZipSlugs } from "@/lib/delivery-zip-pages";
 import { getAllStateSlugs } from "@/lib/state-llc-pages";
 import { getAllCompetitorSlugs } from "@/lib/competitor-pages";
 import { getAllUseCaseSlugs } from "@/lib/use-case-pages";
+import { getAllIntlSaasSlugs } from "@/lib/international-saas-pages";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://nohomailbox.org";
@@ -88,13 +89,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.75,
   }));
 
+  // International CMRA SaaS landing pages.
+  const intlPages = getAllIntlSaasSlugs().map((slug) => ({
+    path: `/international/${slug}`,
+    priority: 0.8,
+  }));
+
   type SitemapPage = {
     path: string;
     priority: number;
     freq?: "weekly" | "monthly";
   };
 
-  const all: SitemapPage[] = [...staticPages, ...blogPosts, ...zipPages, ...statePages, ...vsPages, ...useCasePages];
+  const all: SitemapPage[] = [...staticPages, ...blogPosts, ...zipPages, ...statePages, ...vsPages, ...useCasePages, ...intlPages];
 
   return all.map((page) => ({
     url: `${baseUrl}${page.path}`,

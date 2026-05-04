@@ -352,3 +352,88 @@ for (const sql of phase5f) {
   }
 }
 console.log("Phase 5f migration done.");
+
+// Phase 6 — iter-91 (insurance) + iter-94 (live tracking).
+// MailItem.declaredValueCents + insuranceFeeCents back the declared-
+// value insurance feature. The /dashboard Server Component SELECTs
+// both fields, so they must exist before any dashboard load can
+// succeed. MailItemTrackingState is the per-mail-item live tracking
+// summary populated by the Shippo webhook.
+const phase6 = [
+  `ALTER TABLE MailItem ADD COLUMN declaredValueCents INTEGER`,
+  `ALTER TABLE MailItem ADD COLUMN insuranceFeeCents INTEGER`,
+  `CREATE TABLE IF NOT EXISTS MailItemTrackingState (
+    mailItemId TEXT PRIMARY KEY,
+    lastPolledAt DATETIME,
+    lastStatusKey TEXT,
+    lastStatusLabel TEXT,
+    lastLocation TEXT,
+    etaIso TEXT,
+    pollErrorCount INTEGER NOT NULL DEFAULT 0,
+    pollLastError TEXT,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (mailItemId) REFERENCES MailItem(id) ON DELETE CASCADE
+  )`,
+  `CREATE INDEX IF NOT EXISTS MailItemTrackingState_lastPolledAt_idx ON MailItemTrackingState(lastPolledAt)`,
+];
+
+for (const sql of phase6) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 6 migration done.");
+
+// Phase 7 — iter-105 (storage-fee dispute). MailItem.feeChargedCents
+// records the storage fee charged to a customer when their package
+// crosses the free-storage tier. The Server Component dashboard query
+// SELECTs this column, so the migration must run before any /dashboard
+// load can succeed (mirrors Phase 6's failure mode).
+const phase7 = [
+  `ALTER TABLE MailItem ADD COLUMN feeChargedCents INTEGER`,
+];
+
+for (const sql of phase7) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 7 migration done.");
+
+// Phase 8 — iter-96 (TOTP recovery codes). User.totpRecoveryCodes is a
+// JSON-string column holding SHA-256-hashed one-time codes generated
+// alongside enrollment. NextAuth's Prisma adapter SELECTs every column
+// on the User model during the auth callback, so this column must
+// exist in Turso before any sign-in attempt can succeed.
+const phase8 = [
+  `ALTER TABLE User ADD COLUMN totpRecoveryCodes TEXT`,
+];
+
+for (const sql of phase8) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 8 migration done.");

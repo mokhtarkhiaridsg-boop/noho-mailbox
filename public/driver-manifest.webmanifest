@@ -1,0 +1,15 @@
+{
+  "name": "NOHO Driver",
+  "short_name": "NOHO Driver",
+  "description": "NOHO Mailbox same-day delivery driver app",
+  "start_url": "/driver/route",
+  "scope": "/driver",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#23596A",
+  "background_color": "#F8F2EA",
+  "icons": [
+    { "src": "/brand/logo-trans.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/brand/logo-trans.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

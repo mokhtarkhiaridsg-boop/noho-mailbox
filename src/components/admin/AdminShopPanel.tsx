@@ -34,7 +34,7 @@ const BUCKET_META: Record<StatusBucket, { title: string; sub: string; accent: st
     title: "Pending",
     sub: "Ordered · awaiting prep",
     accent: NOHO_AMBER,
-    bg: "linear-gradient(180deg, rgba(245,166,35,0.10) 0%, rgba(245,166,35,0.02) 60%, transparent 100%)",
+    bg: "#FFFFFF",
     iconStroke: NOHO_AMBER,
     iconPath: (
       <>
@@ -48,7 +48,7 @@ const BUCKET_META: Record<StatusBucket, { title: string; sub: string; accent: st
     title: "Ready for pickup",
     sub: "Packed · waiting for customer",
     accent: NOHO_BLUE,
-    bg: "linear-gradient(180deg, rgba(51,116,133,0.10) 0%, rgba(51,116,133,0.02) 60%, transparent 100%)",
+    bg: "#FFFFFF",
     iconStroke: NOHO_BLUE,
     iconPath: (
       <>
@@ -62,7 +62,7 @@ const BUCKET_META: Record<StatusBucket, { title: string; sub: string; accent: st
     title: "Completed",
     sub: "Picked up by customer",
     accent: "#16A34A",
-    bg: "linear-gradient(180deg, rgba(22,163,74,0.08) 0%, rgba(22,163,74,0.02) 60%, transparent 100%)",
+    bg: "#FFFFFF",
     iconStroke: "#16A34A",
     iconPath: <path d="M5 12 L10 17 L19 7" strokeLinecap="round" strokeLinejoin="round" />,
   },
@@ -75,19 +75,10 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function huesFor(seed: string): { from: string; to: string } {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  const PAIRS: Array<[string, string]> = [
-    [NOHO_BLUE, NOHO_BLUE_DEEP],
-    [NOHO_INK, "#1F0807"],
-    ["#7C3AED", "#5B21B6"],
-    ["#B07030", "#8B5A24"],
-    ["#16A34A", "#166534"],
-    ["#dc2626", "#991b1b"],
-  ];
-  const [from, to] = PAIRS[h % PAIRS.length];
-  return { from, to };
+// Avatar — neutral cream surface (no rainbow palette).
+function huesFor(_seed: string): { from: string; to: string } {
+  void _seed;
+  return { from: "#F4EEE3", to: "#F4EEE3" };
 }
 
 function ShopOrderCard({
@@ -113,14 +104,13 @@ function ShopOrderCard({
       }}
     >
       <div className="flex items-start gap-2.5">
-        {/* Monogram avatar */}
+        {/* Monogram avatar — neutral cream surface. */}
         <div
-          className="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center font-black text-[11px]"
+          className="w-9 h-9 shrink-0 rounded-md flex items-center justify-center font-bold text-[11px]"
           style={{
-            background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-            color: "#F7E6C2",
-            boxShadow: "0 3px 10px rgba(45,16,15,0.12), inset 0 1px 0 rgba(255,255,255,0.2)",
-            fontFamily: "var(--font-baloo), sans-serif",
+            background: "#F4EEE3",
+            color: "#1A1614",
+            border: "1px solid #E5DACA",
           }}
         >
           {initials(o.customerName)}
@@ -183,10 +173,10 @@ function ShopOrderCard({
                 key={n.value}
                 disabled={isPending}
                 onClick={() => onAdvance(o.id, n.value)}
-                className="text-[10px] font-black uppercase tracking-[0.14em] px-2.5 py-1 rounded-md text-white disabled:opacity-40"
+                className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md text-white disabled:opacity-40 transition-colors"
                 style={{
-                  background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
-                  boxShadow: `0 2px 8px ${NOHO_BLUE}33`,
+                  background: NOHO_INK,
+                  border: `1px solid ${NOHO_INK}`,
                 }}
               >
                 {n.label}
@@ -297,10 +287,10 @@ export function AdminShopPanel({ shopOrders }: Props) {
             return (
               <section
                 key={b}
-                className="rounded-2xl p-3 flex flex-col"
+                className="rounded-md p-3 flex flex-col"
                 style={{
                   background: meta.bg,
-                  border: `1px solid ${meta.accent}33`,
+                  border: `1px solid ${meta.accent}55`,
                   minHeight: 260,
                 }}
                 aria-labelledby={`shop-col-${b}`}
@@ -367,8 +357,8 @@ export function AdminShopPanel({ shopOrders }: Props) {
       {/* ─── TABLE VIEW ─────────────────────────────────────────────── */}
       {view === "table" && (
         <div
-          className="bg-white rounded-2xl overflow-hidden"
-          style={{ boxShadow: "0 2px 8px rgba(26,23,20,0.06)" }}
+          className="bg-white rounded-md overflow-hidden"
+          style={{ border: "1px solid #E5DACA" }}
         >
           <div className="px-5 py-4 border-b border-border-light">
             <h3 className="font-black text-sm uppercase text-text-light">Shop orders</h3>
@@ -409,8 +399,8 @@ export function AdminShopPanel({ shopOrders }: Props) {
                               key={n.value}
                               disabled={isPending}
                               onClick={() => advance(o.id, n.value)}
-                              className="text-[10px] font-black px-2.5 py-1 rounded-lg text-white disabled:opacity-50"
-                              style={{ background: "linear-gradient(135deg, #337485, #23596A)" }}
+                              className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md text-white disabled:opacity-50 transition-colors"
+                              style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
                             >
                               {n.label}
                             </button>
@@ -453,23 +443,20 @@ function KpiTile({
 }) {
   return (
     <div
-      className="rounded-2xl p-4 transition-all hover:-translate-y-0.5"
+      className="rounded-md p-4 transition-colors"
       style={{
-        background: accent ? `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)` : "white",
-        boxShadow: accent
-          ? `0 8px 24px ${NOHO_BLUE}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
-        border: accent ? "1px solid rgba(247,230,194,0.18)" : "1px solid rgba(232,221,208,0.5)",
+        background: accent ? NOHO_INK : "#FFFFFF",
+        border: `1px solid ${accent ? NOHO_INK : "#E5DACA"}`,
       }}
     >
       <p
-        className="text-[10px] font-black uppercase tracking-[0.16em]"
-        style={{ color: accent ? "rgba(255,255,255,0.55)" : "rgba(45,16,15,0.45)" }}
+        className="text-[10px] font-bold uppercase tracking-[0.14em]"
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
       >
         {label}
       </p>
       <p
-        className="text-2xl sm:text-3xl font-black tracking-tight mt-1"
+        className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
           color: accent ? "white" : NOHO_INK,
           fontFamily: "var(--font-baloo), sans-serif",

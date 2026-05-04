@@ -131,5 +131,37 @@ export async function applyReferralCodeInternal(
     }),
   ]);
 
+  // iter-98: Best-effort dual conversion email — referrer gets paid,
+  // referee gets welcomed. Fire-and-forget so a Resend outage doesn't
+  // block the signup wallet credit.
+  void (async () => {
+    try {
+      const [refr, refe] = await Promise.all([
+        prisma.user.findUnique({ where: { id: referral.referrerId }, select: { name: true, email: true } }),
+        prisma.user.findUnique({ where: { id: newUserId }, select: { name: true, email: true } }),
+      ]);
+      const { sendReferralEarnedEmail, sendReferralWelcomeEmail } = await import("./email");
+      if (refr?.email && refe) {
+        await sendReferralEarnedEmail({
+          referrerEmail: refr.email,
+          referrerName: refr.name ?? "",
+          refereeName: refe.name ?? "the new member",
+          creditCents: REFERRAL_CREDIT_CENTS,
+          newWalletBalanceCents: referrerNewBal,
+        });
+      }
+      if (refe?.email && refr) {
+        await sendReferralWelcomeEmail({
+          refereeEmail: refe.email,
+          refereeName: refe.name ?? "",
+          referrerName: refr.name ?? "a friend",
+          creditCents: REFERRAL_CREDIT_CENTS,
+        });
+      }
+    } catch (e) {
+      console.error("[applyReferralCodeInternal] conversion emails failed:", e);
+    }
+  })();
+
   return true;
 }

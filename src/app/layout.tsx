@@ -4,6 +4,9 @@ import "./globals.css";
 import { InteractiveCursor } from "@/components/InteractiveCursor";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { Ripple } from "@/components/Ripple";
+import { LocaleProvider } from "@/lib/i18n/LocaleProvider";
+import { LOCALE_META } from "@/lib/i18n/dictionary";
+import { getServerLocale } from "@/app/actions/locale";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -102,18 +105,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // iter-110: pick locale from cookie / Accept-Language so SSR + client
+  // see the same dir/lang attrs and translated strings on first paint.
+  const locale = await getServerLocale();
+  const dir = LOCALE_META[locale].dir;
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang={locale} dir={dir} className={inter.variable}>
       <body className="min-h-screen flex flex-col font-[family-name:var(--font-inter)] antialiased">
-        <ScrollProgress />
-        {children}
-        <InteractiveCursor />
-        <Ripple />
+        <LocaleProvider initial={locale}>
+          <ScrollProgress />
+          {children}
+          <InteractiveCursor />
+          <Ripple />
+        </LocaleProvider>
       </body>
     </html>
   );

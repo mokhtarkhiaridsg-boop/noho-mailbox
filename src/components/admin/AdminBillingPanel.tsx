@@ -9,6 +9,7 @@ import {
   runLateFeesBatch,
   setAutoRenewal,
 } from "@/app/actions/billing";
+import AdminInvoiceBuilder from "./AdminInvoiceBuilder";
 
 type BillingCustomer = {
   id: string;
@@ -33,6 +34,28 @@ const NOHO_INK = "#2D100F";
 const NOHO_CREAM = "#F7E6C2";
 const NOHO_AMBER = "#F5A623";
 
+// Shared formal hairline tokens (mirrors AdminCashRegister / AdminMailPanel).
+const T = {
+  bg: "#FAF7F2",
+  surface: "#FFFFFF",
+  surfaceAlt: "#F4EEE3",
+  border: "#E5DACA",
+  ink: "#1A1614",
+  inkSoft: "#5C4540",
+  inkFaint: "#998877",
+  accent: NOHO_INK,
+  blue: NOHO_BLUE,
+  success: "#16A34A",
+  danger: "#B91C1C",
+  warning: "#B07030",
+};
+const MONO = "ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace";
+const TAB_NUM: React.CSSProperties = {
+  fontVariantNumeric: "tabular-nums",
+  fontFeatureSettings: "'tnum' 1",
+  fontFamily: MONO,
+};
+
 function fmt(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
 }
@@ -42,21 +65,6 @@ function initials(name: string): string {
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
-function huesFor(seed: string): { from: string; to: string } {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  const PAIRS: Array<[string, string]> = [
-    [NOHO_BLUE, NOHO_BLUE_DEEP],
-    [NOHO_INK, "#1F0807"],
-    ["#7C3AED", "#5B21B6"],
-    ["#B07030", "#8B5A24"],
-    ["#16A34A", "#166534"],
-    ["#dc2626", "#991b1b"],
-  ];
-  const [from, to] = PAIRS[h % PAIRS.length];
-  return { from, to };
 }
 
 function daysUntilDue(dueDate: string): number {
@@ -84,16 +92,11 @@ function CustomerCard({
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
   const [autoRenew, setAutoRenewState] = useState(c.planAutoRenew ?? false);
-  const { from, to } = huesFor(c.name);
   const days = c.planDueDate ? daysUntilDue(c.planDueDate) : null;
 
-  const bucketAccent = bucket === "overdue" ? "#dc2626" : bucket === "warning" ? NOHO_AMBER : "#16A34A";
-  const bucketBg =
-    bucket === "overdue"
-      ? "rgba(220,38,38,0.06)"
-      : bucket === "warning"
-      ? "rgba(245,166,35,0.06)"
-      : "rgba(22,163,74,0.05)";
+  // One bucket dot color — the row itself stays neutral hairline.
+  const bucketDot =
+    bucket === "overdue" ? T.danger : bucket === "warning" ? T.warning : T.success;
 
   function doAction(label: string, fn: () => Promise<{ success?: boolean; error?: string; [k: string]: unknown }>) {
     setMsg(null);
@@ -117,42 +120,64 @@ function CustomerCard({
 
   return (
     <div
-      className="rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className="rounded-md p-3 transition-colors"
       style={{
-        background: "white",
-        border: `1px solid ${bucketAccent}22`,
-        boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 10px rgba(45,16,15,0.04)",
+        background: T.surface,
+        border: `1px solid ${T.border}`,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = T.surfaceAlt;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = T.surface;
       }}
     >
       <div className="flex items-start gap-3">
-        {/* Monogram avatar */}
+        {/* Monogram avatar — neutral surface, no rainbow gradient. */}
         <div
-          className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center font-black text-sm"
+          className="w-10 h-10 shrink-0 rounded flex items-center justify-center font-bold text-[12px] relative"
           style={{
-            background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-            color: NOHO_CREAM,
-            boxShadow: "0 4px 12px rgba(45,16,15,0.15), inset 0 1px 0 rgba(255,255,255,0.2)",
-            fontFamily: "var(--font-baloo), sans-serif",
+            background: T.surfaceAlt,
+            border: `1px solid ${T.border}`,
+            color: T.ink,
           }}
         >
           {initials(c.name)}
+          {/* Bucket dot on top-right corner. */}
+          <span
+            aria-hidden="true"
+            className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
+            style={{
+              background: bucketDot,
+              border: `1.5px solid ${T.surface}`,
+            }}
+          />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 flex-wrap">
             <div className="min-w-0">
-              <p className="font-black text-sm truncate" style={{ color: NOHO_INK }}>
+              <p
+                className="font-bold text-[13px] truncate"
+                style={{ color: T.ink }}
+              >
                 {c.name}
               </p>
-              <p className="text-[11px] truncate" style={{ color: "rgba(45,16,15,0.45)" }}>
+              <p
+                className="text-[11px] truncate"
+                style={{ color: T.inkFaint }}
+              >
                 {c.email}
               </p>
             </div>
             <span
-              className="text-[10px] font-black uppercase tracking-[0.14em] px-2 py-0.5 rounded-md inline-flex items-center gap-1 shrink-0"
-              style={{ background: bucketBg, color: bucketAccent }}
+              className="text-[10px] font-bold uppercase tracking-[0.10em] px-2 h-6 rounded inline-flex items-center gap-1.5 shrink-0"
+              style={{
+                background: T.surfaceAlt,
+                color: T.inkSoft,
+                border: `1px solid ${T.border}`,
+              }}
             >
-              <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full" style={{ background: bucketAccent }} />
               {c.plan ?? "No plan"}
             </span>
           </div>
@@ -161,34 +186,39 @@ function CustomerCard({
           {c.planDueDate && days !== null && (
             <div className="mt-2.5">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: bucketAccent }}>
+                <span
+                  className="text-[10px] font-bold uppercase tracking-[0.10em]"
+                  style={{ color: bucketDot, ...TAB_NUM }}
+                >
                   {dueLabel(days)}
                 </span>
-                <span className="text-[10px] font-bold" style={{ color: "rgba(45,16,15,0.5)" }}>
+                <span
+                  className="text-[10px]"
+                  style={{ color: T.inkFaint, ...TAB_NUM }}
+                >
                   {c.planDueDate}
                 </span>
               </div>
               <div
-                className="h-1.5 rounded-full overflow-hidden"
-                style={{ background: "rgba(232,229,224,0.6)" }}
+                className="h-1 rounded-full overflow-hidden"
+                style={{ background: T.surfaceAlt }}
               >
                 {(() => {
-                  // Visualize where they sit in the renewal window. Anchor:
-                  // -10d (over grace) → 0 → +30d (next month). Clamp to [0,100].
                   const minDays = -10;
                   const maxDays = 30;
-                  const pct = Math.max(0, Math.min(100, ((days - minDays) / (maxDays - minDays)) * 100));
+                  const pct = Math.max(
+                    0,
+                    Math.min(
+                      100,
+                      ((days - minDays) / (maxDays - minDays)) * 100,
+                    ),
+                  );
                   return (
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${pct}%`,
-                        background:
-                          days < 0
-                            ? "linear-gradient(90deg, #dc2626, #991b1b)"
-                            : days <= 14
-                            ? `linear-gradient(90deg, ${NOHO_AMBER}, #B07030)`
-                            : `linear-gradient(90deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
+                        background: bucketDot,
                       }}
                     />
                   );
@@ -199,59 +229,83 @@ function CustomerCard({
 
           {/* Wallet + auto-renew row */}
           <div className="flex items-center justify-between mt-3 gap-2 flex-wrap">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <span
-                className="text-[10px] font-black uppercase tracking-[0.14em] px-2 py-1 rounded-md inline-flex items-center gap-1.5"
+                className="text-[10px] font-bold uppercase tracking-[0.10em] px-2 h-6 rounded inline-flex items-center gap-1.5"
                 style={{
-                  background: c.walletBalanceCents > 0 ? "rgba(22,163,74,0.10)" : "rgba(45,16,15,0.05)",
-                  color: c.walletBalanceCents > 0 ? "#15803d" : "rgba(45,16,15,0.55)",
+                  background: T.surfaceAlt,
+                  color: c.walletBalanceCents > 0 ? T.success : T.inkFaint,
+                  border: `1px solid ${T.border}`,
+                  ...TAB_NUM,
                 }}
               >
-                <svg viewBox="0 0 16 16" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+                <svg
+                  viewBox="0 0 16 16"
+                  className="w-2.5 h-2.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinejoin="round"
+                >
                   <rect x="2" y="4" width="12" height="9" rx="1" />
                   <path d="M2 7 L14 7" />
                 </svg>
-                Wallet {fmt(c.walletBalanceCents)}
+                {fmt(c.walletBalanceCents)}
               </span>
               <button
                 onClick={() => toggleAutoRenew(!autoRenew)}
-                className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.14em] px-2 py-1 rounded-md transition-colors"
+                className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.10em] px-2 h-6 rounded transition-colors"
                 style={{
-                  background: autoRenew ? "rgba(51,116,133,0.10)" : "rgba(232,229,224,0.6)",
-                  color: autoRenew ? NOHO_BLUE_DEEP : "rgba(45,16,15,0.55)",
+                  background: T.surface,
+                  color: autoRenew ? T.blue : T.inkFaint,
+                  border: `1px solid ${T.border}`,
                 }}
                 aria-pressed={autoRenew}
               >
                 <span
                   aria-hidden="true"
-                  className="relative w-6 h-3 rounded-full transition-colors"
-                  style={{ background: autoRenew ? NOHO_BLUE : "#d1d5db" }}
+                  className="relative w-5 h-2.5 rounded-full transition-colors"
+                  style={{ background: autoRenew ? T.blue : T.border }}
                 >
                   <span
-                    className="absolute top-0.5 w-2 h-2 bg-white rounded-full shadow"
-                    style={{ transform: autoRenew ? "translateX(13px)" : "translateX(2px)" }}
+                    className="absolute top-0.5 w-1.5 h-1.5 rounded-full transition-transform"
+                    style={{
+                      background: T.surface,
+                      transform: autoRenew
+                        ? "translateX(11px)"
+                        : "translateX(2px)",
+                    }}
                   />
                 </span>
-                Auto-renew {autoRenew ? "on" : "off"}
+                Auto {autoRenew ? "on" : "off"}
               </button>
             </div>
 
             <div className="flex items-center gap-1">
               <button
                 disabled={pending}
-                onClick={() => doAction("Late fee applied", () => applyLateFee(c.id))}
-                className="text-[10px] font-black uppercase tracking-[0.14em] px-2 py-1 rounded-md disabled:opacity-40"
-                style={{ background: "rgba(220,38,38,0.08)", color: "#b91c1c" }}
+                onClick={() =>
+                  doAction("Late fee applied", () => applyLateFee(c.id))
+                }
+                className="text-[10px] font-bold uppercase tracking-[0.10em] px-2 h-6 rounded disabled:opacity-40 transition-colors"
+                style={{
+                  background: T.surface,
+                  color: T.danger,
+                  border: `1px solid ${T.border}`,
+                }}
               >
-                Late Fee
+                Late fee
               </button>
               <button
                 disabled={pending}
-                onClick={() => doAction("Auto-renewed", () => runAutoRenewal(c.id))}
-                className="text-[10px] font-black uppercase tracking-[0.14em] px-2 py-1 rounded-md text-white disabled:opacity-40"
+                onClick={() =>
+                  doAction("Auto-renewed", () => runAutoRenewal(c.id))
+                }
+                className="text-[10px] font-bold uppercase tracking-[0.10em] px-2 h-6 rounded disabled:opacity-40 transition-colors"
                 style={{
-                  background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
-                  boxShadow: `0 2px 8px ${NOHO_BLUE}33`,
+                  background: T.accent,
+                  color: "#FFFFFF",
+                  border: `1px solid ${T.accent}`,
                 }}
               >
                 Renew
@@ -262,7 +316,9 @@ function CustomerCard({
           {msg && (
             <p
               className="text-[10px] mt-2 font-bold"
-              style={{ color: msg.startsWith("✓") ? "#16a34a" : "#dc2626" }}
+              style={{
+                color: msg.startsWith("✓") ? T.success : T.danger,
+              }}
             >
               {msg}
             </p>
@@ -280,6 +336,7 @@ export default function AdminBillingPanel() {
   const [batchMsg, setBatchMsg] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<"overdue" | "warning" | "uptodate">("overdue");
   const [loadedOnce, setLoadedOnce] = useState(false);
+  const [invoiceBuilderOpen, setInvoiceBuilderOpen] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -346,36 +403,64 @@ export default function AdminBillingPanel() {
             Manage plan payments, late fees, and auto-renewals
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <button
             disabled={batchPending}
             onClick={() => runBatch("Expiry warnings", sendExpiryWarnings)}
-            className="text-[10px] font-black uppercase tracking-[0.14em] px-3 py-2 rounded-xl border disabled:opacity-40 transition-colors"
-            style={{ borderColor: "rgba(245,166,35,0.4)", color: "#92400e", background: "rgba(245,166,35,0.04)" }}
+            className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-8 rounded-md disabled:opacity-40 transition-colors"
+            style={{
+              background: T.surface,
+              color: T.warning,
+              border: `1px solid ${T.border}`,
+            }}
           >
             Send expiry warnings
           </button>
           <button
             disabled={batchPending}
             onClick={() => runBatch("Late fees batch", runLateFeesBatch)}
-            className="text-[10px] font-black uppercase tracking-[0.14em] px-3 py-2 rounded-xl border disabled:opacity-40 transition-colors"
-            style={{ borderColor: "rgba(220,38,38,0.4)", color: "#b91c1c", background: "rgba(220,38,38,0.04)" }}
+            className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-8 rounded-md disabled:opacity-40 transition-colors"
+            style={{
+              background: T.surface,
+              color: T.danger,
+              border: `1px solid ${T.border}`,
+            }}
           >
             Run late-fees batch
           </button>
           <button
+            onClick={() => setInvoiceBuilderOpen(true)}
+            className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-8 rounded-md transition-colors"
+            style={{
+              background: T.accent,
+              color: "#FFFFFF",
+              border: `1px solid ${T.accent}`,
+            }}
+          >
+            + New invoice
+          </button>
+          <button
             onClick={load}
             disabled={loading}
-            className="text-[10px] font-black uppercase tracking-[0.14em] px-3 py-2 rounded-xl text-white disabled:opacity-40"
+            className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-8 rounded-md disabled:opacity-40 transition-colors"
             style={{
-              background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
-              boxShadow: `0 2px 10px ${NOHO_BLUE}33`,
+              background: T.surface,
+              color: T.blue,
+              border: `1px solid ${T.border}`,
             }}
           >
             {loading ? "Loading…" : "Refresh"}
           </button>
         </div>
       </div>
+
+      {/* Invoice Builder modal */}
+      {invoiceBuilderOpen && (
+        <AdminInvoiceBuilder
+          onClose={() => setInvoiceBuilderOpen(false)}
+          onSaved={(_id, num) => setBatchMsg(`✓ Invoice ${num} saved`)}
+        />
+      )}
 
       {batchMsg && (
         <div
@@ -423,28 +508,49 @@ export default function AdminBillingPanel() {
         </div>
       )}
 
-      {/* Health distribution bar */}
+      {/* Health distribution bar — solid colors, hairline border, no shadow */}
       {totals && totals.totalCount > 0 && (
         <div
-          className="rounded-2xl bg-white p-5"
-          style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+          className="rounded-md p-4"
+          style={{
+            background: T.surface,
+            border: `1px solid ${T.border}`,
+          }}
         >
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: NOHO_INK }}>
+            <h3
+              className="text-[10px] font-bold uppercase tracking-[0.16em]"
+              style={{ color: T.ink }}
+            >
               Account health
             </h3>
-            <p className="text-[10px] font-bold" style={{ color: "rgba(45,16,15,0.4)" }}>
-              {totals.totalCount} active customers
+            <p
+              className="text-[10px]"
+              style={{ color: T.inkFaint, ...TAB_NUM }}
+            >
+              {totals.totalCount} active
             </p>
           </div>
           <div
-            className="h-3 rounded-full overflow-hidden flex"
-            style={{ background: "rgba(232,229,224,0.6)" }}
+            className="h-2 rounded-full overflow-hidden flex"
+            style={{ background: T.surfaceAlt }}
           >
             {[
-              { count: totals.overdueCount, color: "linear-gradient(90deg, #dc2626, #991b1b)", label: "Overdue" },
-              { count: totals.warningCount, color: `linear-gradient(90deg, ${NOHO_AMBER}, #B07030)`, label: "Expiring" },
-              { count: totals.healthyCount, color: "linear-gradient(90deg, #16A34A, #166534)", label: "Up to date" },
+              {
+                count: totals.overdueCount,
+                color: T.danger,
+                label: "Overdue",
+              },
+              {
+                count: totals.warningCount,
+                color: T.warning,
+                label: "Expiring",
+              },
+              {
+                count: totals.healthyCount,
+                color: T.success,
+                label: "Up to date",
+              },
             ].map((seg) => {
               const pct = (seg.count / totals.totalCount) * 100;
               if (pct === 0) return null;
@@ -458,54 +564,75 @@ export default function AdminBillingPanel() {
               );
             })}
           </div>
-          <div className="flex items-center gap-4 mt-3 text-[10px] font-bold flex-wrap">
-            <span className="inline-flex items-center gap-1.5" style={{ color: "#b91c1c" }}>
-              <span aria-hidden="true" className="w-2 h-2 rounded-full" style={{ background: "#dc2626" }} />
+          <div className="flex items-center gap-4 mt-2.5 text-[10px] font-bold flex-wrap">
+            <span
+              className="inline-flex items-center gap-1.5"
+              style={{ color: T.inkSoft, ...TAB_NUM }}
+            >
+              <span
+                aria-hidden="true"
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: T.danger }}
+              />
               Overdue {totals.overdueCount}
             </span>
-            <span className="inline-flex items-center gap-1.5" style={{ color: "#92400e" }}>
-              <span aria-hidden="true" className="w-2 h-2 rounded-full" style={{ background: NOHO_AMBER }} />
+            <span
+              className="inline-flex items-center gap-1.5"
+              style={{ color: T.inkSoft, ...TAB_NUM }}
+            >
+              <span
+                aria-hidden="true"
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: T.warning }}
+              />
               Expiring {totals.warningCount}
             </span>
-            <span className="inline-flex items-center gap-1.5" style={{ color: "#15803d" }}>
-              <span aria-hidden="true" className="w-2 h-2 rounded-full" style={{ background: "#16A34A" }} />
+            <span
+              className="inline-flex items-center gap-1.5"
+              style={{ color: T.inkSoft, ...TAB_NUM }}
+            >
+              <span
+                aria-hidden="true"
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: T.success }}
+              />
               Up to date {totals.healthyCount}
             </span>
           </div>
         </div>
       )}
 
-      {/* Section selector */}
+      {/* Section selector — minimal segmented control. */}
       {overview && (
-        <div className="grid grid-cols-3 gap-3">
+        <div
+          className="inline-flex p-0.5 rounded-md"
+          style={{ background: "#F4EEE3", border: "1px solid #E5DACA" }}
+        >
           {sections.map((s) => {
             const active = activeSection === s.key;
             return (
               <button
                 key={s.key}
                 onClick={() => setActiveSection(s.key)}
-                className="rounded-2xl p-4 text-left transition-all hover:-translate-y-0.5"
+                className="px-3 h-8 rounded text-[11px] font-bold uppercase tracking-[0.10em] inline-flex items-center gap-1.5 transition-colors"
                 style={{
-                  background: active ? `${s.color}10` : "white",
-                  border: `2px solid ${active ? s.color : "rgba(232,229,224,0.7)"}`,
-                  boxShadow: active ? `0 4px 16px ${s.color}33` : "0 1px 3px rgba(26,23,20,0.04)",
+                  background: active ? "#FFFFFF" : "transparent",
+                  color: active ? "#1A1614" : "#5C4540",
+                  boxShadow: active ? "0 1px 0 rgba(45,16,15,0.06)" : "none",
                 }}
               >
-                <p
-                  className="text-3xl font-black tracking-tight"
+                {s.label}
+                <span
+                  className="px-1 h-4 rounded inline-flex items-center text-[10px]"
                   style={{
-                    color: active ? s.color : NOHO_INK,
-                    fontFamily: "var(--font-baloo), sans-serif",
+                    background: active ? "#F4EEE3" : "transparent",
+                    color: active ? "#1A1614" : "#998877",
+                    fontVariantNumeric: "tabular-nums",
+                    fontFamily: "ui-monospace, monospace",
                   }}
                 >
                   {s.count}
-                </p>
-                <p
-                  className="text-[10px] font-black uppercase tracking-[0.16em] mt-1"
-                  style={{ color: active ? s.color : "rgba(45,16,15,0.55)" }}
-                >
-                  {s.label}
-                </p>
+                </span>
               </button>
             );
           })}
@@ -523,8 +650,8 @@ export default function AdminBillingPanel() {
         <div className="space-y-3">
           {activeCustomers.length === 0 ? (
             <div
-              className="rounded-2xl bg-white p-10 text-center"
-              style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04)" }}
+              className="rounded-md bg-white p-8 text-center"
+              style={{ border: "1px solid #E5DACA" }}
             >
               <p className="text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
                 No customers in this category.
@@ -540,10 +667,10 @@ export default function AdminBillingPanel() {
 
       {/* Info card */}
       <div
-        className="rounded-2xl p-4 text-xs space-y-1.5"
+        className="rounded-md p-4 text-xs space-y-1.5"
         style={{
           background: "rgba(51,116,133,0.04)",
-          border: "1px solid rgba(51,116,133,0.12)",
+          border: "1px solid rgba(51,116,133,0.30)",
         }}
       >
         <p className="font-black uppercase tracking-[0.16em]" style={{ color: NOHO_BLUE_DEEP }}>
@@ -573,44 +700,51 @@ function KpiTile({
   accent?: boolean;
   danger?: boolean;
 }) {
+  // Polished: hairline borders, single dark accent for the primary tile,
+  // muted danger outline (no full red gradient). Tabular monospace numerals.
   const isAccent = accent && !danger;
   const isDanger = danger;
   return (
     <div
-      className="rounded-2xl p-4 transition-all hover:-translate-y-0.5"
+      className="p-4 rounded-md"
       style={{
-        background: isAccent
-          ? `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`
-          : isDanger
-          ? "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)"
-          : "white",
-        boxShadow: isAccent
-          ? `0 8px 24px ${NOHO_BLUE}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : isDanger
-          ? "0 8px 24px rgba(220,38,38,0.32), inset 0 1px 0 rgba(255,255,255,0.18)"
-          : "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
-        border: isAccent || isDanger ? "1px solid rgba(247,230,194,0.18)" : "1px solid rgba(232,221,208,0.5)",
+        background: isAccent ? "#2D100F" : "#FFFFFF",
+        border: `1px solid ${isAccent ? "#2D100F" : isDanger ? "#B91C1C" : "#E5DACA"}`,
       }}
     >
       <p
-        className="text-[10px] font-black uppercase tracking-[0.16em]"
-        style={{ color: isAccent || isDanger ? "rgba(255,255,255,0.55)" : "rgba(45,16,15,0.45)" }}
+        className="text-[10px] font-bold uppercase tracking-[0.16em]"
+        style={{
+          color: isAccent
+            ? "rgba(255,255,255,0.65)"
+            : isDanger
+            ? "#B91C1C"
+            : "#998877",
+        }}
       >
         {label}
       </p>
       <p
-        className="text-2xl sm:text-3xl font-black tracking-tight mt-1"
+        className="text-[28px] font-bold leading-none mt-2"
         style={{
-          color: isAccent || isDanger ? "white" : NOHO_INK,
-          fontFamily: "var(--font-baloo), sans-serif",
+          color: isAccent ? "#FFFFFF" : "#1A1614",
+          fontVariantNumeric: "tabular-nums",
+          fontFeatureSettings: "'tnum' 1",
+          fontFamily: "ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace",
         }}
       >
         {value}
       </p>
       {sub && (
         <p
-          className="text-[10px] font-bold mt-1"
-          style={{ color: isAccent || isDanger ? "rgba(255,255,255,0.6)" : NOHO_BLUE }}
+          className="text-[11px] mt-2"
+          style={{
+            color: isAccent
+              ? "rgba(255,255,255,0.6)"
+              : isDanger
+              ? "#7F1D1D"
+              : "#5C4540",
+          }}
         >
           {sub}
         </p>

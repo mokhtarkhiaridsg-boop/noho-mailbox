@@ -143,7 +143,7 @@ export default function AdminPromoBannerEditor() {
   if (!cfg) {
     return (
       <div
-        className="rounded-3xl p-6"
+        className="rounded-md p-5"
         style={{ background: "white", border: `1px solid ${BORDER}` }}
       >
         <p className="text-sm" style={{ color: INK_SOFT }}>
@@ -158,11 +158,10 @@ export default function AdminPromoBannerEditor() {
 
   return (
     <div
-      className="rounded-3xl p-6 space-y-5"
+      className="rounded-md p-5 space-y-5"
       style={{
         background: "white",
         border: `1px solid ${BORDER}`,
-        boxShadow: "var(--shadow-cream-sm)",
       }}
     >
       {/* Header */}
@@ -208,7 +207,7 @@ export default function AdminPromoBannerEditor() {
       <div>
         {fieldLabel("Live preview")}
         <div
-          className="rounded-2xl overflow-hidden"
+          className="rounded-md overflow-hidden"
           style={{ border: `1px solid ${BORDER}` }}
         >
           {cfg.enabled ? (
@@ -408,14 +407,14 @@ export default function AdminPromoBannerEditor() {
             type="button"
             onClick={save}
             disabled={pending}
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-2xl text-[12px] font-black uppercase tracking-[0.06em] transition-transform hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-md text-[11px] font-bold uppercase tracking-[0.10em] transition-colors disabled:opacity-50"
             style={{
-              background: `linear-gradient(135deg, ${BLUE} 0%, ${BLUE_DEEP} 100%)`,
+              background: INK,
               color: "white",
-              boxShadow: "0 6px 20px rgba(51,116,133,0.32)",
+              border: `1px solid ${INK}`,
             }}
           >
-            {pending ? "Saving…" : "Save & Publish"}
+            {pending ? "Saving…" : "Save & publish"}
           </button>
         </div>
       </div>

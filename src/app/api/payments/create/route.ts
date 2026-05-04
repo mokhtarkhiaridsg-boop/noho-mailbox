@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { SquareClient } from "square";
+import { SquareClient, SquareEnvironment } from "square";
 
 export const dynamic = "force-dynamic";
 
@@ -23,8 +23,12 @@ export async function POST(request: NextRequest) {
 
     const client = new SquareClient({
       token,
+      // SquareEnvironment is a URL constant — the SDK uses it as the base URL.
+      // Passing the literal string "sandbox" silently breaks every call.
       environment:
-        process.env.SQUARE_ENVIRONMENT === "production" ? "production" : "sandbox",
+        process.env.SQUARE_ENVIRONMENT === "production"
+          ? SquareEnvironment.Production
+          : SquareEnvironment.Sandbox,
     });
 
     // Create payment with Square

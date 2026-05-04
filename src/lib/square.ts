@@ -1,13 +1,18 @@
-import { SquareClient, SquareError } from "square";
+import { SquareClient, SquareEnvironment, SquareError } from "square";
 
 function getSquareClient(): SquareClient | null {
   const token = process.env.SQUARE_ACCESS_TOKEN?.trim();
   if (!token) return null;
 
+  // SquareEnvironment is a URL constant (e.g. "https://connect.squareupsandbox.com").
+  // The SDK uses it as the base URL — passing the literal string "sandbox" makes
+  // it concatenate "sandbox/v2/…" and every request 500s with "Failed to parse URL".
   return new SquareClient({
     token,
     environment:
-      process.env.SQUARE_ENVIRONMENT === "production" ? "production" : "sandbox",
+      process.env.SQUARE_ENVIRONMENT === "production"
+        ? SquareEnvironment.Production
+        : SquareEnvironment.Sandbox,
   });
 }
 
@@ -161,4 +166,134 @@ export async function getSquareCatalog() {
 
 export function isSquareError(err: unknown): err is SquareError {
   return err instanceof SquareError;
+}
+
+// ─── Catalog write (used by the unified shop ⇄ Square dual-write) ───────
+//
+// Creates a single ITEM with one variation (we don't model SKUs/sizes yet).
+// On success returns the new Square IDs so the caller can persist them on
+// the local CatalogItem row. Throws on failure — callers wrap with try/catch.
+export async function createSquareCatalogItem(input: {
+  name: string;
+  description?: string;
+  priceCents: number;
+  currency?: string;
+  category?: string;
+  sku?: string;
+}): Promise<{ itemId: string; variationId: string }> {
+  const client = getSquareClient();
+  if (!client) throw new Error("Square not configured");
+
+  const idempotencyKey =
+    "noho-cat-" +
+    Date.now().toString(36) +
+    "-" +
+    Math.random().toString(36).slice(2, 10);
+
+  // Square upsertCatalogObject expects negative ID prefixes (#) for new objects;
+  // they're rewritten by the API into permanent IDs in the response. We send
+  // one ITEM with a single ITEM_VARIATION nested under it.
+  const tempItemId = "#item";
+  const tempVarId = "#var";
+
+  const body = {
+    idempotencyKey,
+    object: {
+      type: "ITEM" as const,
+      id: tempItemId,
+      itemData: {
+        name: input.name,
+        description: input.description,
+        variations: [
+          {
+            type: "ITEM_VARIATION" as const,
+            id: tempVarId,
+            itemVariationData: {
+              itemId: tempItemId,
+              name: "Regular",
+              pricingType: "FIXED_PRICING" as const,
+              priceMoney: {
+                amount: BigInt(input.priceCents),
+                currency: (input.currency ?? "USD") as "USD",
+              },
+              sku: input.sku,
+            },
+          },
+        ],
+      },
+    },
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const res = await (client.catalog as any).object.upsert(body);
+  const obj = res?.catalogObject ?? res?.result?.catalogObject;
+  const variation = obj?.itemData?.variations?.[0];
+
+  return {
+    itemId: obj?.id ?? "",
+    variationId: variation?.id ?? "",
+  };
+}
+
+// ─── Catalog update ─────────────────────────────────────────────────────
+export async function updateSquareCatalogItem(input: {
+  itemId: string;
+  name: string;
+  description?: string;
+  priceCents: number;
+  currency?: string;
+  sku?: string;
+}): Promise<void> {
+  const client = getSquareClient();
+  if (!client) throw new Error("Square not configured");
+
+  // Square requires the full object to update — first retrieve, then re-upsert
+  // with the same IDs and bumped fields. We patch only the fields the admin
+  // edited and pass everything else through.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const existing = await (client.catalog as any).object.get({ objectId: input.itemId, includeRelatedObjects: true });
+  const obj = existing?.object ?? existing?.result?.object;
+  if (!obj) throw new Error("Square item not found: " + input.itemId);
+
+  const variation = obj.itemData?.variations?.[0];
+  const updated = {
+    ...obj,
+    itemData: {
+      ...obj.itemData,
+      name: input.name,
+      description: input.description ?? obj.itemData?.description,
+      variations: variation
+        ? [
+            {
+              ...variation,
+              itemVariationData: {
+                ...variation.itemVariationData,
+                priceMoney: {
+                  amount: BigInt(input.priceCents),
+                  currency: (input.currency ?? "USD") as "USD",
+                },
+                sku: input.sku ?? variation.itemVariationData?.sku,
+              },
+            },
+          ]
+        : obj.itemData?.variations,
+    },
+  };
+
+  const idempotencyKey =
+    "noho-cat-upd-" +
+    Date.now().toString(36) +
+    "-" +
+    Math.random().toString(36).slice(2, 10);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (client.catalog as any).object.upsert({ idempotencyKey, object: updated });
+}
+
+// ─── Catalog delete ─────────────────────────────────────────────────────
+export async function deleteSquareCatalogItem(itemId: string): Promise<void> {
+  const client = getSquareClient();
+  if (!client) throw new Error("Square not configured");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (client.catalog as any).object.delete({ objectId: itemId });
 }

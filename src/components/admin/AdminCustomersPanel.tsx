@@ -1,6 +1,16 @@
 "use client";
 
-import { useState } from "react";
+/**
+ * Admin Customers — Iter 4 rebuild.
+ *
+ * Adds a hero stats bar (animated counters), smart filter chips with live
+ * counts, branded card visual upgrade (avatar circles, gradient by status,
+ * hover lift), and a sticky-header table with subtle row gradients.
+ *
+ * Same data, same callbacks. Pure shell-level redesign.
+ */
+
+import { useEffect, useMemo, useState } from "react";
 import { StatusBadge } from "./StatusBadge";
 import type { Customer } from "./types";
 
@@ -12,34 +22,64 @@ type Props = {
   openCustomer: (c: Customer) => void;
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_CREAM = "#F7E6C2";
-
-// Plan-tier visual identity. Premium = ink-on-cream luxury feel; Business =
-// brand teal; Basic = soft cream. Each gets its own gradient for the avatar
-// monogram so admin recognizes tiers at a glance.
-const PLAN_THEME: Record<
-  string,
-  { dot: string; pill: { bg: string; text: string }; avatarGrad: string }
-> = {
-  Premium: {
-    dot: NOHO_INK,
-    pill: { bg: "rgba(45,16,15,0.08)", text: NOHO_INK },
-    avatarGrad: `linear-gradient(135deg, ${NOHO_INK} 0%, #1F0807 100%)`,
-  },
-  Business: {
-    dot: NOHO_BLUE,
-    pill: { bg: "rgba(51,116,133,0.12)", text: NOHO_BLUE_DEEP },
-    avatarGrad: `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`,
-  },
-  Basic: {
-    dot: "#A89484",
-    pill: { bg: "rgba(232,229,224,0.7)", text: "#5C4540" },
-    avatarGrad: "linear-gradient(135deg, #B07030 0%, #8B5A24 100%)",
-  },
+// Brand tokens — mirror Overview / Mailbox Center palette.
+const T = {
+  bg: "#FAF7F2",
+  surface: "#FFFFFF",
+  surfaceAlt: "#F4EEE3",
+  border: "#E5DACA",
+  ink: "#2D100F",
+  inkSoft: "#5C4540",
+  inkFaint: "#7A6050",
+  cream: "#F7E6C2",
+  blue: "#337485",
+  blueDeep: "#23596A",
+  red: "#E70013",
+  amber: "#F5A623",
+  success: "#16A34A",
+  danger: "#B91C1C",
+  warning: "#B07030",
 };
+const MONO = "ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace";
+const TAB_NUM: React.CSSProperties = {
+  fontVariantNumeric: "tabular-nums",
+  fontFeatureSettings: "'tnum' 1",
+  fontFamily: MONO,
+};
+
+// rAF count-up tween — same helper as Overview/Mailbox Center.
+function useAnimatedCount(target: number, duration = 800): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      setValue(target);
+      return;
+    }
+    const reduced =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setValue(target);
+      return;
+    }
+    const start = performance.now();
+    const from = value;
+    const delta = target - from;
+    if (delta === 0) return;
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const next = Math.round(from + delta * eased);
+      setValue(next);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target, duration]);
+  return value;
+}
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -48,7 +88,17 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function dueChip(planDueDate: string | null | undefined) {
+// Avatar — flat neutral surface with hairline border. Was a 6-tone rainbow
+// gradient palette which read as "circus" against the formal hairline
+// chrome. The customer's identity comes from their initials, not from a
+// random color the system assigned them on first render.
+function avatarHue(_name: string): string {
+  void _name;
+  return T.surfaceAlt;
+}
+
+type DueState = { label: string; tone: "danger" | "warning" } | null;
+function computeDue(planDueDate: string | null | undefined): DueState {
   if (!planDueDate) return null;
   const [y, m, d] = planDueDate.split("-").map(Number);
   if (!y || !m || !d) return null;
@@ -56,15 +106,14 @@ function dueChip(planDueDate: string | null | undefined) {
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const days = Math.ceil((+due - +today) / 86400000);
-  if (days < 0) return { label: "OVERDUE", bg: "rgba(231,0,19,0.12)", color: "#b91c1c" };
-  if (days <= 14)
-    return {
-      label: `DUE ${days}d`,
-      bg: "rgba(245,158,11,0.18)",
-      color: "#92400e",
-    };
+  if (days < 0) return { label: "Overdue", tone: "danger" };
+  if (days <= 14) return { label: `Due ${days}d`, tone: "warning" };
   return null;
 }
+
+type SortKey = "name" | "suite" | "plan" | "due";
+type SortDir = "asc" | "desc";
+type Segment = "all" | "active" | "atrisk" | "kyc" | "business" | "personal";
 
 export function AdminCustomersPanel({
   customers,
@@ -74,29 +123,150 @@ export function AdminCustomersPanel({
   openCustomer,
 }: Props) {
   const [view, setView] = useState<"cards" | "table">("cards");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [segment, setSegment] = useState<Segment>("all");
 
-  const filteredCustomers = customers.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.suiteNumber.includes(searchQuery),
-  );
+  // ─── Segment predicates ──────────────────────────────────────────
+  const isAtRisk = (c: Customer) => {
+    if (c.status === "Suspended") return true;
+    const due = computeDue(c.planDueDate);
+    return due !== null;
+  };
+  const isKycPending = (c: Customer) => Boolean(c.kycStatus && c.kycStatus !== "Approved");
+  const isBusiness = (c: Customer) => c.boxType === "Business" || Boolean(c.businessName);
+  const isPersonal = (c: Customer) => !isBusiness(c);
+
+  // ─── Hero counters ──────────────────────────────────────────────
+  const counts = useMemo(() => {
+    let active = 0,
+      atrisk = 0,
+      kyc = 0,
+      business = 0;
+    for (const c of customers) {
+      if (c.status === "Active") active++;
+      if (isAtRisk(c)) atrisk++;
+      if (isKycPending(c)) kyc++;
+      if (isBusiness(c)) business++;
+    }
+    return { total: customers.length, active, atrisk, kyc, business };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customers]);
+
+  // ─── Filter + sort ──────────────────────────────────────────────
+  const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const list = customers.filter((c) => {
+      // Segment first
+      if (segment === "active" && c.status !== "Active") return false;
+      if (segment === "atrisk" && !isAtRisk(c)) return false;
+      if (segment === "kyc" && !isKycPending(c)) return false;
+      if (segment === "business" && !isBusiness(c)) return false;
+      if (segment === "personal" && !isPersonal(c)) return false;
+      // Search
+      if (!q) return true;
+      const phoneDigits = (c.phone ?? "").replace(/\D/g, "");
+      const qDigits = q.replace(/\D/g, "");
+      return (
+        c.name.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        (c.suiteNumber ?? "").includes(q) ||
+        (c.businessName ?? "").toLowerCase().includes(q) ||
+        (qDigits.length >= 3 && phoneDigits.includes(qDigits))
+      );
+    });
+    const dir = sortDir === "asc" ? 1 : -1;
+    return [...list].sort((a, b) => {
+      switch (sortKey) {
+        case "name":
+          return a.name.localeCompare(b.name) * dir;
+        case "suite": {
+          const an = parseInt(a.suiteNumber ?? "0", 10) || 0;
+          const bn = parseInt(b.suiteNumber ?? "0", 10) || 0;
+          return (an - bn) * dir;
+        }
+        case "plan":
+          return ((a.plan ?? "").localeCompare(b.plan ?? "")) * dir;
+        case "due":
+          return ((a.planDueDate ?? "").localeCompare(b.planDueDate ?? "")) * dir;
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customers, searchQuery, sortKey, sortDir, segment]);
+
+  function toggleSort(k: SortKey) {
+    if (sortKey === k) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(k);
+      setSortDir("asc");
+    }
+  }
+
+  // ─── Filter chip definitions (with live counts) ────────────────
+  const segments: Array<{ id: Segment; label: string; count: number; tone: string }> = [
+    { id: "all",      label: "All",         count: counts.total,    tone: T.ink },
+    { id: "active",   label: "Active",      count: counts.active,   tone: T.success },
+    { id: "atrisk",   label: "At-risk",     count: counts.atrisk,   tone: T.red },
+    { id: "kyc",      label: "KYC pending", count: counts.kyc,      tone: T.amber },
+    { id: "business", label: "Business",    count: counts.business, tone: T.blue },
+  ];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h2 className="font-black text-lg uppercase tracking-wide text-text-light">Customers</h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.5)" }}>
-            {filteredCustomers.length} of {customers.length}
-            {searchQuery && ` matching "${searchQuery}"`}
-          </p>
-        </div>
-        <div className="flex gap-2 items-center flex-wrap">
-          {/* View toggle */}
+      {/* ─── Hero metric strip ─── 5-up animated counters that double as
+          shortcuts to common segments. */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+        <HeroTile label="Total" value={counts.total} tone="ink" onClick={() => setSegment("all")} active={segment === "all"} />
+        <HeroTile label="Active" value={counts.active} tone="success" onClick={() => setSegment("active")} active={segment === "active"} />
+        <HeroTile label="At-risk" value={counts.atrisk} tone="red" onClick={() => setSegment("atrisk")} active={segment === "atrisk"} pulse={counts.atrisk > 0} />
+        <HeroTile label="KYC pending" value={counts.kyc} tone="amber" onClick={() => setSegment("kyc")} active={segment === "kyc"} pulse={counts.kyc > 0} />
+        <HeroTile label="Business" value={counts.business} tone="blue" onClick={() => setSegment("business")} active={segment === "business"} />
+      </div>
+
+      {/* ─── Toolbar — search · filter chips · view toggle · add ─── */}
+      <div
+        className="rounded-xl"
+        style={{ background: T.surface, border: `1px solid ${T.border}` }}
+      >
+        {/* Top row: search + chips + add */}
+        <div
+          className="flex items-center gap-3 px-4 h-12"
+          style={{ borderBottom: `1px solid ${T.border}` }}
+        >
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <svg viewBox="0 0 16 16" className="w-4 h-4 shrink-0" fill="none" stroke={T.inkFaint} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="7" cy="7" r="5" />
+              <path d="M11 11 L14 14" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search name, email, suite, phone…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 bg-transparent text-sm focus:outline-none"
+              style={{ color: T.ink }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="text-[11px] font-bold transition-colors"
+                style={{ color: T.inkFaint }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = T.ink; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = T.inkFaint; }}
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+            <span className="text-[11px] shrink-0 font-bold" style={{ color: T.inkFaint, ...TAB_NUM }}>
+              {filtered.length}/{customers.length}
+            </span>
+          </div>
+
           <div
-            className="inline-flex rounded-xl p-0.5"
-            style={{ background: "rgba(232,229,224,0.5)", border: "1px solid rgba(232,229,224,0.7)" }}
+            className="hidden sm:inline-flex p-0.5 rounded-md shrink-0"
+            style={{ background: T.surfaceAlt, border: `1px solid ${T.border}` }}
           >
             {(["cards", "table"] as const).map((v) => {
               const active = view === v;
@@ -104,233 +274,212 @@ export function AdminCustomersPanel({
                 <button
                   key={v}
                   onClick={() => setView(v)}
-                  className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.16em] transition-all"
+                  className="px-2.5 h-7 rounded text-[10px] font-bold uppercase tracking-[0.10em] transition-colors"
                   style={{
-                    background: active ? "white" : "transparent",
-                    color: active ? NOHO_INK : "rgba(45,16,15,0.55)",
-                    boxShadow: active ? "0 1px 2px rgba(45,16,15,0.08)" : undefined,
+                    background: active ? T.surface : "transparent",
+                    color: active ? T.ink : T.inkSoft,
+                    boxShadow: active ? "0 1px 0 rgba(45,16,15,0.06)" : "none",
                   }}
-                  aria-pressed={active}
-                  aria-label={`View as ${v}`}
                 >
-                  {v === "cards" ? (
-                    <span className="inline-flex items-center gap-1">
-                      <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <rect x="1" y="1" width="4.5" height="4.5" rx="0.6" />
-                        <rect x="6.5" y="1" width="4.5" height="4.5" rx="0.6" />
-                        <rect x="1" y="6.5" width="4.5" height="4.5" rx="0.6" />
-                        <rect x="6.5" y="6.5" width="4.5" height="4.5" rx="0.6" />
-                      </svg>
-                      Cards
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1">
-                      <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <line x1="1" y1="3" x2="11" y2="3" />
-                        <line x1="1" y1="6" x2="11" y2="6" />
-                        <line x1="1" y1="9" x2="11" y2="9" />
-                      </svg>
-                      Table
-                    </span>
-                  )}
+                  {v}
                 </button>
               );
             })}
           </div>
-          <input
-            type="text"
-            placeholder="Search name, email, suite..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[#337485] bg-white"
-            style={{ borderColor: "rgba(232,229,224,0.7)" }}
-          />
+
           <button
             onClick={() => setShowAddCustomerModal(true)}
-            className="px-4 py-2.5 rounded-xl text-sm font-black text-white"
+            className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[11px] font-bold uppercase tracking-[0.06em] transition-colors"
             style={{
-              background: "linear-gradient(135deg, #337485, #23596A)",
-              boxShadow: "0 2px 10px rgba(51,116,133,0.3)",
+              background: T.ink,
+              color: "#FFFFFF",
+              border: `1px solid ${T.ink}`,
             }}
           >
-            + Add Customer
+            <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M8 3 V13 M3 8 H13" />
+            </svg>
+            Add customer
           </button>
+        </div>
+
+        {/* Bottom row: segment chips */}
+        <div className="flex items-center gap-1.5 px-3 py-2 overflow-x-auto">
+          {segments.map((seg) => {
+            const active = segment === seg.id;
+            return (
+              <button
+                key={seg.id}
+                onClick={() => setSegment(seg.id)}
+                className="shrink-0 inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-bold uppercase tracking-[0.08em] transition-colors"
+                style={{
+                  background: active ? seg.tone : T.surface,
+                  color: active ? "#fff" : T.inkSoft,
+                  border: `1px solid ${active ? seg.tone : T.border}`,
+                }}
+              >
+                {seg.label}
+                <span
+                  className="text-[10px] font-black px-1.5 h-4 rounded inline-flex items-center"
+                  style={{
+                    background: active ? "rgba(255,255,255,0.20)" : T.surfaceAlt,
+                    color: active ? "#fff" : T.inkFaint,
+                    ...TAB_NUM,
+                  }}
+                >
+                  {seg.count}
+                </span>
+              </button>
+            );
+          })}
+          <span className="flex-1" />
+          {segment !== "all" && (
+            <button
+              onClick={() => setSegment("all")}
+              className="shrink-0 text-[10px] font-bold uppercase tracking-[0.08em]"
+              style={{ color: T.blue }}
+            >
+              Clear filter
+            </button>
+          )}
         </div>
       </div>
 
-      {filteredCustomers.length === 0 && (
+      {/* ─── Empty state ───────────────────────────────────────────── */}
+      {filtered.length === 0 && (
         <div
-          className="rounded-2xl p-10 text-center"
-          style={{
-            background: "white",
-            border: "1px solid rgba(232,229,224,0.7)",
-            boxShadow: "0 1px 3px rgba(26,23,20,0.04)",
-          }}
+          className="rounded-xl p-12 text-center"
+          style={{ background: T.surface, border: `1px solid ${T.border}` }}
         >
-          <p className="text-sm font-bold" style={{ color: "rgba(45,16,15,0.6)" }}>
-            No customers found{searchQuery ? ` for "${searchQuery}"` : ""}.
+          <span
+            className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-3"
+            style={{ background: T.surfaceAlt, color: T.inkFaint }}
+          >
+            <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="9" r="3.5" />
+              <path d="M5 20 C5 15.5 8.5 13 12 13 C15.5 13 19 15.5 19 20" />
+              <circle cx="12" cy="12" r="10.5" strokeDasharray="2 4" opacity="0.4" />
+            </svg>
+          </span>
+          <p className="text-sm font-bold" style={{ color: T.ink }}>
+            No customers found
+          </p>
+          <p className="text-[12px] mt-1" style={{ color: T.inkFaint }}>
+            {searchQuery
+              ? `Nothing matches "${searchQuery}"${segment !== "all" ? ` in ${segment}` : ""}.`
+              : segment !== "all"
+              ? `No customers in segment "${segment}".`
+              : "Add your first customer with the button above."}
           </p>
         </div>
       )}
 
-      {/* ─── CARD VIEW ─────────────────────────────────────────────── */}
-      {view === "cards" && filteredCustomers.length > 0 && (
+      {/* ─── Cards view ───────────────────────────────────────────── */}
+      {view === "cards" && filtered.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          {filteredCustomers.map((c) => {
-            const theme = PLAN_THEME[c.plan ?? "Basic"] ?? PLAN_THEME.Basic;
-            const due = dueChip(c.planDueDate);
+          {filtered.map((c) => {
+            const due = computeDue(c.planDueDate);
             const noDeposit = (c.securityDepositCents ?? 0) === 0;
-            const kycPending = c.kycStatus && c.kycStatus !== "Approved";
+            const kycPending = isKycPending(c);
+            const business = isBusiness(c);
+            const status = c.status === "Suspended" ? "danger" : c.status === "Active" ? "ok" : "neutral";
+            // Subtle status accent line on the left edge of the card.
+            const accentColor =
+              status === "danger" ? T.red : status === "ok" ? T.success : T.border;
             return (
               <button
                 key={c.id}
                 onClick={() => openCustomer(c)}
-                className="group relative text-left rounded-2xl p-4 transition-all duration-200 hover:-translate-y-0.5 overflow-hidden"
+                className="relative text-left rounded-xl p-4 transition-all hover:-translate-y-0.5 overflow-hidden"
                 style={{
-                  background: "white",
-                  border: "1px solid rgba(232,229,224,0.7)",
-                  boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
+                  background: T.surface,
+                  border: `1px solid ${T.border}`,
+                  boxShadow: "0 1px 0 rgba(255,255,255,0.6) inset",
                 }}
-                aria-label={`Open ${c.name}'s record`}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = T.ink;
+                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(45,16,15,0.08), 0 1px 0 rgba(255,255,255,0.6) inset";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = T.border;
+                  e.currentTarget.style.boxShadow = "0 1px 0 rgba(255,255,255,0.6) inset";
+                }}
+                aria-label={`Open ${c.name}`}
               >
-                {/* Gradient ring on hover — subtle teal frame */}
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-                  style={{
-                    boxShadow: `0 0 0 1px ${NOHO_BLUE}55, 0 12px 32px rgba(51,116,133,0.18)`,
-                  }}
+                {/* Status accent bar — left edge */}
+                <span
+                  aria-hidden
+                  className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full"
+                  style={{ background: accentColor, opacity: status === "neutral" ? 0.4 : 1 }}
                 />
-
-                <div className="relative flex items-start gap-3">
-                  {/* Avatar monogram with plan-tier gradient */}
+                <div className="flex items-start gap-3 pl-2">
+                  {/* Avatar circle with gradient */}
                   <div
-                    className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center font-black text-sm tracking-tight"
+                    className="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-[13px] font-bold relative"
                     style={{
-                      background: theme.avatarGrad,
-                      color: NOHO_CREAM,
-                      boxShadow: `0 4px 14px ${theme.dot}45, inset 0 1px 0 rgba(255,255,255,0.18)`,
-                      fontFamily: "var(--font-baloo), sans-serif",
+                      background: avatarHue(c.name),
+                      color: "#FFFFFF",
+                      boxShadow: "0 1px 0 rgba(255,255,255,0.18) inset, 0 2px 4px rgba(45,16,15,0.16)",
                     }}
                   >
                     {initials(c.name)}
+                    {business && (
+                      <span
+                        aria-hidden
+                        className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+                        style={{ background: T.cream, color: T.ink, border: `1.5px solid ${T.surface}` }}
+                        title="Business box"
+                      >
+                        <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          <path d="M2 4 H10 V10 H2 Z M4 4 V2 H8 V4" />
+                        </svg>
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    {/* Top row: name + suite badge */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="font-black text-sm truncate" style={{ color: NOHO_INK }}>
+                        <p className="text-[13px] font-bold truncate" style={{ color: T.ink }}>
                           {c.name}
                         </p>
-                        <p className="text-[11px] truncate" style={{ color: "rgba(45,16,15,0.45)" }}>
-                          {c.email}
+                        <p className="text-[11px] truncate" style={{ color: T.inkFaint }}>
+                          {c.businessName ? `${c.businessName} · ` : ""}{c.email}
                         </p>
                       </div>
                       <span
-                        className="shrink-0 text-[10px] font-black px-2 py-0.5 rounded-md"
+                        className="shrink-0 text-[10px] font-bold px-1.5 h-5 rounded inline-flex items-center"
                         style={{
-                          background: "rgba(45,16,15,0.06)",
-                          color: NOHO_INK,
-                          fontFamily: "var(--font-baloo), sans-serif",
+                          background: T.surfaceAlt,
+                          color: T.ink,
+                          ...TAB_NUM,
                           letterSpacing: "0.04em",
                         }}
+                        title="Suite number"
                       >
                         #{c.suiteNumber || "—"}
                       </span>
                     </div>
 
-                    {/* Business sub-line */}
-                    {c.businessName && (
-                      <p
-                        className="text-[11px] font-bold mt-1 flex items-center gap-1"
-                        style={{ color: NOHO_BLUE_DEEP }}
-                      >
-                        <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
-                          <rect x="2" y="3" width="12" height="11" />
-                          <rect x="4" y="5" width="2" height="2" />
-                          <rect x="7" y="5" width="2" height="2" />
-                          <rect x="10" y="5" width="2" height="2" />
-                          <rect x="7" y="9" width="2" height="5" />
-                        </svg>
-                        <span className="truncate">{c.businessName}</span>
-                      </p>
-                    )}
-
-                    {/* Pill row: plan + status + warnings */}
-                    <div className="flex flex-wrap gap-1.5 mt-2.5 items-center">
-                      <span
-                        className="text-[10px] font-black uppercase tracking-[0.12em] px-2 py-0.5 rounded-md inline-flex items-center gap-1"
-                        style={{ background: theme.pill.bg, color: theme.pill.text }}
-                      >
-                        <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full" style={{ background: theme.dot }} />
-                        {c.plan ?? "Basic"}
-                      </span>
-                      <StatusBadge status={c.status} />
-                      {due && (
-                        <span
-                          className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                          style={{ background: due.bg, color: due.color }}
-                        >
-                          {due.label}
-                        </span>
+                    <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                      {c.plan && (
+                        <Pill tone="default">
+                          {c.plan}
+                          {c.planTerm ? ` · ${c.planTerm}mo` : ""}
+                        </Pill>
                       )}
-                      {noDeposit && (
-                        <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-red-50 text-red-700">
-                          DEPOSIT REQ
-                        </span>
-                      )}
-                      {kycPending && (
-                        <span
-                          className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                          style={{
-                            background:
-                              c.kycStatus === "Rejected"
-                                ? "rgba(231,0,19,0.12)"
-                                : "rgba(245,158,11,0.18)",
-                            color: c.kycStatus === "Rejected" ? "#b91c1c" : "#92400e",
-                          }}
-                        >
-                          KYC: {c.kycStatus}
-                        </span>
-                      )}
-                      {c.boxType === "Business" && (
-                        <span
-                          className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md"
-                          style={{
-                            background: "rgba(51,116,133,0.10)",
-                            color: NOHO_BLUE,
-                          }}
-                        >
-                          BIZ
-                        </span>
-                      )}
+                      {due && <Pill tone={due.tone}>{due.label}</Pill>}
+                      {noDeposit && <Pill tone="warning">No deposit</Pill>}
+                      {kycPending && <Pill tone="warning">KYC {c.kycStatus}</Pill>}
                     </div>
 
-                    {/* Bottom stats row: mail/pkg with icons + joined date */}
-                    <div
-                      className="flex items-center justify-between gap-2 mt-3 pt-2.5"
-                      style={{ borderTop: "1px dashed rgba(232,229,224,0.8)" }}
-                    >
-                      <div className="flex items-center gap-3 text-[11px]" style={{ color: "rgba(45,16,15,0.6)" }}>
-                        <span className="inline-flex items-center gap-1 font-bold">
-                          <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.7">
-                            <rect x="2" y="4" width="12" height="9" rx="1" />
-                            <path d="M2 5 L8 9 L14 5" />
-                          </svg>
-                          {c.mailCount}
-                        </span>
-                        <span className="inline-flex items-center gap-1 font-bold">
-                          <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round">
-                            <path d="M8 2 L14 5 L14 11 L8 14 L2 11 L2 5 Z" />
-                            <path d="M2 5 L8 8 L14 5 M8 8 L8 14" />
-                          </svg>
-                          {c.packageCount}
-                        </span>
-                      </div>
-                      <span className="text-[10px]" style={{ color: "rgba(45,16,15,0.35)" }}>
-                        {new Date(c.createdAt).toLocaleDateString()}
+                    <div className="mt-3 flex items-center justify-between gap-3 text-[11px]">
+                      <span style={{ color: T.inkFaint }}>
+                        <span style={{ color: T.ink, fontWeight: 700, ...TAB_NUM }}>{c.mailCount ?? 0}</span> mail
+                        <span className="mx-1.5" style={{ color: T.inkFaint }}>·</span>
+                        <span style={{ color: T.ink, fontWeight: 700, ...TAB_NUM }}>{c.packageCount ?? 0}</span> pkg
                       </span>
+                      <StatusBadge status={c.status || "—"} />
                     </div>
                   </div>
                 </div>
@@ -340,128 +489,266 @@ export function AdminCustomersPanel({
         </div>
       )}
 
-      {/* ─── TABLE VIEW (compact fallback) ─────────────────────────── */}
-      {view === "table" && filteredCustomers.length > 0 && (
+      {/* ─── Table view ───────────────────────────────────────────── */}
+      {view === "table" && filtered.length > 0 && (
         <div
-          className="rounded-2xl overflow-hidden bg-white"
-          style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+          className="rounded-xl overflow-hidden"
+          style={{ background: T.surface, border: `1px solid ${T.border}` }}
         >
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr
-                  style={{
-                    background: "rgba(232,229,224,0.4)",
-                    borderBottom: "1px solid rgba(232,229,224,0.5)",
-                  }}
-                >
-                  <th className="text-left px-5 py-3 font-black text-[10px] uppercase tracking-widest text-text-light/50">Customer</th>
-                  <th className="text-left px-4 py-3 font-black text-[10px] uppercase tracking-widest text-text-light/50">Suite</th>
-                  <th className="text-left px-4 py-3 font-black text-[10px] uppercase tracking-widest text-text-light/50">Plan</th>
-                  <th className="text-left px-4 py-3 font-black text-[10px] uppercase tracking-widest text-text-light/50">Status</th>
-                  <th className="text-left px-4 py-3 font-black text-[10px] uppercase tracking-widest text-text-light/50">Mail</th>
-                  <th className="text-left px-4 py-3 font-black text-[10px] uppercase tracking-widest text-text-light/50">Joined</th>
-                  <th className="px-4 py-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCustomers.map((c, i) => {
-                  const theme = PLAN_THEME[c.plan ?? "Basic"] ?? PLAN_THEME.Basic;
-                  const due = dueChip(c.planDueDate);
-                  return (
-                    <tr
-                      key={c.id}
-                      className="hover:bg-bg-light/10 transition-colors"
-                      style={{
-                        borderBottom: i < filteredCustomers.length - 1 ? "1px solid rgba(232,229,224,0.3)" : "none",
-                      }}
-                    >
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-2.5">
-                          <div
-                            className="w-7 h-7 shrink-0 rounded-lg flex items-center justify-center font-black text-[10px]"
-                            style={{
-                              background: theme.avatarGrad,
-                              color: NOHO_CREAM,
-                              fontFamily: "var(--font-baloo), sans-serif",
-                            }}
-                          >
-                            {initials(c.name)}
-                          </div>
-                          <div>
-                            <p className="font-bold text-text-light flex items-center gap-2">
-                              {c.name}
-                              {c.boxType === "Business" && (
-                                <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#337485]/10 text-[#337485]">
-                                  Biz
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-[10px] text-text-light/35">{c.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 font-bold text-text-light">#{c.suiteNumber}</td>
-                      <td className="px-4 py-3.5">
+          <table className="w-full" style={{ borderCollapse: "collapse" }}>
+            <thead className="sticky top-11 z-10" style={{ background: T.surfaceAlt }}>
+              <tr>
+                <Th sortKey="name"  current={sortKey} dir={sortDir} onClick={toggleSort}>Name</Th>
+                <Th sortKey="suite" current={sortKey} dir={sortDir} onClick={toggleSort} align="center">Suite</Th>
+                <Th sortKey="plan"  current={sortKey} dir={sortDir} onClick={toggleSort}>Plan</Th>
+                <Th sortKey="due"   current={sortKey} dir={sortDir} onClick={toggleSort}>Renewal</Th>
+                <Th align="center">Mail</Th>
+                <Th align="right">Status</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((c, idx) => {
+                const due = computeDue(c.planDueDate);
+                const accentColor =
+                  c.status === "Suspended" ? T.red : c.status === "Active" ? T.success : T.border;
+                return (
+                  <tr
+                    key={c.id}
+                    onClick={() => openCustomer(c)}
+                    className="cursor-pointer transition-colors"
+                    style={{
+                      borderTop: `1px solid ${T.border}`,
+                      background: idx % 2 === 0 ? T.surface : "rgba(244,238,227,0.35)",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(51,116,133,0.06)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = idx % 2 === 0 ? T.surface : "rgba(244,238,227,0.35)"; }}
+                  >
+                    <td style={cell()}>
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <span
-                          className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded inline-flex items-center gap-1"
-                          style={{ background: theme.pill.bg, color: theme.pill.text }}
+                          aria-hidden
+                          className="w-1 h-8 rounded-full shrink-0"
+                          style={{ background: accentColor, opacity: c.status === "Active" || c.status === "Suspended" ? 1 : 0.3 }}
+                        />
+                        <span
+                          className="w-8 h-8 rounded-full text-[10px] font-bold flex items-center justify-center shrink-0"
+                          style={{
+                            background: avatarHue(c.name),
+                            color: "#FFFFFF",
+                            boxShadow: "0 1px 0 rgba(255,255,255,0.16) inset",
+                          }}
                         >
-                          <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full" style={{ background: theme.dot }} />
-                          {c.plan}
+                          {initials(c.name)}
                         </span>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <StatusBadge status={c.status} />
-                          {(c.securityDepositCents ?? 0) === 0 && (
-                            <span className="text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">DEPOSIT REQ</span>
-                          )}
-                          {due && (
-                            <span
-                              className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                              style={{ background: due.bg, color: due.color }}
-                            >
-                              {due.label}
-                            </span>
-                          )}
-                          {c.kycStatus && c.kycStatus !== "Approved" && (
-                            <span
-                              className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                              style={{
-                                background:
-                                  c.kycStatus === "Rejected" ? "rgba(231,0,19,0.12)" : "rgba(245,158,11,0.18)",
-                                color: c.kycStatus === "Rejected" ? "#b91c1c" : "#92400e",
-                              }}
-                            >
-                              KYC: {c.kycStatus}
-                            </span>
-                          )}
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-bold truncate" style={{ color: T.ink }}>
+                            {c.name}
+                          </p>
+                          <p className="text-[11px] truncate" style={{ color: T.inkFaint }}>
+                            {c.email}
+                          </p>
                         </div>
-                      </td>
-                      <td className="px-4 py-3.5 text-xs text-text-light/50">
-                        {c.mailCount} mail · {c.packageCount} pkg
-                      </td>
-                      <td className="px-4 py-3.5 text-xs text-text-light/40">{new Date(c.createdAt).toLocaleDateString()}</td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center">
-                          <button
-                            onClick={() => openCustomer(c)}
-                            className="text-xs font-bold text-white bg-[#337485] hover:bg-[#23596A] px-2.5 py-1 rounded-lg transition-colors"
-                            aria-label={`Open ${c.name}'s record`}
-                          >
-                            Open
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </td>
+                    <td style={{ ...cell(), textAlign: "center", ...TAB_NUM }}>
+                      #{c.suiteNumber || "—"}
+                    </td>
+                    <td style={cell()}>
+                      <span className="text-[12px] font-bold" style={{ color: T.ink }}>
+                        {c.plan ?? "—"}
+                      </span>
+                      {c.planTerm && (
+                        <span className="ml-1.5 text-[11px]" style={{ color: T.inkFaint }}>
+                          {c.planTerm}mo
+                        </span>
+                      )}
+                    </td>
+                    <td style={cell()}>
+                      {due ? (
+                        <Pill tone={due.tone}>{due.label}</Pill>
+                      ) : c.planDueDate ? (
+                        <span className="text-[12px]" style={{ ...TAB_NUM, color: T.inkSoft }}>
+                          {c.planDueDate}
+                        </span>
+                      ) : (
+                        <span className="text-[12px]" style={{ color: T.inkFaint }}>—</span>
+                      )}
+                    </td>
+                    <td style={{ ...cell(), textAlign: "center", ...TAB_NUM }}>
+                      <span style={{ color: T.ink, fontWeight: 700 }}>{c.mailCount ?? 0}</span>
+                      <span className="mx-1" style={{ color: T.inkFaint }}>/</span>
+                      <span style={{ color: T.inkSoft }}>{c.packageCount ?? 0}</span>
+                    </td>
+                    <td style={{ ...cell(), textAlign: "right" }}>
+                      <StatusBadge status={c.status || "—"} />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
   );
+}
+
+// ─── Sub-components ─────────────────────────────────────────────────────
+
+function HeroTile({
+  label,
+  value,
+  tone,
+  onClick,
+  active,
+  pulse,
+}: {
+  label: string;
+  value: number;
+  tone: "ink" | "success" | "red" | "amber" | "blue";
+  onClick: () => void;
+  active?: boolean;
+  pulse?: boolean;
+}) {
+  const animated = useAnimatedCount(value);
+  // Tone now ONLY drives the left bar accent + the pulse dot. The tile
+  // body itself stays neutral surface + ink — keeps the metric strip
+  // calm and lets the data (the number) be the focal point.
+  const barColor = (() => {
+    switch (tone) {
+      case "success": return T.success;
+      case "red":     return T.red;
+      case "amber":   return T.amber;
+      case "blue":    return T.blue;
+      default:        return T.ink;
+    }
+  })();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="relative overflow-hidden rounded-md text-left px-3 py-2.5 transition-colors"
+      style={{
+        background: T.surface,
+        border: `1px solid ${active ? barColor : T.border}`,
+      }}
+      onMouseEnter={(e) => {
+        if (!active) e.currentTarget.style.background = T.surfaceAlt;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = T.surface;
+      }}
+    >
+      <span
+        aria-hidden
+        className="absolute left-0 top-0 bottom-0 w-0.5"
+        style={{ background: barColor }}
+      />
+      {pulse && value > 0 && (
+        <span
+          aria-hidden
+          className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full"
+          style={{
+            background: barColor,
+            animation: "tile-pulse 1.8s ease-in-out infinite",
+          }}
+        />
+      )}
+      <p
+        className="pl-2 text-[10px] font-bold uppercase tracking-[0.14em]"
+        style={{ color: T.inkFaint }}
+      >
+        {label}
+      </p>
+      <p
+        className="pl-2 text-[24px] font-bold leading-none mt-1"
+        style={{ ...TAB_NUM, color: T.ink }}
+      >
+        {animated.toLocaleString()}
+      </p>
+      <style>{`
+        @keyframes tile-pulse {
+          0%, 100% { opacity: 0.55; transform: scale(1); }
+          50%      { opacity: 1;    transform: scale(1.35); }
+        }
+      `}</style>
+    </button>
+  );
+}
+
+function Pill({
+  tone = "default",
+  children,
+}: {
+  tone?: "default" | "danger" | "warning" | "success";
+  children: React.ReactNode;
+}) {
+  const styles = (() => {
+    switch (tone) {
+      case "danger":  return { bg: "rgba(231,0,19,0.10)",  color: T.danger };
+      case "warning": return { bg: "rgba(245,166,35,0.14)", color: T.warning };
+      case "success": return { bg: "rgba(22,163,74,0.10)",  color: T.success };
+      default:        return { bg: T.surfaceAlt,            color: T.ink };
+    }
+  })();
+  return (
+    <span
+      className="inline-flex items-center px-1.5 h-5 rounded text-[10px] font-bold uppercase tracking-[0.10em]"
+      style={{ background: styles.bg, color: styles.color }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function Th({
+  children,
+  sortKey: thKey,
+  current,
+  dir,
+  onClick,
+  align = "left",
+}: {
+  children: React.ReactNode;
+  sortKey?: SortKey;
+  current?: SortKey;
+  dir?: SortDir;
+  onClick?: (k: SortKey) => void;
+  align?: "left" | "center" | "right";
+}) {
+  const sortable = !!thKey && !!onClick;
+  const active = sortable && thKey === current;
+  return (
+    <th
+      style={{
+        textAlign: align,
+        padding: "10px 16px",
+        fontSize: 10,
+        fontWeight: 800,
+        textTransform: "uppercase",
+        letterSpacing: "0.14em",
+        color: active ? T.ink : T.inkSoft,
+        cursor: sortable ? "pointer" : "default",
+        userSelect: "none",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+      onClick={sortable ? () => onClick!(thKey!) : undefined}
+    >
+      <span className="inline-flex items-center gap-1">
+        {children}
+        {active && (
+          <span style={{ fontSize: 8, color: T.blue }}>{dir === "asc" ? "▲" : "▼"}</span>
+        )}
+      </span>
+    </th>
+  );
+}
+
+function cell(): React.CSSProperties {
+  return {
+    padding: "12px 16px",
+    fontSize: 13,
+    color: T.ink,
+    verticalAlign: "middle",
+  };
 }

@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * Branded interactive cursor for the desktop site.
- * - Cream + brown outer ring with a brand-blue dot inside (matches the logo)
- * - Expands and softens over interactive elements (links, buttons, [role=button])
- * - Becomes an I-beam over text inputs / textareas / contenteditable
- * - Auto-disabled on touch devices and for prefers-reduced-motion users (CSS)
+ * Interactive cursor — regular arrow shape, blue tint, click feedback.
  *
- * Mounted at the root layout so it covers every page.
+ * Was a chunky cream/brown disc with a context label. The new design is
+ * subtler: a normal pointer-arrow silhouette in blue (matches the iPad-OS
+ * sidebar accent), a small ring scale + tactile "tick" sound on click.
+ *
+ * Auto-disabled on touch devices and for prefers-reduced-motion users.
  */
 import { useEffect, useRef } from "react";
 
@@ -15,7 +15,6 @@ export function InteractiveCursor() {
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // Only run on devices with a fine pointer + hover capability.
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (!fine.matches || reduce.matches) return;
@@ -33,9 +32,9 @@ export function InteractiveCursor() {
     let raf = 0;
 
     const tick = () => {
-      // Smooth easing toward target
-      x += (tx - x) * 0.22;
-      y += (ty - y) * 0.22;
+      // Tighter easing — feels closer to a real cursor, not a balloon.
+      x += (tx - x) * 0.42;
+      y += (ty - y) * 0.42;
       cursorEl.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       raf = requestAnimationFrame(tick);
     };
@@ -49,76 +48,111 @@ export function InteractiveCursor() {
     }
     function isTextTarget(t: EventTarget | null): boolean {
       if (!t || !(t instanceof Element)) return false;
-      return !!t.closest('input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]');
+      return !!t.closest(
+        'input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]',
+      );
     }
 
-    // Label resolution — small, signature touch.
-    function labelFor(t: EventTarget | null): string {
-      if (!t || !(t instanceof Element)) return "";
-      const explicit = t.closest<HTMLElement>("[data-cursor-label]");
-      if (explicit) return explicit.dataset.cursorLabel ?? "";
-      const a = t.closest<HTMLAnchorElement>("a[href]");
-      if (a) {
-        const href = a.getAttribute("href") ?? "";
-        if (href.startsWith("tel:")) return "Call";
-        if (href.startsWith("mailto:")) return "Email";
-        if (href.startsWith("/signup")) return "Sign up";
-        if (href.startsWith("/login")) return "Sign in";
-        if (href.startsWith("#")) return "Jump to";
-        if (a.target === "_blank") return "New tab";
-        return "";
+    // ─── Click sound — tiny synthesised "tick" using WebAudio ───────────
+    // No asset request, no mp3 load — generate the sound at click time.
+    // Two short sine pings (mouse-down + mouse-up feel) keep it tactile
+    // without being intrusive. Lazy-init the AudioContext on first user
+    // gesture (browsers block autoplay otherwise).
+    let audio: AudioContext | null = null;
+    function ensureAudio(): AudioContext | null {
+      if (audio) return audio;
+      const C =
+        (window as unknown as {
+          AudioContext?: typeof AudioContext;
+          webkitAudioContext?: typeof AudioContext;
+        }).AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (!C) return null;
+      try {
+        audio = new C();
+        return audio;
+      } catch {
+        return null;
       }
-      const btn = t.closest<HTMLElement>('button, [role="button"]');
-      if (btn) {
-        const t2 = btn.getAttribute("aria-label");
-        if (t2 && t2.length <= 16) return t2;
-      }
-      return "";
     }
-
-    // Find or lazily create the label element inside the cursor disc.
-    let labelEl = cursorEl.querySelector<HTMLSpanElement>(".noho-cursor__label");
-    if (!labelEl) {
-      labelEl = document.createElement("span");
-      labelEl.className = "noho-cursor__label";
-      cursorEl.appendChild(labelEl);
+    function playTick(freq: number, duration: number, gain: number) {
+      const ctx = ensureAudio();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      g.gain.value = 0;
+      osc.connect(g).connect(ctx.destination);
+      const t0 = ctx.currentTime;
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(gain, t0 + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+      osc.start(t0);
+      osc.stop(t0 + duration + 0.02);
     }
-    const labelNode: HTMLSpanElement = labelEl;
-    let lastLabel = "";
 
     function onMove(e: MouseEvent) {
       tx = e.clientX;
       ty = e.clientY;
       const t = e.target;
-      const ptr = isPointerTarget(t);
-      cursorEl.classList.toggle("is-pointer", ptr);
+      cursorEl.classList.toggle("is-pointer", isPointerTarget(t));
       cursorEl.classList.toggle("is-text", isTextTarget(t));
-      const next = ptr ? labelFor(t) : "";
-      if (next !== lastLabel) {
-        lastLabel = next;
-        if (next) {
-          labelNode.textContent = next;
-          cursorEl.classList.add("has-label");
-        } else {
-          cursorEl.classList.remove("has-label");
-        }
-      }
     }
     function onEnter() { cursorEl.style.opacity = "1"; }
     function onLeave() { cursorEl.style.opacity = "0"; }
+    function onMouseDown(e: MouseEvent) {
+      cursorEl.classList.add("is-down");
+      // Only play the click if we're on a real interactive target —
+      // otherwise dragging text fires too.
+      if (isPointerTarget(e.target)) {
+        playTick(880, 0.06, 0.05);
+      }
+    }
+    function onMouseUp(e: MouseEvent) {
+      cursorEl.classList.remove("is-down");
+      if (isPointerTarget(e.target)) {
+        playTick(620, 0.05, 0.04);
+      }
+    }
 
     window.addEventListener("mousemove", onMove, { passive: true });
     window.addEventListener("mouseenter", onEnter);
     window.addEventListener("mouseleave", onLeave);
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mouseup", onMouseUp);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseenter", onEnter);
       window.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mouseup", onMouseUp);
       document.documentElement.classList.remove("has-noho-cursor");
+      if (audio) {
+        try { audio.close(); } catch { /* noop */ }
+      }
     };
   }, []);
 
-  return <div ref={ref} className="noho-cursor" aria-hidden="true" />;
+  return (
+    <div ref={ref} className="noho-cursor" aria-hidden="true">
+      {/* Regular arrow silhouette — same shape as the OS pointer, just
+          painted in brand blue. Inline SVG so we never wait on assets. */}
+      <svg
+        className="noho-cursor__arrow"
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="#1976FF"
+        stroke="#FFFFFF"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      >
+        <path d="M4 2 L4 18 L9 14 L11.5 21 L14.2 19.8 L11.7 13 L18 13 Z" />
+      </svg>
+    </div>
+  );
 }

@@ -93,7 +93,184 @@ export async function getPOSCatalog(): Promise<POSCatalogEntry[]> {
     { sku: "fee:business",  name: "Business solutions pkg", category: "Fees", priceCents: 200000, hint: "$2,000 LLC launch" },
   );
 
+  // ─── Items synced from Square (one source of truth) ────────────────────
+  // Anything that lives in the Square catalog and was last synced down to
+  // the local `CatalogItem` table shows up here automatically. When admin
+  // creates a new item in /admin → POS, the dual-write helper below pushes
+  // it to Square first, then writes the row here, so the next call to
+  // getPOSCatalog returns it without an extra sync.
+  try {
+    const synced = await prisma.catalogItem.findMany({
+      where: { inStock: true },
+      orderBy: [{ category: "asc" }, { name: "asc" }],
+    });
+    for (const it of synced) {
+      out.push({
+        sku: "sq:" + it.id,
+        name: it.name,
+        category: it.category ?? "Square",
+        priceCents: it.price,
+        hint: it.description ?? undefined,
+        squareCatalogId: it.squareCatalogId,
+      });
+    }
+  } catch {
+    // CatalogItem table may not exist on older deploys — don't break POS.
+  }
+
   return out;
+}
+
+// ─── Catalog dual-write helpers ─────────────────────────────────────────
+//
+// Single source of truth: anything an admin adds in /admin → POS lives in
+// BOTH our DB (CatalogItem) AND the Square catalog. If Square push fails
+// we still keep the local copy so the till can ring it up — the admin can
+// retry the Square sync later.
+
+import {
+  createSquareCatalogItem,
+  updateSquareCatalogItem,
+  deleteSquareCatalogItem,
+  isSquareConfigured,
+} from "@/lib/square";
+
+// Type lives at module scope but is intentionally NOT exported — Next.js
+// 16 "use server" files can only export async functions. Local-only types
+// are fine; if any consumer needs this shape, move it to `@/lib/pos`.
+type CatalogItemInput = {
+  name: string;
+  description?: string;
+  priceCents: number;
+  category?: string;
+  imageUrl?: string;
+};
+
+export async function createCatalogItem(
+  input: CatalogItemInput,
+): Promise<{ success: true; id: string; squareSynced: boolean } | { error: string }> {
+  await verifyAdmin();
+  if (!input.name.trim()) return { error: "Name is required" };
+  if (!Number.isFinite(input.priceCents) || input.priceCents < 0) {
+    return { error: "Price must be a positive number of cents" };
+  }
+
+  let squareItemId: string | null = null;
+  let squareSynced = false;
+  if (isSquareConfigured()) {
+    try {
+      const sq = await createSquareCatalogItem({
+        name: input.name.trim(),
+        description: input.description?.trim() || undefined,
+        priceCents: input.priceCents,
+        category: input.category,
+      });
+      squareItemId = sq.itemId || null;
+      squareSynced = !!squareItemId;
+    } catch (err) {
+      // Don't block local creation — admin sees the warning + can retry sync.
+      // eslint-disable-next-line no-console
+      console.warn("[pos] Square dual-write failed:", err instanceof Error ? err.message : err);
+    }
+  }
+
+  // Use the Square id when present; otherwise generate a local-only marker
+  // so the unique constraint is satisfied and re-sync can replace it later.
+  const localKey = squareItemId ?? "local-" + Math.random().toString(36).slice(2, 14);
+  const row = await prisma.catalogItem.create({
+    data: {
+      squareCatalogId: localKey,
+      name: input.name.trim(),
+      description: input.description?.trim() || null,
+      price: input.priceCents,
+      currency: "USD",
+      category: input.category?.trim() || null,
+      imageUrl: input.imageUrl?.trim() || null,
+      inStock: true,
+    },
+  });
+
+  revalidatePath("/admin");
+  return { success: true, id: row.id, squareSynced };
+}
+
+export async function updateCatalogItem(input: {
+  id: string;
+  name: string;
+  description?: string;
+  priceCents: number;
+  category?: string;
+  inStock?: boolean;
+}): Promise<{ success: true; squareSynced: boolean } | { error: string }> {
+  await verifyAdmin();
+  const existing = await prisma.catalogItem.findUnique({ where: { id: input.id } });
+  if (!existing) return { error: "Item not found" };
+
+  let squareSynced = false;
+  // Only push to Square if the row was previously synced (has a real Square id).
+  if (
+    isSquareConfigured() &&
+    existing.squareCatalogId &&
+    !existing.squareCatalogId.startsWith("local-")
+  ) {
+    try {
+      await updateSquareCatalogItem({
+        itemId: existing.squareCatalogId,
+        name: input.name.trim(),
+        description: input.description?.trim() || undefined,
+        priceCents: input.priceCents,
+      });
+      squareSynced = true;
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn("[pos] Square update failed:", err instanceof Error ? err.message : err);
+    }
+  }
+
+  await prisma.catalogItem.update({
+    where: { id: input.id },
+    data: {
+      name: input.name.trim(),
+      description: input.description?.trim() || null,
+      price: input.priceCents,
+      category: input.category?.trim() || existing.category,
+      inStock: input.inStock ?? existing.inStock,
+      syncedAt: new Date(),
+    },
+  });
+
+  revalidatePath("/admin");
+  return { success: true, squareSynced };
+}
+
+export async function deleteCatalogItem(
+  id: string,
+): Promise<{ success: true } | { error: string }> {
+  await verifyAdmin();
+  const existing = await prisma.catalogItem.findUnique({ where: { id } });
+  if (!existing) return { error: "Item not found" };
+
+  if (
+    isSquareConfigured() &&
+    existing.squareCatalogId &&
+    !existing.squareCatalogId.startsWith("local-")
+  ) {
+    try {
+      await deleteSquareCatalogItem(existing.squareCatalogId);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn("[pos] Square delete failed:", err instanceof Error ? err.message : err);
+    }
+  }
+
+  await prisma.catalogItem.delete({ where: { id } });
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+export async function listCatalogItems() {
+  await verifyAdmin();
+  return prisma.catalogItem.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] });
 }
 
 // ─── Customer search (used by POS attach-customer) ───────────────────────

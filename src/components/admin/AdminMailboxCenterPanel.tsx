@@ -1096,12 +1096,12 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
       {(mode === "renew" || mode === "search") && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Customer picker */}
-          <div className="lg:col-span-1 rounded-2xl bg-white p-5" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+          <div className="lg:col-span-1 rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
             <div className="grid grid-cols-2 gap-2 mb-3">
               <button
                 onClick={() => setWalkInOpen(true)}
-                className="flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl text-[11px] font-black text-white transition-all hover:-translate-y-0.5 whitespace-nowrap"
-                style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`, boxShadow: "0 4px 14px rgba(51,116,133,0.32)" }}
+                className="flex items-center justify-center gap-1.5 px-2 h-9 rounded-md text-[11px] font-bold text-white transition-colors whitespace-nowrap"
+                style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
               >
                 <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <circle cx="9" cy="9" r="3.5" />
@@ -1113,8 +1113,8 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
               <button
                 onClick={handleRunAutoRenewals}
                 disabled={autoRenewing}
-                className="flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl text-[11px] font-black transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-wait whitespace-nowrap"
-                style={{ background: "rgba(45,16,15,0.06)", color: NOHO_INK, border: "1px solid rgba(45,16,15,0.18)" }}
+                className="flex items-center justify-center gap-1.5 px-2 h-9 rounded-md text-[11px] font-bold uppercase tracking-[0.10em] transition-colors disabled:opacity-50 disabled:cursor-wait whitespace-nowrap"
+                style={{ background: "#FFFFFF", color: NOHO_INK, border: "1px solid #E5DACA" }}
                 title="Run renewals for everyone with auto-renew on whose plan is due"
               >
                 {autoRenewing && (
@@ -1382,7 +1382,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
           </div>
 
           {/* Renewal form */}
-          <div className="lg:col-span-2 rounded-2xl bg-white p-5 sm:p-6" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+          <div className="lg:col-span-2 rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Renewal</p>
             <h3 className="text-xl font-extrabold tracking-tight mt-1" style={{ color: NOHO_INK }}>
               {selected ? `${selected.name} · Suite #${selected.suiteNumber ?? "—"}` : "Pick a customer to begin"}
@@ -1600,8 +1600,8 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
               <button
                 onClick={handleProcess}
                 disabled={isPending || !selected || priceCents == null}
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-black text-white transition-all disabled:opacity-60 disabled:cursor-wait"
-                style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`, boxShadow: "0 6px 18px rgba(51,116,133,0.35)" }}
+                className="flex items-center justify-center gap-2 px-5 h-10 rounded-md text-sm font-bold text-white transition-colors disabled:opacity-60 disabled:cursor-wait"
+                style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
               >
                 {isPending && (
                   <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -1620,7 +1620,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
       {(mode === "renew" || mode === "search") && selected && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Notes timeline */}
-          <div className="lg:col-span-2 rounded-2xl bg-white p-5 sm:p-6" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+          <div className="lg:col-span-2 rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>
                 Customer Log · {selected.name}
@@ -1722,7 +1722,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
           {/* Suite + Keys */}
           <div className="space-y-5">
             {/* Auto-renew toggle + wallet balance */}
-            <div className="rounded-2xl bg-white p-5" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Auto-renew</p>
                 <button
@@ -1875,7 +1875,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             </div>
 
             {/* Suite reassign */}
-            <div className="rounded-2xl bg-white p-5" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-1">Suite</p>
               {!reassignOpen ? (
                 <div className="flex items-center justify-between gap-2">
@@ -1921,7 +1921,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             </div>
 
             {/* Keys */}
-            <div className="rounded-2xl bg-white p-5" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Keys in hand</p>
                 <span className="text-[10px] font-black px-1.5 py-0.5 rounded" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>
@@ -1970,7 +1970,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             </div>
 
             {/* Security deposit */}
-            <div className="rounded-2xl bg-white p-5" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
               <div className="flex items-center justify-between mb-1">
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Security Deposit</p>
                 {!refundOpen && (selected.securityDepositCents ?? 0) > 0 && (
@@ -2053,7 +2053,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             </div>
 
             {/* Cancel + refund (terminate account) */}
-            <div className="rounded-2xl bg-white p-5" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
               <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "#b91c1c" }}>Cancel Account</p>
               {!cancelOpen ? (
                 <>
@@ -2150,7 +2150,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
 
       {/* ─── Key Registry mode ─── */}
       {mode === "keys" && (
-        <div className="rounded-2xl bg-white p-5 sm:p-6" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+        <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>
               Key Registry
@@ -2267,7 +2267,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
       )}
 
       {(mode === "recent") && (
-        <div className="rounded-2xl bg-white p-5 sm:p-6" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+        <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>
               Recent Renewals
@@ -2377,7 +2377,7 @@ function PlanDistributionCard({ distribution }: { distribution: Record<string, n
     "(no plan)": "#7A6050",
   };
   return (
-    <div className="rounded-2xl bg-white p-5 sm:p-6" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+    <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>Plan Distribution</h3>
         <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>
@@ -2418,7 +2418,7 @@ function ForwardingMapCard({ byState }: { byState: Record<string, number> }) {
   const rest = entries.slice(8).reduce((s, [, n]) => s + n, 0);
   const max = top[0]?.[1] ?? 1;
   return (
-    <div className="rounded-2xl bg-white p-5 sm:p-6" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+    <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>Forwarding Reach</h3>
         <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>
@@ -2484,7 +2484,7 @@ function TillCard({
   const fmt = (cents: number) => `$${(cents / 100).toFixed(2)}`;
   const pctOf = (cents: number) => (week.completedCents > 0 ? (cents / week.completedCents) * 100 : 0);
   return (
-    <div className="rounded-2xl bg-white p-5 sm:p-6" style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}>
+    <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>Cash Till</h3>
         <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>

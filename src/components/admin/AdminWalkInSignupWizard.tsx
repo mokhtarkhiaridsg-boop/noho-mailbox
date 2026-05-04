@@ -216,12 +216,12 @@ export function AdminWalkInSignupWizard({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8" style={{ background: "rgba(10,8,7,0.6)" }}>
       <div
-        className="bg-white rounded-3xl w-full max-w-2xl max-h-[92vh] overflow-y-auto"
-        style={{ boxShadow: "0 24px 60px rgba(10,8,7,0.4)" }}
+        className="bg-white rounded-md w-full max-w-2xl max-h-[92vh] overflow-y-auto"
+        style={{ border: "1px solid #E5DACA", boxShadow: "0 16px 48px rgba(10,8,7,0.32)" }}
       >
         {/* Header */}
         <div
-          className="sticky top-0 px-6 py-4 flex items-center justify-between rounded-t-3xl"
+          className="sticky top-0 px-6 py-4 flex items-center justify-between"
           style={{ background: NOHO_INK, color: NOHO_CREAM }}
         >
           <div>
@@ -615,8 +615,8 @@ export function AdminWalkInSignupWizard({
             <button
               onClick={next}
               disabled={isPending || (step === 4 && uploadingSlot !== null)}
-              className="text-xs font-black px-5 py-2.5 rounded-xl text-white disabled:opacity-50"
-              style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`, boxShadow: "0 4px 14px rgba(51,116,133,0.32)" }}
+              className="text-[12px] font-bold uppercase tracking-[0.10em] px-4 h-10 rounded-md text-white disabled:opacity-50 transition-colors"
+              style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
             >
               Next →
             </button>
@@ -624,8 +624,8 @@ export function AdminWalkInSignupWizard({
             <button
               onClick={handleSubmit}
               disabled={isPending || !canSubmit || uploadingSlot !== null}
-              className="flex items-center gap-2 text-xs font-black px-5 py-2.5 rounded-xl text-white disabled:opacity-50 disabled:cursor-wait"
-              style={{ background: `linear-gradient(135deg, ${NOHO_INK}, #1a0908)`, boxShadow: "0 4px 14px rgba(45,16,15,0.4)" }}
+              className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.10em] px-4 h-10 rounded-md text-white disabled:opacity-50 disabled:cursor-wait transition-colors"
+              style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
               title={uploadingSlot ? "Wait for ID photo upload to finish" : ""}
             >
               {(isPending || uploadingSlot) && (

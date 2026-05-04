@@ -41,19 +41,10 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function huesFor(seed: string): { from: string; to: string } {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  const PAIRS: Array<[string, string]> = [
-    [NOHO_BLUE, NOHO_BLUE_DEEP],
-    [NOHO_INK, "#1F0807"],
-    ["#7C3AED", "#5B21B6"],
-    ["#B07030", "#8B5A24"],
-    [NOHO_GREEN, "#166534"],
-    [NOHO_RED, "#991b1b"],
-  ];
-  const [from, to] = PAIRS[h % PAIRS.length];
-  return { from, to };
+// Avatar — neutral cream surface (no rainbow palette).
+function huesFor(_seed: string): { from: string; to: string } {
+  void _seed;
+  return { from: "#F4EEE3", to: "#F4EEE3" };
 }
 
 export function AdminQuarterlyReportPanel() {
@@ -164,12 +155,14 @@ export function AdminQuarterlyReportPanel() {
 
   return (
     <div className="space-y-5">
-      {/* Hero strip */}
+      {/* Hero strip — Command Tower variant. */}
       <div
         className="relative overflow-hidden rounded-2xl"
         style={{
-          background: `linear-gradient(135deg, ${NOHO_BLUE_DEEP} 0%, ${NOHO_BLUE} 50%, #1F4554 100%)`,
-          boxShadow: "0 8px 28px rgba(35,89,106,0.30)",
+          background:
+            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
+          boxShadow:
+            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
         }}
       >
         {/* Pattern */}
@@ -306,11 +299,8 @@ export function AdminQuarterlyReportPanel() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Period picker — 1 col */}
         <div
-          className="rounded-2xl bg-white p-4"
-          style={{
-            border: `1px solid ${NOHO_INK}11`,
-            boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 12px rgba(45,16,15,0.04)",
-          }}
+          className="rounded-md bg-white p-4"
+          style={{ border: "1px solid #E5DACA" }}
         >
           <div className="flex items-center gap-2 mb-3">
             <span
@@ -400,10 +390,10 @@ export function AdminQuarterlyReportPanel() {
       {/* Compliance bar */}
       {stats.total > 0 && (
         <div
-          className="rounded-2xl p-4 bg-white"
+          className="rounded-md p-4 bg-white"
           style={{
             border: `1px solid ${NOHO_INK}11`,
-            boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 12px rgba(45,16,15,0.04)",
+            
           }}
         >
           <div className="flex items-center justify-between mb-2">
@@ -437,10 +427,10 @@ export function AdminQuarterlyReportPanel() {
                 width: `${stats.completeness}%`,
                 background:
                   stats.completeness === 100
-                    ? `linear-gradient(90deg, ${NOHO_GREEN} 0%, #22C55E 100%)`
+                    ? NOHO_GREEN
                     : stats.completeness > 75
-                      ? `linear-gradient(90deg, ${NOHO_AMBER} 0%, ${NOHO_GREEN} 100%)`
-                      : `linear-gradient(90deg, ${NOHO_RED} 0%, ${NOHO_AMBER} 100%)`,
+                      ? NOHO_AMBER
+                      : NOHO_RED,
               }}
             />
           </div>
@@ -483,7 +473,7 @@ export function AdminQuarterlyReportPanel() {
       {/* List */}
       {loading ? (
         <div
-          className="rounded-2xl p-10 text-center text-sm bg-white"
+          className="rounded-md p-8 text-center text-sm bg-white"
           style={{ border: `1px solid ${NOHO_INK}11`, color: `${NOHO_INK}66` }}
         >
           <div className="inline-flex items-center gap-2 font-bold">
@@ -496,14 +486,14 @@ export function AdminQuarterlyReportPanel() {
         </div>
       ) : filtered.length === 0 ? (
         <div
-          className="rounded-2xl p-12 text-center"
+          className="rounded-md p-10 text-center"
           style={{
             background: `linear-gradient(180deg, ${NOHO_CREAM}66 0%, white 100%)`,
             border: `1px dashed ${NOHO_INK}1a`,
           }}
         >
           <div
-            className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-3"
+            className="w-14 h-14 rounded-md mx-auto flex items-center justify-center mb-3"
             style={{ background: `${NOHO_BLUE}15` }}
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={NOHO_BLUE} strokeWidth="2">
@@ -547,26 +537,24 @@ function StatementRow({
 
   return (
     <div
-      className="rounded-xl bg-white relative overflow-hidden transition-all hover:-translate-y-0.5"
+      className="rounded-md bg-white relative overflow-hidden transition-colors"
       style={{
-        border: `1px solid ${accent}22`,
-        boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 12px rgba(45,16,15,0.04)",
+        border: `1px solid ${accent}55`,
       }}
     >
       <div
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{
-          background: `linear-gradient(180deg, ${accent} 0%, ${accent}66 100%)`,
-        }}
+        className="absolute left-0 top-0 bottom-0 w-0.5"
+        style={{ background: accent }}
       />
 
       <div className="p-3 pl-4 flex items-center gap-3">
-        {/* Monogram */}
+        {/* Monogram — neutral cream surface. */}
         <div
-          className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center text-white font-black text-xs"
+          className="w-9 h-9 rounded-md shrink-0 flex items-center justify-center font-bold text-[11px]"
           style={{
-            background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-            boxShadow: `0 3px 8px ${from}55`,
+            background: "#F4EEE3",
+            color: NOHO_INK,
+            border: "1px solid #E5DACA",
           }}
         >
           {initials(r.userName)}
@@ -630,13 +618,13 @@ function StatementRow({
                 href={`/admin/statements/${r.statementId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg text-white text-center transition-all hover:shadow-md"
+                className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md text-white text-center inline-flex items-center justify-center transition-colors"
                 style={{
-                  background: `linear-gradient(180deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`,
-                  boxShadow: `0 2px 6px ${NOHO_BLUE}40`,
+                  background: NOHO_INK,
+                  border: `1px solid ${NOHO_INK}`,
                 }}
               >
-                View / Print
+                View / print
               </a>
               <button
                 onClick={onRefresh}
@@ -655,10 +643,10 @@ function StatementRow({
             <button
               onClick={onRefresh}
               disabled={isPending}
-              className="text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-lg text-white transition-all hover:shadow-md disabled:opacity-50"
+              className="text-[10px] font-bold uppercase tracking-[0.10em] px-3 h-8 rounded-md text-white transition-colors disabled:opacity-50"
               style={{
-                background: `linear-gradient(180deg, ${NOHO_RED} 0%, #991b1b 100%)`,
-                boxShadow: `0 2px 6px ${NOHO_RED}40`,
+                background: NOHO_INK,
+                border: `1px solid ${NOHO_INK}`,
               }}
             >
               + Generate

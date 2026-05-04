@@ -28,7 +28,7 @@ const BUCKET_META: Record<StatusBucket, { title: string; sub: string; accent: st
     title: "Pending",
     sub: "Booked · awaiting pickup",
     accent: NOHO_AMBER,
-    bg: "linear-gradient(180deg, rgba(245,166,35,0.10) 0%, rgba(245,166,35,0.02) 60%, transparent 100%)",
+    bg: "#FFFFFF",
     iconStroke: NOHO_AMBER,
     iconPath: (
       <>
@@ -38,10 +38,10 @@ const BUCKET_META: Record<StatusBucket, { title: string; sub: string; accent: st
     ),
   },
   transit: {
-    title: "In Transit",
+    title: "In transit",
     sub: "Picked up · en route",
     accent: NOHO_BLUE,
-    bg: "linear-gradient(180deg, rgba(51,116,133,0.10) 0%, rgba(51,116,133,0.02) 60%, transparent 100%)",
+    bg: "#FFFFFF",
     iconStroke: NOHO_BLUE,
     iconPath: (
       <>
@@ -56,7 +56,7 @@ const BUCKET_META: Record<StatusBucket, { title: string; sub: string; accent: st
     title: "Delivered",
     sub: "Completed today",
     accent: "#16A34A",
-    bg: "linear-gradient(180deg, rgba(22,163,74,0.08) 0%, rgba(22,163,74,0.02) 60%, transparent 100%)",
+    bg: "#FFFFFF",
     iconStroke: "#16A34A",
     iconPath: <path d="M5 12 L10 17 L19 7" strokeLinecap="round" strokeLinejoin="round" />,
   },
@@ -131,7 +131,7 @@ function DeliveryCard({
           <span aria-hidden="true" className="w-2.5 flex justify-center shrink-0">
             <span
               className="w-0.5 h-3"
-              style={{ background: "linear-gradient(180deg, rgba(45,16,15,0.3), rgba(51,116,133,0.6))" }}
+              style={{ background: "rgba(45,16,15,0.4)" }}
             />
           </span>
           <span
@@ -275,7 +275,7 @@ export function AdminDeliveriesPanel({ deliveryOrders, isPending, handleDelivery
             return (
               <section
                 key={b}
-                className="rounded-2xl p-3 flex flex-col"
+                className="rounded-md p-3 flex flex-col"
                 style={{
                   background: meta.bg,
                   border: `1px solid ${meta.accent}33`,
@@ -345,8 +345,8 @@ export function AdminDeliveriesPanel({ deliveryOrders, isPending, handleDelivery
       {/* ─── TABLE VIEW ─────────────────────────────────────────────── */}
       {view === "table" && (
         <div
-          className="bg-white rounded-2xl overflow-hidden"
-          style={{ boxShadow: "0 2px 8px rgba(26,23,20,0.06)" }}
+          className="bg-white rounded-md overflow-hidden"
+          style={{ border: "1px solid #E5DACA" }}
         >
           <div className="px-5 py-4 border-b border-border-light">
             <h3 className="font-black text-sm uppercase text-text-light">Delivery Orders</h3>
@@ -424,18 +424,15 @@ function KpiTile({
 }) {
   return (
     <div
-      className="rounded-2xl p-4 transition-all hover:-translate-y-0.5"
+      className="rounded-md p-4 transition-colors"
       style={{
-        background: accent ? `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)` : "white",
-        boxShadow: accent
-          ? `0 8px 24px ${NOHO_BLUE}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
-        border: accent ? "1px solid rgba(247,230,194,0.18)" : "1px solid rgba(232,221,208,0.5)",
+        background: accent ? "#2D100F" : "#FFFFFF",
+        border: `1px solid ${accent ? "#2D100F" : "#E5DACA"}`,
       }}
     >
       <p
-        className="text-[10px] font-black uppercase tracking-[0.16em]"
-        style={{ color: accent ? "rgba(255,255,255,0.55)" : "rgba(45,16,15,0.45)" }}
+        className="text-[10px] font-bold uppercase tracking-[0.14em]"
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
       >
         {label}
       </p>

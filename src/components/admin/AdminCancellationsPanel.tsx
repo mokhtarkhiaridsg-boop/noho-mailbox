@@ -108,31 +108,23 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
 
   return (
     <div
-      className="rounded-2xl overflow-hidden transition-all hover:shadow-md"
+      className="rounded-md overflow-hidden transition-colors"
       style={{
         background: "white",
-        border: "1px solid rgba(232,229,224,0.7)",
-        boxShadow: "0 1px 3px rgba(45,16,15,0.04), 0 4px 12px rgba(45,16,15,0.04)",
+        border: "1px solid #E5DACA",
       }}
     >
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full text-left flex items-start gap-3 p-4"
       >
-        {/* Avatar monogram */}
+        {/* Avatar monogram — neutral cream with status dot. */}
         <div
-          className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center font-black text-sm"
+          className="w-10 h-10 shrink-0 rounded-md flex items-center justify-center font-bold text-[12px] relative"
           style={{
-            background: row.status === "Pending"
-              ? `linear-gradient(135deg, ${NOHO_AMBER}, #B07030)`
-              : row.status === "Denied"
-              ? "linear-gradient(135deg, #dc2626, #991b1b)"
-              : row.status === "Completed"
-              ? "linear-gradient(135deg, #16A34A, #166534)"
-              : `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
-            color: "#F7E6C2",
-            boxShadow: "0 4px 14px rgba(45,16,15,0.18), inset 0 1px 0 rgba(255,255,255,0.2)",
-            fontFamily: "var(--font-baloo), sans-serif",
+            background: "#F4EEE3",
+            color: NOHO_INK,
+            border: "1px solid #E5DACA",
           }}
         >
           {initials(row.user.name)}
@@ -191,25 +183,12 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
                 style={{ background: "rgba(232,229,224,0.6)" }}
               >
                 <div
-                  className="h-full rounded-full transition-all duration-500 relative overflow-hidden"
+                  className="h-full rounded-full transition-all duration-500"
                   style={{
                     width: `${grace.pctElapsed}%`,
-                    background:
-                      grace.daysLeft <= 3
-                        ? "linear-gradient(90deg, #dc2626 0%, #991b1b 100%)"
-                        : `linear-gradient(90deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`,
+                    background: grace.daysLeft <= 3 ? "#dc2626" : NOHO_BLUE,
                   }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)",
-                      animation: "noho-shine 4s ease-in-out infinite",
-                    }}
-                  />
-                </div>
+                />
               </div>
               {grace.daysLeft <= 3 && (
                 <p className="text-[10px] font-black mt-1" style={{ color: "#b91c1c" }}>
@@ -275,11 +254,8 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
                   const notes = window.prompt("Admin notes (optional):");
                   doAction(() => approveCancellation(row.id, notes ?? undefined), "Approved");
                 }}
-                className="text-xs font-black px-3 py-1.5 rounded-xl text-white disabled:opacity-40"
-                style={{
-                  background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
-                  boxShadow: `0 2px 10px ${NOHO_BLUE}33`,
-                }}
+                className="text-[11px] font-bold uppercase tracking-[0.10em] px-3 h-8 rounded-md text-white disabled:opacity-40 transition-colors"
+                style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
               >
                 Approve · 30-day grace
               </button>
@@ -382,10 +358,11 @@ export function AdminCancellationsPanel() {
         </div>
         <button
           onClick={load}
-          className="text-[10px] font-black uppercase tracking-[0.16em] px-3 py-1.5 rounded-xl text-white"
+          className="text-[10px] font-bold uppercase tracking-[0.10em] px-3 h-8 rounded-md transition-colors"
           style={{
-            background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
-            boxShadow: `0 2px 10px ${NOHO_BLUE}33`,
+            background: "#FFFFFF",
+            color: NOHO_BLUE,
+            border: "1px solid #E5DACA",
           }}
         >
           Refresh
@@ -402,8 +379,8 @@ export function AdminCancellationsPanel() {
 
       {/* ─── Lifecycle stepper ──────────────────────────────────────── */}
       <div
-        className="rounded-2xl p-5 bg-white"
-        style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+        className="rounded-md p-4 bg-white"
+        style={{ border: "1px solid #E5DACA" }}
       >
         <h3 className="text-[10px] font-black uppercase tracking-[0.18em] mb-4" style={{ color: "rgba(45,16,15,0.5)" }}>
           Lifecycle
@@ -491,8 +468,8 @@ export function AdminCancellationsPanel() {
 
       {rows !== null && filtered.length === 0 && (
         <div
-          className="rounded-2xl bg-white p-10 text-center"
-          style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04)" }}
+          className="rounded-md bg-white p-8 text-center"
+          style={{ border: "1px solid #E5DACA" }}
         >
           <p className="text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
             No {filter !== "All" ? filter.toLowerCase() : ""} cancellation requests
@@ -508,10 +485,10 @@ export function AdminCancellationsPanel() {
 
       {/* Workflow info card */}
       <div
-        className="rounded-2xl p-4 text-xs"
+        className="rounded-md p-4 text-xs"
         style={{
           background: "rgba(51,116,133,0.04)",
-          border: "1px solid rgba(51,116,133,0.12)",
+          border: "1px solid rgba(51,116,133,0.30)",
         }}
       >
         <p className="font-black mb-1.5 uppercase tracking-[0.16em]" style={{ color: NOHO_BLUE_DEEP }}>
@@ -541,32 +518,35 @@ function KpiTile({
 }) {
   return (
     <div
-      className="rounded-2xl p-4 transition-all hover:-translate-y-0.5"
+      className="rounded-md p-4 transition-colors"
       style={{
-        background: accent ? `linear-gradient(135deg, ${NOHO_AMBER} 0%, #B07030 100%)` : "white",
-        boxShadow: accent
-          ? `0 8px 24px ${NOHO_AMBER}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
-        border: accent ? "1px solid rgba(247,230,194,0.18)" : "1px solid rgba(232,221,208,0.5)",
+        background: accent ? NOHO_INK : "#FFFFFF",
+        border: `1px solid ${accent ? NOHO_INK : "#E5DACA"}`,
       }}
     >
       <p
-        className="text-[10px] font-black uppercase tracking-[0.16em]"
-        style={{ color: accent ? "rgba(255,255,255,0.6)" : "rgba(45,16,15,0.45)" }}
+        className="text-[10px] font-bold uppercase tracking-[0.14em]"
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
       >
         {label}
       </p>
       <p
-        className="text-2xl sm:text-3xl font-black tracking-tight mt-1"
+        className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
-          color: accent ? "white" : NOHO_INK,
-          fontFamily: "var(--font-baloo), sans-serif",
+          color: accent ? "#F7E6C2" : NOHO_INK,
+          fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
+          fontVariantNumeric: "tabular-nums",
         }}
       >
         {value}
       </p>
       {sub && (
-        <p className="text-[10px] font-bold mt-1" style={{ color: accent ? "rgba(255,255,255,0.65)" : NOHO_BLUE }}>
+        <p
+          className="text-[10px] font-medium mt-1"
+          style={{
+            color: accent ? "rgba(247,230,194,0.55)" : "#998877",
+          }}
+        >
           {sub}
         </p>
       )}

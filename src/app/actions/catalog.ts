@@ -2,24 +2,12 @@
 import { prisma } from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
-
-export type PlanItem = {
-  id: string; name: string; description: string;
-  price3mo: number; price6mo: number; price14mo: number;
-  discountPct: number; features: string[]; highlighted: boolean;
-};
-export type ShopItem = {
-  id: string; name: string; description: string;
-  price: number; discountPct: number; category: string; inStock: boolean;
-};
-export type ServiceItem = {
-  id: string; name: string; description: string;
-  price: string; discountPct: number; unit: string;
-};
-export type MailboxSlot = {
-  number: string; status: "available" | "occupied" | "reserved" | "maintenance";
-  customerId?: string; customerName?: string;
-};
+// Types live in /lib/catalog-types — "use server" files in Next.js 16
+// can ONLY export async functions. Re-exporting `type` from here is
+// also disallowed, so importers should pull from `@/lib/catalog-types`
+// directly. (This unblocks the /admin/lookup page-data collection step
+// that was failing with "found string" / non-function exports.)
+import type { PlanItem, ShopItem, ServiceItem, MailboxSlot } from "@/lib/catalog-types";
 
 async function getCfg<T>(key: string, def: T): Promise<T> {
   try {

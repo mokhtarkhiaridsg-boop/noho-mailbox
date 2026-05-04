@@ -41,77 +41,89 @@ import {
 } from "@/components/admin/AdminIcons";
 import { AdminQuarterlyReportPanel } from "@/components/admin/AdminQuarterlyReportPanel";
 import { AdminEmbeddedPortal } from "@/components/admin/AdminEmbeddedPortal";
+import AdminMailerPanel from "@/components/admin/AdminMailerPanel";
+import { AdminCommandPalette } from "@/components/admin/AdminCommandPalette";
 import { AdminChatPanel } from "@/components/admin/AdminChatPanel";
-import AdminPOSPanel from "@/components/admin/AdminPOSPanel";
+import AdminCashRegister from "@/components/admin/AdminCashRegister";
+import AdminDailyZReport from "@/components/admin/AdminDailyZReport";
 
 type NavItem = { id: string; label: string; Icon: (p: { className?: string }) => React.ReactElement };
 type NavGroup = { label: string; items: NavItem[] };
 
+// Condensed admin nav — 4 sections instead of 8. Items that need urgent
+// attention bubble to the "Today" group; everything else is grouped by
+// domain. Total: 19 items (down from 27). Items that were redundant or
+// rarely-used got folded into a single section header.
 const navGroups: NavGroup[] = [
   {
     label: "Today",
     items: [
-      { id: "overview", label: "Overview", Icon: IconOverview },
-      { id: "register", label: "Cash Register", Icon: IconRegister },
-      { id: "signups", label: "Signup Requests", Icon: IconSignup },
-      { id: "credits", label: "Credit Requests", Icon: IconCredit },
+      { id: "overview",  label: "Overview",      Icon: IconOverview },
+      { id: "register",  label: "Cash Register", Icon: IconRegister },
+      { id: "zreport",   label: "Daily Report",  Icon: IconReport },
+      { id: "signups",   label: "Signups",       Icon: IconSignup },
+      { id: "credits",   label: "Credits",       Icon: IconCredit },
     ],
   },
   {
     label: "Customers",
     items: [
-      { id: "customers", label: "Customers", Icon: IconCustomers },
-      { id: "mailboxcenter", label: "Mailbox Center", Icon: IconBox },
-      { id: "compliance", label: "Compliance", Icon: IconCompliance },
-    ],
-  },
-  {
-    label: "Mail",
-    items: [
-      { id: "mail", label: "Mail & Packages", Icon: IconMail },
-      { id: "requests", label: "Mail Requests", Icon: IconClipboard },
-      { id: "mailhold", label: "Mail Hold", Icon: IconHold },
-      { id: "keys", label: "Key Requests", Icon: IconKey },
+      { id: "customers",      label: "Customers",      Icon: IconCustomers },
+      { id: "mailboxcenter",  label: "Mailbox Center", Icon: IconBox },
+      { id: "compliance",     label: "Compliance",     Icon: IconCompliance },
+      { id: "idexpiring",     label: "ID Expirations", Icon: IconCompliance },
+      { id: "cmrareport",     label: "CMRA Report",    Icon: IconCompliance },
+      { id: "csvonboard",     label: "Bulk Onboard",   Icon: IconCustomers },
     ],
   },
   {
     label: "Operations",
     items: [
-      { id: "deliveries", label: "Deliveries", Icon: IconTruck },
-      { id: "qrpickup", label: "QR Pickup", Icon: IconQR },
-      { id: "notary", label: "Notary", Icon: IconNotary },
-      { id: "shippingcenter", label: "Shipping Center", Icon: IconShipping },
-      { id: "shop", label: "Shop Orders", Icon: IconShop },
+      { id: "mail",            label: "Mail & Packages", Icon: IconMail },
+      { id: "requests",        label: "Mail Requests",   Icon: IconClipboard },
+      { id: "mailhold",        label: "Mail Hold",       Icon: IconHold },
+      { id: "vacationholds",   label: "Vacation Holds",  Icon: IconHold },
+      { id: "keys",            label: "Keys",            Icon: IconKey },
+      { id: "keyledger",       label: "Key Ledger",      Icon: IconKey },
+      { id: "deliveries",      label: "Deliveries",      Icon: IconTruck },
+      { id: "qrpickup",        label: "QR Pickup",       Icon: IconQR },
+      { id: "pickupqueue",     label: "Pickup Queue",    Icon: IconCalendar },
+      { id: "occupancy",       label: "Occupancy Map",   Icon: IconBox },
+      { id: "stickynotes",     label: "Sticky Notes",    Icon: IconClipboard },
+      { id: "notary",          label: "Notary",          Icon: IconNotary },
+      { id: "shippingcenter",  label: "Shipping",        Icon: IconShipping },
+      { id: "shop",            label: "Shop",            Icon: IconShop },
     ],
   },
   {
-    label: "Communications",
+    label: "Money & Comms",
     items: [
-      { id: "messages", label: "Messages", Icon: IconChat },
-      { id: "emails", label: "Email Logs", Icon: IconEmail },
-    ],
-  },
-  {
-    label: "Reports",
-    items: [
-      { id: "quarterly", label: "Quarterly Statements", Icon: IconCalendar },
-      { id: "revenue", label: "Revenue", Icon: IconReport },
-    ],
-  },
-  {
-    label: "Business",
-    items: [
-      { id: "billing", label: "Billing", Icon: IconReceipt },
-      { id: "cancellations", label: "Cancellations", Icon: IconCancel },
-      { id: "business", label: "Business Solutions", Icon: IconBuilding },
-      { id: "partners", label: "Partner Program", Icon: IconReport },
-      { id: "tenants", label: "SaaS Tenants", Icon: IconBuilding },
-      { id: "square", label: "Square", Icon: IconSquare },
+      { id: "billing",        label: "Billing",       Icon: IconReceipt },
+      { id: "revenue",        label: "Revenue",       Icon: IconReport },
+      { id: "cancellations",  label: "Cancellations", Icon: IconCancel },
+      { id: "square",         label: "Square",        Icon: IconSquare },
+      { id: "quarterly",      label: "Quarterly",     Icon: IconCalendar },
+      { id: "messages",       label: "Messages",      Icon: IconChat },
+      { id: "emails",         label: "Email Logs",    Icon: IconEmail },
+      { id: "mailer",         label: "Bulk Mailer",   Icon: IconEmail },
+      { id: "insights",       label: "Insights",      Icon: IconReport },
+      { id: "kpidigest",      label: "Daily Digest",  Icon: IconReport },
+      { id: "disputes",       label: "Disputes",      Icon: IconReceipt },
+      { id: "bookkeeping",    label: "Bookkeeping",   Icon: IconReport },
+      { id: "referrals",      label: "Referrals",     Icon: IconReport },
+      { id: "affiliates",     label: "Affiliates",    Icon: IconReport },
     ],
   },
   {
     label: "System",
-    items: [{ id: "settings", label: "Settings", Icon: IconSettings }],
+    items: [
+      { id: "business",  label: "Business Solutions", Icon: IconBuilding },
+      { id: "partners",  label: "Partners",           Icon: IconReport },
+      { id: "tenants",   label: "Tenants",            Icon: IconBuilding },
+      { id: "operatinghours", label: "Operating Hours", Icon: IconCalendar },
+      { id: "webhooks",  label: "Webhooks",           Icon: IconReport },
+      { id: "settings",  label: "Settings",           Icon: IconSettings },
+    ],
   },
 ];
 
@@ -120,132 +132,318 @@ const flatNav: NavItem[] = navGroups.flatMap((g) => g.items);
 function getNavItem(id: string) {
   return flatNav.find((i) => i.id === id);
 }
+// Find which group label contains the given tab id (for default-expand state).
+function groupLabelForTab(id: string): string {
+  for (const g of navGroups) {
+    if (g.items.some((it) => it.id === id)) return g.label;
+  }
+  return navGroups[0]?.label ?? "Today";
+}
 
-// ─── MailOS status strip ────────────────────────────────────────────────
+// ─── Unified Command Bar ────────────────────────────────────────────────
 //
-// Ultra-thin (h-7) sticky bar above the main header. Reads as a system
-// status line — like a macOS menubar — but in NOHO's cream/ink palette.
-// Updates live: clock ticks every second, a subtle pulse signals "system
-// online", and "to-do" counters surface the most urgent admin queues.
-function MailOsStatusStrip(props: {
+// Clean white top bar — iPad-OS aesthetic. Avatar + name dropdown on the
+// left, Quick search input centered on the right. The cream gradient and
+// brand chrome are GONE; this bar prioritizes calm whitespace and single
+// blue accent (#1976FF) for primary affordances. No more stacked breadcrumb
+// or tiny todo-chip clutter — those move into the search palette and the
+// profile menu.
+function MailOsCommandBar(props: {
   signupCount: number;
   creditCount: number;
   mailRequestCount: number;
   keyRequestCount: number;
   currentTabLabel: string;
+  onOpenPalette: () => void;
 }) {
-  const [now, setNow] = useState<Date | null>(null);
-  useEffect(() => {
-    setNow(new Date());
-    const id = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const todoTotal =
-    props.signupCount + props.creditCount + props.mailRequestCount + props.keyRequestCount;
-  const timeStr = now
-    ? now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
-    : "—";
-  const dateStr = now
-    ? now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-    : "—";
+  void props.signupCount;
+  void props.creditCount;
+  void props.mailRequestCount;
+  void props.keyRequestCount;
+  void props.currentTabLabel;
 
   return (
-    <div
-      className="sticky top-0 z-50 h-7 px-3 sm:px-4 flex items-center justify-between text-[10px] font-bold tracking-wide select-none"
+    <header
+      className="sticky top-0 z-50 h-14 px-4 sm:px-6 flex items-center gap-3 select-none"
       style={{
-        background:
-          "linear-gradient(180deg, rgba(247,230,194,0.9) 0%, rgba(244,236,219,0.92) 100%)",
-        backdropFilter: "saturate(140%) blur(6px)",
-        WebkitBackdropFilter: "saturate(140%) blur(6px)",
-        borderBottom: "1px solid rgba(45,16,15,0.12)",
-        color: "#2D100F",
+        background: "#FFFFFF",
+        borderBottom: "1px solid #ECEEF1",
       }}
       role="banner"
-      aria-label="MailOS status strip"
+      aria-label="Admin command bar"
     >
-      {/* Left: brand mark + system menu hint */}
-      <div className="flex items-center gap-2 min-w-0">
-        <span
-          aria-hidden="true"
-          className="w-3.5 h-3.5 rounded-md inline-flex items-center justify-center shrink-0"
-          style={{
-            background: "linear-gradient(135deg, #2D100F 0%, #1F0807 100%)",
-            color: "#F7E6C2",
-            fontSize: 8,
-            fontWeight: 900,
-          }}
-        >
+      {/* Left: logo + live breadcrumb. The Admin Console pill + redundant
+          breadcrumb from the old 64px header are gone — the breadcrumb
+          here updates live with the current tab. */}
+      <Link href="/" className="flex items-center gap-2 group shrink-0" aria-label="Home">
+        <Logo className="h-7 w-auto transition-transform duration-200 group-hover:scale-[1.04]" />
+      </Link>
 
-        </span>
-        <span className="font-black truncate" style={{ letterSpacing: "0.04em" }}>
-          MailOS
-        </span>
-        <span className="hidden sm:inline opacity-50 mx-1">·</span>
-        <span className="hidden sm:inline opacity-60 truncate">
-          {props.currentTabLabel}
-        </span>
-      </div>
+      <span className="flex-1" />
 
-      {/* Center: live clock */}
-      <div className="hidden md:flex items-center gap-2">
-        <span
-          className="font-black"
-          style={{
-            fontFamily:
-              'ui-monospace, "SF Mono", "Menlo", "Monaco", "Cascadia Code", monospace',
-            letterSpacing: "0.04em",
-          }}
+      {/* Center-right: Quick search input — iPad-OS style with subtle
+          background. Click anywhere on it to open the command palette. */}
+      <button
+        type="button"
+        onClick={props.onOpenPalette}
+        className="hidden md:inline-flex items-center gap-2.5 h-9 px-3.5 rounded-full text-[13px] transition-colors"
+        style={{
+          background: "#F4F5F7",
+          color: "#7A8290",
+          border: "1px solid transparent",
+          minWidth: 280,
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "#EDEFF2"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "#F4F5F7"; }}
+        aria-label="Quick search (⌘K)"
+        title="Search · jump · run actions"
+      >
+        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="#1976FF" strokeWidth="2" strokeLinecap="round">
+          <circle cx="11" cy="11" r="6" />
+          <path d="m17 17 4 4" />
+        </svg>
+        <span className="flex-1 text-left">Quick search</span>
+        <kbd
+          className="text-[10px] font-mono px-1.5 h-5 rounded inline-flex items-center"
+          style={{ background: "#FFFFFF", color: "#9AA1AC", border: "1px solid #E4E6EA" }}
         >
-          {dateStr}
-        </span>
-        <span className="opacity-30">·</span>
-        <span
-          className="font-black"
-          style={{
-            fontFamily:
-              'ui-monospace, "SF Mono", "Menlo", "Monaco", "Cascadia Code", monospace',
-            letterSpacing: "0.06em",
-            minWidth: "5ch",
-            textAlign: "center",
-          }}
-        >
-          {timeStr}
-        </span>
-      </div>
+          ⌘K
+        </kbd>
+      </button>
 
-      {/* Right: live pulse + counters */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        {todoTotal > 0 && (
-          <span
-            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md"
-            style={{
-              background: "rgba(231,0,19,0.10)",
-              color: "#a51b1b",
-              border: "1px solid rgba(231,0,19,0.18)",
-            }}
-            title={`Action items waiting: ${props.signupCount} signups · ${props.creditCount} credits · ${props.mailRequestCount} mail requests · ${props.keyRequestCount} key requests`}
+      <Link
+        href="/dashboard"
+        className="hidden sm:inline-flex items-center gap-1.5 text-[12px] font-medium px-3 h-9 rounded-full transition-colors"
+        style={{ color: "#3B4252", background: "transparent" }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F7"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+        title="Switch to member view"
+      >
+        <IconExternal className="w-3.5 h-3.5" />
+        Member view
+      </Link>
+      <ProfileDropdown />
+    </header>
+  );
+}
+
+// ─── Command Palette (⌘K) ───────────────────────────────────────────────
+//
+// Modal overlay opened from MailOsCommandBar's center pill or by ⌘K /
+// Ctrl+K. Filters across all 19 nav items + quick actions. Up/Down to
+// navigate, Enter to execute, Esc to close. Input auto-focuses on open.
+type PaletteAction = {
+  id: string;
+  label: string;
+  hint?: string;
+  group: string;
+  Icon?: (p: { className?: string }) => React.ReactElement;
+  run: () => void;
+};
+function CommandPalette(props: {
+  open: boolean;
+  onClose: () => void;
+  actions: PaletteAction[];
+}) {
+  const [query, setQuery] = useState("");
+  const [cursor, setCursor] = useState(0);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Reset on open + focus the input.
+  useEffect(() => {
+    if (props.open) {
+      setQuery("");
+      setCursor(0);
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [props.open]);
+
+  // Filter — substring match across label + group + hint, simple and
+  // fast. Group order is preserved.
+  const filtered = (() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return props.actions;
+    return props.actions.filter((a) => {
+      const hay = `${a.label} ${a.group} ${a.hint ?? ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  })();
+
+  // Clamp cursor to filtered length whenever filter changes.
+  useEffect(() => {
+    if (cursor >= filtered.length) setCursor(Math.max(0, filtered.length - 1));
+  }, [filtered.length, cursor]);
+
+  function handleKey(e: React.KeyboardEvent) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setCursor((c) => Math.min(filtered.length - 1, c + 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setCursor((c) => Math.max(0, c - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const pick = filtered[cursor];
+      if (pick) {
+        pick.run();
+        props.onClose();
+      }
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      props.onClose();
+    }
+  }
+
+  if (!props.open) return null;
+
+  // Group rendering — collapse into sections with a small label header.
+  const grouped: Record<string, PaletteAction[]> = {};
+  for (const a of filtered) {
+    if (!grouped[a.group]) grouped[a.group] = [];
+    grouped[a.group].push(a);
+  }
+
+  let runningIndex = 0;
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Command palette"
+      className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-20 sm:pt-24"
+      style={{
+        background: "rgba(45,16,15,0.45)",
+        backdropFilter: "blur(4px)",
+        WebkitBackdropFilter: "blur(4px)",
+      }}
+      onClick={props.onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-xl rounded-2xl overflow-hidden flex flex-col"
+        style={{
+          background: "#FFFFFF",
+          border: "1px solid rgba(45,16,15,0.12)",
+          boxShadow:
+            "0 28px 90px rgba(45,16,15,0.32), 0 1px 0 rgba(255,255,255,0.7) inset",
+          maxHeight: "min(72vh, 560px)",
+        }}
+      >
+        {/* Search input row */}
+        <div
+          className="flex items-center gap-3 px-4 h-12 shrink-0"
+          style={{ borderBottom: "1px solid rgba(45,16,15,0.08)" }}
+        >
+          <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" style={{ color: "rgba(45,16,15,0.5)" }} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <circle cx="11" cy="11" r="6" />
+            <path d="m17 17 4 4" />
+          </svg>
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Jump to a panel, run an action…"
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setCursor(0); }}
+            onKeyDown={handleKey}
+            className="flex-1 bg-transparent text-[14px] font-semibold focus:outline-none"
+            style={{ color: "#2D100F" }}
+          />
+          <kbd
+            className="text-[10px] font-mono px-1.5 h-5 rounded inline-flex items-center shrink-0"
+            style={{ background: "rgba(45,16,15,0.05)", color: "rgba(45,16,15,0.5)", border: "1px solid rgba(45,16,15,0.1)" }}
           >
-            <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="currentColor" aria-hidden="true">
-              <circle cx="6" cy="6" r="2.5" />
-            </svg>
-            <span className="font-black">{todoTotal}</span>
-            <span className="hidden sm:inline opacity-70">to-do</span>
+            Esc
+          </kbd>
+        </div>
+
+        {/* Filtered results */}
+        <div className="flex-1 overflow-y-auto py-1">
+          {filtered.length === 0 && (
+            <div className="px-5 py-8 text-center text-[12px]" style={{ color: "rgba(45,16,15,0.5)" }}>
+              No matches for &ldquo;{query}&rdquo;
+            </div>
+          )}
+          {Object.entries(grouped).map(([groupName, items]) => (
+            <div key={groupName} className="py-1">
+              <div
+                className="px-4 pt-1.5 pb-1 text-[9px] font-black uppercase tracking-[0.18em]"
+                style={{ color: "rgba(45,16,15,0.4)" }}
+              >
+                {groupName}
+              </div>
+              <ul>
+                {items.map((a) => {
+                  const idx = runningIndex++;
+                  const active = idx === cursor;
+                  return (
+                    <li key={a.id}>
+                      <button
+                        type="button"
+                        onMouseEnter={() => setCursor(idx)}
+                        onClick={() => { a.run(); props.onClose(); }}
+                        className="w-full flex items-center gap-3 px-4 h-10 text-left transition-colors"
+                        style={{
+                          background: active ? "rgba(51,116,133,0.08)" : "transparent",
+                          color: "#2D100F",
+                        }}
+                      >
+                        <span
+                          className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
+                          style={{
+                            background: active ? "#337485" : "rgba(45,16,15,0.05)",
+                            color: active ? "#fff" : "rgba(45,16,15,0.7)",
+                            transition: "all 150ms",
+                          }}
+                        >
+                          {a.Icon ? <a.Icon className="w-3.5 h-3.5" /> : (
+                            <svg viewBox="0 0 12 12" className="w-2 h-2" fill="currentColor"><circle cx="6" cy="6" r="3" /></svg>
+                          )}
+                        </span>
+                        <span className="flex-1 min-w-0">
+                          <span className="block text-[13px] font-bold truncate">{a.label}</span>
+                          {a.hint && (
+                            <span className="block text-[10px] truncate" style={{ color: "rgba(45,16,15,0.5)" }}>{a.hint}</span>
+                          )}
+                        </span>
+                        {active && (
+                          <kbd
+                            className="text-[10px] font-mono px-1.5 h-5 rounded inline-flex items-center shrink-0"
+                            style={{ background: "#337485", color: "#fff" }}
+                          >
+                            ↵
+                          </kbd>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer hints */}
+        <div
+          className="flex items-center gap-3 px-4 h-8 text-[10px] font-semibold shrink-0"
+          style={{
+            background: "rgba(247,230,194,0.4)",
+            borderTop: "1px solid rgba(45,16,15,0.06)",
+            color: "rgba(45,16,15,0.55)",
+          }}
+        >
+          <span className="inline-flex items-center gap-1">
+            <kbd className="font-mono text-[9px] px-1 h-4 rounded inline-flex items-center" style={{ background: "rgba(45,16,15,0.06)", border: "1px solid rgba(45,16,15,0.1)" }}>↑↓</kbd>
+            navigate
           </span>
-        )}
-        <span className="inline-flex items-center gap-1.5">
-          <span className="relative flex h-1.5 w-1.5">
-            <span
-              className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-              style={{ background: "#16a34a" }}
-            />
-            <span
-              className="relative inline-flex rounded-full h-1.5 w-1.5"
-              style={{ background: "#16a34a" }}
-            />
+          <span className="inline-flex items-center gap-1">
+            <kbd className="font-mono text-[9px] px-1 h-4 rounded inline-flex items-center" style={{ background: "rgba(45,16,15,0.06)", border: "1px solid rgba(45,16,15,0.1)" }}>↵</kbd>
+            run
           </span>
-          <span className="hidden sm:inline opacity-70">Online</span>
-        </span>
+          <span className="inline-flex items-center gap-1">
+            <kbd className="font-mono text-[9px] px-1 h-4 rounded inline-flex items-center" style={{ background: "rgba(45,16,15,0.06)", border: "1px solid rgba(45,16,15,0.1)" }}>esc</kbd>
+            close
+          </span>
+          <span className="ml-auto opacity-60">{filtered.length} result{filtered.length === 1 ? "" : "s"}</span>
+        </div>
       </div>
     </div>
   );
@@ -266,6 +464,22 @@ import { AdminCancellationsPanel } from "@/components/admin/AdminCancellationsPa
 import { AdminPartnersPanel, type PartnerRow } from "@/components/admin/AdminPartnersPanel";
 import { AdminTenantsPanel, type TenantRow } from "@/components/admin/AdminTenantsPanel";
 import { AdminMailHoldPanel } from "@/components/admin/AdminMailHoldPanel";
+import AdminVacationHoldPanel from "@/components/admin/AdminVacationHoldPanel";
+import AdminOperatingHoursPanel from "@/components/admin/AdminOperatingHoursPanel";
+import AdminInsightsPanel from "@/components/admin/AdminInsightsPanel";
+import AdminKeyLedgerPanel from "@/components/admin/AdminKeyLedgerPanel";
+import AdminReferralsPanel from "@/components/admin/AdminReferralsPanel";
+import AdminCsvOnboardPanel from "@/components/admin/AdminCsvOnboardPanel";
+import AdminPickupAppointmentsPanel from "@/components/admin/AdminPickupAppointmentsPanel";
+import AdminIdExpiringPanel from "@/components/admin/AdminIdExpiringPanel";
+import AdminWebhooksPanel from "@/components/admin/AdminWebhooksPanel";
+import AdminKpiDigestPanel from "@/components/admin/AdminKpiDigestPanel";
+import AdminStorageDisputesPanel from "@/components/admin/AdminStorageDisputesPanel";
+import AdminBookkeepingPanel from "@/components/admin/AdminBookkeepingPanel";
+import AdminCmraReportPanel from "@/components/admin/AdminCmraReportPanel";
+import AdminSuiteOccupancyPanel from "@/components/admin/AdminSuiteOccupancyPanel";
+import AdminPinnedNotesPanel from "@/components/admin/AdminPinnedNotesPanel";
+import AdminAffiliateEarningsPanel from "@/components/admin/AdminAffiliateEarningsPanel";
 import { AdminQRPickupPanel } from "@/components/admin/AdminQRPickupPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
@@ -515,52 +729,183 @@ function ProfileDropdown() {
     function close(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
-    if (open) document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
+    function escape(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    if (open) {
+      document.addEventListener("mousedown", close);
+      document.addEventListener("keydown", escape);
+    }
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", escape);
+    };
   }, [open]);
+  // ─── Brand-consistent palette ─── kills the legacy #162d3a slate-blue
+  // that was bleeding into the dropdown chrome.
+  const INK = "#2D100F";
+  const CREAM = "#F7E6C2";
+  const SURFACE = "#FFFFFF";
+  const BORDER = "#E5DACA";
+  const BLUE = "#337485";
+  const RED = "#E70013";
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full transition-colors hover:bg-black/5"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className="flex items-center gap-2 pl-0.5 pr-2 h-8 rounded-full transition-all"
+        style={{
+          background: open ? "rgba(45,16,15,0.06)" : "transparent",
+          border: `1px solid ${open ? "rgba(45,16,15,0.10)" : "transparent"}`,
+        }}
+        onMouseEnter={(e) => { if (!open) e.currentTarget.style.background = "rgba(45,16,15,0.04)"; }}
+        onMouseLeave={(e) => { if (!open) e.currentTarget.style.background = "transparent"; }}
       >
-        <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white"
-          style={{ background: "linear-gradient(135deg, #337485, #1a3f7a)" }}
+        <span
+          className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold"
+          style={{
+            background: INK,
+            color: CREAM,
+            border: `1px solid ${INK}`,
+          }}
         >
           NM
-        </div>
-        <svg viewBox="0 0 12 12" className="w-2.5 h-2.5 text-[#162d3a]/50" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 4l4 4 4-4"/></svg>
+        </span>
+        <svg
+          viewBox="0 0 12 12"
+          className="w-2.5 h-2.5 transition-transform duration-150"
+          style={{ color: "rgba(45,16,15,0.5)", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        >
+          <path d="M2 4l4 4 4-4" />
+        </svg>
       </button>
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 w-60 rounded-xl overflow-hidden z-[100]"
-          style={{ background: "white", border: "1px solid rgba(22,45,58,0.12)", boxShadow: "0 12px 40px rgba(22,45,58,0.18)" }}
+          role="menu"
+          className="absolute right-0 top-full mt-1.5 w-64 rounded-md overflow-hidden z-[100] origin-top-right"
+          style={{
+            background: SURFACE,
+            border: `1px solid ${BORDER}`,
+            boxShadow: "0 12px 36px rgba(45,16,15,0.16)",
+            animation: "profile-pop 160ms cubic-bezier(0.22, 1, 0.36, 1) both",
+          }}
         >
-          <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(22,45,58,0.08)" }}>
-            <p className="text-xs font-black text-[#162d3a]">Admin · NOHO Mailbox</p>
-            <p className="text-[10px] text-[#162d3a]/55 mt-0.5">Signed in as administrator</p>
-          </div>
-          <Link href="/dashboard" className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-[#162d3a] hover:bg-[#f4f6f8] transition-colors">
-            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3 3-5 6-5s6 2 6 5"/></svg>
-            Switch to Member View
-          </Link>
-          <Link href="/" className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-[#162d3a] hover:bg-[#f4f6f8] transition-colors">
-            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 8 L8 2 L14 8 M4 7 L4 14 L12 14 L12 7"/></svg>
-            View Public Site
-          </Link>
-          <div style={{ borderTop: "1px solid rgba(22,45,58,0.08)" }}>
-            <button
-              onClick={() => logout()}
-              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left"
+          {/* Header — admin identity card */}
+          <div
+            className="px-4 py-3 flex items-center gap-3"
+            style={{
+              borderBottom: `1px solid ${BORDER}`,
+              background: "linear-gradient(180deg, #FFFCF7 0%, #FFFFFF 100%)",
+            }}
+          >
+            <span
+              className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-black shrink-0"
+              style={{
+                background: `linear-gradient(135deg, ${INK} 0%, #4A1F1C 100%)`,
+                color: CREAM,
+                boxShadow: "0 1px 0 rgba(255,255,255,0.18) inset, 0 2px 4px rgba(45,16,15,0.18)",
+              }}
             >
-              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 14 L2 14 L2 2 L7 2 M10 5l3 3-3 3 M5 8 L13 8"/></svg>
-              Sign Out
+              NM
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs font-black truncate" style={{ color: INK }}>Admin · NOHO Mailbox</p>
+              <p className="text-[10px] mt-0.5" style={{ color: "rgba(45,16,15,0.5)" }}>
+                Signed in as administrator
+              </p>
+            </div>
+          </div>
+
+          {/* Section: Quick switches */}
+          <DropdownSection label="Switch to">
+            <DropdownLink href="/dashboard" icon={(
+              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="8" cy="6" r="2.6" />
+                <path d="M2.5 14c0-3 3-5 5.5-5s5.5 2 5.5 5" />
+              </svg>
+            )}>
+              Member view
+            </DropdownLink>
+            <DropdownLink href="/" icon={(
+              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 8 L8 2 L14 8 M4 7 L4 14 L12 14 L12 7" />
+              </svg>
+            )}>
+              Public site
+            </DropdownLink>
+          </DropdownSection>
+
+          {/* Section: Session */}
+          <div style={{ borderTop: `1px solid ${BORDER}` }}>
+            <button
+              role="menuitem"
+              onClick={() => logout()}
+              className="w-full flex items-center gap-2.5 px-4 h-10 text-xs font-bold transition-colors text-left"
+              style={{ color: RED }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(231,0,19,0.06)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 14 L2 14 L2 2 L7 2 M10 5l3 3-3 3 M5 8 L13 8" />
+              </svg>
+              Sign out
             </button>
           </div>
+          <style>{`
+            @keyframes profile-pop {
+              0%   { opacity: 0; transform: translateY(-4px) scale(0.96); }
+              100% { opacity: 1; transform: translateY(0)    scale(1);    }
+            }
+          `}</style>
         </div>
       )}
     </div>
+  );
+}
+
+function DropdownSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="py-1">
+      <p
+        className="px-4 pt-1.5 pb-0.5 text-[9px] font-black uppercase tracking-[0.18em]"
+        style={{ color: "rgba(45,16,15,0.42)" }}
+      >
+        {label}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+function DropdownLink({
+  href,
+  icon,
+  children,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      role="menuitem"
+      className="flex items-center gap-2.5 px-4 h-9 text-xs font-bold transition-colors"
+      style={{ color: "#2D100F" }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(247,230,194,0.55)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+    >
+      <span className="w-5 h-5 inline-flex items-center justify-center" style={{ color: "rgba(45,16,15,0.65)" }}>
+        {icon}
+      </span>
+      {children}
+    </Link>
   );
 }
 
@@ -583,15 +928,46 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   }
   const [tab, setTabState] = useState(() => normalizeTabSlug(searchParams.get("tab")));
 
+  // Which sidebar group is expanded — accordion-style, single open at a time.
+  // Defaults to the group containing the active tab so users see siblings.
+  const [expandedGroup, setExpandedGroup] = useState<string>(() => groupLabelForTab(normalizeTabSlug(searchParams.get("tab"))));
+
   // When the URL changes (back/forward/external link), pull the tab back in.
   useEffect(() => {
     const next = normalizeTabSlug(searchParams.get("tab"));
     setTabState((prev) => (prev === next ? prev : next));
+    setExpandedGroup(groupLabelForTab(next));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isPending, startTransition] = useTransition();
+  // iter-86: Find-anything admin omnibox. Cmd+K is already owned by the
+  // legacy nav-only CommandPalette below; this one searches across
+  // entities (customers, packages, dropoffs, labels) and lives behind
+  // Cmd+Shift+F (or just "/" when no input has focus).
+  const [omniOpen, setOmniOpen] = useState(false);
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const meta = e.metaKey || e.ctrlKey;
+      // Cmd/Ctrl+Shift+F — "Find anything" everywhere.
+      if (meta && e.shiftKey && (e.key === "f" || e.key === "F")) {
+        e.preventDefault();
+        setOmniOpen((v) => !v);
+        return;
+      }
+      // "/" opens it too (when not focused in an input/textarea).
+      if (e.key === "/" && !omniOpen) {
+        const t = e.target as HTMLElement | null;
+        const tag = t?.tagName?.toLowerCase();
+        if (tag === "input" || tag === "textarea" || t?.isContentEditable) return;
+        e.preventDefault();
+        setOmniOpen(true);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [omniOpen]);
   const [syncResults, setSyncResults] = useState<SyncResult[] | null>(null);
 
   // Modal and filter state
@@ -820,305 +1196,279 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
     return 0;
   };
 
+  // ─── Command palette state + global ⌘K / Ctrl+K opener ────────────────
+  // Combined the old MailOsStatusStrip (28px) and the chunky 64px header
+  // into one 44px MailOsCommandBar — recovers 48px of vertical space, no
+  // duplicated breadcrumb, no marketing pill, no unused branding chrome.
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const isMac = typeof navigator !== "undefined" && /Mac/.test(navigator.platform);
+      const cmd = isMac ? e.metaKey : e.ctrlKey;
+      // ⌘K / Ctrl+K → open. ⌘P / Ctrl+P also opens (familiar from Linear/VSCode).
+      if (cmd && (e.key === "k" || e.key === "K" || e.key === "p" || e.key === "P")) {
+        e.preventDefault();
+        setPaletteOpen(true);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  // Build the palette action list — nav items first (each grouped), then
+  // quick-launch actions. The label match is fuzzy by substring, so the
+  // user can type "renew" and find "Mailbox Center" via its hint.
+  const paletteActions: PaletteAction[] = [
+    ...navGroups.flatMap((g) => g.items.map((it) => ({
+      id: `nav:${it.id}`,
+      label: it.label,
+      hint: g.label,
+      group: g.label,
+      Icon: it.Icon,
+      run: () => setTab(it.id),
+    }))),
+    {
+      id: "action:logmail", label: "Log mail", hint: "Open the log-mail intake modal",
+      group: "Quick Actions",
+      run: () => {
+        setLogMailForm({ suite: "", from: "", type: "Letter", recipientName: "", recipientPhone: "", exteriorImageUrl: "", weightOz: "", dimensions: "" });
+        setShowLogMailModal(true);
+      },
+    },
+    {
+      id: "action:logpkg", label: "Log package", hint: "Open the log-package intake modal",
+      group: "Quick Actions",
+      run: () => {
+        setLogMailForm({ suite: "", from: "", type: "Package", recipientName: "", recipientPhone: "", exteriorImageUrl: "", weightOz: "", dimensions: "" });
+        setShowLogMailModal(true);
+      },
+    },
+    {
+      id: "action:newcustomer", label: "Add customer", hint: "Open the new-customer modal",
+      group: "Quick Actions",
+      run: () => setShowAddCustomerModal(true),
+    },
+    {
+      id: "action:scaninbound", label: "Scan inbound", hint: "Jump to scan workspace in Shipping Center",
+      group: "Quick Actions",
+      run: () => {
+        setTab("shippingcenter");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("noho-shipping-subview", { detail: { subview: "scan" } }));
+        }
+      },
+    },
+    {
+      id: "action:runsheet", label: "Today's run sheet", hint: "Open the print run-sheet in a new tab",
+      group: "Quick Actions",
+      run: () => {
+        if (typeof window !== "undefined") window.open("/admin/shipping/runsheet", "_blank", "noopener,noreferrer");
+      },
+    },
+    {
+      id: "action:memberview", label: "Switch to member view", hint: "Go to /dashboard",
+      group: "Quick Actions",
+      run: () => router.push("/dashboard"),
+    },
+  ];
+
   return (
     <div className="min-h-screen text-[#2D100F]" style={{ background: "#F7E6C2" }}>
-      {/* ─── MailOS status strip — frosted, ultra-thin, sticky on top.
-          Gives the admin panel an "operating-system shell" feel: live clock,
-          system-state pulse, and at-a-glance counters. Brand stays cream-ink:
-          no foreign blue/grey OS chrome. */}
-      <MailOsStatusStrip
+      {/* ─── Single 44px command bar (replaces 28px status strip + 64px
+          header — net +48px reclaimed). Logo · breadcrumb · ⌘K · clock ·
+          to-do · member-view · profile, all in one row. */}
+      <MailOsCommandBar
         signupCount={pendingSignups}
         creditCount={creditRequests.filter((r) => r.status === "Pending" || r.status === "LinkSent").length}
         mailRequestCount={mailRequests.length}
         keyRequestCount={keyRequests.length}
         currentTabLabel={currentTab?.label ?? "Overview"}
+        onOpenPalette={() => setPaletteOpen(true)}
       />
 
-      {/* ─── Top bar — branded cream with brown accents ─── */}
-      <header
-        className="sticky top-7 z-40 px-5 h-16 flex items-center justify-between"
-        style={{
-          background: "#F7E6C2",
-          borderBottom: "1.5px solid rgba(45,16,15,0.12)",
-        }}
-      >
-        <div className="flex items-center gap-5">
-          <Link href="/" className="flex items-center gap-3 group">
-            <Logo className="h-7 sm:h-8 w-auto transition-transform duration-300 group-hover:scale-[1.03]" />
-          </Link>
-          <div
-            className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.22em]"
-            style={{ background: "#2D100F", color: "#F7E6C2" }}
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-400" />
-            </span>
-            Admin Console
-          </div>
-          <span className="hidden md:block text-[11px] font-semibold" style={{ color: "rgba(45,16,15,0.55)" }}>
-            <span style={{ color: "rgba(45,16,15,0.4)" }}>Console</span>
-            <span className="mx-1.5" style={{ color: "rgba(45,16,15,0.25)" }}>/</span>
-            <span className="font-black" style={{ color: "#2D100F" }}>{currentTab?.label ?? "Overview"}</span>
-          </span>
-        </div>
+      {/* ⌘K command palette — opens from the bar pill or ⌘K / ⌘P. */}
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        actions={paletteActions}
+      />
 
-        <div className="flex items-center gap-3">
-          <div
-            className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl"
-            style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(45,16,15,0.12)" }}
-          >
-            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" style={{ color: "rgba(45,16,15,0.5)" }} fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="6" /><path d="m17 17 4 4" strokeLinecap="round" /></svg>
-            <input
-              type="text"
-              placeholder="Search customers, mail, suites…"
-              className="bg-transparent text-xs font-semibold focus:outline-none w-52"
-              style={{ color: "#2D100F" }}
-              value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); if (tab !== "customers") setTab("customers"); }}
-            />
-          </div>
-          <Link
-            href="/dashboard"
-            className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-xl transition-colors"
-            style={{ color: "rgba(45,16,15,0.65)", background: "rgba(255,255,255,0.5)", border: "1px solid rgba(45,16,15,0.1)" }}
-          >
-            <IconExternal className="w-3 h-3" />
-            Member View
-          </Link>
-          <ProfileDropdown />
-        </div>
-      </header>
+      {/* iter-86: Find-anything omnibox — Cmd+Shift+F or "/". Searches
+          customers, mail items, dropoffs, label orders, Shippo labels. */}
+      <AdminCommandPalette
+        open={omniOpen}
+        onClose={() => setOmniOpen(false)}
+      />
 
-      <div className="flex">
-        {/* ─── Branded sidebar — brown ink with warm cream accents ─── */}
+      <div className="flex" style={{ background: "#F4F5F7" }}>
+        {/* ─── Sidebar — iPad-OS aesthetic, accordion groups so the whole
+            list fits in one viewport with NO scroll. Active group is auto-
+            expanded; clicking another group header expands it and collapses
+            the rest. Group headers carry a sum of badge counts across
+            their children so urgent things bubble even when collapsed. */}
         <aside
-          className="hidden lg:flex flex-col w-64 shrink-0 sticky top-16 self-start"
+          className="hidden lg:flex flex-col shrink-0 sticky top-14 self-start"
           style={{
-            height: "calc(100vh - 64px)",
-            background: "#2D100F",
-            borderRight: "1px solid rgba(247,230,194,0.05)",
+            height: "calc(100vh - 56px)",
+            width: 232,
+            background: "#FFFFFF",
+            borderRight: "1px solid #ECEEF1",
           }}
         >
-          <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
-            {navGroups.map((group) => (
-              <div key={group.label}>
-                <p
-                  className="px-3 mb-2 text-[10px] font-black uppercase tracking-[0.24em] flex items-center gap-2"
-                  style={{ color: "rgba(247,230,194,0.4)" }}
-                >
-                  {/* Soft gradient underline accent — gives each group a
-                      subtle visual identity without screaming for attention. */}
-                  <span
-                    aria-hidden="true"
-                    className="inline-block h-px w-3"
-                    style={{ background: "linear-gradient(90deg, rgba(51,116,133,0.6), rgba(247,230,194,0.05))" }}
-                  />
-                  {group.label}
-                </p>
-                <ul className="space-y-0.5">
-                  {group.items.map((item) => {
-                    const active = tab === item.id;
-                    const badge = badgeFor(item.id);
-                    const urgentBadge = item.id === "signups" || item.id === "credits" || item.id === "requests" || item.id === "mailhold";
-                    return (
-                      <li key={item.id}>
-                        <button
-                          onClick={() => setTab(item.id)}
-                          className="group w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-semibold transition-all duration-200 text-left relative overflow-hidden"
-                          style={{
-                            background: active
-                              ? "linear-gradient(90deg, rgba(51,116,133,0.32) 0%, rgba(51,116,133,0.18) 50%, rgba(51,116,133,0.08) 100%)"
-                              : "transparent",
-                            color: active ? "#F7E6C2" : "rgba(247,230,194,0.65)",
-                            boxShadow: active
-                              ? "inset 0 1px 0 rgba(247,230,194,0.08), 0 1px 14px rgba(51,116,133,0.18)"
-                              : undefined,
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!active) e.currentTarget.style.background = "rgba(247,230,194,0.06)";
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!active) e.currentTarget.style.background = "transparent";
-                          }}
-                        >
-                          {active && (
-                            <>
-                              {/* Glowing left rail with gradient — replaces
-                                  the flat 3px bar with a vertically-fading
-                                  teal accent that has a subtle halo. */}
-                              <span
-                                aria-hidden="true"
-                                className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r-full"
-                                style={{
-                                  background: "linear-gradient(180deg, #337485 0%, #4a8ea0 50%, #337485 100%)",
-                                  boxShadow: "0 0 10px 1px rgba(51,116,133,0.5)",
-                                }}
-                              />
-                              {/* Soft right-edge fade so the active row looks
-                                  recessed rather than pasted on. */}
-                              <span
-                                aria-hidden="true"
-                                className="absolute inset-y-0 right-0 w-12 pointer-events-none"
-                                style={{
-                                  background: "linear-gradient(90deg, transparent, rgba(247,230,194,0.04))",
-                                }}
-                              />
-                            </>
-                          )}
-                          <span
-                            aria-hidden="true"
-                            className="shrink-0 transition-transform duration-200 group-hover:scale-110 inline-flex"
-                            style={{
-                              filter: active ? "drop-shadow(0 0 6px rgba(247,230,194,0.35))" : undefined,
-                            }}
-                          >
-                            <item.Icon className="w-4 h-4" />
-                          </span>
-                          <span className="flex-1 truncate">{item.label}</span>
-                          {badge > 0 && (
-                            <span
-                              className="relative text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center transition-all duration-200 group-hover:scale-110"
+          <nav className="flex-1 px-2.5 py-3 flex flex-col gap-0.5 overflow-hidden">
+            {navGroups.map((group) => {
+              const isExpanded = expandedGroup === group.label;
+              const groupHasActive = group.items.some((it) => it.id === tab);
+              const groupBadgeSum = group.items.reduce((acc, it) => acc + badgeFor(it.id), 0);
+              return (
+                <div key={group.label} className="flex flex-col">
+                  {/* Group header — click to toggle. Always visible. */}
+                  <button
+                    type="button"
+                    onClick={() => setExpandedGroup(isExpanded ? "" : group.label)}
+                    className="w-full h-8 flex items-center gap-2 px-2 rounded-md text-left transition-colors"
+                    style={{
+                      background: "transparent",
+                      color: groupHasActive ? "#1976FF" : "#7A8290",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F7"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                    aria-expanded={isExpanded}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="w-3 h-3 shrink-0 transition-transform"
+                      style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                    <span
+                      className="flex-1 text-[11px] font-semibold uppercase tracking-[0.08em] truncate"
+                    >
+                      {group.label}
+                    </span>
+                    {!isExpanded && groupBadgeSum > 0 && (
+                      <span
+                        className="text-[10px] font-semibold px-1.5 h-[16px] rounded-full inline-flex items-center justify-center"
+                        style={{
+                          background: "#FF3B30",
+                          color: "#FFFFFF",
+                          minWidth: 16,
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
+                        {groupBadgeSum > 99 ? "99+" : groupBadgeSum}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Group items — render only when expanded. */}
+                  {isExpanded && (
+                    <ul className="flex flex-col gap-px py-0.5 mb-1">
+                      {group.items.map((item) => {
+                        const active = tab === item.id;
+                        const badge = badgeFor(item.id);
+                        return (
+                          <li key={item.id}>
+                            <button
+                              onClick={() => setTab(item.id)}
+                              className="relative w-full h-8 flex items-center gap-2.5 rounded-md pl-5 pr-2 text-left transition-colors"
                               style={{
-                                background: urgentBadge ? "#F5A623" : "#337485",
-                                color: urgentBadge ? "#2D100F" : "white",
-                                boxShadow: urgentBadge ? "0 0 12px rgba(245,166,35,0.45)" : "0 0 8px rgba(51,116,133,0.35)",
+                                background: active ? "#EBF2FF" : "transparent",
+                                color: active ? "#1976FF" : "#3B4252",
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!active) e.currentTarget.style.background = "#F4F5F7";
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!active) e.currentTarget.style.background = "transparent";
                               }}
                             >
-                              {/* Animated outer ping ring — visually signals
-                                  "fresh attention needed" on urgent badges. */}
-                              {urgentBadge && (
+                              <item.Icon className="w-[15px] h-[15px] shrink-0" />
+                              <span
+                                className="text-[13px] flex-1 truncate"
+                                style={{ fontWeight: active ? 600 : 500 }}
+                              >
+                                {item.label}
+                              </span>
+                              {badge > 0 && (
                                 <span
-                                  aria-hidden="true"
-                                  className="absolute inset-0 rounded-full animate-ping"
-                                  style={{ background: "#F5A623", opacity: 0.4 }}
-                                />
+                                  className="text-[10px] font-semibold px-1.5 h-[16px] rounded-full inline-flex items-center justify-center"
+                                  style={{
+                                    background: active ? "#1976FF" : "#FF3B30",
+                                    color: "#FFFFFF",
+                                    minWidth: 16,
+                                    fontVariantNumeric: "tabular-nums",
+                                  }}
+                                >
+                                  {badge > 99 ? "99+" : badge}
+                                </span>
                               )}
-                              <span className="relative">{badge}</span>
-                            </span>
-                          )}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
           </nav>
-
-          {/* Footer status pill */}
-          <div className="p-3" style={{ borderTop: "1px solid rgba(247,230,194,0.06)" }}>
-            <div
-              className="rounded-xl p-3"
-              style={{
-                background: "rgba(51,116,133,0.18)",
-                border: "1px solid rgba(51,116,133,0.32)",
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-                </span>
-                <p className="text-[11px] font-black" style={{ color: "#F7E6C2" }}>
-                  All systems operational
-                </p>
-              </div>
-              <p className="text-[10px] mt-1" style={{ color: "rgba(247,230,194,0.55)" }}>
-                NOHO Mailbox · Lankershim Blvd
-              </p>
-            </div>
-          </div>
         </aside>
 
-        {/* ─── Main content area — warm cream canvas wrapped in MailOS
-            window-chrome (traffic-light dots + panel title in monospace).
-            The chrome is purely decorative — no minimize/close behavior —
-            but it instantly flips the visual perception from "webapp" to
-            "OS workspace" while staying entirely on-brand. */}
+        {/* ─── Main content area — soft gray canvas with subtle pastel
+            polygon decorations in corners. Single big focal card per
+            tab, lots of whitespace, no nested cards. */}
         <div
-          className="flex-1 min-w-0 min-h-[calc(100vh-92px)] px-3 sm:px-5 py-4 sm:py-5"
-          style={{ background: "#FAFAF8", color: "#2D100F" }}
+          className="flex-1 min-w-0 px-6 sm:px-8 py-6 sm:py-8 relative overflow-hidden"
+          style={{ height: "calc(100vh - 56px)", background: "#F4F5F7", color: "#3B4252" }}
         >
+          {/* Decorative pastel polygons — purely visual, position absolute
+              behind everything. Subtle, soft, iPad-OS feel. */}
           <div
-            className="mx-auto max-w-[1400px] rounded-2xl overflow-hidden"
+            aria-hidden="true"
+            className="absolute -top-32 -right-32 pointer-events-none"
             style={{
-              background: "#FFFFFF",
-              border: "1px solid rgba(45,16,15,0.08)",
-              boxShadow:
-                "0 1px 0 rgba(255,255,255,0.6) inset, 0 8px 28px rgba(45,16,15,0.06), 0 1px 3px rgba(45,16,15,0.04)",
+              width: 480,
+              height: 480,
+              background: "linear-gradient(135deg, rgba(255,182,193,0.18), rgba(255,182,193,0.06))",
+              clipPath: "polygon(0 30%, 60% 0, 100% 50%, 70% 100%, 20% 90%)",
+              zIndex: 0,
             }}
-          >
-            {/* Window title bar — three traffic-light dots in brand colors
-                (red Tunisia, cream box, blue brand), then the active-panel
-                label in monospace, then a subtle right-side hint. */}
-            <div
-              className="flex items-center px-4 sm:px-5 h-9 select-none"
-              style={{
-                background:
-                  "linear-gradient(180deg, #F8F2EA 0%, #F4ECDB 100%)",
-                borderBottom: "1px solid rgba(45,16,15,0.08)",
-              }}
-            >
-              {/* Traffic lights */}
-              <div className="flex items-center gap-1.5 shrink-0" aria-hidden="true">
-                <span
-                  className="w-3 h-3 rounded-full"
-                  style={{
-                    background: "#E70013",
-                    boxShadow: "inset 0 0 0 1px rgba(45,16,15,0.18), 0 1px 0 rgba(255,255,255,0.4)",
-                  }}
-                />
-                <span
-                  className="w-3 h-3 rounded-full"
-                  style={{
-                    background: "#F5A623",
-                    boxShadow: "inset 0 0 0 1px rgba(45,16,15,0.18), 0 1px 0 rgba(255,255,255,0.4)",
-                  }}
-                />
-                <span
-                  className="w-3 h-3 rounded-full"
-                  style={{
-                    background: "#337485",
-                    boxShadow: "inset 0 0 0 1px rgba(45,16,15,0.18), 0 1px 0 rgba(255,255,255,0.4)",
-                  }}
-                />
-              </div>
-              {/* Panel title in monospace */}
-              <div className="flex-1 text-center">
-                <span
-                  className="text-[11px] font-bold tracking-[0.06em]"
-                  style={{
-                    color: "rgba(45,16,15,0.55)",
-                    fontFamily:
-                      'ui-monospace, "SF Mono", "Menlo", "Monaco", "Cascadia Code", monospace',
-                  }}
-                >
-                  ~/admin/{tab} · {currentTab?.label ?? "Overview"}
-                </span>
-              </div>
-              {/* Right-side keyboard hint */}
-              <div className="hidden sm:flex items-center gap-1 shrink-0">
-                <kbd
-                  className="text-[9px] font-black px-1.5 py-0.5 rounded"
-                  style={{
-                    background: "rgba(45,16,15,0.06)",
-                    color: "rgba(45,16,15,0.55)",
-                    fontFamily: "ui-monospace, monospace",
-                  }}
-                >
-                  ⌘K
-                </kbd>
-                <span className="text-[9px]" style={{ color: "rgba(45,16,15,0.4)" }}>
-                  search
-                </span>
-              </div>
-            </div>
+          />
+          <div
+            aria-hidden="true"
+            className="absolute top-1/3 -left-24 pointer-events-none"
+            style={{
+              width: 380,
+              height: 380,
+              background: "linear-gradient(135deg, rgba(186,225,255,0.20), rgba(186,225,255,0.06))",
+              clipPath: "polygon(40% 0, 100% 30%, 80% 100%, 0 80%, 10% 30%)",
+              zIndex: 0,
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute -bottom-32 right-1/4 pointer-events-none"
+            style={{
+              width: 420,
+              height: 420,
+              background: "linear-gradient(135deg, rgba(204,229,210,0.18), rgba(204,229,210,0.05))",
+              clipPath: "polygon(20% 0, 100% 20%, 90% 90%, 30% 100%, 0 50%)",
+              zIndex: 0,
+            }}
+          />
 
-            {/* Inner content — the original admin canvas */}
-            <div className="px-3 sm:px-5 py-4 sm:py-6">
-          {/* Mobile pill nav — branded cream/brown */}
-          <div className="lg:hidden mb-5">
+          <div className="relative h-full" style={{ zIndex: 1 }}>
+          <div className="mx-auto max-w-[1400px] h-full">
+            <div className="px-1 sm:px-2 py-1 sm:py-2 h-full overflow-hidden">
+          {/* Mobile pill nav — clean iPad-OS white/blue */}
+          <div className="lg:hidden mb-3">
             <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
               {flatNav.map((item) => {
                 const active = tab === item.id;
@@ -1127,22 +1477,22 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                   <button
                     key={item.id}
                     onClick={() => setTab(item.id)}
-                    className="shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[11px] font-black uppercase tracking-wider transition-all duration-200 snap-start"
+                    className="shrink-0 inline-flex items-center gap-1.5 px-3 h-8 rounded-full text-[12px] font-medium transition-colors snap-start"
                     style={{
-                      background: active ? "#2D100F" : "white",
-                      color: active ? "#F7E6C2" : "rgba(45,16,15,0.7)",
-                      border: active ? "1px solid #2D100F" : "1px solid rgba(45,16,15,0.12)",
-                      boxShadow: active ? "0 4px 12px rgba(45,16,15,0.18)" : "none",
+                      background: active ? "#EBF2FF" : "#FFFFFF",
+                      color: active ? "#1976FF" : "#3B4252",
+                      border: active ? "1px solid #1976FF" : "1px solid #ECEEF1",
+                      fontWeight: active ? 600 : 500,
                     }}
                   >
                     <item.Icon className="w-3.5 h-3.5" />
                     {item.label}
                     {badge > 0 && (
                       <span
-                        className="text-[9px] font-black px-1 py-0 rounded-full min-w-[16px] h-4 inline-flex items-center justify-center"
+                        className="text-[10px] font-semibold px-1.5 min-w-[16px] h-4 rounded-full inline-flex items-center justify-center"
                         style={{
-                          background: active ? "#F5A623" : "#337485",
-                          color: active ? "#2D100F" : "white",
+                          background: active ? "#1976FF" : "#FF3B30",
+                          color: "#FFFFFF",
                         }}
                       >
                         {badge}
@@ -1165,7 +1515,10 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             />
           )}
           {tab === "register" && (
-            <AdminPOSPanel />
+            <AdminCashRegister />
+          )}
+          {tab === "zreport" && (
+            <AdminDailyZReport />
           )}
           {tab === "customers" && (
             <AdminCustomersPanel
@@ -1226,12 +1579,29 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             <AdminChatPanel meId={adminId} customers={customers} />
           )}
           {tab === "emails" && <AdminEmailLogsPanel />}
+          {tab === "mailer" && <AdminMailerPanel />}
           {tab === "billing" && <AdminBillingPanel />}
           {tab === "cancellations" && <AdminCancellationsPanel />}
           {tab === "partners" && <AdminPartnersPanel partners={partners} />}
           {tab === "tenants" && <AdminTenantsPanel tenants={tenants} />}
           {tab === "mailhold" && <AdminMailHoldPanel />}
+          {tab === "vacationholds" && <AdminVacationHoldPanel />}
+          {tab === "operatinghours" && <AdminOperatingHoursPanel />}
+          {tab === "insights" && <AdminInsightsPanel />}
+          {tab === "keyledger" && <AdminKeyLedgerPanel />}
+          {tab === "referrals" && <AdminReferralsPanel />}
+          {tab === "csvonboard" && <AdminCsvOnboardPanel />}
           {tab === "qrpickup" && <AdminQRPickupPanel />}
+          {tab === "pickupqueue" && <AdminPickupAppointmentsPanel />}
+          {tab === "occupancy" && <AdminSuiteOccupancyPanel />}
+          {tab === "stickynotes" && <AdminPinnedNotesPanel />}
+          {tab === "affiliates" && <AdminAffiliateEarningsPanel />}
+          {tab === "idexpiring" && <AdminIdExpiringPanel />}
+          {tab === "webhooks" && <AdminWebhooksPanel />}
+          {tab === "kpidigest" && <AdminKpiDigestPanel />}
+          {tab === "disputes" && <AdminStorageDisputesPanel />}
+          {tab === "bookkeeping" && <AdminBookkeepingPanel />}
+          {tab === "cmrareport" && <AdminCmraReportPanel />}
           {tab === "quarterly" && <AdminQuarterlyReportPanel />}
           {tab === "revenue" && (
             <AdminRevenuePanel
@@ -1274,14 +1644,79 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             />
           )}
           {tab === "settings" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="font-black text-lg uppercase tracking-wide text-text-light">Settings</h2>
-                {settingsSaved && (
-                  <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
-                    ✓ Saved to database
-                  </span>
-                )}
+            <div className="space-y-4">
+              {/* Settings header — Command Tower variant matching the rest
+                  of the polished admin chrome. */}
+              <div
+                className="relative overflow-hidden rounded-2xl px-5 sm:px-6 py-5"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
+                  boxShadow:
+                    "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+                }}
+              >
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 pointer-events-none opacity-[0.13]"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
+                    backgroundSize: "44px 44px",
+                    maskImage:
+                      "radial-gradient(ellipse at center, black 30%, transparent 80%)",
+                    transform:
+                      "perspective(800px) rotateX(58deg) translateY(20%) scale(1.4)",
+                    transformOrigin: "center bottom",
+                  }}
+                />
+                <div className="relative flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <p
+                      className="text-[10px] font-black uppercase tracking-[0.28em] mb-1"
+                      style={{ color: "rgba(247,230,194,0.6)" }}
+                    >
+                      <span
+                        aria-hidden
+                        className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle"
+                        style={{
+                          background: "#F5A623",
+                          boxShadow: "0 0 8px #F5A623",
+                        }}
+                      />
+                      Store configuration
+                    </p>
+                    <h2
+                      className="font-bold tracking-tight"
+                      style={{
+                        fontSize: "clamp(1.4rem, 2.8vw, 1.8rem)",
+                        color: "#FFFFFF",
+                      }}
+                    >
+                      Settings
+                    </h2>
+                    <p
+                      className="text-[12px] mt-1 max-w-md"
+                      style={{ color: "rgba(247,230,194,0.7)" }}
+                    >
+                      Pricing, virtual mailbox tiers, promo banner copy, and
+                      store information. All edits persist to the SiteConfig
+                      database.
+                    </p>
+                  </div>
+                  {settingsSaved && (
+                    <span
+                      className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md inline-flex items-center"
+                      style={{
+                        background: "rgba(22,163,74,0.20)",
+                        color: "#7CE7A4",
+                        border: "1px solid rgba(22,163,74,0.4)",
+                      }}
+                    >
+                      ✓ Saved to database
+                    </span>
+                  )}
+                </div>
               </div>
 
               <AdminPricingEditor />
@@ -1358,8 +1793,8 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                       router.refresh();
                     });
                   }}
-                  className="w-full py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-40 transition-transform hover:-translate-y-0.5"
-                  style={{ background: "linear-gradient(135deg, #337485, #23596A)", boxShadow: "0 4px 14px rgba(51,116,133,0.3)" }}
+                  className="w-full h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] text-white disabled:opacity-40 transition-colors"
+                  style={{ background: "#2D100F", border: "1px solid #2D100F" }}
                 >
                   {isPending ? "Saving…" : "Save Store Info to Database"}
                 </button>
@@ -1447,8 +1882,8 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                       setTimeout(() => setSettingsSaved(false), 3000);
                     });
                   }}
-                  className="w-full py-2.5 rounded-xl text-sm font-black text-white disabled:opacity-40 transition-transform hover:-translate-y-0.5"
-                  style={{ background: "linear-gradient(135deg, #337485, #23596A)", boxShadow: "0 4px 14px rgba(51,116,133,0.3)" }}
+                  className="w-full h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] text-white disabled:opacity-40 transition-colors"
+                  style={{ background: "#2D100F", border: "1px solid #2D100F" }}
                 >
                   {isPending ? "Saving…" : "Save Carrier Times"}
                 </button>
@@ -1456,6 +1891,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             </div>
           )}
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -1506,273 +1942,12 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
         />
       )}
 
-      {/* ─── MailOS Dock — bottom-anchored quick-launch ─────────────────
-          Floats fixed at the bottom of the viewport. Hides on small
-          screens (mobile already has the pill nav). Magnetic hover via
-          CSS-only scale-on-:hover so it costs zero JS. */}
-      <MailOsDock
-        onLogMail={() => {
-          setLogMailForm({ suite: "", from: "", type: "Letter", recipientName: "", recipientPhone: "", exteriorImageUrl: "", weightOz: "", dimensions: "" });
-          setShowLogMailModal(true);
-        }}
-        onLogPackage={() => {
-          setLogMailForm({ suite: "", from: "", type: "Package", recipientName: "", recipientPhone: "", exteriorImageUrl: "", weightOz: "", dimensions: "" });
-          setShowLogMailModal(true);
-        }}
-        onAddCustomer={() => setShowAddCustomerModal(true)}
-        onJump={(id) => setTab(id)}
-        unreadTotal={pendingSignups + creditRequests.filter((r) => r.status === "Pending" || r.status === "LinkSent").length + mailRequests.length + keyRequests.length}
-      />
+      {/* MailOsDock removed — the slim left icon dock + Quick Actions
+          panel on Overview already cover quick-launch. A second floating
+          bar at the bottom was duplicate navigation and pure visual
+          noise. The "+" buttons inside each panel handle in-context
+          creates (Log Mail, Log Package, Add Customer). */}
     </div>
   );
 }
 
-// ─── MailOS Dock ────────────────────────────────────────────────────────
-//
-// Bottom-floating quick-launch bar. Six icon tiles, each with a tooltip
-// label that surfaces on hover. Magnetic-style scale on hover (subtle,
-// not gimmicky) — adjacent siblings nudge slightly via :has() neighbor
-// selectors when supported, otherwise just the hovered item scales.
-function MailOsDock(props: {
-  onLogMail: () => void;
-  onLogPackage: () => void;
-  onAddCustomer: () => void;
-  onJump: (tabId: string) => void;
-  unreadTotal: number;
-}) {
-  const items: Array<{
-    key: string;
-    label: string;
-    onClick: () => void;
-    badge?: number;
-    accent: string;
-    icon: React.ReactNode;
-  }> = [
-    {
-      key: "mail",
-      label: "Log Mail",
-      onClick: props.onLogMail,
-      accent: "#337485",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
-          <rect x="3" y="6" width="18" height="13" rx="2" />
-          <path d="M3 8 L12 14 L21 8" />
-        </svg>
-      ),
-    },
-    {
-      key: "package",
-      label: "Log Package",
-      onClick: props.onLogPackage,
-      accent: "#23596A",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
-          <path d="M12 3 L21 7 L21 17 L12 21 L3 17 L3 7 Z" />
-          <path d="M3 7 L12 11 L21 7" />
-          <path d="M12 11 L12 21" />
-        </svg>
-      ),
-    },
-    {
-      key: "customer",
-      label: "New Customer",
-      onClick: props.onAddCustomer,
-      accent: "#B07030",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          <circle cx="12" cy="9" r="3.5" />
-          <path d="M5 20 C5 15.5 8.5 13 12 13 C15.5 13 19 15.5 19 20" />
-          <path d="M18 5 L18 9 M16 7 L20 7" />
-        </svg>
-      ),
-    },
-    {
-      key: "delivery",
-      label: "Deliveries",
-      onClick: () => props.onJump("deliveries"),
-      accent: "#7C3AED",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round">
-          <rect x="2" y="9" width="13" height="9" rx="1" />
-          <path d="M15 12 L19 12 L21 14 L21 18 L15 18" />
-          <circle cx="6" cy="19" r="1.5" />
-          <circle cx="18" cy="19" r="1.5" />
-        </svg>
-      ),
-    },
-    {
-      key: "quickship",
-      label: "Quick Ship",
-      onClick: () => props.onJump("shipping"),
-      accent: "#337485",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 1 L17 5 L11 17 L8 11 L4 8 Z" />
-        </svg>
-      ),
-    },
-    {
-      key: "runsheet",
-      label: "Today's Run Sheet",
-      onClick: () => {
-        if (typeof window !== "undefined") window.open("/admin/shipping/runsheet", "_blank", "noopener,noreferrer");
-      },
-      accent: "#16a34a",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 9 V3 H18 V9" />
-          <rect x="6" y="9" width="12" height="9" rx="1" />
-          <path d="M6 13 H18 M6 16 H14" />
-        </svg>
-      ),
-    },
-    {
-      key: "scan",
-      label: "Scan Inbound",
-      onClick: () => {
-        // Jumps to the Shipping Center, then fires the top-level-subview
-        // event listened to by AdminShippingCenterPanel (separate from the
-        // `noho-shipping-jump` event used for inner Quick-Ship workspace tabs).
-        props.onJump("shipping");
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("noho-shipping-subview", { detail: { subview: "scan" } }));
-        }
-      },
-      accent: "#16a34a",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 7 V4 H7 M17 4 H20 V7 M20 17 V20 H17 M7 20 H4 V17" />
-          <path d="M3 12 H21" />
-        </svg>
-      ),
-    },
-    {
-      key: "requests",
-      label: "Mail Requests",
-      onClick: () => props.onJump("requests"),
-      accent: "#F5A623",
-      badge: props.unreadTotal,
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="4" y="3" width="16" height="18" rx="2" />
-          <path d="M8 8 L16 8 M8 12 L16 12 M8 16 L13 16" />
-        </svg>
-      ),
-    },
-    {
-      key: "search",
-      label: "Search (⌘K)",
-      onClick: () => {
-        // Focus the existing header search input as a lightweight palette.
-        const el = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]');
-        if (el) {
-          el.focus();
-          el.scrollIntoView({ block: "center", behavior: "smooth" });
-        }
-      },
-      accent: "#2D100F",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          <circle cx="11" cy="11" r="6" />
-          <path d="m17 17 4 4" />
-        </svg>
-      ),
-    },
-  ];
-
-  return (
-    <div
-      aria-label="MailOS quick launch"
-      className="hidden md:flex fixed left-1/2 bottom-4 -translate-x-1/2 z-50 pointer-events-none"
-    >
-      <div
-        className="pointer-events-auto flex items-end gap-2 px-3 py-2 rounded-2xl"
-        style={{
-          background: "linear-gradient(180deg, rgba(247,230,194,0.92) 0%, rgba(244,236,219,0.95) 100%)",
-          backdropFilter: "saturate(160%) blur(14px)",
-          WebkitBackdropFilter: "saturate(160%) blur(14px)",
-          border: "1px solid rgba(45,16,15,0.12)",
-          boxShadow:
-            "0 12px 36px rgba(45,16,15,0.18), 0 1px 0 rgba(255,255,255,0.7) inset, 0 -1px 0 rgba(45,16,15,0.06) inset",
-        }}
-      >
-        {items.map((it, idx) => (
-          <DockItem
-            key={it.key}
-            label={it.label}
-            accent={it.accent}
-            badge={it.badge}
-            onClick={it.onClick}
-            // Visual groupings: [Mail · Pkg · Customer] | [Delivery · Quick
-            // Ship · Run Sheet · Scan] | [Requests] | [Search]. Dividers
-            // fall AFTER indexes 2, 6, and 7.
-            divider={idx === 2 || idx === 6 || idx === 7}
-          >
-            {it.icon}
-          </DockItem>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function DockItem(props: {
-  label: string;
-  accent: string;
-  badge?: number;
-  divider?: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <>
-      <button
-        onClick={props.onClick}
-        className="group relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-[1.18] hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2"
-        style={{
-          background: "white",
-          color: props.accent,
-          border: `1px solid ${props.accent}33`,
-          boxShadow: `0 2px 6px ${props.accent}22, 0 1px 0 rgba(255,255,255,0.6) inset`,
-          transformOrigin: "center bottom",
-        }}
-        aria-label={props.label}
-        title={props.label}
-      >
-        <span className="w-5 h-5 inline-flex items-center justify-center" aria-hidden="true">
-          {props.children}
-        </span>
-        {props.badge != null && props.badge > 0 && (
-          <span
-            className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full text-[9px] font-black flex items-center justify-center px-1"
-            style={{
-              background: "#E70013",
-              color: "#fff",
-              boxShadow: "0 0 0 2px rgba(247,230,194,0.95), 0 0 8px rgba(231,0,19,0.45)",
-            }}
-          >
-            {props.badge > 99 ? "99+" : props.badge}
-          </span>
-        )}
-        {/* Tooltip — appears above on hover */}
-        <span
-          className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-[0.12em] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap"
-          style={{
-            background: "#2D100F",
-            color: "#F7E6C2",
-            boxShadow: "0 4px 12px rgba(45,16,15,0.3)",
-          }}
-        >
-          {props.label}
-        </span>
-      </button>
-      {props.divider && (
-        <span
-          aria-hidden="true"
-          className="self-center w-px h-7 mx-1"
-          style={{ background: "rgba(45,16,15,0.12)" }}
-        />
-      )}
-    </>
-  );
-}

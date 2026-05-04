@@ -439,6 +439,7 @@ export async function sendLabelTrackingEmail(data: {
 // Sent right after admin confirms the in-person handoff in pickup-mode
 // scanner. It's a courtesy receipt — confirms the customer has the package
 // and gives them something to forward to anyone else who was expecting it.
+// iter-92: Includes a 5-star feedback CTA link with a per-pickup token.
 // Best-effort: errors logged via EmailLog by sendEmail() but never throw.
 export async function sendMailPickedUpEmail(data: {
   email: string;
@@ -447,6 +448,7 @@ export async function sendMailPickedUpEmail(data: {
   carrier?: string | null;
   trackingNumber?: string | null;
   pickedUpAt: Date;
+  feedbackToken?: string;
 }) {
   const firstName = data.name.split(" ")[0] || "there";
   const dateLabel = data.pickedUpAt.toLocaleString("en-US", {
@@ -466,6 +468,12 @@ export async function sendMailPickedUpEmail(data: {
       ${data.trackingNumber ? `<p style="margin:0;font-size:13px;color:#334155;"><strong>Tracking #:</strong> <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">${data.trackingNumber}</span></p>` : ""}
     </div>
     ${p("If this wasn't you, reply to this email or call us right away.")}
+    ${data.feedbackToken ? `
+    <div style="margin:20px 0;padding:14px 18px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;text-align:center;">
+      <p style="margin:0 0 8px;font-size:13px;color:#7c2d12;font-weight:700;">How was the pickup?</p>
+      <p style="margin:0 0 10px;font-size:11px;color:#92400e;">One tap — no login required.</p>
+      <a href="${BASE_URL}/feedback/${data.feedbackToken}" style="display:inline-block;padding:8px 16px;border-radius:8px;background:#f59e0b;color:#fff;font-weight:800;font-size:13px;text-decoration:none;">★★★★★ Rate your pickup</a>
+    </div>` : ""}
     ${btn(`${BASE_URL}/dashboard`, "View in Dashboard")}
     ${p(`<span style="font-size:12px;color:#94a3b8;">Questions? Call us at <a href="tel:+18185067744" style="color:#337485;">(818) 506-7744</a> or stop by Mon–Fri 9:30am–5:30pm · Sat 10am–1:30pm.</span>`)}
   `);
@@ -474,6 +482,257 @@ export async function sendMailPickedUpEmail(data: {
     subject: `Picked up · Suite #${data.suiteNumber} — NOHO Mailbox`,
     html,
     kind: "mail_picked_up",
+    userId: await uidFromEmail(data.email),
+  });
+}
+
+// iter-98 — Referral conversion notifications. Two emails go out when
+// a referee signs up using a code:
+//   - Referrer gets the "you earned $10" payout email
+//   - Referee gets the welcome credit confirmation
+export async function sendReferralEarnedEmail(data: {
+  referrerEmail: string;
+  referrerName: string;
+  refereeName: string;
+  creditCents: number;
+  newWalletBalanceCents: number;
+}) {
+  const firstName = data.referrerName.split(" ")[0] || "there";
+  const fmt = (c: number) => `$${(c / 100).toFixed(2)}`;
+  const html = layout(`You earned a referral credit — NOHO Mailbox`, `
+    ${h1(`You earned ${fmt(data.creditCents)} ✓`)}
+    ${p(`Hi ${firstName}, <strong>${data.refereeName}</strong> just signed up using your referral code. Your wallet was credited.`)}
+    <div style="background:#f0fdf4;border-left:3px solid #16a34a;border-radius:4px;padding:16px 20px;margin:16px 0;">
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Credit added:</strong> ${fmt(data.creditCents)}</p>
+      <p style="margin:0;font-size:13px;color:#334155;"><strong>New wallet balance:</strong> ${fmt(data.newWalletBalanceCents)}</p>
+    </div>
+    ${p("Use it for forwarding fees, scans, deliveries, mailbox renewal — anything we charge against your wallet.")}
+    ${btn(`${BASE_URL}/dashboard?tab=wallet`, "View wallet")}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">Keep sharing your code — every signup adds another ${fmt(data.creditCents)}.</span>`)}
+  `);
+  return sendEmail({
+    to: data.referrerEmail,
+    subject: `${fmt(data.creditCents)} added to your wallet · ${data.refereeName} just joined — NOHO Mailbox`,
+    html,
+    kind: "referral_earned",
+    userId: await uidFromEmail(data.referrerEmail),
+  });
+}
+
+export async function sendReferralWelcomeEmail(data: {
+  refereeEmail: string;
+  refereeName: string;
+  referrerName: string;
+  creditCents: number;
+}) {
+  const firstName = data.refereeName.split(" ")[0] || "there";
+  const fmt = (c: number) => `$${(c / 100).toFixed(2)}`;
+  const html = layout(`Welcome to NOHO Mailbox`, `
+    ${h1(`Welcome — ${fmt(data.creditCents)} added ✓`)}
+    ${p(`Hi ${firstName}, ${data.referrerName.split(" ")[0]} sent you here. As a thanks, we've added <strong>${fmt(data.creditCents)}</strong> to your wallet to get you started.`)}
+    ${p(`Use it for any service we offer — forwarding, scans, same-day delivery, mailbox plan, fee waivers.`)}
+    ${btn(`${BASE_URL}/dashboard`, "Open dashboard")}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">Questions? Call us at <a href="tel:+18185067744" style="color:#337485;">(818) 506-7744</a>.</span>`)}
+  `);
+  return sendEmail({
+    to: data.refereeEmail,
+    subject: `Welcome to NOHO Mailbox · ${fmt(data.creditCents)} credit on us`,
+    html,
+    kind: "referral_welcome",
+    userId: await uidFromEmail(data.refereeEmail),
+  });
+}
+
+// iter-91 — Insurance receipt. Sent when a customer declares value on
+// a package and pays the corresponding tier fee. Itemizes the declared
+// value, tier, fee charged, new wallet balance.
+export async function sendPackageInsuredEmail(data: {
+  email: string;
+  name: string;
+  suiteNumber: string;
+  carrier: string | null;
+  trackingNumber: string | null;
+  declaredValueCents: number;
+  tierLabel: string;
+  feeCents: number;
+  newWalletBalanceCents: number;
+}) {
+  const firstName = data.name.split(" ")[0] || "there";
+  const fmt = (c: number) => `$${(c / 100).toFixed(2)}`;
+  const html = layout(`Package insured — NOHO Mailbox`, `
+    ${h1("Package insured ✓")}
+    ${p(`Hi ${firstName}, you've added insurance to your package. We've got coverage on file for it while it's on our shelf.`)}
+    <div style="background:#f0fdf4;border-left:3px solid #16a34a;border-radius:4px;padding:16px 20px;margin:16px 0;">
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Suite:</strong> #${data.suiteNumber}</p>
+      ${data.carrier ? `<p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Carrier:</strong> ${data.carrier}</p>` : ""}
+      ${data.trackingNumber ? `<p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Tracking #:</strong> <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">${data.trackingNumber}</span></p>` : ""}
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Declared value:</strong> ${fmt(data.declaredValueCents)}</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Coverage:</strong> ${data.tierLabel}</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Fee charged:</strong> ${fmt(data.feeCents)} <span style="color:#888">(new wallet ${fmt(data.newWalletBalanceCents)})</span></p>
+    </div>
+    ${p(`If anything happens to the package while we're holding it, we'll cover up to your declared value. Reach out to us right away — we'll make it right.`)}
+    ${btn(`${BASE_URL}/dashboard?tab=packages`, "View packages")}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">Coverage applies in-bureau only — once handed off (pickup or carrier sweep), the carrier's own insurance applies.</span>`)}
+  `);
+  return sendEmail({
+    to: data.email,
+    subject: `Package insured · ${fmt(data.declaredValueCents)} declared — NOHO Mailbox`,
+    html,
+    kind: "package_insured",
+    userId: await uidFromEmail(data.email),
+  });
+}
+
+// iter-89 — Vacation hold confirmation. Sent when a member schedules a
+// vacation hold from their dashboard. Lists the date range + digest
+// preference + what we'll do with packages that arrive during the hold
+// (auto-shelf as Held, will auto-resume on end date).
+export async function sendVacationHoldStartedEmail(data: {
+  email: string;
+  name: string;
+  suiteNumber: string;
+  startDate: string;
+  endDate: string;
+  digest: boolean;
+}) {
+  const firstName = data.name.split(" ")[0] || "there";
+  const html = layout(`Vacation hold scheduled — NOHO Mailbox`, `
+    ${h1("Vacation hold scheduled ✓")}
+    ${p(`Hi ${firstName}, we've got your back. Here's what we'll do during your hold:`)}
+    <div style="background:#fef3c7;border-left:3px solid #f59e0b;border-radius:4px;padding:16px 20px;margin:16px 0;">
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Suite:</strong> #${data.suiteNumber}</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>From:</strong> ${data.startDate}</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Through:</strong> ${data.endDate}</p>
+      <p style="margin:0;font-size:13px;color:#334155;"><strong>Daily digest emails:</strong> ${data.digest ? "On" : "Off"}</p>
+    </div>
+    <p style="margin:0 0 8px;font-size:13px;color:#334155;font-weight:700;">What happens next</p>
+    <ul style="margin:0 0 16px;padding-left:18px;font-size:13px;color:#334155;line-height:1.55;">
+      <li>Anything that arrives during your hold goes straight to our Held shelf — not Awaiting Pickup.</li>
+      <li>${data.digest ? "We'll email you a daily digest of what landed." : "Storage fees still pause — we won't bill day-4 charges during your hold."}</li>
+      <li>On <strong>${data.endDate}</strong>, we automatically move everything to Awaiting Pickup and send you a heads-up email.</li>
+    </ul>
+    ${btn(`${BASE_URL}/dashboard?tab=settings`, "Manage hold")}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">Cancel or extend any time from your dashboard.</span>`)}
+  `);
+  return sendEmail({
+    to: data.email,
+    subject: `Vacation hold scheduled · ${data.startDate} → ${data.endDate} — NOHO Mailbox`,
+    html,
+    kind: "vacation_hold_started",
+    userId: await uidFromEmail(data.email),
+  });
+}
+
+// iter-89 — Vacation hold ended. Fires when the auto-resume cron flips
+// a hold's packages back to Awaiting Pickup, OR when admin/customer
+// manually ends a hold.
+export async function sendVacationHoldEndedEmail(data: {
+  email: string;
+  name: string;
+  suiteNumber: string;
+  endedManually?: boolean;
+  packagesReleased: number;
+}) {
+  const firstName = data.name.split(" ")[0] || "there";
+  const html = layout(`Welcome back — NOHO Mailbox`, `
+    ${h1("Welcome back ✓")}
+    ${p(`Hi ${firstName}, ${data.endedManually ? "your vacation hold has been ended" : "your vacation hold ended automatically today"}.`)}
+    <div style="background:#f0fdf4;border-left:3px solid #16a34a;border-radius:4px;padding:16px 20px;margin:16px 0;">
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Suite:</strong> #${data.suiteNumber}</p>
+      <p style="margin:0;font-size:13px;color:#334155;"><strong>Packages released to Awaiting Pickup:</strong> ${data.packagesReleased}</p>
+    </div>
+    ${data.packagesReleased > 0
+      ? p(`Stop by during open hours and we'll have them ready. Or set up a guest pickup if you can't make it yourself.`)
+      : p(`Nothing accumulated during the hold — clean shelf!`)}
+    ${btn(`${BASE_URL}/dashboard?tab=packages`, "View packages")}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">Mon–Fri 9:30am–5:30pm · Sat 10am–1:30pm · (818) 506-7744</span>`)}
+  `);
+  return sendEmail({
+    to: data.email,
+    subject: `Welcome back · ${data.packagesReleased} package${data.packagesReleased === 1 ? "" : "s"} ready — NOHO Mailbox`,
+    html,
+    kind: "vacation_hold_ended",
+    userId: await uidFromEmail(data.email),
+  });
+}
+
+// iter-88 — Guest pickup authorization. Sent to a guest the customer
+// authorized to pick up packages from their NOHO Mailbox. Includes a
+// QR (encoded as data URL by the caller) and the bureau hours so the
+// guest knows when to come in.
+export async function sendGuestPickupAuthEmail(data: {
+  toEmail: string;
+  guestName: string;
+  customerName: string;
+  customerSuiteNumber: string;
+  qrDataUrl: string;
+  expiresAt?: Date | null;
+  notes?: string | null;
+}) {
+  const expLine = data.expiresAt
+    ? `<p style="margin:0;font-size:13px;color:#7c2d12;"><strong>Expires:</strong> ${data.expiresAt.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</p>`
+    : `<p style="margin:0;font-size:13px;color:#334155;"><strong>Valid:</strong> until revoked by ${data.customerName.split(" ")[0]}</p>`;
+  const html = layout(`Pickup pass — NOHO Mailbox`, `
+    ${h1("You're authorized for pickup ✓")}
+    ${p(`Hi ${data.guestName.split(" ")[0]}, <strong>${data.customerName}</strong> has authorized you to pick up packages from their NOHO Mailbox (suite #${data.customerSuiteNumber}). Bring this email and a photo ID with you.`)}
+    <div style="background:#f0fdf4;border-left:3px solid #16a34a;border-radius:4px;padding:16px 20px;margin:16px 0;">
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>For:</strong> ${data.customerName} · suite #${data.customerSuiteNumber}</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Guest name:</strong> ${data.guestName}</p>
+      ${expLine}
+      ${data.notes ? `<p style="margin:6px 0 0;font-size:13px;color:#334155;"><strong>Note:</strong> ${data.notes}</p>` : ""}
+    </div>
+    <div style="text-align:center;margin:24px 0;">
+      <img src="${data.qrDataUrl}" alt="Pickup QR" style="width:200px;height:200px;border:1px solid #e2e8f0;border-radius:8px;" />
+      <p style="margin:8px 0 0;font-size:11px;color:#94a3b8;">Show this QR to the bureau staff at the counter.</p>
+    </div>
+    ${p(`<strong>Hours:</strong><br>Mon–Fri 9:30am–5:30pm · Sat 10am–1:30pm<br>5062 Lankershim Blvd · NoHo, CA 91601`)}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">Questions? Call us at <a href="tel:+18185067744" style="color:#337485;">(818) 506-7744</a>.</span>`)}
+  `);
+  return sendEmail({
+    to: data.toEmail,
+    subject: `You're authorized to pick up at NOHO Mailbox · suite #${data.customerSuiteNumber}`,
+    html,
+    kind: "guest_pickup_auth",
+    userId: await uidFromEmail(data.toEmail),
+  });
+}
+
+// iter-87 — Storage fee charged on pickup. Sent right after the pickup
+// confirmation when the package was sitting > 3 days. Itemizes the
+// billable days, the rate, the amount charged from wallet, and any
+// residual still owed (becomes an open Invoice).
+export async function sendStorageFeeChargedEmail(data: {
+  email: string;
+  name: string;
+  suiteNumber: string;
+  daysOnShelf: number;
+  billableDays: number;
+  ratePerDayCents: number;
+  walletDebitCents: number;
+  invoiceCents: number;
+  newWalletBalanceCents: number;
+}) {
+  const firstName = data.name.split(" ")[0] || "there";
+  const fmt = (c: number) => `$${(c / 100).toFixed(2)}`;
+  const html = layout(`Storage fee — NOHO Mailbox`, `
+    ${h1("Storage fee receipt")}
+    ${p(`Hi ${firstName}, your package was sitting on the shelf for <strong>${data.daysOnShelf} day${data.daysOnShelf === 1 ? "" : "s"}</strong>. Per our Terms, storage starts on day 4 at $6.50/day.`)}
+    <div style="background:#fff7ed;border-left:3px solid #f59e0b;border-radius:4px;padding:16px 20px;margin:16px 0;">
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Suite:</strong> #${data.suiteNumber}</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Billable days:</strong> ${data.billableDays} × ${fmt(data.ratePerDayCents)}</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Total fee:</strong> ${fmt(data.billableDays * data.ratePerDayCents)}</p>
+      ${data.walletDebitCents > 0 ? `<p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Charged from wallet:</strong> ${fmt(data.walletDebitCents)} <span style="color:#888">(new balance ${fmt(data.newWalletBalanceCents)})</span></p>` : ""}
+      ${data.invoiceCents > 0 ? `<p style="margin:0;font-size:13px;color:#7c2d12;"><strong>Owed on next visit:</strong> ${fmt(data.invoiceCents)}</p>` : ""}
+    </div>
+    ${data.invoiceCents > 0 ? p("We've added the residual to your account as an open invoice. Top up your wallet anytime to clear it.") : p("All paid in full from your wallet — thanks!")}
+    ${btn(`${BASE_URL}/dashboard?tab=wallet`, "View wallet")}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">Questions? Reply to this email or call (818) 506-7744.</span>`)}
+  `);
+  return sendEmail({
+    to: data.email,
+    subject: `Storage fee · ${fmt(data.billableDays * data.ratePerDayCents)} — NOHO Mailbox`,
+    html,
+    kind: "storage_fee",
     userId: await uidFromEmail(data.email),
   });
 }

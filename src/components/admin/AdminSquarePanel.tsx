@@ -50,16 +50,14 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
         </p>
       </div>
 
-      {/* ─── Connection status hero ─────────────────────────────────── */}
+      {/* ─── Connection status hero — Command Tower variant ─────────── */}
       <div
         className="rounded-2xl p-5 sm:p-6 relative overflow-hidden"
         style={{
-          background: isConnected
-            ? `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`
-            : "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)",
-          boxShadow: isConnected
-            ? `0 12px 32px ${NOHO_BLUE}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-            : "0 12px 32px rgba(220,38,38,0.32), inset 0 1px 0 rgba(255,255,255,0.18)",
+          background:
+            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
+          boxShadow:
+            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
           color: "#F7E6C2",
         }}
       >
@@ -144,10 +142,9 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
       {/* Setup instructions when not connected */}
       {!isConnected && (
         <div
-          className="rounded-2xl p-5 bg-white"
+          className="rounded-md p-4 bg-white"
           style={{
-            boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
-            border: "1px dashed rgba(220,38,38,0.3)",
+            border: "1px dashed rgba(220,38,38,0.4)",
           }}
         >
           <h3 className="font-black text-sm uppercase tracking-wide mb-3" style={{ color: NOHO_INK }}>
@@ -189,8 +186,8 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
 
       {/* ─── Sync action grid — 3 specific + 1 sync-all ─────────────── */}
       <div
-        className="rounded-2xl bg-white p-5"
-        style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+        className="rounded-md bg-white p-4"
+        style={{ border: "1px solid #E5DACA" }}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: NOHO_INK }}>
@@ -316,8 +313,8 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
 
       {/* ─── Sync history timeline ─────────────────────────────────── */}
       <div
-        className="rounded-2xl bg-white overflow-hidden"
-        style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+        className="rounded-md bg-white overflow-hidden"
+        style={{ border: "1px solid #E5DACA" }}
       >
         <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(232,229,224,0.5)" }}>
           <h3 className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: NOHO_INK }}>
@@ -350,10 +347,15 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
               return (
                 <li
                   key={log.id}
-                  className="relative rounded-xl bg-white p-3 transition-all hover:shadow-md"
+                  className="relative rounded-md bg-white p-3 transition-colors"
                   style={{
-                    border: "1px solid rgba(232,229,224,0.7)",
-                    boxShadow: "0 1px 2px rgba(45,16,15,0.04)",
+                    border: "1px solid #E5DACA",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#F4EEE3";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "#FFFFFF";
                   }}
                 >
                   <span
@@ -424,26 +426,24 @@ function KpiTile({
 }) {
   return (
     <div
-      className="rounded-2xl p-4 transition-all hover:-translate-y-0.5"
+      className="rounded-md p-4 transition-colors"
       style={{
-        background: accent ? `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)` : "white",
-        boxShadow: accent
-          ? `0 8px 24px ${NOHO_BLUE}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
-        border: accent ? "1px solid rgba(247,230,194,0.18)" : "1px solid rgba(232,221,208,0.5)",
+        background: accent ? NOHO_INK : "#FFFFFF",
+        border: `1px solid ${accent ? NOHO_INK : "#E5DACA"}`,
       }}
     >
       <p
-        className="text-[10px] font-black uppercase tracking-[0.16em]"
-        style={{ color: accent ? "rgba(255,255,255,0.55)" : "rgba(45,16,15,0.45)" }}
+        className="text-[10px] font-bold uppercase tracking-[0.14em]"
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
       >
         {label}
       </p>
       <p
-        className="text-2xl sm:text-3xl font-black tracking-tight mt-1"
+        className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
-          color: accent ? "white" : NOHO_INK,
-          fontFamily: "var(--font-baloo), sans-serif",
+          color: accent ? "#F7E6C2" : NOHO_INK,
+          fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
+          fontVariantNumeric: "tabular-nums",
         }}
       >
         {value}
@@ -481,15 +481,10 @@ function SyncCard({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="rounded-xl p-4 text-left transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
+      className="rounded-md p-4 text-left transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       style={{
-        background: primary
-          ? `linear-gradient(135deg, ${accent} 0%, ${NOHO_BLUE_DEEP} 100%)`
-          : "white",
-        border: primary ? "1px solid rgba(247,230,194,0.18)" : `1px solid ${accent}33`,
-        boxShadow: primary
-          ? `0 8px 24px ${accent}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : `0 2px 8px ${accent}22, 0 1px 0 rgba(255,255,255,0.6) inset`,
+        background: primary ? NOHO_INK : "#FFFFFF",
+        border: `1px solid ${primary ? NOHO_INK : "#E5DACA"}`,
       }}
     >
       <div className="flex items-center gap-2.5">

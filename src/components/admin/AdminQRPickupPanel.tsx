@@ -231,13 +231,13 @@ export function AdminQRPickupPanel() {
             <button
               disabled={!token.trim() || pending}
               onClick={process}
-              className="px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-[0.16em] text-white disabled:opacity-40 transition-transform hover:-translate-y-0.5"
+              className="px-5 h-10 rounded-md text-sm font-bold uppercase tracking-[0.10em] text-white disabled:opacity-40 transition-colors"
               style={{
-                background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
-                boxShadow: `0 6px 20px ${NOHO_BLUE}55, inset 0 1px 0 rgba(255,255,255,0.18)`,
+                background: NOHO_INK,
+                border: `1px solid ${NOHO_INK}`,
               }}
             >
-              {pending ? "Processing…" : "Process Pickup"}
+              {pending ? "Processing…" : "Process pickup"}
             </button>
             <button
               onClick={() => {
@@ -263,16 +263,13 @@ export function AdminQRPickupPanel() {
         </div>
       </div>
 
-      {/* Result tile — last scan outcome */}
+      {/* Result tile — last scan outcome (flat hairline w/ accent dot). */}
       {result && (
         <div
-          className="rounded-2xl p-5 transition-all"
+          className="rounded-md p-4 transition-colors"
           style={{
-            background: result.success
-              ? "linear-gradient(135deg, rgba(22,163,74,0.08), rgba(22,163,74,0.02))"
-              : "linear-gradient(135deg, rgba(220,38,38,0.08), rgba(220,38,38,0.02))",
-            border: `2px solid ${result.success ? "rgba(22,163,74,0.3)" : "rgba(220,38,38,0.3)"}`,
-            boxShadow: `0 4px 18px ${result.success ? "rgba(22,163,74,0.18)" : "rgba(220,38,38,0.18)"}`,
+            background: "#FFFFFF",
+            border: `1px solid ${result.success ? "rgba(22,163,74,0.4)" : "rgba(220,38,38,0.4)"}`,
           }}
         >
           {result.error ? (
@@ -288,22 +285,22 @@ export function AdminQRPickupPanel() {
               <div className="flex items-start gap-4">
                 {result.pickedUp! > 0 ? (
                   <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                    className="w-10 h-10 rounded-md flex items-center justify-center shrink-0"
                     style={{
-                      background: "linear-gradient(135deg, #16A34A, #166534)",
-                      boxShadow: "0 6px 18px rgba(22,163,74,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+                      background: "#16A34A",
+                      border: "1px solid #166534",
                     }}
                   >
-                    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M5 12 L10 17 L19 7" />
                     </svg>
                   </div>
                 ) : (
                   <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                    style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}
+                    className="w-10 h-10 rounded-md flex items-center justify-center shrink-0"
+                    style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
                   >
-                    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round">
                       <circle cx="12" cy="12" r="9" />
                       <path d="M12 8 L12 13 M12 16 L12.01 16" />
                     </svg>
@@ -344,18 +341,17 @@ export function AdminQRPickupPanel() {
                       <span
                         className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
                         style={{
-                          background: item.type === "Package"
-                            ? `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`
-                            : "linear-gradient(135deg, #EBF2FA, #D4E4F4)",
+                          background: "#F4EEE3",
+                          border: "1px solid #E5DACA",
                         }}
                       >
                         {item.type === "Package" ? (
-                          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="#fff" strokeWidth="2" strokeLinejoin="round">
+                          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke={NOHO_INK} strokeWidth="1.6" strokeLinejoin="round">
                             <path d="M12 3 L21 7 L21 17 L12 21 L3 17 L3 7 Z" />
                             <path d="M3 7 L12 11 L21 7" />
                           </svg>
                         ) : (
-                          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke={NOHO_BLUE} strokeWidth="2" strokeLinejoin="round">
+                          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke={NOHO_INK} strokeWidth="1.6" strokeLinejoin="round">
                             <rect x="3" y="6" width="18" height="13" rx="2" />
                             <path d="M3 8 L12 14 L21 8" />
                           </svg>
@@ -375,7 +371,7 @@ export function AdminQRPickupPanel() {
       {recents.length > 0 && (
         <div
           className="rounded-2xl bg-white p-5"
-          style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+          style={{ border: "1px solid #E5DACA" }}
         >
           <h3 className="text-[10px] font-black uppercase tracking-[0.18em] mb-3" style={{ color: NOHO_INK }}>
             Recent in this session
@@ -391,9 +387,10 @@ export function AdminQRPickupPanel() {
                 }}
               >
                 <span
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
                   style={{
-                    background: "linear-gradient(135deg, #16A34A, #166534)",
+                    background: "#16A34A",
+                    border: "1px solid #166534",
                     color: "white",
                   }}
                 >
@@ -464,26 +461,24 @@ function KpiTile({
 }) {
   return (
     <div
-      className="rounded-2xl p-4 transition-all hover:-translate-y-0.5"
+      className="rounded-md p-4 transition-colors"
       style={{
-        background: accent ? `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)` : "white",
-        boxShadow: accent
-          ? `0 8px 24px ${NOHO_BLUE}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
-        border: accent ? "1px solid rgba(247,230,194,0.18)" : "1px solid rgba(232,221,208,0.5)",
+        background: accent ? NOHO_INK : "#FFFFFF",
+        border: `1px solid ${accent ? NOHO_INK : "#E5DACA"}`,
       }}
     >
       <p
-        className="text-[10px] font-black uppercase tracking-[0.16em]"
-        style={{ color: accent ? "rgba(255,255,255,0.55)" : "rgba(45,16,15,0.45)" }}
+        className="text-[10px] font-bold uppercase tracking-[0.14em]"
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
       >
         {label}
       </p>
       <p
-        className="text-2xl sm:text-3xl font-black tracking-tight mt-1"
+        className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
-          color: accent ? "white" : NOHO_INK,
-          fontFamily: "var(--font-baloo), sans-serif",
+          color: accent ? "#F7E6C2" : NOHO_INK,
+          fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
+          fontVariantNumeric: "tabular-nums",
         }}
       >
         {value}

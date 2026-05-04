@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { parsePrefs, patchPrefs, type NotifEvent, type ChannelPrefs, type NotifPrefs } from "@/lib/notifPrefs";
 
 const profileSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -122,4 +123,36 @@ export async function getMyEmailHistory(limit = 50) {
       sentAt: true,
     },
   });
+}
+
+
+// iter-84: Notification preferences. Read+write the JSON blob on User.notifPrefs.
+export async function getMyNotifPrefs(): Promise<NotifPrefs> {
+  const session = await verifySession();
+  const u = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { notifPrefs: true },
+  });
+  return parsePrefs(u?.notifPrefs);
+}
+
+export async function updateMyNotifPrefs(event: NotifEvent, patch: Partial<ChannelPrefs>) {
+  const session = await verifySession();
+  const u = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { notifPrefs: true, phone: true },
+  });
+  if (!u) return { error: "User not found" };
+  // SMS opt-in requires a phone number on file. Otherwise the toggle
+  // would silently no-op for every send.
+  if (patch.sms === true && !u.phone) {
+    return { error: "Add a phone number to your profile before enabling SMS." };
+  }
+  const next = patchPrefs(parsePrefs(u.notifPrefs), event, patch);
+  await prisma.user.update({
+    where: { id: session.id },
+    data: { notifPrefs: JSON.stringify(next) },
+  });
+  revalidatePath("/dashboard");
+  return { success: true, prefs: next };
 }

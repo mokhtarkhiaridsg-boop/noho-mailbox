@@ -18,6 +18,7 @@ import {
   IconScan,
 } from "@/components/MemberIcons";
 import { AiEnvelope } from "@/components/AnimatedIcons";
+import OnboardingChecklistCard from "./OnboardingChecklistCard";
 
 // Animated number counter — counts up from 0 to value over 600ms with a
 // spring-damped tween. Used in the metric cards so big numbers feel earned
@@ -306,6 +307,11 @@ export default function OverviewPanel({
 
   return (
     <div className="space-y-5 sm:space-y-7">
+      {/* iter-114: Onboarding checklist — top of the overview so new
+          members see "what's next" before anything else. Self-collapses
+          to a small chip once everything's done. */}
+      <OnboardingChecklistCard />
+
       {/* ─── Hero Panel ──────────────────────────────────────────────────
           Single unified above-the-fold band combining: branded mailbox
           illustration (left) with live state, smart contextual actions

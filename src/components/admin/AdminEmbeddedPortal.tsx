@@ -260,11 +260,8 @@ export function AdminEmbeddedPortal({ title, subtitle, url, quickSteps }: Props)
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {steps.length > 0 && (
           <div
-            className="rounded-2xl p-4 bg-white lg:col-span-2"
-            style={{
-              border: `1px solid ${NOHO_INK}11`,
-              boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 12px rgba(45,16,15,0.04)",
-            }}
+            className="rounded-md p-4 bg-white lg:col-span-2"
+            style={{ border: "1px solid #E5DACA" }}
           >
             <div className="flex items-center gap-2 mb-3">
               <div
@@ -309,11 +306,8 @@ export function AdminEmbeddedPortal({ title, subtitle, url, quickSteps }: Props)
 
         {links.length > 0 && (
           <div
-            className="rounded-2xl p-4 bg-white"
-            style={{
-              border: `1px solid ${NOHO_INK}11`,
-              boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 12px rgba(45,16,15,0.04)",
-            }}
+            className="rounded-md p-4 bg-white"
+            style={{ border: "1px solid #E5DACA" }}
           >
             <div className="flex items-center gap-2 mb-3">
               <div
@@ -374,10 +368,9 @@ export function AdminEmbeddedPortal({ title, subtitle, url, quickSteps }: Props)
       {/* Embed or launch tile */}
       {view === "embed" && !frameError ? (
         <div
-          className="rounded-2xl bg-white overflow-hidden relative"
+          className="rounded-md bg-white overflow-hidden relative"
           style={{
-            border: `1px solid ${NOHO_INK}11`,
-            boxShadow: "0 1px 0 rgba(51,116,133,0.04), 0 4px 12px rgba(45,16,15,0.05)",
+            border: "1px solid #E5DACA",
             height: "calc(100vh - 380px)",
             minHeight: 480,
           }}
@@ -427,10 +420,10 @@ export function AdminEmbeddedPortal({ title, subtitle, url, quickSteps }: Props)
         </div>
       ) : (
         <div
-          className="rounded-2xl p-12 text-center relative overflow-hidden"
+          className="rounded-md p-10 text-center relative overflow-hidden"
           style={{
-            background: `linear-gradient(180deg, ${NOHO_CREAM}66 0%, white 100%)`,
-            border: `1px dashed ${NOHO_INK}1a`,
+            background: "#FFFFFF",
+            border: `1px dashed ${NOHO_INK}26`,
           }}
         >
           {/* Decorative carrier-color accent */}

@@ -267,10 +267,10 @@ export function AdminEmailLogsPanel() {
 
       {err ? (
         <div
-          className="rounded-2xl p-6 text-center"
+          className="rounded-md p-5 text-center"
           style={{
             background: "rgba(220,38,38,0.06)",
-            border: "1px solid rgba(220,38,38,0.18)",
+            border: "1px solid rgba(220,38,38,0.40)",
             color: "#dc2626",
           }}
         >
@@ -278,20 +278,20 @@ export function AdminEmailLogsPanel() {
         </div>
       ) : rows === null ? (
         <div
-          className="rounded-2xl bg-white px-5 py-12 text-center text-sm"
+          className="rounded-md bg-white px-5 py-12 text-center text-sm"
           style={{
             color: "rgba(45,16,15,0.4)",
-            boxShadow: "0 1px 3px rgba(26,23,20,0.04)",
+            border: "1px solid #E5DACA",
           }}
         >
           Loading email log…
         </div>
       ) : filtered && filtered.length === 0 ? (
         <div
-          className="rounded-2xl bg-white px-5 py-12 text-center text-sm"
+          className="rounded-md bg-white px-5 py-12 text-center text-sm"
           style={{
             color: "rgba(45,16,15,0.4)",
-            boxShadow: "0 1px 3px rgba(26,23,20,0.04)",
+            border: "1px solid #E5DACA",
           }}
         >
           No emails match this filter.
@@ -320,10 +320,7 @@ export function AdminEmailLogsPanel() {
                   <div
                     aria-hidden="true"
                     className="absolute left-2 top-2 bottom-2 w-px"
-                    style={{
-                      background:
-                        "linear-gradient(180deg, rgba(45,16,15,0.18) 0%, rgba(45,16,15,0.05) 100%)",
-                    }}
+                    style={{ background: "#E5DACA" }}
                   />
                   <ul className="space-y-2">
                     {items.map((r) => {
@@ -332,10 +329,15 @@ export function AdminEmailLogsPanel() {
                       return (
                         <li
                           key={r.id}
-                          className="relative rounded-xl bg-white p-3 transition-all hover:shadow-md"
+                          className="relative rounded-md bg-white p-3 transition-colors"
                           style={{
-                            border: "1px solid rgba(232,229,224,0.7)",
-                            boxShadow: "0 1px 2px rgba(45,16,15,0.04)",
+                            border: "1px solid #E5DACA",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = "#F4EEE3";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "#FFFFFF";
                           }}
                         >
                           {/* Status node on the rail */}
@@ -471,42 +473,42 @@ function KpiTile({
 }) {
   const isAccent = accent && !danger;
   const isDanger = danger;
+  const bg = isAccent ? NOHO_INK : isDanger ? "#B91C1C" : "#FFFFFF";
   return (
     <div
-      className="rounded-2xl p-4 transition-all hover:-translate-y-0.5"
+      className="rounded-md p-4 transition-colors"
       style={{
-        background: isAccent
-          ? `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`
-          : isDanger
-          ? "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)"
-          : "white",
-        boxShadow: isAccent
-          ? `0 8px 24px ${NOHO_BLUE}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : isDanger
-          ? "0 8px 24px rgba(220,38,38,0.32), inset 0 1px 0 rgba(255,255,255,0.18)"
-          : "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
-        border: isAccent || isDanger ? "1px solid rgba(247,230,194,0.18)" : "1px solid rgba(232,221,208,0.5)",
+        background: bg,
+        border: `1px solid ${isAccent ? NOHO_INK : isDanger ? "#B91C1C" : "#E5DACA"}`,
       }}
     >
       <p
-        className="text-[10px] font-black uppercase tracking-[0.16em]"
-        style={{ color: isAccent || isDanger ? "rgba(255,255,255,0.55)" : "rgba(45,16,15,0.45)" }}
+        className="text-[10px] font-bold uppercase tracking-[0.14em]"
+        style={{
+          color: isAccent || isDanger ? "rgba(247,230,194,0.6)" : "#998877",
+        }}
       >
         {label}
       </p>
       <p
-        className="text-2xl sm:text-3xl font-black tracking-tight mt-1"
+        className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
-          color: isAccent || isDanger ? "white" : NOHO_INK,
-          fontFamily: "var(--font-baloo), sans-serif",
+          color: isAccent || isDanger ? "#F7E6C2" : NOHO_INK,
+          fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
+          fontVariantNumeric: "tabular-nums",
         }}
       >
         {value}
       </p>
       {sub && (
         <p
-          className="text-[10px] font-bold mt-1"
-          style={{ color: isAccent || isDanger ? "rgba(255,255,255,0.6)" : NOHO_BLUE }}
+          className="text-[10px] font-medium mt-1"
+          style={{
+            color:
+              isAccent || isDanger
+                ? "rgba(247,230,194,0.55)"
+                : "#998877",
+          }}
         >
           {sub}
         </p>

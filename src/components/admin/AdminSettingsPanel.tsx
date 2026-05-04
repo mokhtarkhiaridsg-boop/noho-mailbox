@@ -107,12 +107,14 @@ export function AdminSettingsPanel() {
 
   return (
     <div className="space-y-5">
-      {/* Hero strip */}
+      {/* Hero strip — Command Tower variant. */}
       <div
         className="relative overflow-hidden rounded-2xl"
         style={{
-          background: `linear-gradient(135deg, ${NOHO_INK} 0%, ${NOHO_BLUE_DEEP} 100%)`,
-          boxShadow: "0 8px 28px rgba(45,16,15,0.30)",
+          background:
+            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
+          boxShadow:
+            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
         }}
       >
         <div

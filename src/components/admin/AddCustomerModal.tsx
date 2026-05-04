@@ -147,7 +147,7 @@ export function AddCustomerModal({ onClose }: Props) {
   if (success) {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-        <div className="bg-white rounded-2xl p-10 text-center w-full max-w-sm mx-4" style={{ boxShadow: "0 8px 40px rgba(26,23,20,0.2)" }}>
+        <div className="bg-white rounded-md p-8 text-center w-full max-w-sm mx-4" style={{ border: "1px solid #E5DACA", boxShadow: "0 12px 36px rgba(26,23,20,0.18)" }}>
           <p className="text-4xl mb-3">✓</p>
           <p className="font-black text-lg text-text-light">Customer Created!</p>
           <p className="text-sm text-text-light/50 mt-1">Closing…</p>
@@ -159,7 +159,7 @@ export function AddCustomerModal({ onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.55)" }} onClick={onClose}>
       <div
-        className="bg-white rounded-2xl w-full max-w-lg mx-4 max-h-[92vh] overflow-y-auto"
+        className="bg-white rounded-md w-full max-w-lg mx-4 max-h-[92vh] overflow-y-auto"
         style={{ boxShadow: "0 8px 40px rgba(26,23,20,0.22)" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -612,10 +612,10 @@ export function AddCustomerModal({ onClose }: Props) {
                 (!form.businessName || !form.businessOwnerName || !form.businessOwnerRelation))
             }
             onClick={handleSubmit}
-            className="w-full py-3 rounded-xl text-white font-black text-sm disabled:opacity-40 transition-colors"
-            style={{ background: "linear-gradient(135deg, #337485, #23596A)", boxShadow: "0 2px 10px rgba(51,116,133,0.3)" }}
+            className="w-full h-11 rounded-md text-white text-[12px] font-bold uppercase tracking-[0.10em] disabled:opacity-40 transition-colors"
+            style={{ background: "#2D100F", border: "1px solid #2D100F" }}
           >
-            {isPending ? "Creating…" : "Create Customer"}
+            {isPending ? "Creating…" : "Create customer"}
           </button>
 
         </div>

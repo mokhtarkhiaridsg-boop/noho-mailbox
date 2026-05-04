@@ -3,57 +3,40 @@
  * Renders three live signals: open/closed (computed at request time),
  * today's mail intake count, and last courier run "ago" string.
  *
- * Updates per-request (which on Vercel = roughly per-CDN-revalidation —
- * good enough for an ambient signal at the bottom of the page).
+ * iter-90: Hours computation now reads from the editable operating-hours
+ * config in SiteConfig instead of hardcoded windows. Holiday exceptions
+ * are honored automatically.
  */
 import { getFooterStats, timeAgo } from "@/lib/footer-stats";
-
-type Status = "open" | "lunch" | "closed";
-
-function nowInLA(): { day: number; hour: number; minute: number } {
-  const fmt = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Los_Angeles",
-    weekday: "short",
-    hour: "numeric",
-    minute: "numeric",
-    hour12: false,
-  });
-  const parts = fmt.formatToParts(new Date());
-  const get = (k: string) => parts.find((p) => p.type === k)?.value ?? "";
-  const dayMap: Record<string, number> = {
-    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
-  };
-  const day = dayMap[get("weekday")] ?? 0;
-  const hour = parseInt(get("hour"), 10);
-  const minute = parseInt(get("minute"), 10);
-  return { day, hour, minute };
-}
-
-function computeStatus(): { status: Status; sub: string } {
-  const { day, hour, minute } = nowInLA();
-  const m = hour * 60 + minute;
-  if (day >= 1 && day <= 5) {
-    if (m < 570) return { status: "closed", sub: "opens 9:30 am" };
-    if (m < 810) return { status: "open", sub: "lunch break 1:30–2 pm" };
-    if (m < 840) return { status: "lunch", sub: "back at 2:00 pm" };
-    if (m < 1050) return { status: "open", sub: "closes 5:30 pm" };
-    return { status: "closed", sub: day === 5 ? "opens Sat 10 am" : "opens 9:30 am tomorrow" };
-  }
-  if (day === 6) {
-    if (m < 600) return { status: "closed", sub: "opens 10:00 am" };
-    if (m < 810) return { status: "open", sub: "closes 1:30 pm" };
-    return { status: "closed", sub: "opens Mon 9:30 am" };
-  }
-  return { status: "closed", sub: "opens Mon 9:30 am" };
-}
+import { getOperatingHours } from "@/app/actions/operatingHours";
+import { isOpenNow } from "@/lib/operating-hours";
 
 export async function LiveFooterStatus() {
-  const stats = await getFooterStats();
-  const { status, sub } = computeStatus();
+  const [stats, hours] = await Promise.all([getFooterStats(), getOperatingHours()]);
+  const result = isOpenNow(hours);
   const dotColor =
-    status === "open" ? "#16a34a" : status === "lunch" ? "#F5A623" : "#9CA3AF";
+    result.status === "open" ? "#16a34a"
+    : result.status === "closing_soon" ? "#F5A623"
+    : result.status === "break" ? "#F5A623"
+    : result.status === "closed_holiday" ? "#E70013"
+    : "#9CA3AF";
   const headline =
-    status === "open" ? "Open now" : status === "lunch" ? "On lunch" : "Closed";
+    result.status === "open" ? "Open now"
+    : result.status === "closing_soon" ? "Closing soon"
+    : result.status === "break" ? "On lunch"
+    : result.status === "closed_holiday" ? `Closed · ${result.holiday?.label ?? "holiday"}`
+    : "Closed";
+  const sub =
+    result.status === "open" || result.status === "closing_soon"
+      ? `${result.todayLabel}${result.minutesUntilClose != null ? ` · closes in ${result.minutesUntilClose} min` : ""}`
+      : result.status === "break"
+      ? `Back shortly · ${result.todayLabel}`
+      : result.status === "closed_holiday"
+      ? (result.holiday?.note ?? "Reopens next business day")
+      : `Today: ${result.todayLabel}`;
+  const status = result.status === "open" || result.status === "closing_soon" ? "open"
+    : result.status === "break" ? "lunch"
+    : "closed";
 
   return (
     <div

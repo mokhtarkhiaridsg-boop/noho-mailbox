@@ -232,7 +232,10 @@ body {
   .ai-icon:hover .ai-wheel, .ai-icon:hover .ai-shield-body { animation: none; }
 }
 
-/* ─── Branded interactive cursor (desktop only) ─── */
+/* ─── Custom arrow cursor (desktop only) ─────────────────────────────
+   Regular arrow-pointer silhouette painted in brand blue, with a small
+   scale-down on click. The arrow tip anchors at translate(0,0) so the
+   "hot point" matches the OS cursor — no positional offset needed. */
 @media (hover: hover) and (pointer: fine) {
   .noho-cursor {
     pointer-events: none;
@@ -240,79 +243,44 @@ body {
     top: 0;
     left: 0;
     z-index: 9999;
-    width: 28px;
-    height: 28px;
-    margin-left: -14px;
-    margin-top: -14px;
-    border-radius: 50%;
-    border: 2px solid #2D100F;
-    background: rgba(247,230,194,0.85);
-    box-shadow: 0 2px 6px rgba(45,16,15,0.18);
-    transition: width 0.18s ease, height 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    width: 20px;
+    height: 20px;
+    /* Arrow tip is at the top-left of the SVG (4,2) so we don't offset
+       — the cursor's translate3d targets the actual mouse coord. */
+    transition: transform 0.06s ease, opacity 0.18s ease;
     will-change: transform;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.18));
   }
-  .noho-cursor::after {
-    content: "";
-    position: absolute;
-    inset: 6px;
-    border-radius: 50%;
-    background: #337485;
-    opacity: 0.9;
-    transition: inset 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+  .noho-cursor__arrow {
+    display: block;
+    transition: transform 0.08s ease, fill 0.12s ease;
+    transform-origin: 4px 2px; /* keep the tip anchored on scale */
   }
-  .noho-cursor.is-pointer {
-    width: 44px;
-    height: 44px;
-    margin-left: -22px;
-    margin-top: -22px;
-    background: rgba(51,116,133,0.18);
-    border-color: #337485;
-    box-shadow: 0 4px 14px rgba(51,116,133,0.25);
+  /* Pointer state — slightly larger over interactive targets, blue gets
+     a touch brighter. Mimics the OS "link" cursor cue. */
+  .noho-cursor.is-pointer .noho-cursor__arrow {
+    fill: #0F5BD9;
+    transform: scale(1.12);
   }
-  .noho-cursor.is-pointer::after {
-    inset: 18px;
-    background: #2D100F;
-    opacity: 1;
+  /* Mouse-down — quick squish for tactile click feedback. */
+  .noho-cursor.is-down .noho-cursor__arrow {
+    transform: scale(0.88);
   }
+  .noho-cursor.is-pointer.is-down .noho-cursor__arrow {
+    transform: scale(0.96);
+  }
+  /* I-beam over text — swap the arrow SVG for a thin vertical bar via
+     a pseudo-element. We hide the SVG and draw the bar instead. */
+  .noho-cursor.is-text .noho-cursor__arrow { display: none; }
   .noho-cursor.is-text {
-    width: 4px;
-    height: 22px;
-    margin-left: -2px;
-    margin-top: -11px;
-    border-radius: 2px;
-    background: #2D100F;
-    border: none;
+    width: 2px;
+    height: 18px;
+    margin-left: -1px;
+    margin-top: -9px;
+    background: #1976FF;
+    border-radius: 1px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.7);
   }
-  .noho-cursor.is-text::after { display: none; }
-  /* Context label — slides out to the right of the cursor disc */
-  .noho-cursor__label {
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translate(8px, -50%) translateX(-4px);
-    background: #2D100F;
-    color: #F7E6C2;
-    font-family: var(--font-baloo), sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    line-height: 1;
-    padding: 5px 8px;
-    border-radius: 8px;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.18s ease, transform 0.22s ease;
-    box-shadow: 0 4px 14px rgba(45,16,15,0.25);
-  }
-  .noho-cursor.has-label .noho-cursor__label {
-    opacity: 1;
-    transform: translate(8px, -50%) translateX(0);
-  }
-  .noho-cursor.is-text .noho-cursor__label,
-  .noho-cursor:not(.is-pointer) .noho-cursor__label { opacity: 0; }
   /* Hide native cursor on root so the custom one is the only pointer */
   html.has-noho-cursor, html.has-noho-cursor * { cursor: none !important; }
   html.has-noho-cursor a, html.has-noho-cursor button { cursor: none !important; }

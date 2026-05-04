@@ -48,6 +48,8 @@ export type POSCatalogEntry = {
   category: string;
   priceCents: number;
   hint?: string;
+  /** Square catalog object id (set on items synced from / pushed to Square). */
+  squareCatalogId?: string;
 };
 
 export const ZELLE_RECIPIENT_EMAIL = "nohomailbox@gmail.com";

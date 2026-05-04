@@ -297,7 +297,8 @@ export function AdminShippingCenterPanel({
       <button
         type="button"
         onClick={() => setHelpOpen(true)}
-        className="fixed bottom-20 right-5 z-40 hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-white border border-[#e8e5e0] text-[#2D100F] hover:bg-[#FAF6F0] hover:border-[#337485] transition-colors shadow-md"
+        className="fixed bottom-20 right-5 z-40 hidden md:flex items-center gap-1.5 px-3 h-8 rounded-md text-[11px] font-bold bg-white border border-[#E5DACA] text-[#2D100F] hover:bg-[#F4EEE3] hover:border-[#2D100F] transition-colors"
+        style={{ boxShadow: "0 4px 12px rgba(26,23,20,0.10)" }}
         title="Keyboard shortcuts (?)"
         aria-label="Show keyboard shortcuts"
       >

@@ -139,8 +139,8 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
 
       {/* ─── 12-month bar chart ─────────────────────────────────────── */}
       <div
-        className="rounded-2xl bg-white p-5"
-        style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+        className="rounded-md bg-white p-4"
+        style={{ border: "1px solid #E5DACA" }}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-black text-sm uppercase tracking-wide" style={{ color: NOHO_INK }}>
@@ -159,26 +159,13 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
               <div key={m.key} className="flex flex-col items-center gap-1.5">
                 <div className="relative w-full flex items-end justify-center" style={{ height: 140 }}>
                   <div
-                    className="w-full max-w-[28px] rounded-t-md transition-all duration-700"
+                    className="w-full max-w-[28px] rounded-t-sm transition-all duration-700"
                     style={{
                       height: h,
-                      background: isCurrent
-                        ? `linear-gradient(180deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`
-                        : "linear-gradient(180deg, rgba(51,116,133,0.5) 0%, rgba(51,116,133,0.25) 100%)",
-                      boxShadow: isCurrent ? `0 4px 12px ${NOHO_BLUE}66` : undefined,
+                      background: isCurrent ? NOHO_BLUE : "rgba(51,116,133,0.40)",
                     }}
                     title={`${m.label}: $${(m.valueCents / 100).toFixed(2)}`}
-                  >
-                    {/* Shine overlay */}
-                    <span
-                      aria-hidden="true"
-                      className="block w-full h-full rounded-t-md"
-                      style={{
-                        background:
-                          "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 40%)",
-                      }}
-                    />
-                  </div>
+                  />
                 </div>
                 <p
                   className="text-[9px] font-black tracking-wide"
@@ -195,8 +182,8 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
       {/* ─── Source mix donut + Top customers ───────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div
-          className="rounded-2xl bg-white p-5"
-          style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+          className="rounded-md bg-white p-4"
+          style={{ border: "1px solid #E5DACA" }}
         >
           <h3 className="font-black text-sm uppercase tracking-wide mb-4" style={{ color: NOHO_INK }}>
             Payment sources
@@ -233,8 +220,8 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
         </div>
 
         <div
-          className="rounded-2xl bg-white p-5"
-          style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+          className="rounded-md bg-white p-4"
+          style={{ border: "1px solid #E5DACA" }}
         >
           <h3 className="font-black text-sm uppercase tracking-wide mb-4" style={{ color: NOHO_INK }}>
             Top customers
@@ -255,29 +242,28 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
                     style={{ background: i === 0 ? "rgba(245,166,35,0.06)" : "transparent" }}
                   >
                     <span
-                      className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-black shrink-0"
+                      className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0"
                       style={{
-                        background: i === 0
-                          ? `linear-gradient(135deg, ${NOHO_AMBER}, #B07030)`
-                          : "rgba(232,229,224,0.7)",
+                        background: i === 0 ? NOHO_AMBER : "#F4EEE3",
                         color: i === 0 ? "white" : "rgba(45,16,15,0.7)",
+                        border: `1px solid ${i === 0 ? NOHO_AMBER : "#E5DACA"}`,
                       }}
                     >
                       {i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-black truncate" style={{ color: NOHO_INK }}>
+                      <p className="text-[12px] font-bold truncate" style={{ color: NOHO_INK }}>
                         {c.name}
                       </p>
                       <div
-                        className="h-1.5 rounded-full mt-1 overflow-hidden"
-                        style={{ background: "rgba(232,229,224,0.6)" }}
+                        className="h-1 rounded-full mt-1 overflow-hidden"
+                        style={{ background: "#E5DACA" }}
                       >
                         <div
                           className="h-full rounded-full"
                           style={{
                             width: `${pct * 100}%`,
-                            background: `linear-gradient(90deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
+                            background: NOHO_BLUE,
                           }}
                         />
                       </div>
@@ -295,8 +281,8 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
 
       {/* ─── Recent payments ────────────────────────────────────────── */}
       <div
-        className="rounded-2xl overflow-hidden bg-white"
-        style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+        className="rounded-md overflow-hidden bg-white"
+        style={{ border: "1px solid #E5DACA" }}
       >
         <div
           className="px-5 py-4 flex items-center justify-between"
@@ -367,26 +353,24 @@ function KpiTile({
 }) {
   return (
     <div
-      className="rounded-2xl p-4 sm:p-5 transition-all hover:-translate-y-0.5"
+      className="rounded-md p-4 transition-colors"
       style={{
-        background: accent ? `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)` : "white",
-        boxShadow: accent
-          ? `0 8px 24px ${NOHO_BLUE}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
-        border: accent ? "1px solid rgba(247,230,194,0.18)" : "1px solid rgba(232,221,208,0.5)",
+        background: accent ? NOHO_INK : "#FFFFFF",
+        border: `1px solid ${accent ? NOHO_INK : "#E5DACA"}`,
       }}
     >
       <p
-        className="text-[10px] font-black uppercase tracking-[0.16em]"
-        style={{ color: accent ? "rgba(255,255,255,0.55)" : "rgba(45,16,15,0.45)" }}
+        className="text-[10px] font-bold uppercase tracking-[0.14em]"
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
       >
         {label}
       </p>
       <p
-        className="text-2xl sm:text-3xl font-black tracking-tight mt-1"
+        className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
-          color: accent ? "white" : NOHO_INK,
-          fontFamily: "var(--font-baloo), sans-serif",
+          color: accent ? "#F7E6C2" : NOHO_INK,
+          fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
+          fontVariantNumeric: "tabular-nums",
         }}
       >
         {value}

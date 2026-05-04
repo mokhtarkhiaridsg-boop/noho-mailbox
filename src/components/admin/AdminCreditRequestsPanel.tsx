@@ -47,19 +47,11 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function huesFor(seed: string): { from: string; to: string } {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  const PAIRS: Array<[string, string]> = [
-    [NOHO_BLUE, NOHO_BLUE_DEEP],
-    [NOHO_INK, "#1F0807"],
-    ["#7C3AED", "#5B21B6"],
-    ["#B07030", "#8B5A24"],
-    [NOHO_GREEN, "#166534"],
-    [NOHO_RED, "#991b1b"],
-  ];
-  const [from, to] = PAIRS[h % PAIRS.length];
-  return { from, to };
+// Avatar — neutral cream surface (no rainbow palette) to match the rest
+// of the formal admin chrome.
+function huesFor(_seed: string): { from: string; to: string } {
+  void _seed;
+  return { from: "#F4EEE3", to: "#F4EEE3" };
 }
 
 function relTime(iso: string): string {
@@ -202,59 +194,69 @@ export function AdminCreditRequestsPanel({ requests }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Hero strip — money/wallet theme */}
+      {/* Hero strip — Command Tower variant matching the Overview shell.
+          Replaces the previous emerald-green→ink three-stop gradient with
+          glow shadow which read too loud against the formal hairline UI. */}
       <div
-        className="relative overflow-hidden rounded-2xl"
+        className="relative overflow-hidden rounded-2xl px-5 sm:px-6 py-5"
         style={{
-          background: `linear-gradient(135deg, ${NOHO_GREEN} 0%, #0f6b3a 50%, ${NOHO_BLUE_DEEP} 100%)`,
-          boxShadow: "0 8px 28px rgba(22,163,74,0.30)",
+          background:
+            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
+          boxShadow:
+            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
         }}
       >
-        {/* Dollar-sign pattern decoration */}
         <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none select-none"
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none opacity-[0.13]"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 25% 35%, white 1.5px, transparent 1.5px), radial-gradient(circle at 75% 75%, white 1px, transparent 1px)",
-            backgroundSize: "40px 40px, 28px 28px",
+              "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
+            backgroundSize: "44px 44px",
+            maskImage:
+              "radial-gradient(ellipse at center, black 30%, transparent 80%)",
+            transform:
+              "perspective(800px) rotateX(58deg) translateY(20%) scale(1.4)",
+            transformOrigin: "center bottom",
           }}
         />
-        {/* Wallet corner mark */}
-        <div className="absolute right-6 top-6 opacity-15 pointer-events-none">
-          <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke={NOHO_CREAM} strokeWidth="1.2">
-            <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2" />
-            <path d="M16 11h5v4h-5a2 2 0 0 1 0-4z" />
-            <circle cx="17.5" cy="13" r="0.6" fill={NOHO_CREAM} stroke="none" />
-          </svg>
-        </div>
+        <div
+          aria-hidden="true"
+          className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full opacity-15 blur-3xl pointer-events-none"
+          style={{ background: NOHO_GREEN }}
+        />
 
-        <div className="relative p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div
-              className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: NOHO_AMBER }}
-            />
+        <div className="relative">
+          <p
+            className="text-[10px] font-black uppercase tracking-[0.28em] mb-1"
+            style={{ color: "rgba(247,230,194,0.6)" }}
+          >
             <span
-              className="text-[10px] font-black uppercase tracking-[0.2em]"
-              style={{ color: NOHO_CREAM }}
-            >
-              Wallet Top-ups · Square
-            </span>
-          </div>
+              aria-hidden
+              className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle"
+              style={{
+                background: NOHO_AMBER,
+                boxShadow: `0 0 8px ${NOHO_AMBER}`,
+              }}
+            />
+            Wallet top-ups · Square
+          </p>
           <h2
-            className="font-black tracking-tight mb-1"
+            className="font-bold tracking-tight"
             style={{
-              fontFamily: "var(--font-baloo, system-ui)",
-              fontSize: "clamp(1.5rem, 3vw, 2rem)",
-              color: "white",
-              textShadow: "0 2px 8px rgba(0,0,0,0.30)",
+              fontSize: "clamp(1.4rem, 2.8vw, 1.8rem)",
+              color: "#FFFFFF",
             }}
           >
-            Credit Requests Console
+            Credit requests
           </h2>
-          <p className="text-[12px] font-medium max-w-md" style={{ color: `${NOHO_CREAM}cc` }}>
-            Members request wallet top-ups from their dashboard. Text the Square link, then
-            mark paid once Square confirms — credits land instantly.
+          <p
+            className="text-[12px] mt-1 max-w-md"
+            style={{ color: "rgba(247,230,194,0.7)" }}
+          >
+            Members request wallet top-ups from their dashboard. Text the
+            Square link, then mark paid once Square confirms — credits land
+            instantly.
           </p>
         </div>
       </div>
@@ -280,10 +282,10 @@ export function AdminCreditRequestsPanel({ requests }: Props) {
 
       {/* Workflow legend */}
       <div
-        className="rounded-2xl p-4 bg-white"
+        className="rounded-md p-4 bg-white"
         style={{
           border: `1px solid ${NOHO_INK}11`,
-          boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 12px rgba(45,16,15,0.04)",
+          
         }}
       >
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
@@ -341,14 +343,14 @@ export function AdminCreditRequestsPanel({ requests }: Props) {
       {/* Cards */}
       {filtered.length === 0 ? (
         <div
-          className="rounded-2xl p-12 text-center"
+          className="rounded-md p-10 text-center"
           style={{
             background: `linear-gradient(180deg, ${NOHO_CREAM}66 0%, white 100%)`,
             border: `1px dashed ${NOHO_INK}1a`,
           }}
         >
           <div
-            className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-3"
+            className="w-14 h-14 rounded-md mx-auto flex items-center justify-center mb-3"
             style={{ background: `${NOHO_GREEN}15` }}
           >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={NOHO_GREEN} strokeWidth="2">
@@ -410,28 +412,26 @@ function RequestCard({
 
   return (
     <div
-      className="rounded-2xl bg-white relative overflow-hidden transition-all hover:-translate-y-0.5"
+      className="rounded-md bg-white relative overflow-hidden transition-colors"
       style={{
-        border: `1px solid ${meta.color}33`,
-        boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 8px 22px rgba(45,16,15,0.06)",
+        border: `1px solid ${meta.color}55`,
       }}
     >
-      {/* Status accent stripe */}
+      {/* Status accent stripe — solid color, no gradient. */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{
-          background: `linear-gradient(180deg, ${meta.color} 0%, ${meta.color}66 100%)`,
-        }}
+        className="absolute left-0 top-0 bottom-0 w-0.5"
+        style={{ background: meta.color }}
       />
 
       <div className="p-4 pl-5">
         <div className="flex items-start gap-3">
-          {/* Monogram */}
+          {/* Monogram — neutral cream surface. */}
           <div
-            className="w-12 h-12 rounded-xl shrink-0 flex items-center justify-center text-white font-black text-sm"
+            className="w-10 h-10 rounded-md shrink-0 flex items-center justify-center font-bold text-[12px]"
             style={{
-              background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-              boxShadow: `0 4px 12px ${from}55`,
+              background: "#F4EEE3",
+              color: NOHO_INK,
+              border: "1px solid #E5DACA",
             }}
           >
             {initials(r.userName)}
@@ -470,26 +470,26 @@ function RequestCard({
             </p>
           </div>
 
-          {/* Big amount tile */}
+          {/* Big amount tile — flat hairline now, no green glow gradient. */}
           <div
-            className="rounded-xl px-3 py-2 text-right shrink-0"
+            className="rounded-md px-3 py-2 text-right shrink-0"
             style={{
-              background: `linear-gradient(135deg, ${NOHO_GREEN} 0%, #0f6b3a 100%)`,
-              boxShadow: `0 4px 12px ${NOHO_GREEN}40`,
+              background: NOHO_INK,
+              border: `1px solid ${NOHO_INK}`,
             }}
           >
             <p
-              className="text-[8px] font-black uppercase tracking-wider"
-              style={{ color: `${NOHO_CREAM}cc` }}
+              className="text-[9px] font-bold uppercase tracking-[0.10em]"
+              style={{ color: "rgba(247,230,194,0.6)" }}
             >
               Top-up
             </p>
             <p
-              className="font-black tabular-nums leading-none mt-0.5"
+              className="font-bold tabular-nums leading-none mt-0.5"
               style={{
-                fontFamily: "var(--font-baloo, system-ui)",
-                fontSize: "1.2rem",
-                color: "white",
+                fontSize: "1.1rem",
+                color: NOHO_CREAM,
+                fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
               }}
             >
               {dollars(r.amountCents)}
@@ -616,13 +616,14 @@ function RequestCard({
               onClick={onTextLink}
               disabled={isPending}
               title={r.userPhone ? `Text link to ${r.userPhone}` : "No phone on file"}
-              className="flex items-center justify-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-2 rounded-lg text-white transition-all hover:shadow-md disabled:opacity-50"
+              className="flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-[0.10em] px-2 h-8 rounded-md transition-colors disabled:opacity-50"
               style={{
-                background: `linear-gradient(180deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`,
-                boxShadow: `0 2px 6px ${NOHO_BLUE}40`,
+                background: "#FFFFFF",
+                color: NOHO_BLUE,
+                border: `1px solid ${NOHO_BLUE}40`,
               }}
             >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
               </svg>
               Text link
@@ -630,13 +631,13 @@ function RequestCard({
             <button
               onClick={onMarkPaid}
               disabled={isPending}
-              className="flex items-center justify-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-2 rounded-lg text-white transition-all hover:shadow-md disabled:opacity-50"
+              className="flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-[0.10em] px-2 h-8 rounded-md text-white transition-colors disabled:opacity-50"
               style={{
-                background: `linear-gradient(180deg, ${NOHO_GREEN} 0%, #15803d 100%)`,
-                boxShadow: `0 2px 6px ${NOHO_GREEN}40`,
+                background: NOHO_INK,
+                border: `1px solid ${NOHO_INK}`,
               }}
             >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M5 13l4 4L19 7" />
               </svg>
               Mark paid
@@ -687,10 +688,10 @@ function WorkflowStep({
   return (
     <div className="flex items-center gap-2 flex-1 min-w-[120px]">
       <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-[11px] shrink-0"
+        className="w-7 h-7 rounded-md flex items-center justify-center text-white font-bold text-[11px] shrink-0"
         style={{
-          background: `linear-gradient(135deg, ${color} 0%, ${color}cc 100%)`,
-          boxShadow: `0 2px 6px ${color}55`,
+          background: color,
+          border: `1px solid ${color}`,
         }}
       >
         {n}
@@ -752,9 +753,7 @@ function KpiTile({
     >
       <div
         className="absolute left-0 right-0 top-0 h-0.5"
-        style={{
-          background: `linear-gradient(90deg, ${accent} 0%, ${accent}55 100%)`,
-        }}
+        style={{ background: accent }}
       />
       <div className="flex items-center justify-between mb-1">
         <span

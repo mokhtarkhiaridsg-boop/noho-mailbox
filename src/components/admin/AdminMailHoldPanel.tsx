@@ -27,25 +27,25 @@ const URGENCY_META: Record<HeldItem["urgency"], { label: string; sub: string; co
     label: "OK",
     sub: "Within 7 days",
     color: "#16A34A",
-    bg: "linear-gradient(180deg, rgba(22,163,74,0.06) 0%, rgba(22,163,74,0.01) 60%, transparent 100%)",
+    bg: "#FFFFFF",
   },
   medium: {
     label: "7+ days",
     sub: "First warning sent",
     color: NOHO_AMBER,
-    bg: "linear-gradient(180deg, rgba(245,166,35,0.07) 0%, rgba(245,166,35,0.01) 60%, transparent 100%)",
+    bg: "#FFFFFF",
   },
   high: {
     label: "14+ days",
     sub: "Second warning",
     color: "#ea580c",
-    bg: "linear-gradient(180deg, rgba(234,88,12,0.08) 0%, rgba(234,88,12,0.01) 60%, transparent 100%)",
+    bg: "#FFFFFF",
   },
   overdue: {
     label: "Overdue",
     sub: "30+ days · urgent",
     color: "#dc2626",
-    bg: "linear-gradient(180deg, rgba(220,38,38,0.08) 0%, rgba(220,38,38,0.01) 60%, transparent 100%)",
+    bg: "#FFFFFF",
   },
 };
 
@@ -56,19 +56,11 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function huesFor(seed: string): { from: string; to: string } {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  const PAIRS: Array<[string, string]> = [
-    [NOHO_BLUE, NOHO_BLUE_DEEP],
-    [NOHO_INK, "#1F0807"],
-    ["#7C3AED", "#5B21B6"],
-    ["#B07030", "#8B5A24"],
-    ["#16A34A", "#166534"],
-    ["#dc2626", "#991b1b"],
-  ];
-  const [from, to] = PAIRS[h % PAIRS.length];
-  return { from, to };
+// Avatar — neutral cream surface. Was a 6-tone rainbow palette which
+// read as "circus" against the formal admin chrome.
+function huesFor(_seed: string): { from: string; to: string } {
+  void _seed;
+  return { from: "#F4EEE3", to: "#F4EEE3" };
 }
 
 function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }) {
@@ -102,14 +94,13 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
       }}
     >
       <div className="flex items-start gap-2.5">
-        {/* Avatar monogram */}
+        {/* Avatar monogram — neutral cream surface. */}
         <div
-          className="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center font-black text-[11px]"
+          className="w-9 h-9 shrink-0 rounded-md flex items-center justify-center font-bold text-[11px]"
           style={{
-            background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-            color: "#F7E6C2",
-            boxShadow: "0 3px 10px rgba(45,16,15,0.12), inset 0 1px 0 rgba(255,255,255,0.2)",
-            fontFamily: "var(--font-baloo), sans-serif",
+            background: "#F4EEE3",
+            color: "#1A1614",
+            border: "1px solid #E5DACA",
           }}
         >
           {initials(item.userName)}
@@ -150,19 +141,12 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
                 of 30
               </span>
             </div>
-            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(232,229,224,0.6)" }}>
+            <div className="h-1 rounded-full overflow-hidden" style={{ background: "#E5DACA" }}>
               <div
-                className="h-full rounded-full transition-all duration-500 relative overflow-hidden"
+                className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${pct}%`,
-                  background:
-                    item.urgency === "overdue"
-                      ? "linear-gradient(90deg, #dc2626, #991b1b)"
-                      : item.urgency === "high"
-                      ? `linear-gradient(90deg, #ea580c, #9a3412)`
-                      : item.urgency === "medium"
-                      ? `linear-gradient(90deg, ${NOHO_AMBER}, #B07030)`
-                      : "linear-gradient(90deg, #16A34A, #166534)",
+                  background: meta.color,
                 }}
               />
             </div>
@@ -173,10 +157,10 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
             <button
               disabled={pending}
               onClick={() => release("forward")}
-              className="text-[10px] font-black uppercase tracking-[0.14em] px-2.5 py-1 rounded-md text-white disabled:opacity-40"
+              className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md text-white disabled:opacity-40 transition-colors"
               style={{
-                background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
-                boxShadow: `0 2px 8px ${NOHO_BLUE}33`,
+                background: NOHO_INK,
+                border: `1px solid ${NOHO_INK}`,
               }}
             >
               Forward
@@ -184,10 +168,11 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
             <button
               disabled={pending}
               onClick={() => release("return")}
-              className="text-[10px] font-black uppercase tracking-[0.14em] px-2.5 py-1 rounded-md disabled:opacity-40"
+              className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md disabled:opacity-40 transition-colors"
               style={{
-                background: "rgba(232,229,224,0.5)",
-                color: "rgba(45,16,15,0.6)",
+                background: "#FFFFFF",
+                color: "#5C4540",
+                border: "1px solid #E5DACA",
               }}
             >
               Return
@@ -301,13 +286,10 @@ export function AdminMailHoldPanel() {
           <button
             disabled={batchPending}
             onClick={runBatch}
-            className="text-[10px] font-black uppercase tracking-[0.14em] px-3 py-2 rounded-xl text-white disabled:opacity-40"
-            style={{
-              background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})`,
-              boxShadow: `0 2px 10px ${NOHO_BLUE}33`,
-            }}
+            className="text-[10px] font-bold uppercase tracking-[0.10em] px-3 h-8 rounded-md text-white disabled:opacity-40 transition-colors"
+            style={{ background: NOHO_INK, border: `1px solid ${NOHO_INK}` }}
           >
-            {batchPending ? "Running…" : "Run Hold Check"}
+            {batchPending ? "Running…" : "Run hold check"}
           </button>
         </div>
       </div>
@@ -339,8 +321,8 @@ export function AdminMailHoldPanel() {
       {/* Distribution bar */}
       {counts && counts.total > 0 && (
         <div
-          className="rounded-2xl bg-white p-5"
-          style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)" }}
+          className="rounded-md bg-white p-4"
+          style={{ border: "1px solid #E5DACA" }}
         >
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: NOHO_INK }}>
@@ -350,12 +332,12 @@ export function AdminMailHoldPanel() {
               {counts.total} items
             </p>
           </div>
-          <div className="h-3 rounded-full overflow-hidden flex" style={{ background: "rgba(232,229,224,0.6)" }}>
+          <div className="h-2 rounded-full overflow-hidden flex" style={{ background: "#E5DACA" }}>
             {[
-              { count: counts.low, color: "linear-gradient(90deg, #16A34A, #166534)", label: "OK" },
-              { count: counts.medium, color: `linear-gradient(90deg, ${NOHO_AMBER}, #B07030)`, label: "7+" },
-              { count: counts.high, color: "linear-gradient(90deg, #ea580c, #9a3412)", label: "14+" },
-              { count: counts.overdue, color: "linear-gradient(90deg, #dc2626, #991b1b)", label: "Overdue" },
+              { count: counts.low, color: "#16A34A", label: "OK" },
+              { count: counts.medium, color: NOHO_AMBER, label: "7+" },
+              { count: counts.high, color: "#ea580c", label: "14+" },
+              { count: counts.overdue, color: "#dc2626", label: "Overdue" },
             ].map((seg) => {
               const pct = (seg.count / counts.total) * 100;
               if (pct === 0) return null;
@@ -466,8 +448,8 @@ export function AdminMailHoldPanel() {
 
       {items !== null && items.length === 0 && (
         <div
-          className="rounded-2xl bg-white p-10 text-center"
-          style={{ boxShadow: "0 1px 3px rgba(26,23,20,0.04)" }}
+          className="rounded-md bg-white p-8 text-center"
+          style={{ border: "1px solid #E5DACA" }}
         >
           <p className="text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
             No items currently held.
@@ -512,21 +494,13 @@ function KpiTile({
 }) {
   const isAccent = accent && !danger;
   const isDanger = danger;
+  const bg = isAccent ? NOHO_INK : isDanger ? "#B91C1C" : "#FFFFFF";
   return (
     <div
-      className="rounded-2xl p-4 transition-all hover:-translate-y-0.5"
+      className="rounded-md p-4 transition-colors"
       style={{
-        background: isAccent
-          ? `linear-gradient(135deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`
-          : isDanger
-          ? "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)"
-          : "white",
-        boxShadow: isAccent
-          ? `0 8px 24px ${NOHO_BLUE}33, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : isDanger
-          ? "0 8px 24px rgba(220,38,38,0.32), inset 0 1px 0 rgba(255,255,255,0.18)"
-          : "0 1px 3px rgba(26,23,20,0.04), 0 4px 12px rgba(26,23,20,0.05)",
-        border: isAccent || isDanger ? "1px solid rgba(247,230,194,0.18)" : "1px solid rgba(232,221,208,0.5)",
+        background: bg,
+        border: `1px solid ${isAccent ? NOHO_INK : isDanger ? "#B91C1C" : "#E5DACA"}`,
       }}
     >
       <p

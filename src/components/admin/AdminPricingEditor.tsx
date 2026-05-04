@@ -53,7 +53,7 @@ export function AdminPricingEditor() {
   if (!config) {
     return (
       <div
-        className="rounded-2xl bg-white p-6"
+        className="rounded-md bg-white p-5"
         style={{
           border: "1px solid rgba(45,16,15,0.1)",
           boxShadow: "0 1px 0 rgba(51,116,133,0.04), 0 4px 12px rgba(45,16,15,0.05)",
@@ -68,10 +68,9 @@ export function AdminPricingEditor() {
 
   return (
     <div
-      className="rounded-2xl bg-white space-y-5 p-6"
+      className="rounded-md bg-white space-y-5 p-5"
       style={{
-        border: "1px solid rgba(45,16,15,0.1)",
-        boxShadow: "0 1px 0 rgba(51,116,133,0.04), 0 4px 12px rgba(45,16,15,0.05)",
+        border: "1px solid #E5DACA",
       }}
     >
       <div className="flex items-end justify-between gap-3 flex-wrap">

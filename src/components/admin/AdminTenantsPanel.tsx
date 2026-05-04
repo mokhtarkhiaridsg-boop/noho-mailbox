@@ -226,62 +226,66 @@ export function AdminTenantsPanel({ tenants }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Hero strip — SaaS theme */}
+      {/* Hero strip — Command Tower variant matching Overview shell. */}
       <div
-        className="relative overflow-hidden rounded-2xl"
+        className="relative overflow-hidden rounded-2xl px-5 sm:px-6 py-5"
         style={{
-          background: `linear-gradient(135deg, #1a1f3a 0%, #2D100F 50%, ${NOHO_BLUE_DEEP} 100%)`,
-          boxShadow: "0 8px 28px rgba(26,31,58,0.30)",
+          background:
+            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
+          boxShadow:
+            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
         }}
       >
-        {/* Server-room dot grid */}
         <div
-          className="absolute inset-0 opacity-[0.08] pointer-events-none"
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none opacity-[0.13]"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 25% 30%, white 1.2px, transparent 1.2px), radial-gradient(circle at 75% 70%, white 1px, transparent 1px)",
-            backgroundSize: "32px 32px, 22px 22px",
+              "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
+            backgroundSize: "44px 44px",
+            maskImage:
+              "radial-gradient(ellipse at center, black 30%, transparent 80%)",
+            transform:
+              "perspective(800px) rotateX(58deg) translateY(20%) scale(1.4)",
+            transformOrigin: "center bottom",
           }}
         />
-        {/* Cloud/server corner mark */}
-        <div className="absolute right-6 top-6 opacity-15 pointer-events-none">
-          <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke={NOHO_CREAM} strokeWidth="1.2">
-            <rect x="2" y="3" width="20" height="6" rx="1.5" />
-            <rect x="2" y="13" width="20" height="6" rx="1.5" />
-            <circle cx="6" cy="6" r="0.6" fill={NOHO_CREAM} stroke="none" />
-            <circle cx="6" cy="16" r="0.6" fill={NOHO_CREAM} stroke="none" />
-            <line x1="9" y1="6" x2="18" y2="6" />
-            <line x1="9" y1="16" x2="18" y2="16" />
-          </svg>
-        </div>
+        <div
+          aria-hidden="true"
+          className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full opacity-15 blur-3xl pointer-events-none"
+          style={{ background: NOHO_BLUE_DEEP }}
+        />
 
-        <div className="relative p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div
-              className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: NOHO_GREEN }}
-            />
+        <div className="relative">
+          <p
+            className="text-[10px] font-black uppercase tracking-[0.28em] mb-1"
+            style={{ color: "rgba(247,230,194,0.6)" }}
+          >
             <span
-              className="text-[10px] font-black uppercase tracking-[0.2em]"
-              style={{ color: NOHO_CREAM }}
-            >
-              SaaS · CMRA Operators
-            </span>
-          </div>
+              aria-hidden
+              className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle"
+              style={{
+                background: NOHO_GREEN,
+                boxShadow: `0 0 8px ${NOHO_GREEN}`,
+              }}
+            />
+            SaaS · CMRA operators
+          </p>
           <h2
-            className="font-black tracking-tight mb-1"
+            className="font-bold tracking-tight"
             style={{
-              fontFamily: "var(--font-baloo, system-ui)",
-              fontSize: "clamp(1.5rem, 3vw, 2rem)",
-              color: "white",
-              textShadow: "0 2px 8px rgba(0,0,0,0.30)",
+              fontSize: "clamp(1.4rem, 2.8vw, 1.8rem)",
+              color: "#FFFFFF",
             }}
           >
-            Tenant Operations
+            Tenant operations
           </h2>
-          <p className="text-[12px] font-medium max-w-md" style={{ color: `${NOHO_CREAM}cc` }}>
-            White-label NOHO Mailbox to other CMRA operators. Manage trials, tiers, and billing
-            for downstream tenants.
+          <p
+            className="text-[12px] mt-1 max-w-md"
+            style={{ color: "rgba(247,230,194,0.7)" }}
+          >
+            White-label NOHO Mailbox to other CMRA operators. Manage trials,
+            tiers, and billing for downstream tenants.
           </p>
         </div>
       </div>
@@ -418,28 +422,26 @@ function TenantCard({
 
   return (
     <div
-      className="rounded-2xl bg-white relative overflow-hidden transition-all hover:-translate-y-0.5"
+      className="rounded-md bg-white relative overflow-hidden transition-colors"
       style={{
-        border: `1px solid ${meta.color}33`,
-        boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 8px 22px rgba(45,16,15,0.06)",
+        border: `1px solid ${meta.color}55`,
       }}
     >
-      {/* Status accent stripe */}
+      {/* Status accent stripe — solid color, no gradient. */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{
-          background: `linear-gradient(180deg, ${meta.color} 0%, ${meta.color}66 100%)`,
-        }}
+        className="absolute left-0 top-0 bottom-0 w-0.5"
+        style={{ background: meta.color }}
       />
 
       <div className="p-4 pl-5">
         <div className="flex items-start gap-3">
-          {/* Monogram */}
+          {/* Monogram — neutral cream surface. */}
           <div
-            className="w-12 h-12 rounded-xl shrink-0 flex items-center justify-center text-white font-black text-sm"
+            className="w-10 h-10 rounded-md shrink-0 flex items-center justify-center font-bold text-[12px]"
             style={{
-              background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-              boxShadow: `0 4px 12px ${from}55`,
+              background: "#F4EEE3",
+              color: "#1A1614",
+              border: "1px solid #E5DACA",
             }}
           >
             {initials(t.name)}
@@ -605,10 +607,10 @@ function TenantCard({
           <button
             onClick={onLogPayment}
             disabled={isPending}
-            className="text-[10px] font-black uppercase tracking-wider px-2 py-2 rounded-lg text-white transition-all hover:shadow-md disabled:opacity-50 inline-flex items-center justify-center gap-1"
+            className="text-[10px] font-bold uppercase tracking-[0.10em] px-2 h-8 rounded-md text-white transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-1"
             style={{
-              background: `linear-gradient(180deg, ${NOHO_GREEN} 0%, #15803d 100%)`,
-              boxShadow: `0 2px 6px ${NOHO_GREEN}40`,
+              background: NOHO_GREEN,
+              border: `1px solid #15803d`,
             }}
           >
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
@@ -706,12 +708,11 @@ function NotesEditor({
           onSave(notes);
           setDirty(false);
         }}
-        className="mt-2 px-3.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-white transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-2 px-3 h-8 rounded-md text-[10px] font-bold uppercase tracking-[0.10em] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         style={{
-          background: dirty
-            ? `linear-gradient(180deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE_DEEP} 100%)`
-            : `${NOHO_INK}22`,
-          boxShadow: dirty ? `0 2px 6px ${NOHO_BLUE}40` : "none",
+          background: dirty ? NOHO_INK : `${NOHO_INK}11`,
+          color: dirty ? "#FFFFFF" : `${NOHO_INK}66`,
+          border: `1px solid ${dirty ? NOHO_INK : "#E5DACA"}`,
         }}
       >
         {dirty ? "Save notes" : "✓ Saved"}

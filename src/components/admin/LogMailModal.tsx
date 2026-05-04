@@ -63,7 +63,7 @@ export function LogMailModal({
 }: Props) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.5)" }}>
-      <div className="bg-white rounded-2xl w-full max-w-md max-h-[92vh] overflow-y-auto" style={{ boxShadow: "0 8px 40px rgba(26,23,20,0.2)" }}>
+      <div className="bg-white rounded-md w-full max-w-md max-h-[92vh] overflow-y-auto" style={{ border: "1px solid #E5DACA", boxShadow: "0 12px 36px rgba(26,23,20,0.18)" }}>
         <div className="sticky top-0 bg-white px-6 pt-5 pb-4 border-b border-[#e8e5e0] flex items-center justify-between">
           <h3 className="font-black text-base uppercase tracking-wide text-text-light">Log Incoming Mail</h3>
           <button onClick={onClose} className="text-text-light/30 hover:text-text-light text-xl">✕</button>
@@ -201,13 +201,14 @@ export function LogMailModal({
           <button
             onClick={handleLogMailSubmit}
             disabled={isPending || !logMailForm.suite || !logMailForm.from}
-            className="flex-1 px-4 py-3 rounded-xl text-sm font-black text-white disabled:opacity-40"
-            style={{ background: "linear-gradient(135deg, #337485, #23596A)", boxShadow: "0 2px 10px rgba(51,116,133,0.3)" }}
+            className="flex-1 px-4 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] text-white disabled:opacity-40 transition-colors"
+            style={{ background: "#2D100F", border: "1px solid #2D100F" }}
           >
-            {isPending ? "Saving…" : `Log ${logMailForm.type} & Notify Customer`}
+            {isPending ? "Saving…" : `Log ${logMailForm.type} & notify`}
           </button>
           <button onClick={onClose}
-            className="px-4 py-3 rounded-xl text-sm font-bold text-text-light border border-[#e8e5e0] hover:bg-[#f5f3f0]"
+            className="px-4 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] transition-colors"
+            style={{ background: "#FFFFFF", color: "#5C4540", border: "1px solid #E5DACA" }}
           >Cancel</button>
         </div>
       </div>

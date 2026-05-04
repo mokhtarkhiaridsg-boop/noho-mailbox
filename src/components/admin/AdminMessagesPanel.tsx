@@ -115,13 +115,14 @@ function ThreadReply({
       <button
         disabled={pending || !body.trim()}
         onClick={send}
-        className="text-[11px] font-black px-3 py-2 rounded-lg text-white disabled:opacity-50"
+        className="text-[11px] font-bold uppercase tracking-[0.10em] px-3 h-9 rounded-md text-white disabled:opacity-50 transition-colors"
         style={{
-          background: "linear-gradient(135deg, #337485, #23596A)",
+          background: "#2D100F",
+          border: "1px solid #2D100F",
           whiteSpace: "nowrap",
         }}
       >
-        {pending ? "Sending…" : "Send Reply"}
+        {pending ? "Sending…" : "Send reply"}
       </button>
       {err && <p className="text-[10px] text-red-700 ml-2">{err}</p>}
     </div>
@@ -211,8 +212,8 @@ export function AdminMessagesPanel({
           className="text-xs font-bold px-3 py-1.5 rounded-full transition-all"
           style={{
             background: serviceFilter === "all" ? "#337485" : "#FFFFFF",
-            color: serviceFilter === "all" ? "#FFFFFF" : "#162d3a",
-            border: "1px solid #162d3a26",
+            color: serviceFilter === "all" ? "#FFFFFF" : "#1A1614",
+            border: "1px solid #1A161426",
           }}
         >
           All ({counts.all ?? 0})
@@ -228,7 +229,7 @@ export function AdminMessagesPanel({
               style={{
                 background: active ? meta.color : meta.bg,
                 color: active ? "#FFFFFF" : meta.color,
-                border: active ? "1px solid transparent" : "1px solid #162d3a26",
+                border: active ? "1px solid transparent" : "1px solid #1A161426",
               }}
             >
               {meta.label} ({counts[s] ?? 0})
@@ -252,7 +253,7 @@ export function AdminMessagesPanel({
           <h3 className="font-black text-sm uppercase tracking-wide text-text-light">
             Contact Form Submissions
           </h3>
-          <span className="text-xs font-bold text-[#162d3a]/50">
+          <span className="text-xs font-bold text-[#1A1614]/50">
             {filtered.length} shown
           </span>
         </div>
@@ -305,10 +306,11 @@ export function AdminMessagesPanel({
                     <div className="flex flex-col gap-1.5 shrink-0">
                       <a
                         href={`mailto:${c.email}?subject=Re: Your NOHO Mailbox inquiry`}
-                        className="text-[11px] font-bold px-3 py-1.5 rounded-lg text-white text-center"
+                        className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md text-center inline-flex items-center justify-center transition-colors"
                         style={{
-                          background:
-                            "linear-gradient(135deg, #337485, #23596A)",
+                          background: "#2D100F",
+                          color: "#FFFFFF",
+                          border: "1px solid #2D100F",
                           whiteSpace: "nowrap",
                         }}
                       >
@@ -317,14 +319,15 @@ export function AdminMessagesPanel({
                       {phoneDigits ? (
                         <a
                           href={`sms:+1${phoneDigits}?&body=${smsBody}`}
-                          className="text-[11px] font-bold px-3 py-1.5 rounded-lg text-white text-center"
+                          className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md text-center inline-flex items-center justify-center transition-colors"
                           style={{
-                            background:
-                              "linear-gradient(135deg, #16a34a, #15803d)",
+                            background: "#FFFFFF",
+                            color: "#16a34a",
+                            border: "1px solid #16a34a40",
                             whiteSpace: "nowrap",
                           }}
                         >
-                          SMS quick reply
+                          SMS reply
                         </a>
                       ) : (
                         <span

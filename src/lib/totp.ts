@@ -69,3 +69,27 @@ export function verifyToken(secret: string, token: string, window = 1): boolean 
   }
   return false;
 }
+
+// iter-96: One-time recovery codes — single-use backup auth in case
+// admin loses their authenticator. Stored hashed in JSON on User.
+const RECOVERY_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+
+export function generateRecoveryCodes(count = 10): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const buf = crypto.randomBytes(10);
+    out.push(Array.from(buf, (b) => RECOVERY_ALPHABET[b % RECOVERY_ALPHABET.length]).join(""));
+  }
+  return out;
+}
+
+export function hashRecoveryCode(code: string): string {
+  return crypto.createHash("sha256").update(code.trim()).digest("hex");
+}
+
+// Verify a plaintext recovery code against a list of hashes; returns
+// the index that matched (so the caller can remove it) or -1.
+export function findRecoveryHashIndex(plaintextCode: string, hashes: string[]): number {
+  const candidate = hashRecoveryCode(plaintextCode);
+  return hashes.indexOf(candidate);
+}

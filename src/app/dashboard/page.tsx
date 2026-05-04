@@ -75,6 +75,10 @@ export default async function DashboardPage() {
           exteriorImageUrl: true,
           recipientName: true,
           createdAt: true, // iter-80: enables storage-tier countdown chip
+          declaredValueCents: true, // iter-91: insured chip + amount
+          insuranceFeeCents: true,
+          feeChargedCents: true,    // iter-105: storage-fee dispute CTA
+          aiAnalysisJson: true,     // iter-108: parsed into aiWarnings + aiNotes
         },
       }),
       prisma.forwardingAddress.findMany({
@@ -239,7 +243,73 @@ export default async function DashboardPage() {
   return (
     <DashboardClient
       user={{ ...user, planDueDate: user.planDueDate ?? null }}
-      mailItems={mailItems.map((m) => ({ ...m, createdAt: m.createdAt.toISOString() }))}
+      mailItems={await (async () => {
+        // iter-94: Hydrate each mail row with its latest tracking
+        // summary if MailItemTrackingState exists. One IN-list query
+        // keeps it cheap.
+        //
+        // Hardening note (2026-05-02): wrapped in try/catch so that if
+        // the MailItemTrackingState table hasn't been created in Turso
+        // yet (or any other query-level failure) the dashboard still
+        // renders without the tracking column rather than crashing the
+        // whole Server Component render and showing the global error
+        // boundary. The trackingStatus prop is optional in the client.
+        const ids = mailItems.map((m) => m.id);
+        type TrackingState = {
+          mailItemId: string;
+          lastStatusKey: string | null;
+          lastStatusLabel: string | null;
+          lastLocation: string | null;
+          etaIso: string | null;
+          lastPolledAt: Date | null;
+        };
+        let states: TrackingState[] = [];
+        try {
+          if (ids.length > 0) {
+            states = await prisma.mailItemTrackingState.findMany({
+              where: { mailItemId: { in: ids } },
+              select: { mailItemId: true, lastStatusKey: true, lastStatusLabel: true, lastLocation: true, etaIso: true, lastPolledAt: true },
+            });
+          }
+        } catch (err) {
+          // Table may not exist on this database yet — fail soft.
+          console.warn("[dashboard] mailItemTrackingState lookup failed; rendering without tracking", err);
+        }
+        const stateById = new Map(states.map((s) => [s.mailItemId, s] as const));
+        return mailItems.map((m) => {
+          const s = stateById.get(m.id);
+          // iter-108: parse aiAnalysisJson → flat aiWarnings + aiNotes for
+          // the client. Failures are stored as { ok: false, ... } so we
+          // skip them silently and leave warnings null.
+          let aiWarnings: string[] | null = null;
+          let aiNotes: string | null = null;
+          if (m.aiAnalysisJson) {
+            try {
+              const parsed = JSON.parse(m.aiAnalysisJson) as { ok?: boolean; warnings?: unknown; notes?: unknown };
+              if (parsed.ok && Array.isArray(parsed.warnings)) {
+                aiWarnings = parsed.warnings.filter((x): x is string => typeof x === "string");
+                aiNotes = typeof parsed.notes === "string" ? parsed.notes : null;
+              }
+            } catch { /* ignore */ }
+          }
+          // Strip the raw JSON from the client payload — we only ship the
+          // parsed shape.
+          const { aiAnalysisJson: _drop, ...rest } = m;
+          return {
+            ...rest,
+            createdAt: m.createdAt.toISOString(),
+            aiWarnings,
+            aiNotes,
+            trackingStatus: s ? {
+              statusKey: s.lastStatusKey,
+              statusLabel: s.lastStatusLabel,
+              location: s.lastLocation,
+              etaIso: s.etaIso,
+              polledAtIso: s.lastPolledAt?.toISOString() ?? null,
+            } : null,
+          };
+        });
+      })()}
       addresses={addresses}
       bookings={bookings}
       stats={{ totalMail, unread, packages, forwarded }}

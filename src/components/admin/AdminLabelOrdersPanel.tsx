@@ -115,7 +115,7 @@ const STATUS_STYLE: Record<string, { bg: string; fg: string; label: string }> = 
   AwaitingPayment: { bg: "bg-[#fbbf24]/15", fg: "text-[#92400e]", label: "Awaiting payment" },
   LinkSent:        { bg: "bg-[#337485]/15", fg: "text-[#337485]", label: "Link sent" },
   Paid:            { bg: "bg-[#16a34a]/15", fg: "text-[#15803d]", label: "Paid · ready to print" },
-  Printed:         { bg: "bg-[#162d3a]/10", fg: "text-[#162d3a]/70", label: "Printed" },
+  Printed:         { bg: "bg-[#1A1614]/10", fg: "text-[#1A1614]/70", label: "Printed" },
   Cancelled:       { bg: "bg-red-50", fg: "text-red-700", label: "Cancelled" },
 };
 
@@ -295,7 +295,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
       <LifecycleStepper counts={counts} />
 
       {/* Filter strip */}
-      <div className="rounded-2xl bg-white border border-[#e8e5e0] p-3 flex items-center gap-2 flex-wrap" style={{ boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}>
+      <div className="rounded-md bg-white p-3 flex items-center gap-2 flex-wrap" style={{ border: "1px solid #E5DACA" }}>
         <input
           type="text"
           value={query}
@@ -362,21 +362,21 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
         then <strong>Print label</strong> — Shippo purchase happens at print time.
       </p>
 
-      <div className="rounded-2xl bg-white border border-[#162d3a]/10 overflow-hidden">
+      <div className="rounded-md bg-white overflow-hidden" style={{ border: "1px solid #E5DACA" }}>
         {filtered.length === 0 ? (
           <div className="p-12 text-center">
             <svg viewBox="0 0 48 48" className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none">
-              <rect x="6" y="14" width="36" height="28" rx="4" fill="#EBF2FA" stroke="#162d3a" strokeWidth="2" />
-              <path d="M14 14 L14 8 L34 8 L34 14" stroke="#162d3a" strokeWidth="2" />
+              <rect x="6" y="14" width="36" height="28" rx="4" fill="#EBF2FA" stroke="#1A1614" strokeWidth="2" />
+              <path d="M14 14 L14 8 L34 8 L34 14" stroke="#1A1614" strokeWidth="2" />
             </svg>
-            <p className="text-sm font-bold text-[#162d3a]/70">
+            <p className="text-sm font-bold text-[#1A1614]/70">
               {orders.length === 0
                 ? "No open label orders"
                 : query.trim() ? `No orders match "${query}"` : "No orders match this filter"}
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-[#162d3a]/8">
+          <ul className="divide-y divide-[#1A1614]/8">
             {filtered.map((o) => {
               const stl = STATUS_STYLE[o.status] ?? STATUS_STYLE.AwaitingPayment;
               return (
@@ -384,7 +384,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-black text-[#162d3a]">{o.customerName}</p>
+                        <p className="text-sm font-black text-[#1A1614]">{o.customerName}</p>
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${stl.bg} ${stl.fg}`}>
                           {stl.label}
                         </span>
@@ -426,7 +426,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-[#162d3a]/65 mt-1">
+                      <p className="text-xs text-[#1A1614]/65 mt-1">
                         <a href={`mailto:${o.customerEmail}`} className="hover:text-[#337485]">
                           {o.customerEmail}
                         </a>
@@ -439,23 +439,23 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                           </>
                         )}
                       </p>
-                      <p className="text-[10px] text-[#162d3a]/40 mt-0.5">Submitted {o.createdAt}</p>
+                      <p className="text-[10px] text-[#1A1614]/40 mt-0.5">Submitted {o.createdAt}</p>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 p-3 rounded-xl bg-[#162d3a]/3" style={{ background: "#FAF6F0" }}>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 p-3 rounded-xl bg-[#1A1614]/3" style={{ background: "#FAF6F0" }}>
                         <div>
-                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#162d3a]/50">To</p>
-                          <p className="text-xs text-[#162d3a] font-semibold">{o.toName}</p>
-                          <p className="text-[11px] text-[#162d3a]/70">{o.toCity}, {o.toState} {o.toZip}</p>
+                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#1A1614]/50">To</p>
+                          <p className="text-xs text-[#1A1614] font-semibold">{o.toName}</p>
+                          <p className="text-[11px] text-[#1A1614]/70">{o.toCity}, {o.toState} {o.toZip}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#162d3a]/50">Service</p>
-                          <p className="text-xs text-[#162d3a] font-semibold">{o.carrier}</p>
-                          <p className="text-[11px] text-[#162d3a]/70">{o.servicelevel}</p>
+                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#1A1614]/50">Service</p>
+                          <p className="text-xs text-[#1A1614] font-semibold">{o.carrier}</p>
+                          <p className="text-[11px] text-[#1A1614]/70">{o.servicelevel}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#162d3a]/50">Parcel</p>
-                          <p className="text-xs text-[#162d3a] font-semibold">{(o.weightOz / 16).toFixed(2)} lb</p>
-                          <p className="text-[11px] text-[#162d3a]/70">{o.lengthIn}&times;{o.widthIn}&times;{o.heightIn}&quot;</p>
+                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#1A1614]/50">Parcel</p>
+                          <p className="text-xs text-[#1A1614] font-semibold">{(o.weightOz / 16).toFixed(2)} lb</p>
+                          <p className="text-[11px] text-[#1A1614]/70">{o.lengthIn}&times;{o.widthIn}&times;{o.heightIn}&quot;</p>
                         </div>
                       </div>
 
@@ -463,7 +463,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                         <span className="px-2.5 py-1 rounded-lg bg-[#fef3c7] text-[#92400e] font-bold">
                           Customer pays {fmtMoney(o.customerPriceCents)}
                         </span>
-                        <span className="px-2.5 py-1 rounded-lg bg-[#162d3a]/8 text-[#162d3a]/80 font-bold">
+                        <span className="px-2.5 py-1 rounded-lg bg-[#1A1614]/8 text-[#1A1614]/80 font-bold">
                           Shippo cost {fmtMoney(o.shippoCostCents)}
                         </span>
                         <span className="px-2.5 py-1 rounded-lg bg-[#16a34a]/15 text-[#15803d] font-bold">
@@ -472,7 +472,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                       </div>
 
                       {o.notes && (
-                        <p className="text-xs text-[#162d3a]/80 mt-2 italic">&ldquo;{o.notes}&rdquo;</p>
+                        <p className="text-xs text-[#1A1614]/80 mt-2 italic">&ldquo;{o.notes}&rdquo;</p>
                       )}
                       {o.squareLink && (
                         <p className="text-[10px] text-[#337485] mt-1 break-all">
@@ -714,7 +714,7 @@ function LifecycleStepper({ counts }: { counts: { AwaitingPayment: number; LinkS
   ] as const;
 
   return (
-    <div className="rounded-2xl bg-white border border-[#e8e5e0] p-4" style={{ boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}>
+    <div className="rounded-md bg-white p-4" style={{ border: "1px solid #E5DACA" }}>
       <div className="flex items-stretch gap-2 flex-wrap">
         {steps.map((s, i) => {
           const active = s.count > 0;
