@@ -81,10 +81,10 @@ const CARRIERS = ["USPS", "UPS", "FedEx", "DHL"];
 const STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 
 // MailOS palette ── reuse brand tokens, no grey OS chrome.
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_CREAM = "#F7E6C2";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
+const NOHO_CREAM = "#EBF2FF";
 
 export function AdminShippoPanel({ isConfigured, recentLabels }: Props) {
   const router = useRouter();
@@ -336,7 +336,7 @@ export function AdminShippoPanel({ isConfigured, recentLabels }: Props) {
   }
 
   const inputCls =
-    "w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485] bg-white";
+    "w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF] bg-white";
 
   // ─── MailOS workspace shell ──────────────────────────────────────────────
   // Three-region layout: side-rail (left) · workspace surface (center) ·
@@ -357,14 +357,14 @@ export function AdminShippoPanel({ isConfigured, recentLabels }: Props) {
       {/* Header strip */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#337485]/70">
-            <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle bg-[#337485]" style={{ boxShadow: "0 0 6px #337485" }} />
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1976FF]/70">
+            <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle bg-[#1976FF]" style={{ boxShadow: "0 0 6px #1976FF" }} />
             Shippo · Live
           </p>
-          <h2 className="text-xl font-black text-[#2D100F] tracking-tight">Quick Ship Workspace</h2>
+          <h2 className="text-xl font-black text-[#1A1D23] tracking-tight">Quick Ship Workspace</h2>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-white border border-[#e8e5e0] text-[#2D100F]/65">
+          <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-white border border-[#e8e5e0] text-[#1A1D23]/65">
             {recentLabels.length} labels on file
           </span>
           {!isConfigured ? (
@@ -395,7 +395,7 @@ export function AdminShippoPanel({ isConfigured, recentLabels }: Props) {
                       background: active
                         ? "linear-gradient(90deg, rgba(51,116,133,0.18), rgba(51,116,133,0.06))"
                         : "transparent",
-                      boxShadow: active ? "inset 2px 0 0 #337485" : "none",
+                      boxShadow: active ? "inset 2px 0 0 #1976FF" : "none",
                     }}
                   >
                     <span
@@ -408,8 +408,8 @@ export function AdminShippoPanel({ isConfigured, recentLabels }: Props) {
                       <item.Icon className="w-4 h-4" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[12px] font-black text-[#2D100F] tracking-tight">{item.label}</p>
-                      <p className="text-[10px] text-[#2D100F]/45 leading-snug">{item.sub}</p>
+                      <p className="text-[12px] font-black text-[#1A1D23] tracking-tight">{item.label}</p>
+                      <p className="text-[10px] text-[#1A1D23]/45 leading-snug">{item.sub}</p>
                     </div>
                     {item.badge != null && item.badge > 0 && (
                       <span
@@ -427,7 +427,7 @@ export function AdminShippoPanel({ isConfigured, recentLabels }: Props) {
               );
             })}
           </ul>
-          <div className="mt-3 pt-3 border-t border-[#e8e5e0]/70 text-[9.5px] text-[#2D100F]/40 px-2">
+          <div className="mt-3 pt-3 border-t border-[#e8e5e0]/70 text-[9.5px] text-[#1A1D23]/40 px-2">
             <p className="font-black uppercase tracking-wider">Format</p>
             <p className="mt-0.5">{labelFormat} · 4×6 thermal default</p>
           </div>
@@ -574,8 +574,8 @@ function QuickShipPane(props: {
       <Card>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2D100F]/40">Ship From — Sender</p>
-            <p className="text-[11px] mt-0.5 text-[#2D100F]/55">Used as the return address on every label until you change it.</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1A1D23]/40">Ship From — Sender</p>
+            <p className="text-[11px] mt-0.5 text-[#1A1D23]/55">Used as the return address on every label until you change it.</p>
           </div>
           <div className="flex items-center gap-2">
             {senderMsg && (
@@ -585,7 +585,7 @@ function QuickShipPane(props: {
               <button
                 type="button"
                 onClick={() => { setSenderDraft(sender); setSenderEditing(true); }}
-                className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#337485]/10 transition-colors"
+                className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#1976FF]/10 transition-colors"
                 style={{ borderColor: NOHO_BLUE, color: NOHO_BLUE }}
               >
                 Edit Sender
@@ -595,7 +595,7 @@ function QuickShipPane(props: {
                 <button
                   type="button"
                   onClick={() => { setSenderDraft(sender); setSenderEditing(false); }}
-                  className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8]"
+                  className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8]"
                 >
                   Cancel
                 </button>
@@ -614,14 +614,14 @@ function QuickShipPane(props: {
         </div>
 
         {!sender ? (
-          <p className="text-xs text-[#2D100F]/40 mt-3">Loading…</p>
+          <p className="text-xs text-[#1A1D23]/40 mt-3">Loading…</p>
         ) : !senderEditing ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs mt-3">
-            <div><span className="text-[#2D100F]/45">Name:</span> <strong className="text-[#2D100F]">{sender.name}</strong></div>
-            {sender.company && <div><span className="text-[#2D100F]/45">Company:</span> <strong className="text-[#2D100F]">{sender.company}</strong></div>}
-            <div className="col-span-2"><span className="text-[#2D100F]/45">Address:</span> <strong className="text-[#2D100F]">{sender.street1}{sender.street2 ? `, ${sender.street2}` : ""} · {sender.city}, {sender.state} {sender.zip}</strong></div>
-            {sender.phone && <div><span className="text-[#2D100F]/45">Phone:</span> <strong className="text-[#2D100F]">{sender.phone}</strong></div>}
-            {sender.email && <div><span className="text-[#2D100F]/45">Email:</span> <strong className="text-[#2D100F]">{sender.email}</strong></div>}
+            <div><span className="text-[#1A1D23]/45">Name:</span> <strong className="text-[#1A1D23]">{sender.name}</strong></div>
+            {sender.company && <div><span className="text-[#1A1D23]/45">Company:</span> <strong className="text-[#1A1D23]">{sender.company}</strong></div>}
+            <div className="col-span-2"><span className="text-[#1A1D23]/45">Address:</span> <strong className="text-[#1A1D23]">{sender.street1}{sender.street2 ? `, ${sender.street2}` : ""} · {sender.city}, {sender.state} {sender.zip}</strong></div>
+            {sender.phone && <div><span className="text-[#1A1D23]/45">Phone:</span> <strong className="text-[#1A1D23]">{sender.phone}</strong></div>}
+            {sender.email && <div><span className="text-[#1A1D23]/45">Email:</span> <strong className="text-[#1A1D23]">{sender.email}</strong></div>}
           </div>
         ) : senderDraft && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
@@ -635,7 +635,7 @@ function QuickShipPane(props: {
               { label: "Email", key: "email", placeholder: "nohomailbox@gmail.com" },
             ].map(({ label, key, placeholder }) => (
               <div key={key} className={key === "street1" ? "sm:col-span-2" : ""}>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">{label}</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">{label}</label>
                 <input
                   className={inputCls}
                   value={(senderDraft[key as keyof SenderAddress] as string) ?? ""}
@@ -646,13 +646,13 @@ function QuickShipPane(props: {
             ))}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">State *</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">State *</label>
                 <select className={inputCls} value={senderDraft.state} onChange={(e) => setSenderDraft({ ...senderDraft, state: e.target.value })}>
                   {STATES.map((s) => <option key={s}>{s}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">Zip *</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">Zip *</label>
                 <input className={inputCls} value={senderDraft.zip} maxLength={5} onChange={(e) => setSenderDraft({ ...senderDraft, zip: e.target.value.replace(/\D/g, "") })} placeholder="91601" />
               </div>
             </div>
@@ -673,12 +673,12 @@ function QuickShipPane(props: {
             <IconPlug className="w-5 h-5" />
           </span>
           <div className="min-w-0">
-            <p className="text-[12px] font-black text-[#2D100F]">
+            <p className="text-[12px] font-black text-[#1A1D23]">
               {activeCarrierCount > 0
                 ? `${activeCarrierCount} carrier account${activeCarrierCount === 1 ? "" : "s"} pinned to your contracts`
                 : "No carrier accounts pinned — using Shippo defaults"}
             </p>
-            <p className="text-[11px] text-[#2D100F]/55 leading-snug">
+            <p className="text-[11px] text-[#1A1D23]/55 leading-snug">
               {activeCarrierCount > 0
                 ? "Rates & label purchases will use your real UPS/FedEx/DHL accounts."
                 : "UPS/FedEx purchases may fail. Pin your carrier accounts under the Carriers tab."}
@@ -688,7 +688,7 @@ function QuickShipPane(props: {
         <button
           type="button"
           onClick={gotoCarriers}
-          className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#337485]/10 transition-colors shrink-0"
+          className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#1976FF]/10 transition-colors shrink-0"
           style={{ borderColor: NOHO_BLUE, color: NOHO_BLUE }}
         >
           Manage →
@@ -699,8 +699,8 @@ function QuickShipPane(props: {
       <Card>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2D100F]/40">Label Format</p>
-            <p className="text-[11px] mt-0.5 text-[#2D100F]/55">Applied at purchase. <strong className="text-[#337485]">PDF 4×6</strong> = thermal label printers (JADENS, Zebra, Brother, Dymo).</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1A1D23]/40">Label Format</p>
+            <p className="text-[11px] mt-0.5 text-[#1A1D23]/55">Applied at purchase. <strong className="text-[#1976FF]">PDF 4×6</strong> = thermal label printers (JADENS, Zebra, Brother, Dymo).</p>
           </div>
           <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-full" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>
             Selected: {labelFormat}
@@ -722,11 +722,11 @@ function QuickShipPane(props: {
               type="button"
               onClick={() => setLabelFormat(f.v)}
               className={`text-left px-3 py-2 rounded-lg text-xs font-bold border-2 transition-colors ${
-                labelFormat === f.v ? "bg-[#337485] text-white border-[#337485]" : "border-[#e8e5e0] text-[#2D100F] hover:border-[#337485]"
+                labelFormat === f.v ? "bg-[#1976FF] text-white border-[#1976FF]" : "border-[#e8e5e0] text-[#1A1D23] hover:border-[#1976FF]"
               }`}
             >
               <p>{f.label}</p>
-              <p className={`text-[10px] font-medium mt-0.5 ${labelFormat === f.v ? "text-white/80" : "text-[#2D100F]/45"}`}>{f.sub}</p>
+              <p className={`text-[10px] font-medium mt-0.5 ${labelFormat === f.v ? "text-white/80" : "text-[#1A1D23]/45"}`}>{f.sub}</p>
             </button>
           ))}
         </div>
@@ -735,7 +735,7 @@ function QuickShipPane(props: {
       {/* Ship To */}
       <Card>
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2D100F]/40">Ship To</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1A1D23]/40">Ship To</p>
           {recipients.length > 0 && (
             <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: "rgba(51,116,133,0.10)", color: NOHO_BLUE }}>
               {recipients.length} saved
@@ -761,22 +761,22 @@ function QuickShipPane(props: {
           />
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">Street Address</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">Street Address</label>
             <input className={inputCls} value={rateForm.toStreet} onChange={(e: any) => setRateForm((p: any) => ({ ...p, toStreet: e.target.value }))} placeholder="123 Main St" />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">City</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">City</label>
             <input className={inputCls} value={rateForm.toCity} onChange={(e: any) => setRateForm((p: any) => ({ ...p, toCity: e.target.value }))} placeholder="Los Angeles" />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">State</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">State</label>
               <select className={inputCls} value={rateForm.toState} onChange={(e: any) => setRateForm((p: any) => ({ ...p, toState: e.target.value }))}>
                 {STATES.map((s) => <option key={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">Zip</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">Zip</label>
               <input className={inputCls} value={rateForm.toZip} maxLength={5} onChange={(e: any) => setRateForm((p: any) => ({ ...p, toZip: e.target.value.replace(/\D/g, "") }))} placeholder="90001" />
             </div>
           </div>
@@ -785,7 +785,7 @@ function QuickShipPane(props: {
 
       {/* Parcel */}
       <Card>
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2D100F]/40">Package Dimensions</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1A1D23]/40">Package Dimensions</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
           {[
             { label: "Length (in)", key: "lengthIn" },
@@ -793,7 +793,7 @@ function QuickShipPane(props: {
             { label: "Height (in)", key: "heightIn" },
           ].map(({ label, key }) => (
             <div key={key}>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">{label}</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">{label}</label>
               <input
                 type="number"
                 min={0.1}
@@ -806,7 +806,7 @@ function QuickShipPane(props: {
           ))}
         </div>
         <div className="mt-3">
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">Weight</label>
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">Weight</label>
           <WeightInput
             valueOz={parseFloat(rateForm.weightOz) || ""}
             onChangeOz={(oz) => setRateForm((p: any) => ({ ...p, weightOz: String(oz) }))}
@@ -838,17 +838,17 @@ function QuickShipPane(props: {
                   weightOz: String(p.weightOz),
                 }))}
                 title={`${p.lengthIn}×${p.widthIn}×${p.heightIn} in · ${(p.weightOz / 16).toFixed(2)} lb`}
-                className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-[#337485]/10 text-[#337485] hover:bg-[#337485]/20 transition-colors"
+                className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-[#1976FF]/10 text-[#1976FF] hover:bg-[#1976FF]/20 transition-colors"
               >{p.label}</button>
             ))}
             {presets.length === 0 && (
-              <span className="text-[10.5px] text-[#2D100F]/50 italic">No presets yet — set up your real box stock for one-tap fill.</span>
+              <span className="text-[10.5px] text-[#1A1D23]/50 italic">No presets yet — set up your real box stock for one-tap fill.</span>
             )}
           </div>
           <button
             type="button"
             onClick={gotoPresets}
-            className="text-[10px] font-bold px-2 py-1.5 rounded-lg border border-[#e8e5e0] text-[#2D100F]/65 hover:text-[#337485] hover:border-[#337485] transition-colors shrink-0"
+            className="text-[10px] font-bold px-2 py-1.5 rounded-lg border border-[#e8e5e0] text-[#1A1D23]/65 hover:text-[#1976FF] hover:border-[#1976FF] transition-colors shrink-0"
             title="Edit your saved parcel presets"
           >
             Edit presets →
@@ -861,8 +861,8 @@ function QuickShipPane(props: {
           the receipt page header so admin can scan past purchases. */}
       <Card>
         <div className="flex items-center justify-between gap-2 mb-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2D100F]/40">Internal note (optional)</p>
-          <span className="text-[9.5px] text-[#2D100F]/45 tabular-nums">{labelNote.length}/100</span>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1A1D23]/40">Internal note (optional)</p>
+          <span className="text-[9.5px] text-[#1A1D23]/45 tabular-nums">{labelNote.length}/100</span>
         </div>
         <input
           type="text"
@@ -904,12 +904,12 @@ function QuickShipPane(props: {
                 : addrCheck?.valid
                   ? "rgba(22,163,74,0.18)"
                   : "rgba(245,166,35,0.20)",
-              color: addrChecking ? "#23596A" : addrCheck?.valid ? "#15803d" : "#92400e",
+              color: addrChecking ? "#0F5BD9" : addrCheck?.valid ? "#15803d" : "#92400e",
             }}
           >
             {addrChecking ? "…" : addrCheck?.valid ? "✓" : "!"}
           </span>
-          <div className="min-w-0 text-[12px] text-[#2D100F]">
+          <div className="min-w-0 text-[12px] text-[#1A1D23]">
             <p className="font-black">
               {addrChecking
                 ? "Validating address with Shippo…"
@@ -918,7 +918,7 @@ function QuickShipPane(props: {
                   : "Heads up — Shippo flagged the destination"}
             </p>
             {addrCheck && addrCheck.messages.length > 0 && (
-              <ul className="mt-1 space-y-0.5 text-[11px] text-[#2D100F]/65 list-disc pl-4">
+              <ul className="mt-1 space-y-0.5 text-[11px] text-[#1A1D23]/65 list-disc pl-4">
                 {addrCheck.messages.slice(0, 4).map((m, i) => <li key={i}>{m}</li>)}
               </ul>
             )}
@@ -930,7 +930,7 @@ function QuickShipPane(props: {
         disabled={isPending || !rateForm.toStreet || !rateForm.toCity || !rateForm.toZip}
         onClick={fetchRates}
         className="w-full h-11 rounded-md text-white text-sm font-bold uppercase tracking-[0.10em] disabled:opacity-40 transition-colors"
-        style={{ background: "#2D100F", border: "1px solid #2D100F" }}
+        style={{ background: "#1A1D23", border: "1px solid #1A1D23" }}
       >
         {isPending ? "Getting rates…" : "Get live rates"}
       </button>
@@ -1004,7 +1004,7 @@ function RatesList({
   setSelectedRateId: (id: string | null) => void;
 }) {
   if (rates.length === 0) {
-    return <p className="text-center text-sm text-[#2D100F]/50 py-4">No rates available for this destination</p>;
+    return <p className="text-center text-sm text-[#1A1D23]/50 py-4">No rates available for this destination</p>;
   }
 
   // Cheapest = lowest customer price; Fastest = lowest estimatedDays (null →
@@ -1046,11 +1046,11 @@ function RatesList({
           <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#e8e5e0]/70" style={{ background: "linear-gradient(180deg, #FAF6F0, #fff)" }}>
             <CarrierGlyph carrier={g.carrier} className="w-7 h-7 shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-black text-[#2D100F] tracking-tight">{g.carrier}</p>
-              <p className="text-[10px] text-[#2D100F]/45">{g.items.length} service{g.items.length === 1 ? "" : "s"}</p>
+              <p className="text-sm font-black text-[#1A1D23] tracking-tight">{g.carrier}</p>
+              <p className="text-[10px] text-[#1A1D23]/45">{g.items.length} service{g.items.length === 1 ? "" : "s"}</p>
             </div>
-            <p className="text-[10px] font-black uppercase tracking-wider text-[#2D100F]/40 tabular-nums">
-              from <span className="text-[#2D100F]">${(g.items[0].customerPriceCents / 100).toFixed(2)}</span>
+            <p className="text-[10px] font-black uppercase tracking-wider text-[#1A1D23]/40 tabular-nums">
+              from <span className="text-[#1A1D23]">${(g.items[0].customerPriceCents / 100).toFixed(2)}</span>
             </p>
           </div>
           <ul className="divide-y divide-[#e8e5e0]/60">
@@ -1117,7 +1117,7 @@ function RateRow({
       className="px-4 py-3 transition-colors hover:bg-[#f9f9f8] cursor-pointer"
       style={{
         background: isSelected ? "rgba(51,116,133,0.10)" : winBg,
-        boxShadow: isSelected ? "inset 3px 0 0 #337485" : undefined,
+        boxShadow: isSelected ? "inset 3px 0 0 #1976FF" : undefined,
       }}
       onClick={(e) => {
         // Only the row body toggles selection; clicks on the action buttons
@@ -1128,17 +1128,17 @@ function RateRow({
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-            <span className="font-bold text-[13px] text-[#2D100F]">{rate.servicelevel}</span>
-            {isSelected && <Badge color="#337485" label="SELECTED" />}
-            {isCheapest && <Badge color="#16a34a" label="CHEAPEST" />}
-            {isFastest && <Badge color="#337485" label="FASTEST" />}
+            <span className="font-bold text-[13px] text-[#1A1D23]">{rate.servicelevel}</span>
+            {isSelected && <Badge color="#1976FF" label="SELECTED" />}
+            {isCheapest && <Badge color="#22C55E" label="CHEAPEST" />}
+            {isFastest && <Badge color="#1976FF" label="FASTEST" />}
             {rate.estimatedDays != null && (
-              <span className="text-[10px] font-bold text-[#2D100F]/55 bg-[#f4f6f8] px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-bold text-[#1A1D23]/55 bg-[#f4f6f8] px-1.5 py-0.5 rounded-full">
                 {rate.estimatedDays}d
               </span>
             )}
           </div>
-          <p className="text-[11px] text-[#2D100F]/50">
+          <p className="text-[11px] text-[#1A1D23]/50">
             {rate.estimatedDays != null
               ? `Est. ${rate.estimatedDays} business day${rate.estimatedDays !== 1 ? "s" : ""}`
               : rate.durationTerms ?? "Transit time varies"}
@@ -1152,11 +1152,11 @@ function RateRow({
               under it shows the markup value explicitly. */}
           <span
             className="inline-block px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-[0.16em]"
-            style={{ background: "rgba(51,116,133,0.10)", color: "#23596A", border: "1px solid rgba(51,116,133,0.25)" }}
+            style={{ background: "rgba(51,116,133,0.10)", color: "#0F5BD9", border: "1px solid rgba(51,116,133,0.25)" }}
           >
             Customer pays
           </span>
-          <p className="text-[26px] font-extrabold text-[#2D100F] tabular-nums mt-0.5" style={{ lineHeight: 1.05, letterSpacing: "-0.01em" }}>
+          <p className="text-[26px] font-extrabold text-[#1A1D23] tabular-nums mt-0.5" style={{ lineHeight: 1.05, letterSpacing: "-0.01em" }}>
             ${(rate.customerPriceCents / 100).toFixed(2)}
           </p>
           <div className="mt-1 flex items-center gap-1 justify-end">
@@ -1168,14 +1168,14 @@ function RateRow({
               +${(rate.marginCents / 100).toFixed(2)} margin
             </span>
           </div>
-          <p className="text-[10px] text-[#2D100F]/55 mt-1">
+          <p className="text-[10px] text-[#1A1D23]/55 mt-1">
             Wholesale ${parseFloat(rate.amount).toFixed(2)} · you keep <span className="text-emerald-700 font-bold">${(rate.marginCents / 100).toFixed(2)}</span>
           </p>
           <div className="mt-1.5 flex gap-1.5 justify-end">
             <button
               type="button"
               onClick={copyQuote}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8]"
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8]"
               title="Copy customer quote to clipboard (SMS-ready)"
             >
               {copied ? "Copied ✓" : "Copy quote"}
@@ -1232,9 +1232,9 @@ function SelectedRateBar({
       aria-label="Selected rate"
     >
       <div className="min-w-0 flex-1">
-        <p className="text-[9.5px] font-black uppercase tracking-wider text-[#337485]">Selected rate · Customer pays</p>
+        <p className="text-[9.5px] font-black uppercase tracking-wider text-[#1976FF]">Selected rate · Customer pays</p>
         <div className="flex items-center gap-2 flex-wrap mt-0.5">
-          <p className="text-[20px] font-extrabold text-[#2D100F] tabular-nums" style={{ letterSpacing: "-0.01em" }}>
+          <p className="text-[20px] font-extrabold text-[#1A1D23] tabular-nums" style={{ letterSpacing: "-0.01em" }}>
             ${(rate.customerPriceCents / 100).toFixed(2)}
           </p>
           <span
@@ -1244,17 +1244,17 @@ function SelectedRateBar({
           >
             +${(rate.marginCents / 100).toFixed(2)} margin
           </span>
-          <span className="text-[#2D100F]/30">·</span>
-          <span className="text-[11px] text-[#2D100F]/65">
+          <span className="text-[#1A1D23]/30">·</span>
+          <span className="text-[11px] text-[#1A1D23]/65">
             {rate.provider} {rate.servicelevel}
           </span>
           {rate.estimatedDays != null && (
-            <span className="text-[10px] font-bold text-[#23596A] bg-[#337485]/10 px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold text-[#0F5BD9] bg-[#1976FF]/10 px-1.5 py-0.5 rounded-full">
               {rate.estimatedDays}d
             </span>
           )}
         </div>
-        <p className="text-[10px] text-[#2D100F]/55 mt-0.5">
+        <p className="text-[10px] text-[#1A1D23]/55 mt-0.5">
           Wholesale ${parseFloat(rate.amount).toFixed(2)} · NOHO marks up 10% (with $1 floor)
         </p>
       </div>
@@ -1262,7 +1262,7 @@ function SelectedRateBar({
         <button
           type="button"
           onClick={copyQuote}
-          className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-white"
+          className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-white"
         >
           {copied ? "Copied ✓" : "Copy quote"}
         </button>
@@ -1279,7 +1279,7 @@ function SelectedRateBar({
           type="button"
           onClick={onClear}
           aria-label="Clear selection"
-          className="px-2 py-1.5 rounded-lg text-[12px] text-[#2D100F]/55 hover:text-[#2D100F]"
+          className="px-2 py-1.5 rounded-lg text-[12px] text-[#1A1D23]/55 hover:text-[#1A1D23]"
           title="Clear selection"
         >
           ✕
@@ -1334,7 +1334,7 @@ function CarrierGlyph({ carrier, className }: { carrier: string; className?: str
   }
   // Generic fallback — first 2 letters of the carrier name in brand colors.
   return (
-    <span className={className} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: 8, background: "rgba(51,116,133,0.12)", color: "#337485", fontSize: 11, fontWeight: 900, letterSpacing: "0.04em" }}>
+    <span className={className} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: 8, background: "rgba(51,116,133,0.12)", color: "#1976FF", fontSize: 11, fontWeight: 900, letterSpacing: "0.04em" }}>
       {(carrier || "??").slice(0, 2).toUpperCase()}
     </span>
   );
@@ -1420,7 +1420,7 @@ function LabelsPane({
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search name · tracking · suite · city · carrier   ( / to focus)"
           data-quick-search="labels"
-          className="flex-1 min-w-[180px] rounded-xl border border-[#e8e5e0] px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485] bg-white"
+          className="flex-1 min-w-[180px] rounded-xl border border-[#e8e5e0] px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF] bg-white"
         />
         {(["all", "active", "refunded"] as const).map((f) => {
           const active = statusFilter === f;
@@ -1431,7 +1431,7 @@ function LabelsPane({
               className="px-2.5 py-1 rounded-lg text-[10.5px] font-bold uppercase tracking-wider transition-colors"
               style={{
                 background: active ? NOHO_BLUE : "transparent",
-                color: active ? "#fff" : "#2D100F",
+                color: active ? "#fff" : "#1A1D23",
                 border: active ? `1px solid ${NOHO_BLUE}` : "1px solid #e8e5e0",
               }}
             >
@@ -1442,7 +1442,7 @@ function LabelsPane({
         <button
           type="button"
           onClick={() => exportLabelsCsv(filtered)}
-          className="px-2.5 py-1 rounded-lg text-[10.5px] font-bold uppercase tracking-wider border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8] flex items-center gap-1.5"
+          className="px-2.5 py-1 rounded-lg text-[10.5px] font-bold uppercase tracking-wider border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8] flex items-center gap-1.5"
           title="Export current filtered labels to a spreadsheet (CSV)"
         >
           <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -1464,7 +1464,7 @@ function LabelsPane({
 
       {filtered.length === 0 ? (
         <Card>
-          <p className="text-[#2D100F]/40 text-sm py-6 text-center">
+          <p className="text-[#1A1D23]/40 text-sm py-6 text-center">
             {labels.length === 0
               ? "No labels yet — use Quick Ship to buy your first label"
               : `No labels match "${query}"`}
@@ -1497,14 +1497,14 @@ function SummaryTile({ label, value, sub, accent, margin }: { label: string; val
     <div
       className="rounded-md px-3 py-2.5"
       style={{
-        background: accent ? "#2D100F" : margin ? "rgba(22,163,74,0.06)" : "#FFFFFF",
-        border: `1px solid ${accent ? "#2D100F" : margin ? "rgba(22,163,74,0.30)" : "#E5DACA"}`,
+        background: accent ? "#1A1D23" : margin ? "rgba(22,163,74,0.06)" : "#FFFFFF",
+        border: `1px solid ${accent ? "#1A1D23" : margin ? "rgba(22,163,74,0.30)" : "#ECEEF1"}`,
       }}
     >
       <p className="text-[9px] font-black uppercase tracking-[0.18em]" style={{ color: accent ? "rgba(247,230,194,0.75)" : margin ? "#15803d" : "rgba(45,16,15,0.45)" }}>
         {label}
       </p>
-      <p className="text-lg font-extrabold tracking-tight tabular-nums" style={{ color: accent ? "#F7E6C2" : margin ? "#15803d" : "#2D100F" }}>
+      <p className="text-lg font-extrabold tracking-tight tabular-nums" style={{ color: accent ? "#EBF2FF" : margin ? "#15803d" : "#1A1D23" }}>
         {value}
       </p>
       <p className="text-[9.5px]" style={{ color: accent ? "rgba(247,230,194,0.6)" : margin ? "#15803d" : "rgba(45,16,15,0.45)" }}>
@@ -1563,12 +1563,12 @@ function LabelsListBody({
           type="checkbox"
           checked={allVisibleSelected}
           onChange={(e) => onSelectAllVisible(e.target.checked)}
-          className="w-4 h-4 accent-[#337485]"
+          className="w-4 h-4 accent-[#1976FF]"
           title={allVisibleSelected ? "Clear visible" : "Select all visible"}
         />
-        <span className="text-[10px] font-black uppercase tracking-wider text-[#2D100F]/55">
+        <span className="text-[10px] font-black uppercase tracking-wider text-[#1A1D23]/55">
           {allVisibleSelected ? "All visible selected" : "Select all visible"}
-          <span className="text-[#2D100F]/35"> · {labels.length} row{labels.length === 1 ? "" : "s"}</span>
+          <span className="text-[#1A1D23]/35"> · {labels.length} row{labels.length === 1 ? "" : "s"}</span>
         </span>
       </div>
       <ul className="divide-y divide-[#e8e5e0]/60">
@@ -1634,34 +1634,34 @@ function LabelRowItem({
           type="checkbox"
           checked={isSelected}
           onChange={onToggleSelect}
-          className="mt-1 w-4 h-4 accent-[#337485] shrink-0"
+          className="mt-1 w-4 h-4 accent-[#1976FF] shrink-0"
           aria-label={`Select label for ${l.toName}`}
         />
       <div className="flex items-start justify-between gap-4 flex-wrap flex-1 min-w-0">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-bold text-[#2D100F]">{l.toName}</p>
-            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-[#337485]/10 text-[#337485]">
+            <p className="font-bold text-[#1A1D23]">{l.toName}</p>
+            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-[#1976FF]/10 text-[#1976FF]">
               {l.carrier}
             </span>
-            <span className="text-[10px] font-bold text-[#2D100F]/55">{l.servicelevel}</span>
+            <span className="text-[10px] font-bold text-[#1A1D23]/55">{l.servicelevel}</span>
             {isRefunded && <RefundedBadge labelId={l.id} />}
             {liveStatus && (
               <LiveStatusPill status={liveStatus.status} location={liveStatus.loc ?? null} />
             )}
           </div>
-          <p className="text-[11px] text-[#2D100F]/45 mt-0.5">
+          <p className="text-[11px] text-[#1A1D23]/45 mt-0.5">
             {l.toCity}, {l.toState} {l.toZip}
-            {l.suiteNumber && <span className="text-[#337485] font-bold"> · Suite #{l.suiteNumber}</span>}
+            {l.suiteNumber && <span className="text-[#1976FF] font-bold"> · Suite #{l.suiteNumber}</span>}
           </p>
           <div className="mt-1 flex items-center gap-2 flex-wrap">
-            <a href={l.trackingUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-[#337485] hover:underline">
+            <a href={l.trackingUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-[#1976FF] hover:underline">
               {l.trackingNumber}
             </a>
-            <span className="text-[#2D100F]/30">·</span>
-            <span className="text-[11px] text-[#2D100F]/55">${l.amountPaid.toFixed(2)}</span>
-            <span className="text-[#2D100F]/30">·</span>
-            <span className="text-[10px] text-[#2D100F]/40">{l.createdAt}</span>
+            <span className="text-[#1A1D23]/30">·</span>
+            <span className="text-[11px] text-[#1A1D23]/55">${l.amountPaid.toFixed(2)}</span>
+            <span className="text-[#1A1D23]/30">·</span>
+            <span className="text-[10px] text-[#1A1D23]/40">{l.createdAt}</span>
           </div>
         </div>
 
@@ -1670,15 +1670,15 @@ function LabelRowItem({
             onClick={refreshTracking}
             disabled={trackPending || !l.trackingNumber}
             title="Fetch live tracking status from the carrier"
-            className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8] disabled:opacity-50 transition-colors"
+            className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8] disabled:opacity-50 transition-colors"
           >
             {trackPending ? "Tracking…" : liveStatus ? "Refresh" : "Track"}
           </button>
-          <a href={l.labelUrl} target="_blank" rel="noopener noreferrer" className="px-2.5 py-1.5 rounded-lg text-[11px] font-black bg-[#337485] text-white hover:bg-[#23596A] transition-colors">Print</a>
-          <a href={l.labelUrl} download={downloadName} className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8] transition-colors">Download</a>
-          <button onClick={() => onForward(l)} disabled={isPending} className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-[#16a34a] text-white hover:bg-[#15803d] disabled:opacity-50 transition-colors" title="Text label + tracking to the customer">Forward</button>
+          <a href={l.labelUrl} target="_blank" rel="noopener noreferrer" className="px-2.5 py-1.5 rounded-lg text-[11px] font-black bg-[#1976FF] text-white hover:bg-[#0F5BD9] transition-colors">Print</a>
+          <a href={l.labelUrl} download={downloadName} className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8] transition-colors">Download</a>
+          <button onClick={() => onForward(l)} disabled={isPending} className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-[#22C55E] text-white hover:bg-[#15803d] disabled:opacity-50 transition-colors" title="Text label + tracking to the customer">Forward</button>
           <CopyPublicLinkButton labelId={l.id} />
-          <a href={`/admin/shippo/receipt/${l.id}`} target="_blank" rel="noopener noreferrer" className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8] transition-colors">Receipt</a>
+          <a href={`/admin/shippo/receipt/${l.id}`} target="_blank" rel="noopener noreferrer" className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8] transition-colors">Receipt</a>
           {!isRefunded && (
             <button onClick={() => onRefund(l)} disabled={isPending} className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-50 transition-colors">Refund</button>
           )}
@@ -1687,7 +1687,7 @@ function LabelRowItem({
       </div>
 
       {rowMsg && (
-        <p className="mt-2 text-[11px] font-bold text-[#337485] bg-[#337485]/8 px-3 py-1.5 rounded-lg">{rowMsg}</p>
+        <p className="mt-2 text-[11px] font-bold text-[#1976FF] bg-[#1976FF]/8 px-3 py-1.5 rounded-lg">{rowMsg}</p>
       )}
     </li>
   );
@@ -1779,7 +1779,7 @@ function BulkActionBar({
         borderColor: "rgba(51,116,133,0.30)",
       }}
     >
-      <span className="text-[11px] font-black text-[#23596A]">
+      <span className="text-[11px] font-black text-[#0F5BD9]">
         {selectedCount} selected
       </span>
       <div className="flex items-center gap-1.5 flex-wrap">
@@ -1803,16 +1803,16 @@ function BulkActionBar({
         <button
           type="button"
           onClick={openSelectionRunSheet}
-          className="px-3 py-1.5 rounded-lg text-[11px] font-black bg-[#16a34a] text-white hover:bg-[#15803d]"
+          className="px-3 py-1.5 rounded-lg text-[11px] font-black bg-[#22C55E] text-white hover:bg-[#15803d]"
           title="Open the run sheet filtered to just these labels"
         >
           Run sheet for selection
         </button>
       </div>
       {(summary.pending + summary.delivered + summary.transit + summary.other + summary.error) > 0 && (
-        <span className="text-[10.5px] text-[#2D100F]/60 ml-auto">
+        <span className="text-[10.5px] text-[#1A1D23]/60 ml-auto">
           {summary.delivered > 0 && <span className="text-emerald-700 font-bold">{summary.delivered} delivered </span>}
-          {summary.transit > 0 && <span className="text-[#23596A] font-bold">· {summary.transit} in transit </span>}
+          {summary.transit > 0 && <span className="text-[#0F5BD9] font-bold">· {summary.transit} in transit </span>}
           {summary.other > 0 && <span>· {summary.other} other </span>}
           {summary.pending > 0 && <span>· {summary.pending} pending </span>}
           {summary.error > 0 && <span className="text-red-700 font-bold">· {summary.error} err </span>}
@@ -1821,7 +1821,7 @@ function BulkActionBar({
       <button
         type="button"
         onClick={onClear}
-        className="ml-auto sm:ml-0 px-2 py-1 rounded text-[10.5px] text-[#2D100F]/55 hover:text-[#2D100F]"
+        className="ml-auto sm:ml-0 px-2 py-1 rounded text-[10.5px] text-[#1A1D23]/55 hover:text-[#1A1D23]"
       >
         Clear selection
       </button>
@@ -1880,7 +1880,7 @@ function RefundedBadge({ labelId }: { labelId: string }) {
           type="button"
           onClick={fetchStatus}
           disabled={pending}
-          className="text-[9.5px] font-bold text-[#337485] hover:underline disabled:opacity-50"
+          className="text-[9.5px] font-bold text-[#1976FF] hover:underline disabled:opacity-50"
           title="Fetch live refund status from Shippo"
         >
           {pending ? "…" : "status"}
@@ -1895,9 +1895,9 @@ function RefundedBadge({ labelId }: { labelId: string }) {
               className="inline-block w-2 h-1 rounded-sm"
               style={{
                 background: stage === -1
-                  ? "#E70013"
+                  ? "#FF3B30"
                   : stage >= n
-                    ? "#16a34a"
+                    ? "#22C55E"
                     : "rgba(45,16,15,0.20)",
               }}
             />
@@ -1931,7 +1931,7 @@ function CopyPublicLinkButton({ labelId }: { labelId: string }) {
     <button
       type="button"
       onClick={copy}
-      className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8] transition-colors"
+      className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8] transition-colors"
       title="Copy the customer-facing branded NOHO tracking URL to the clipboard"
     >
       {copied ? "Copied ✓" : "Public link"}
@@ -1943,13 +1943,13 @@ function LiveStatusPill({ status, location }: { status: string; location: string
   // Map Shippo's tracking status into a visible color cue. Anything we don't
   // recognize falls through to a neutral teal so unknowns don't look broken.
   const s = (status || "").toUpperCase();
-  let bg = "rgba(51,116,133,0.12)", fg = "#23596A", dot = "#337485", label = s || "—";
-  if (s === "DELIVERED") { bg = "rgba(22,163,74,0.14)"; fg = "#15803d"; dot = "#16a34a"; label = "Delivered"; }
-  else if (s === "TRANSIT") { bg = "rgba(51,116,133,0.18)"; fg = "#23596A"; dot = "#337485"; label = "In transit"; }
+  let bg = "rgba(51,116,133,0.12)", fg = "#0F5BD9", dot = "#1976FF", label = s || "—";
+  if (s === "DELIVERED") { bg = "rgba(22,163,74,0.14)"; fg = "#15803d"; dot = "#22C55E"; label = "Delivered"; }
+  else if (s === "TRANSIT") { bg = "rgba(51,116,133,0.18)"; fg = "#0F5BD9"; dot = "#1976FF"; label = "In transit"; }
   else if (s === "PRE_TRANSIT") { bg = "rgba(245,166,35,0.14)"; fg = "#92400e"; dot = "#F5A623"; label = "Awaiting pickup"; }
-  else if (s === "RETURNED") { bg = "rgba(231,0,19,0.14)"; fg = "#991b1b"; dot = "#E70013"; label = "Returned"; }
-  else if (s === "FAILURE") { bg = "rgba(231,0,19,0.14)"; fg = "#991b1b"; dot = "#E70013"; label = "Failed"; }
-  else if (s === "ERROR") { bg = "rgba(231,0,19,0.14)"; fg = "#991b1b"; dot = "#E70013"; label = "Track error"; }
+  else if (s === "RETURNED") { bg = "rgba(231,0,19,0.14)"; fg = "#991b1b"; dot = "#FF3B30"; label = "Returned"; }
+  else if (s === "FAILURE") { bg = "rgba(231,0,19,0.14)"; fg = "#991b1b"; dot = "#FF3B30"; label = "Failed"; }
+  else if (s === "ERROR") { bg = "rgba(231,0,19,0.14)"; fg = "#991b1b"; dot = "#FF3B30"; label = "Track error"; }
   return (
     <span
       className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded"
@@ -2030,20 +2030,20 @@ function TrackPane(props: any) {
   return (
     <div className="space-y-4">
       <Card>
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2D100F]/40">Track Shipment</p>
-        <p className="text-[11px] mt-0.5 text-[#2D100F]/55">Paste any carrier's tracking number — we auto-detect USPS / UPS / FedEx / DHL.</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1A1D23]/40">Track Shipment</p>
+        <p className="text-[11px] mt-0.5 text-[#1A1D23]/55">Paste any carrier's tracking number — we auto-detect USPS / UPS / FedEx / DHL.</p>
         <div className="grid grid-cols-3 gap-3 mt-3">
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">Carrier</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">Carrier</label>
             <select className={inputCls} value={trackCarrier} onChange={(e: any) => setTrackCarrier(e.target.value)}>
               {CARRIERS.map((c) => <option key={c}>{c}</option>)}
             </select>
           </div>
           <div className="col-span-2">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">
               Tracking Number
               {detectCarrierFromTracking(trackNum) && (
-                <span className="ml-2 text-[#337485] normal-case tracking-normal font-bold">
+                <span className="ml-2 text-[#1976FF] normal-case tracking-normal font-bold">
                   · auto-detected {detectCarrierFromTracking(trackNum)}
                 </span>
               )}
@@ -2062,17 +2062,17 @@ function TrackPane(props: any) {
 
         {recents.length > 0 && (
           <div className="mt-4 pt-3 border-t border-[#e8e5e0]/70">
-            <p className="text-[10px] font-black uppercase tracking-wider text-[#2D100F]/40 mb-2">Recent</p>
+            <p className="text-[10px] font-black uppercase tracking-wider text-[#1A1D23]/40 mb-2">Recent</p>
             <div className="flex flex-wrap gap-2">
               {recents.map((r) => (
                 <button
                   key={`${r.number}-${r.ts}`}
                   type="button"
                   onClick={() => { setTrackCarrier(r.carrier); setTrackNum(r.number); }}
-                  className="text-[10.5px] px-2.5 py-1 rounded-full border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8] hover:border-[#337485] transition-colors flex items-center gap-1.5"
+                  className="text-[10.5px] px-2.5 py-1 rounded-full border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8] hover:border-[#1976FF] transition-colors flex items-center gap-1.5"
                   title={`${r.carrier} · ${new Date(r.ts).toLocaleString()}`}
                 >
-                  <span className="text-[9px] font-black uppercase tracking-wider text-[#337485]">{r.carrier}</span>
+                  <span className="text-[9px] font-black uppercase tracking-wider text-[#1976FF]">{r.carrier}</span>
                   <span className="font-mono">{r.number.length > 14 ? r.number.slice(0, 12) + "…" : r.number}</span>
                 </button>
               ))}
@@ -2092,10 +2092,10 @@ function TrackPane(props: any) {
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2">
                 <LiveStatusPill status={trackResult.status ?? "UNKNOWN"} location={trackResult.location ?? null} />
-                {trackResult.location && <p className="text-sm font-bold text-[#2D100F]">{trackResult.location}</p>}
+                {trackResult.location && <p className="text-sm font-bold text-[#1A1D23]">{trackResult.location}</p>}
               </div>
               {trackResult.eta && (
-                <p className="text-xs text-[#2D100F]/50">ETA: {new Date(trackResult.eta).toLocaleDateString()}</p>
+                <p className="text-xs text-[#1A1D23]/50">ETA: {new Date(trackResult.eta).toLocaleDateString()}</p>
               )}
             </div>
 
@@ -2106,10 +2106,10 @@ function TrackPane(props: any) {
                 style={{
                   width: `${Math.max(4, stage.pos * 100)}%`,
                   background: stage.current === -1
-                    ? "linear-gradient(90deg, #E70013, #991b1b)"
+                    ? "linear-gradient(90deg, #FF3B30, #991b1b)"
                     : stage.current === 3
-                      ? "linear-gradient(90deg, #16a34a, #15803d)"
-                      : "linear-gradient(90deg, #337485, #23596A)",
+                      ? "linear-gradient(90deg, #22C55E, #15803d)"
+                      : "linear-gradient(90deg, #1976FF, #0F5BD9)",
                 }}
               />
             </div>
@@ -2127,7 +2127,7 @@ function TrackPane(props: any) {
                     <p
                       className="text-[10px] font-black uppercase tracking-wider"
                       style={{
-                        color: errored ? "#991b1b" : reached ? "#15803d" : isCurrent ? "#337485" : "rgba(45,16,15,0.40)",
+                        color: errored ? "#991b1b" : reached ? "#15803d" : isCurrent ? "#1976FF" : "rgba(45,16,15,0.40)",
                       }}
                     >
                       {s.label}
@@ -2140,12 +2140,12 @@ function TrackPane(props: any) {
 
           {trackResult.trackingHistory?.length > 0 && (
             <div className="space-y-2 mt-5 pt-4 border-t border-[#e8e5e0]/70">
-              <p className="text-[10px] font-black uppercase tracking-wider text-[#2D100F]/40">History</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-[#1A1D23]/40">History</p>
               {trackResult.trackingHistory.slice(0, 8).map((h: any, i: number) => (
                 <div key={i} className="flex gap-3 items-start text-xs">
-                  <span className="text-[#2D100F]/30 font-mono w-32 shrink-0">{h.date ? new Date(h.date).toLocaleString() : "—"}</span>
-                  <span className="font-semibold text-[#2D100F]">{h.status}</span>
-                  {h.location && <span className="text-[#2D100F]/50 ml-auto">{h.location}</span>}
+                  <span className="text-[#1A1D23]/30 font-mono w-32 shrink-0">{h.date ? new Date(h.date).toLocaleString() : "—"}</span>
+                  <span className="font-semibold text-[#1A1D23]">{h.status}</span>
+                  {h.location && <span className="text-[#1A1D23]/50 ml-auto">{h.location}</span>}
                 </div>
               ))}
             </div>
@@ -2176,7 +2176,7 @@ function CarriersPane({
   if (!isConfigured) {
     return (
       <Card>
-        <p className="text-sm text-[#2D100F]/60">Add <code className="px-1.5 py-0.5 rounded bg-[#f4f6f8] text-[#2D100F] text-xs font-mono">SHIPPO_API_KEY</code> to enable carrier-account selection.</p>
+        <p className="text-sm text-[#1A1D23]/60">Add <code className="px-1.5 py-0.5 rounded bg-[#f4f6f8] text-[#1A1D23] text-xs font-mono">SHIPPO_API_KEY</code> to enable carrier-account selection.</p>
       </Card>
     );
   }
@@ -2236,8 +2236,8 @@ function CarriersPane({
       <Card>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2D100F]/40">Carrier Accounts</p>
-            <p className="text-[11px] mt-0.5 text-[#2D100F]/55">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1A1D23]/40">Carrier Accounts</p>
+            <p className="text-[11px] mt-0.5 text-[#1A1D23]/55">
               Pin your real UPS / FedEx / DHL contracts so labels purchase reliably.
               {accounts.length > 0 && <> Found <strong>{accounts.length}</strong> on your Shippo profile.</>}
             </p>
@@ -2250,7 +2250,7 @@ function CarriersPane({
               type="button"
               onClick={onRefresh}
               disabled={loading}
-              className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8] disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8] disabled:opacity-50"
             >
               {loading ? "Refreshing…" : "Refresh"}
             </button>
@@ -2285,8 +2285,8 @@ function CarriersPane({
                     <div className="flex items-center gap-2">
                       <CarrierGlyph carrier={name} className="w-7 h-7 shrink-0" />
                       <div>
-                        <p className="text-[12px] font-black text-[#2D100F]">{name}</p>
-                        <p className="text-[9.5px] text-[#2D100F]/45">
+                        <p className="text-[12px] font-black text-[#1A1D23]">{name}</p>
+                        <p className="text-[9.5px] text-[#1A1D23]/45">
                           {grouped[name].length} account{grouped[name].length === 1 ? "" : "s"}
                           {stats && stats.recent > 0 && <> · {stats.recent} recent label{stats.recent === 1 ? "" : "s"}</>}
                           {stats && stats.today > 0 && <> · <span className="text-[#15803d] font-bold">{stats.today} today</span></>}
@@ -2294,7 +2294,7 @@ function CarriersPane({
                       </div>
                     </div>
                     {stats?.lastTs && (
-                      <span className="text-[9.5px] text-[#2D100F]/55">last used {relTime(stats.lastTs)}</span>
+                      <span className="text-[9.5px] text-[#1A1D23]/55">last used {relTime(stats.lastTs)}</span>
                     )}
                   </div>
                   <div className="space-y-1.5">
@@ -2314,17 +2314,17 @@ function CarriersPane({
                             type="checkbox"
                             checked={active}
                             onChange={() => onToggle(a.objectId)}
-                            className="mt-0.5 w-4 h-4 accent-[#337485]"
+                            className="mt-0.5 w-4 h-4 accent-[#1976FF]"
                           />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-sm font-black text-[#2D100F]">
+                              <p className="text-sm font-black text-[#1A1D23]">
                                 {active ? "Active" : "Inactive"}
                                 {!a.active && <span className="text-red-700 ml-1">· disabled on Shippo</span>}
                               </p>
                               {active && (
                                 <span className="inline-flex items-center gap-1 text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(22,163,74,0.14)", color: "#15803d" }}>
-                                  <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#16a34a", boxShadow: "0 0 6px rgba(22,163,74,0.55)" }} />
+                                  <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#22C55E", boxShadow: "0 0 6px rgba(22,163,74,0.55)" }} />
                                   Pinned
                                 </span>
                               )}
@@ -2335,12 +2335,12 @@ function CarriersPane({
                               )}
                             </div>
                             {a.accountId && (
-                              <p className="text-[10.5px] text-[#2D100F]/65 font-mono mt-0.5">
-                                <span className="text-[#2D100F]/40">acct</span> {a.accountId}
+                              <p className="text-[10.5px] text-[#1A1D23]/65 font-mono mt-0.5">
+                                <span className="text-[#1A1D23]/40">acct</span> {a.accountId}
                               </p>
                             )}
-                            <p className="text-[9px] text-[#2D100F]/35 font-mono mt-0.5 break-all">
-                              <span className="text-[#2D100F]/30">id</span> {a.objectId}
+                            <p className="text-[9px] text-[#1A1D23]/35 font-mono mt-0.5 break-all">
+                              <span className="text-[#1A1D23]/30">id</span> {a.objectId}
                             </p>
                           </div>
                         </label>
@@ -2356,8 +2356,8 @@ function CarriersPane({
 
       {/* Status summary */}
       <Card>
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2D100F]/40">Active Selection</p>
-        <ul className="mt-2 space-y-1 text-xs text-[#2D100F]">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1A1D23]/40">Active Selection</p>
+        <ul className="mt-2 space-y-1 text-xs text-[#1A1D23]">
           <li>· {ownedCount} of your real carrier contract{ownedCount === 1 ? "" : "s"} active</li>
           <li>
             · Shippo default account {shippoDefaultActive ? "INCLUDED" : "excluded"}
@@ -2449,8 +2449,8 @@ function PresetsPane({
       <Card>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2D100F]/40">Box Presets</p>
-            <p className="text-[11px] mt-0.5 text-[#2D100F]/55">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1A1D23]/40">Box Presets</p>
+            <p className="text-[11px] mt-0.5 text-[#1A1D23]/55">
               Your real box stock. One tap on Quick Ship fills LWH + weight. {presets.length} on file.
             </p>
           </div>
@@ -2462,7 +2462,7 @@ function PresetsPane({
               type="button"
               onClick={resetDefaults}
               disabled={isPending}
-              className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8] disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8] disabled:opacity-50"
               title="Replace with built-in defaults"
             >
               Reset
@@ -2470,7 +2470,7 @@ function PresetsPane({
             <button
               type="button"
               onClick={addNew}
-              className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8]"
+              className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8]"
             >
               + Add preset
             </button>
@@ -2488,8 +2488,8 @@ function PresetsPane({
 
         <div className="mt-3 space-y-2">
           {presets.length === 0 && (
-            <div className="rounded-xl border border-dashed border-[#e8e5e0] px-4 py-6 text-center text-xs text-[#2D100F]/50">
-              No presets yet — click <strong className="text-[#337485]">Add preset</strong> to define your first box size.
+            <div className="rounded-xl border border-dashed border-[#e8e5e0] px-4 py-6 text-center text-xs text-[#1A1D23]/50">
+              No presets yet — click <strong className="text-[#1976FF]">Add preset</strong> to define your first box size.
             </div>
           )}
           {presets.map((p, idx) => {
@@ -2510,7 +2510,7 @@ function PresetsPane({
                 onDrop={(e) => { e.preventDefault(); const src = e.dataTransfer.getData("text/plain") || draggingId; if (src) move(src, p.id); setOverId(null); setDraggingId(null); }}
                 className="rounded-xl bg-white border px-3 py-3 grid grid-cols-1 md:grid-cols-[28px_1.5fr_repeat(4,1fr)_auto] gap-2 items-end transition-all"
                 style={{
-                  borderColor: isOver ? "#337485" : "#e8e5e0",
+                  borderColor: isOver ? "#1976FF" : "#e8e5e0",
                   background: isOver ? "rgba(51,116,133,0.06)" : "#fff",
                   opacity: isDragging ? 0.55 : 1,
                   transform: isOver ? "translateY(1px)" : undefined,
@@ -2525,7 +2525,7 @@ function PresetsPane({
                   </svg>
                 </div>
                 <div className="md:col-span-1">
-                  <label className="block text-[9px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">Label</label>
+                  <label className="block text-[9px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">Label</label>
                   <input
                     className={inputCls}
                     value={p.label}
@@ -2553,8 +2553,8 @@ function PresetsPane({
       </Card>
 
       <Card>
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2D100F]/40">Tips</p>
-        <ul className="mt-2 space-y-1 text-xs text-[#2D100F]/70 list-disc pl-5">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1A1D23]/40">Tips</p>
+        <ul className="mt-2 space-y-1 text-xs text-[#1A1D23]/70 list-disc pl-5">
           <li>Weight is the <strong>empty box</strong> weight — Quick Ship lets admin override per shipment.</li>
           <li>Order matters: presets render top-to-bottom on the rate form. Drag the <span className="inline-block align-middle">⋮⋮</span> handle to reorder.</li>
           <li>To start over with the built-in Envelope / Small / Medium / Large, hit Reset.</li>
@@ -2567,7 +2567,7 @@ function PresetsPane({
 function NumField({ label, value, onChange, inputCls }: { label: string; value: number; onChange: (v: number) => void; inputCls: string }) {
   return (
     <div>
-      <label className="block text-[9px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">{label}</label>
+      <label className="block text-[9px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">{label}</label>
       <input
         type="number"
         min={0}
@@ -2631,7 +2631,7 @@ function RecipientNameAutocomplete({
 
   return (
     <div className="relative">
-      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#2D100F]/40 mb-1">
+      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#1A1D23]/40 mb-1">
         Recipient Name
       </label>
       <input
@@ -2647,7 +2647,7 @@ function RecipientNameAutocomplete({
       {open && matches.length > 0 && (
         <div
           className="absolute left-0 right-0 mt-1 rounded-md bg-white z-20 max-h-72 overflow-auto"
-          style={{ border: "1px solid #E5DACA", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
+          style={{ border: "1px solid #ECEEF1", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
           role="listbox"
         >
           {matches.map((r, i) => {
@@ -2666,13 +2666,13 @@ function RecipientNameAutocomplete({
               >
                 <span
                   className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[9px] font-black"
-                  style={{ background: active ? NOHO_BLUE : "rgba(45,16,15,0.06)", color: active ? "#fff" : "#2D100F" }}
+                  style={{ background: active ? NOHO_BLUE : "rgba(45,16,15,0.06)", color: active ? "#fff" : "#1A1D23" }}
                 >
                   {(r.toName.match(/\b\w/g) ?? []).slice(0, 2).join("").toUpperCase()}
                 </span>
                 <span className="flex-1 min-w-0">
-                  <span className="block font-bold text-[#2D100F] truncate">{r.toName}</span>
-                  <span className="block text-[10.5px] text-[#2D100F]/55 truncate">
+                  <span className="block font-bold text-[#1A1D23] truncate">{r.toName}</span>
+                  <span className="block text-[10.5px] text-[#1A1D23]/55 truncate">
                     {r.toStreet} · {r.toCity}, {r.toState} {r.toZip}
                   </span>
                 </span>
@@ -2688,7 +2688,7 @@ function RecipientNameAutocomplete({
               </button>
             );
           })}
-          <div className="px-3 py-1.5 text-[9.5px] text-[#2D100F]/45 border-t border-[#e8e5e0]">
+          <div className="px-3 py-1.5 text-[9.5px] text-[#1A1D23]/45 border-t border-[#e8e5e0]">
             ↑↓ pick · Enter fill · Esc close
           </div>
         </div>
@@ -2735,14 +2735,14 @@ function DimWeightHint({ lengthIn, widthIn, heightIn, weightOz }: { lengthIn: nu
         </svg>
       </span>
       <div className="min-w-0 flex-1">
-        <p className="font-black text-[#2D100F]">
+        <p className="font-black text-[#1A1D23]">
           {significant ? "DIM weight likely bills higher" : "DIM check"}{" "}
-          <span className="text-[#2D100F]/55 font-normal">·</span>{" "}
-          <span className="text-[#2D100F]" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+          <span className="text-[#1A1D23]/55 font-normal">·</span>{" "}
+          <span className="text-[#1A1D23]" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
             actual <strong>{actualLb.toFixed(2)} lb</strong> · DIM <strong>{dimLb.toFixed(2)} lb</strong>
           </span>
         </p>
-        <p className="text-[#2D100F]/55 leading-snug">
+        <p className="text-[#1A1D23]/55 leading-snug">
           UPS / FedEx will bill the higher of the two ({billable.toFixed(2)} lb).{" "}
           {significant && (
             <span className="text-[#92400e] font-bold">DIM is {ratio.toFixed(1)}× actual — confirm box size.</span>

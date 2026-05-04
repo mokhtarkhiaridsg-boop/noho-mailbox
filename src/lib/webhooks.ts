@@ -22,6 +22,7 @@ export type WebhookEvent =
   | "holiday.notice_sent"
   | "plan.upgraded"
   | "mailer.reply_received"
+  | "suite.transfer_requested"
   | "test.ping";
 
 export const ALL_WEBHOOK_EVENTS: { key: WebhookEvent; label: string; example: string }[] = [
@@ -36,6 +37,7 @@ export const ALL_WEBHOOK_EVENTS: { key: WebhookEvent; label: string; example: st
   { key: "holiday.notice_sent",  label: "Holiday closure notice sent",   example: "📣 Holiday notice sent · Memorial Day · 84/86 recipients" },
   { key: "plan.upgraded",        label: "Member upgraded plan",          example: "⬆️ Karim upgraded Basic → Business · charged $480" },
   { key: "mailer.reply_received", label: "Customer reply landed in mailbox", example: "📨 New reply from sarah@example.com · \"Question about my package\"" },
+  { key: "suite.transfer_requested", label: "Member requested suite transfer", example: "🔀 Karim wants to move from suite #042 → #143" },
   { key: "test.ping",            label: "Test ping",              example: "🧪 NOHO webhook test — all good." },
 ];
 

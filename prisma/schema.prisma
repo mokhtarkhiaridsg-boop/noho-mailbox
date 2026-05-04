@@ -62,6 +62,10 @@ model User {
   walletTopUpThresholdCents Int?
   walletTopUpAmountCents    Int?
   walletTopUpLastFiredAt    DateTime?  // throttle — don't re-fire within 24h
+  // iter-123: Customer's IANA timezone (e.g. "America/New_York", "Europe/London").
+  // When set, time-sensitive emails ("delivered today", "expires Friday")
+  // render dates in this TZ instead of the bureau's. Null = use bureau TZ.
+  timeZone                  String?
 
   // Box ownership type — required for CMRA compliance.
   // A company cannot exist as an individual; if Business, an Owner must be on file.
@@ -115,6 +119,8 @@ model User {
   storageFeeDisputes      StorageFeeDispute[] @relation("DisputeFiledBy")
   storageFeeDisputesAdmin StorageFeeDispute[] @relation("DisputeResolvedBy")
   mailerThreads           MailerThread[]
+  suiteTransferRequests   SuiteTransferRequest[] @relation("TransferRequestedBy")
+  suiteTransfersDecided   SuiteTransferRequest[] @relation("TransferDecidedBy")
 }
 
 model SharedMailboxAccess {
@@ -250,6 +256,31 @@ model PickupAppointment {
 
   @@index([scheduledAt, status])
   @@index([userId, scheduledAt])
+}
+
+// iter-122 — Member self-service suite transfer.
+// Customer requests a swap to a vacant suite # (e.g. memorable number,
+// matches business name). Admin reviews + approves; on approval we
+// atomically update User.suiteNumber + audit. Status stays "Pending"
+// until decided so member sees a banner; after decision we keep the
+// row for the audit trail.
+model SuiteTransferRequest {
+  id            String    @id @default(cuid())
+  userId        String                       // member who filed
+  fromSuite     String                       // snapshot of current suite at file time
+  toSuite       String                       // requested target
+  reason        String                       // member's note
+  status        String    @default("Pending") // "Pending" | "Approved" | "Denied" | "Cancelled"
+  decidedAt     DateTime?
+  decidedById   String?                       // admin who approved/denied
+  decisionNote  String?
+  createdAt     DateTime  @default(now())
+
+  user      User  @relation("TransferRequestedBy", fields: [userId], references: [id], onDelete: Cascade)
+  decidedBy User? @relation("TransferDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([status, createdAt])
 }
 
 // iter-118 — Apple-Mail-style mailer with inbox + replies + notices.

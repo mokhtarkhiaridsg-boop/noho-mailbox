@@ -7,13 +7,13 @@ import {
   type PlanPrices,
 } from "@/app/actions/compliance";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
-const NOHO_GREEN = "#16A34A";
-const NOHO_RED = "#E70013";
-const NOHO_CREAM = "#F7E6C2";
+const NOHO_GREEN = "#22C55E";
+const NOHO_RED = "#FF3B30";
+const NOHO_CREAM = "#EBF2FF";
 
 type FieldDef = {
   key: keyof PlanPrices;
@@ -109,7 +109,7 @@ export function AdminPlanPricingCard() {
     <div
       className="rounded-md bg-white relative overflow-hidden"
       style={{
-        border: "1px solid #E5DACA",
+        border: "1px solid #ECEEF1",
       }}
     >
       {/* Branded header strip — Command Tower variant. */}
@@ -261,7 +261,7 @@ export function AdminPlanPricingCard() {
                 className="inline-flex items-center gap-2 px-4 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] transition-colors disabled:cursor-not-allowed"
                 style={{
                   background: isDirty ? NOHO_INK : `${NOHO_INK}11`,
-                  border: `1px solid ${isDirty ? NOHO_INK : "#E5DACA"}`,
+                  border: `1px solid ${isDirty ? NOHO_INK : "#ECEEF1"}`,
                   color: isDirty ? "#FFFFFF" : `${NOHO_INK}66`,
                 }}
               >

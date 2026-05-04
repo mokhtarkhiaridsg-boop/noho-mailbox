@@ -13,13 +13,16 @@ type Props = {
   customers: Customer[];
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_AMBER = "#F5A623";
-const NOHO_RED = "#E70013";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_GREEN = "#16A34A";
+// iPad-OS tokens — token names preserved so the existing 695-line render
+// tree still resolves; only the hex values change. Cream→soft-gray,
+// brown→near-black ink, blue→iOS-blue.
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
+const NOHO_AMBER = "#F59E0B";
+const NOHO_RED = "#FF3B30";
+const NOHO_CREAM = "#F4F5F7";
+const NOHO_GREEN = "#22C55E";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);

@@ -11,13 +11,13 @@ import {
   type VirtualMailboxPlan,
 } from "@/lib/virtual-mailbox-config";
 
-const INK = "#2D100F";
-const INK_SOFT = "#5C4540";
+const INK = "#1A1D23";
+const INK_SOFT = "#3B4252";
 const INK_FAINT = "#A89484";
 const BORDER = "#E8DDD0";
-const CREAM = "#F7E6C2";
-const BLUE = "#337485";
-const BLUE_DEEP = "#23596A";
+const CREAM = "#EBF2FF";
+const BLUE = "#1976FF";
+const BLUE_DEEP = "#0F5BD9";
 
 function fieldLabel(text: string) {
   return (
@@ -170,7 +170,7 @@ export default function AdminVirtualMailboxEditor() {
               type="checkbox"
               checked={cfg.enabled}
               onChange={(e) => update("enabled", e.target.checked)}
-              className="w-4 h-4 accent-[#2D100F]"
+              className="w-4 h-4 accent-[#1A1D23]"
             />
             Enabled
           </label>
@@ -234,7 +234,7 @@ export default function AdminVirtualMailboxEditor() {
                       type="checkbox"
                       checked={!!p.popular}
                       onChange={(e) => updatePlan(idx, { popular: e.target.checked })}
-                      className="w-3.5 h-3.5 accent-[#2D100F]"
+                      className="w-3.5 h-3.5 accent-[#1A1D23]"
                     />
                     Popular
                   </label>

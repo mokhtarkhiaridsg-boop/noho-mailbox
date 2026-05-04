@@ -25,18 +25,18 @@ import {
   deleteCustomerNote,
 } from "@/app/actions/customerOps";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 const KIND_META: Record<string, { label: string; bg: string; fg: string }> = {
   note:       { label: "Note",       bg: "rgba(245,166,35,0.18)", fg: "#92400e" },
-  call:       { label: "Call",       bg: "rgba(51,116,133,0.12)", fg: "#23596A" },
+  call:       { label: "Call",       bg: "rgba(51,116,133,0.12)", fg: "#0F5BD9" },
   visit:      { label: "Visit",      bg: "rgba(22,163,74,0.14)",  fg: "#15803d" },
   compliance: { label: "Compliance", bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" },
   billing:    { label: "Billing",    bg: "rgba(124,58,237,0.10)", fg: "#5b21b6" },
   issue:      { label: "Issue",      bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" },
-  system:     { label: "System",     bg: "rgba(45,16,15,0.06)",   fg: "#5C4540" },
+  system:     { label: "System",     bg: "rgba(45,16,15,0.06)",   fg: "#3B4252" },
 };
 
 type SelectedCustomer = { id: string; name: string; email: string; suiteNumber: string | null };

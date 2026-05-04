@@ -15,13 +15,13 @@ type Props = {
   customers: Customer[];
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
-const NOHO_RED = "#E70013";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_GREEN = "#16A34A";
+const NOHO_RED = "#FF3B30";
+const NOHO_CREAM = "#EBF2FF";
+const NOHO_GREEN = "#22C55E";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -37,7 +37,7 @@ function huesFor(seed: string): { from: string; to: string } {
     [NOHO_BLUE, NOHO_BLUE_DEEP],
     [NOHO_INK, "#1F0807"],
     ["#7C3AED", "#5B21B6"],
-    ["#B07030", "#8B5A24"],
+    ["#F59E0B", "#8B5A24"],
     [NOHO_GREEN, "#166534"],
     [NOHO_RED, "#991b1b"],
   ];
@@ -269,7 +269,7 @@ export function AdminChatPanel({ meId, customers }: Props) {
             style={{ borderBottom: `1px solid ${NOHO_INK}0d` }}
           >
             <div
-              className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all focus-within:ring-2 focus-within:ring-[#337485]/30"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all focus-within:ring-2 focus-within:ring-[#1976FF]/30"
               style={{
                 background: `${NOHO_CREAM}33`,
                 border: `1px solid ${NOHO_INK}11`,
@@ -356,9 +356,9 @@ export function AdminChatPanel({ meId, customers }: Props) {
                                 <div
                                   className="w-9 h-9 rounded-md flex items-center justify-center text-[11px] font-bold"
                                   style={{
-                                    background: "#F4EEE3",
+                                    background: "#F4F5F7",
                                     color: NOHO_INK,
-                                    border: "1px solid #E5DACA",
+                                    border: "1px solid #ECEEF1",
                                   }}
                                 >
                                   {initials(c.otherName)}
@@ -446,9 +446,9 @@ export function AdminChatPanel({ meId, customers }: Props) {
                               <div
                                 className="w-7 h-7 rounded-md flex items-center justify-center text-[9px] font-bold shrink-0"
                                 style={{
-                                  background: "#F4EEE3",
+                                  background: "#F4F5F7",
                                   color: NOHO_INK,
-                                  border: "1px solid #E5DACA",
+                                  border: "1px solid #ECEEF1",
                                 }}
                               >
                                 {initials(c.name)}

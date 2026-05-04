@@ -116,15 +116,19 @@ type Props = {
   churn30dCount?: number;
   churnAnnualizedPct?: number;
   forwardingByState?: Record<string, number>;
+  // Optional — when provided, the Mailbox Center renders quick-jump
+  // buttons for ID Expirations, CMRA Report, and Bulk Onboard so those
+  // related tools live one click away inside the same panel.
+  setTab?: (id: string) => void;
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_RED = "#E70013";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
+const NOHO_CREAM = "#EBF2FF";
+const NOHO_RED = "#FF3B30";
 
-type Mode = "renew" | "recent" | "keys" | "search";
+type Mode = "renew" | "recent" | "keys" | "search" | "notes";
 type TermKey = "term3" | "term6" | "term14";
 
 const TERMS: Array<{ value: 3 | 6 | 14; key: TermKey; label: string; sub: string }> = [
@@ -200,7 +204,7 @@ function readPersistedUI(): PersistedUI {
   }
 }
 
-export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = [], keys = [], walkInToday, mrrCents = 0, dormantCount = 0, planDistribution, tillWeek, churn30dCount = 0, churnAnnualizedPct = 0, forwardingByState }: Props) {
+export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = [], keys = [], walkInToday, mrrCents = 0, dormantCount = 0, planDistribution, tillWeek, churn30dCount = 0, churnAnnualizedPct = 0, forwardingByState, setTab }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   // Initial UI state hydrates from localStorage on mount via useEffect (below)
@@ -952,121 +956,162 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
   }
 
   return (
-    <div className="space-y-5">
-      {/* ─── NPC Hero ──────────────────────────────────────────── */}
-      <div
-        className="relative rounded-3xl overflow-hidden p-5 sm:p-7"
-        style={{
-          background: "radial-gradient(ellipse at top, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
-          boxShadow: "0 30px 80px rgba(10,18,24,0.45), inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
-        {/* Floor grid */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 pointer-events-none opacity-[0.18]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
-            maskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
-            transform: "perspective(800px) rotateX(58deg) translateY(20%) scale(1.4)",
-            transformOrigin: "center bottom",
-          }}
-        />
-        <div aria-hidden="true" className="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-15 blur-3xl pointer-events-none" style={{ background: NOHO_RED }} />
-        <div aria-hidden="true" className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none" style={{ background: NOHO_BLUE }} />
-
-        <div className="relative z-10">
-          <div className="flex items-start justify-between flex-wrap gap-3 mb-5">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.28em] mb-1" style={{ color: "rgba(247,230,194,0.6)" }}>
-                <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: NOHO_RED, boxShadow: `0 0 8px ${NOHO_RED}` }} />
-                MAILBOX OPERATIONS · LIVE
-              </p>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: NOHO_CREAM, fontFamily: "var(--font-baloo), sans-serif" }}>
-                Mailbox Center
-              </h2>
-              <p className="text-xs mt-1" style={{ color: "rgba(247,230,194,0.55)" }}>
-                Renew suites, send receipts, keep the lights on.
-              </p>
-            </div>
-            <div className="flex gap-3 flex-wrap">
-              <StatTile
-                label="Active"
-                value={customers.filter((c) => c.status === "Active").length}
-                suffix="customers"
-                onClick={() => { setMode("renew"); setStatusFilter("active"); }}
-                active={statusFilter === "active"}
-                title="Click to filter the picker to Active customers only"
-              />
-              <StatTile
-                label="At-Risk"
-                value={atRisk.total}
-                suffix={`${atRisk.overdue}od · ${atRisk.dueSoon}due · ${atRisk.suspended}sus`}
-                title={`${atRisk.overdue} overdue · ${atRisk.dueSoon} due soon · ${atRisk.suspended} suspended — click to filter`}
-                accent={atRisk.total > 0}
-                onClick={() => { setMode("renew"); setStatusFilter("atrisk"); }}
-                active={statusFilter === "atrisk"}
-              />
-              <StatTile
-                label="ID Expiry"
-                value={idExpiring.total}
-                suffix={idExpiring.expired > 0 ? `${idExpiring.expired} expired · ${idExpiring.expiring} 60d` : `${idExpiring.expiring} in 60d`}
-                accent={idExpiring.expired > 0}
-                title={
-                  idExpiring.total > 0
-                    ? `${idExpiring.expired} expired · ${idExpiring.expiring} expiring in 60d — click to surface`
-                    : "No customers with expiring IDs"
-                }
-                onClick={
-                  idExpiring.total > 0
-                    ? () => { setMode("search"); setSearch(""); setStatusFilter("all"); }
-                    : undefined
-                }
-              />
-              {walkInToday && (
-                <StatTile
-                  label="Today"
-                  value={walkInToday.paymentsToday}
-                  suffix={`$${(walkInToday.cashToday / 100).toFixed(0)}c · $${(walkInToday.cardToday / 100).toFixed(0)}cd · $${(walkInToday.squareToday / 100).toFixed(0)}sq`}
-                  title={`Today's payments — $${(walkInToday.cashToday / 100).toFixed(2)} cash · $${(walkInToday.cardToday / 100).toFixed(2)} card-on-file · $${(walkInToday.squareToday / 100).toFixed(2)} Square — click for recent renewals`}
-                  onClick={() => setMode("recent")}
-                />
-              )}
-              {mrrCents > 0 && (
-                <StatTile
-                  label="MRR"
-                  prefix="$"
-                  value={Math.round(mrrCents / 100)}
-                  suffix="recurring / month"
-                />
-              )}
-              {dormantCount > 0 && (
-                <StatTile
-                  label="Dormant"
-                  value={dormantCount}
-                  suffix="0 mail in 90d"
-                />
-              )}
-              {churn30dCount > 0 && (
-                <StatTile
-                  label="Churn 30d"
-                  value={churn30dCount}
-                  suffix={`~${churnAnnualizedPct}%/yr`}
-                  accent={churnAnnualizedPct > 30}
-                />
-              )}
-            </div>
-          </div>
-
-          <NpcScene
-            mode={hoveredMode ?? mode}
-            speech={speech}
-            onPick={setMode}
-            onHover={setHoveredMode}
-          />
+    <div className="flex flex-col h-full gap-3">
+      {/* ─── iPad-OS title row + sub-tool jump buttons ─────────────
+          Replaced the dark "command tower" hero (radial gradient + floor
+          grid + NPC scene) with a clean header row. The 3 jump buttons
+          fold ID Expirations / CMRA Report / Bulk Onboard into this hub. */}
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold" style={{ color: "#1A1D23", letterSpacing: "-0.01em" }}>
+            Mailbox Center
+          </h2>
+          <p className="text-[12px]" style={{ color: "#7A8290" }}>
+            Renew suites · attach customers · run today's payments.
+          </p>
         </div>
+        {setTab && (
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <SubToolButton
+              icon={(
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="M7 9 H11 M7 13 H10 M14 9 H17 M14 13 H17" />
+                </svg>
+              )}
+              label="ID Expirations"
+              count={idExpiring.total}
+              danger={idExpiring.expired > 0}
+              onClick={() => setTab("idexpiring")}
+            />
+            <SubToolButton
+              icon={(
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2 H6 a2 2 0 0 0 -2 2 v16 a2 2 0 0 0 2 2 h12 a2 2 0 0 0 2 -2 V8 z" />
+                  <path d="M14 2 v6 h6" />
+                  <path d="M9 13 H15 M9 17 H13" />
+                </svg>
+              )}
+              label="CMRA Report"
+              onClick={() => setTab("cmrareport")}
+            />
+            <SubToolButton
+              icon={(
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15 v4 a2 2 0 0 1 -2 2 H5 a2 2 0 0 1 -2 -2 v-4" />
+                  <path d="M7 10 L12 15 L17 10" />
+                  <path d="M12 15 V3" />
+                </svg>
+              )}
+              label="Bulk Onboard"
+              onClick={() => setTab("csvonboard")}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* ─── KPI strip ─── */}
+      <div className="shrink-0 flex flex-wrap gap-2.5">
+        <StatTile
+          label="Active"
+          value={customers.filter((c) => c.status === "Active").length}
+          suffix="customers"
+          onClick={() => { setMode("renew"); setStatusFilter("active"); }}
+          active={statusFilter === "active"}
+          title="Click to filter the picker to Active customers only"
+        />
+        <StatTile
+          label="At-Risk"
+          value={atRisk.total}
+          suffix={`${atRisk.overdue}od · ${atRisk.dueSoon}due · ${atRisk.suspended}sus`}
+          title={`${atRisk.overdue} overdue · ${atRisk.dueSoon} due soon · ${atRisk.suspended} suspended — click to filter`}
+          accent={atRisk.total > 0}
+          onClick={() => { setMode("renew"); setStatusFilter("atrisk"); }}
+          active={statusFilter === "atrisk"}
+        />
+        <StatTile
+          label="ID Expiry"
+          value={idExpiring.total}
+          suffix={idExpiring.expired > 0 ? `${idExpiring.expired} expired · ${idExpiring.expiring} 60d` : `${idExpiring.expiring} in 60d`}
+          accent={idExpiring.expired > 0}
+          title={
+            idExpiring.total > 0
+              ? `${idExpiring.expired} expired · ${idExpiring.expiring} expiring in 60d — click to surface`
+              : "No customers with expiring IDs"
+          }
+          onClick={
+            idExpiring.total > 0
+              ? () => { setMode("search"); setSearch(""); setStatusFilter("all"); }
+              : undefined
+          }
+        />
+        {walkInToday && (
+          <StatTile
+            label="Today"
+            value={walkInToday.paymentsToday}
+            suffix={`$${(walkInToday.cashToday / 100).toFixed(0)}c · $${(walkInToday.cardToday / 100).toFixed(0)}cd · $${(walkInToday.squareToday / 100).toFixed(0)}sq`}
+            title={`Today's payments — $${(walkInToday.cashToday / 100).toFixed(2)} cash · $${(walkInToday.cardToday / 100).toFixed(2)} card-on-file · $${(walkInToday.squareToday / 100).toFixed(2)} Square — click for recent renewals`}
+            onClick={() => setMode("recent")}
+          />
+        )}
+        {mrrCents > 0 && (
+          <StatTile
+            label="MRR"
+            prefix="$"
+            value={Math.round(mrrCents / 100)}
+            suffix="recurring / month"
+          />
+        )}
+        {dormantCount > 0 && (
+          <StatTile
+            label="Dormant"
+            value={dormantCount}
+            suffix="0 mail in 90d"
+          />
+        )}
+        {churn30dCount > 0 && (
+          <StatTile
+            label="Churn 30d"
+            value={churn30dCount}
+            suffix={`~${churnAnnualizedPct}%/yr`}
+            accent={churnAnnualizedPct > 30}
+          />
+        )}
+      </div>
+
+      {/* ─── Mode picker tabs (replaces NPC scene) ─── */}
+      <div className="shrink-0 flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-1">
+        {([
+          { id: "renew", label: "Renew" },
+          { id: "search", label: "Search" },
+          { id: "recent", label: "Recent" },
+          { id: "notes", label: "Notes" },
+          { id: "keys", label: "Keys" },
+        ] as const).map((m) => {
+          const active = mode === m.id;
+          return (
+            <button
+              key={m.id}
+              onClick={() => setMode(m.id)}
+              onMouseEnter={() => setHoveredMode(m.id)}
+              onMouseLeave={() => setHoveredMode(null)}
+              className="shrink-0 px-3.5 h-8 rounded-full text-[12px] font-medium transition-colors"
+              style={{
+                background: active ? "#EBF2FF" : "#FFFFFF",
+                color: active ? "#1976FF" : "#3B4252",
+                border: active ? "1px solid #1976FF" : "1px solid #ECEEF1",
+                fontWeight: active ? 600 : 500,
+              }}
+            >
+              {m.label}
+            </button>
+          );
+        })}
+        {speech && (
+          <span className="ml-2 self-center text-[11px]" style={{ color: "#7A8290" }}>
+            {speech}
+          </span>
+        )}
       </div>
 
       {/* Toast */}
@@ -1096,7 +1141,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
       {(mode === "renew" || mode === "search") && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Customer picker */}
-          <div className="lg:col-span-1 rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
+          <div className="lg:col-span-1 rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
             <div className="grid grid-cols-2 gap-2 mb-3">
               <button
                 onClick={() => setWalkInOpen(true)}
@@ -1114,7 +1159,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                 onClick={handleRunAutoRenewals}
                 disabled={autoRenewing}
                 className="flex items-center justify-center gap-1.5 px-2 h-9 rounded-md text-[11px] font-bold uppercase tracking-[0.10em] transition-colors disabled:opacity-50 disabled:cursor-wait whitespace-nowrap"
-                style={{ background: "#FFFFFF", color: NOHO_INK, border: "1px solid #E5DACA" }}
+                style={{ background: "#FFFFFF", color: NOHO_INK, border: "1px solid #ECEEF1" }}
                 title="Run renewals for everyone with auto-renew on whose plan is due"
               >
                 {autoRenewing && (
@@ -1128,7 +1173,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
               </button>
             </div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Customer</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Customer</p>
               <div className="flex gap-1">
                 {(["list", "grid"] as const).map((v) => {
                   const active = pickerView === v;
@@ -1139,7 +1184,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                       className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded transition-colors"
                       style={{
                         background: active ? NOHO_INK : "transparent",
-                        color: active ? NOHO_CREAM : "#7A6050",
+                        color: active ? NOHO_CREAM : "#7A8290",
                       }}
                       title={v === "grid" ? "Suite grid view" : "List view"}
                     >
@@ -1171,7 +1216,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                     className="flex-1 text-[10px] font-black uppercase tracking-wider px-2 py-1.5 rounded-lg transition-colors"
                     style={{
                       background: active ? NOHO_BLUE : "#FFF9F3",
-                      color: active ? "#fff" : "#7A6050",
+                      color: active ? "#fff" : "#7A8290",
                       border: active ? `1px solid ${NOHO_BLUE}` : "1px solid #E8DDD0",
                     }}
                   >
@@ -1190,7 +1235,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                 className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded"
                 style={{
                   background: bulkMode ? NOHO_RED : "transparent",
-                  color: bulkMode ? "#fff" : "#7A6050",
+                  color: bulkMode ? "#fff" : "#7A8290",
                   border: bulkMode ? "none" : "1px solid #E8DDD0",
                 }}
                 title="Multi-select to renew several customers in one batch"
@@ -1216,7 +1261,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             {pickerView === "list" ? (
               <ul className="space-y-1.5 max-h-[28rem] overflow-y-auto">
                 {filtered.length === 0 && (
-                  <li className="text-xs text-[#7A6050] italic px-2">No customers match.</li>
+                  <li className="text-xs text-[#7A8290] italic px-2">No customers match.</li>
                 )}
                 {filtered.map((c) => {
                   const sel = selectedCustomerId === c.id;
@@ -1242,7 +1287,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                         }}
                       >
                         {bulkMode && (
-                          <span className="mt-0.5 w-4 h-4 rounded shrink-0 flex items-center justify-center" style={{ background: checked ? NOHO_RED : "transparent", border: `1.5px solid ${checked ? NOHO_RED : "#7A6050"}` }}>
+                          <span className="mt-0.5 w-4 h-4 rounded shrink-0 flex items-center justify-center" style={{ background: checked ? NOHO_RED : "transparent", border: `1.5px solid ${checked ? NOHO_RED : "#7A8290"}` }}>
                             {checked && (
                               <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M2 6 L5 9 L10 3" />
@@ -1264,13 +1309,13 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                                       background: !bulkMode && sel ? "rgba(255,255,255,0.18)" :
                                         c.status === "Suspended" ? "rgba(231,0,19,0.12)" : "rgba(245,158,11,0.18)",
                                       color: !bulkMode && sel ? "#fff" :
-                                        c.status === "Suspended" ? "#b91c1c" : "#92400e",
+                                        c.status === "Suspended" ? "#EF4444" : "#92400e",
                                     }}>
                                 {c.status}
                               </span>
                             )}
                           </p>
-                          <p className="text-[11px] mt-0.5" style={{ color: !bulkMode && sel ? "rgba(255,255,255,0.7)" : "#7A6050" }}>
+                          <p className="text-[11px] mt-0.5" style={{ color: !bulkMode && sel ? "rgba(255,255,255,0.7)" : "#7A8290" }}>
                             {c.plan ?? "no plan"} · due {fmtDate(c.planDueDate)}
                           </p>
                         </div>
@@ -1283,7 +1328,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
               /* ─── Grid view: each tile is a suite ─── */
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 max-h-[28rem] overflow-y-auto">
                 {filtered.length === 0 && (
-                  <p className="col-span-full text-xs text-[#7A6050] italic px-2 py-4 text-center">No customers match.</p>
+                  <p className="col-span-full text-xs text-[#7A8290] italic px-2 py-4 text-center">No customers match.</p>
                 )}
                 {filtered.map((c) => {
                   const sel = selectedCustomerId === c.id;
@@ -1308,9 +1353,9 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                   const tones: Record<string, { bg: string; fg: string; dot: string }> = {
                     active:    { bg: "#EBF2FA",            fg: NOHO_BLUE,  dot: NOHO_BLUE },
                     duesoon:   { bg: "rgba(245,158,11,0.12)", fg: "#92400e", dot: "#F5A623" },
-                    overdue:   { bg: "rgba(231,0,19,0.10)",   fg: "#b91c1c", dot: NOHO_RED },
-                    suspended: { bg: "rgba(231,0,19,0.18)",   fg: "#b91c1c", dot: NOHO_RED },
-                    noplan:    { bg: "#FFF9F3",            fg: "#7A6050",  dot: "#D8C8B4" },
+                    overdue:   { bg: "rgba(231,0,19,0.10)",   fg: "#EF4444", dot: NOHO_RED },
+                    suspended: { bg: "rgba(231,0,19,0.18)",   fg: "#EF4444", dot: NOHO_RED },
+                    noplan:    { bg: "#FFF9F3",            fg: "#7A8290",  dot: "#D8C8B4" },
                   };
                   const tone = tones[statusTone];
                   const initials = c.name.split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
@@ -1331,7 +1376,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                       className="relative aspect-square rounded-xl flex flex-col items-center justify-center transition-transform hover:-translate-y-0.5"
                       style={{
                         background: bulkMode && checked ? "rgba(231,0,19,0.18)" : sel && !bulkMode ? NOHO_BLUE : tone.bg,
-                        color: bulkMode && checked ? "#b91c1c" : sel && !bulkMode ? "#fff" : tone.fg,
+                        color: bulkMode && checked ? "#EF4444" : sel && !bulkMode ? "#fff" : tone.fg,
                         border: `1.5px solid ${
                           bulkMode && checked ? NOHO_RED :
                           sel && !bulkMode ? NOHO_BLUE :
@@ -1358,10 +1403,10 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             {/* Bulk action footer */}
             {bulkMode && bulkSelected.size > 0 && (
               <div className="mt-3 rounded-xl p-3" style={{ background: "rgba(231,0,19,0.04)", border: "1px solid rgba(231,0,19,0.18)" }}>
-                <p className="text-[11px] font-bold mb-2" style={{ color: "#b91c1c" }}>
+                <p className="text-[11px] font-bold mb-2" style={{ color: "#EF4444" }}>
                   {bulkSelected.size} customer{bulkSelected.size === 1 ? "" : "s"} selected for bulk renewal
                 </p>
-                <p className="text-[10px] mb-2" style={{ color: "#7A6050" }}>
+                <p className="text-[10px] mb-2" style={{ color: "#7A8290" }}>
                   Each renewal uses the term + payment method below at the customer&apos;s standard plan price.
                 </p>
                 <button
@@ -1373,7 +1418,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                   {bulkProcessing ? `Processing ${bulkProgress.done}/${bulkProgress.total}…` : `Renew ${bulkSelected.size} customers · ${termMonths}mo · ${paymentMethod}`}
                 </button>
                 {bulkProgress.lastError && (
-                  <p className="text-[10px] mt-2" style={{ color: "#b91c1c" }}>
+                  <p className="text-[10px] mt-2" style={{ color: "#EF4444" }}>
                     Last error: {bulkProgress.lastError}
                   </p>
                 )}
@@ -1382,19 +1427,19 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
           </div>
 
           {/* Renewal form */}
-          <div className="lg:col-span-2 rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Renewal</p>
+          <div className="lg:col-span-2 rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Renewal</p>
             <h3 className="text-xl font-extrabold tracking-tight mt-1" style={{ color: NOHO_INK }}>
               {selected ? `${selected.name} · Suite #${selected.suiteNumber ?? "—"}` : "Pick a customer to begin"}
             </h3>
             {selected && (
-              <p className="text-xs mt-1" style={{ color: "#7A6050" }}>
+              <p className="text-xs mt-1" style={{ color: "#7A8290" }}>
                 Plan: <strong style={{ color: NOHO_INK }}>{selected.plan ?? "—"}</strong>
                 {" · "}Current due: <strong style={{ color: NOHO_INK }}>{fmtDate(selected.planDueDate)}</strong>
                 {selected.kycStatus && selected.kycStatus !== "Approved" && (
                   <>
                     {" · "}
-                    <span className="font-black" style={{ color: selected.kycStatus === "Rejected" ? "#b91c1c" : "#92400e" }}>
+                    <span className="font-black" style={{ color: selected.kycStatus === "Rejected" ? "#EF4444" : "#92400e" }}>
                       KYC: {selected.kycStatus}
                     </span>
                   </>
@@ -1410,7 +1455,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                 {typeof selected.mail90d === "number" && (
                   <>
                     {" · "}
-                    <span title="Mail items received in last 90 days" style={{ color: selected.mail90d === 0 ? "#b91c1c" : NOHO_INK }}>
+                    <span title="Mail items received in last 90 days" style={{ color: selected.mail90d === 0 ? "#EF4444" : NOHO_INK }}>
                       {selected.mail90d === 0 ? "Dormant — 0 mail in 90d" : `${selected.mail90d} mail in 90d`}
                     </span>
                   </>
@@ -1420,7 +1465,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
 
             {/* Plan picker — defaults to current plan, lets admin upgrade/downgrade in same flow */}
             <div className="mt-5">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">Plan</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">Plan</p>
               <div className="grid grid-cols-3 gap-2">
                 {planNames.map((name) => {
                   const active = (effectivePlan ?? selected?.plan) === name;
@@ -1451,7 +1496,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
 
             {/* Term picker */}
             <div className="mt-5">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">Term</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">Term</p>
               <div className="grid grid-cols-3 gap-2">
                 {TERMS.map((t) => {
                   const active = termMonths === t.value;
@@ -1469,7 +1514,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                       }}
                     >
                       <p className="text-base font-extrabold tracking-tight">{t.label}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: active ? "rgba(255,255,255,0.7)" : "#7A6050" }}>{t.sub}</p>
+                      <p className="text-[10px] mt-0.5" style={{ color: active ? "rgba(255,255,255,0.7)" : "#7A8290" }}>{t.sub}</p>
                     </button>
                   );
                 })}
@@ -1478,7 +1523,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
 
             {/* Payment method */}
             <div className="mt-5">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">Payment method</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">Payment method</p>
               <div className="grid grid-cols-3 gap-2">
                 {(["Square", "Cash", "CardOnFile"] as const).map((m) => {
                   const active = paymentMethod === m;
@@ -1504,7 +1549,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             {/* Price override */}
             <div className="mt-5">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Price</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Price</p>
                 <div className="flex gap-1">
                   {([
                     ["standard", standardPriceCents != null ? fmtMoney(standardPriceCents) : "Standard"],
@@ -1519,7 +1564,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                         className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg disabled:opacity-50 transition-colors"
                         style={{
                           background: active ? NOHO_INK : "#FFF9F3",
-                          color: active ? NOHO_CREAM : "#7A6050",
+                          color: active ? NOHO_CREAM : "#7A8290",
                           border: active ? `1px solid ${NOHO_INK}` : "1px solid #E8DDD0",
                         }}
                       >
@@ -1544,7 +1589,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                     style={{ background: "#FFF9F3", border: "1px solid #E8DDD0", color: NOHO_INK }}
                   />
                   {standardPriceCents != null && customPriceCents != null && (
-                    <span className="text-[10px] font-bold" style={{ color: customPriceCents < standardPriceCents ? "#16a34a" : customPriceCents > standardPriceCents ? "#92400e" : "#7A6050" }}>
+                    <span className="text-[10px] font-bold" style={{ color: customPriceCents < standardPriceCents ? "#22C55E" : customPriceCents > standardPriceCents ? "#92400e" : "#7A8290" }}>
                       {customPriceCents < standardPriceCents ? `−${fmtMoney(standardPriceCents - customPriceCents)}` :
                        customPriceCents > standardPriceCents ? `+${fmtMoney(customPriceCents - standardPriceCents)}` : "match"}
                     </span>
@@ -1572,7 +1617,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
 
             {/* Notes */}
             <div className="mt-5">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">Notes (internal)</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">Notes (internal)</p>
               <textarea
                 value={renewalNotes}
                 onChange={(e) => setRenewalNotes(e.target.value)}
@@ -1587,7 +1632,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             {/* Price preview + CTA */}
             <div className="mt-5 flex items-center justify-between gap-4 flex-wrap">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Total</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Total</p>
                 <p className="text-3xl font-extrabold tracking-tight" style={{ color: NOHO_BLUE }}>
                   {priceCents != null ? fmtMoney(priceCents) : "—"}
                 </p>
@@ -1620,7 +1665,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
       {(mode === "renew" || mode === "search") && selected && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Notes timeline */}
-          <div className="lg:col-span-2 rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
+          <div className="lg:col-span-2 rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>
                 Customer Log · {selected.name}
@@ -1642,7 +1687,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                       className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg transition-colors"
                       style={{
                         background: active ? NOHO_BLUE : "transparent",
-                        color: active ? "#fff" : "#7A6050",
+                        color: active ? "#fff" : "#7A8290",
                         border: active ? `1px solid ${NOHO_BLUE}` : "1px solid #E8DDD0",
                       }}
                     >
@@ -1675,7 +1720,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             {/* Timeline */}
             {customerNotes.length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-sm text-[#7A6050]">No notes yet for this customer.</p>
+                <p className="text-sm text-[#7A8290]">No notes yet for this customer.</p>
               </div>
             ) : (
               <ul className="space-y-2 max-h-80 overflow-y-auto">
@@ -1692,19 +1737,19 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                                   n.kind === "system"     ? "rgba(45,16,15,0.08)" :
                                                             "rgba(51,116,133,0.10)",
                                 color:
-                                  n.kind === "issue"      ? "#b91c1c" :
+                                  n.kind === "issue"      ? "#EF4444" :
                                   n.kind === "billing"    ? "#92400e" :
                                   n.kind === "compliance" ? NOHO_BLUE :
-                                  n.kind === "system"     ? "#7A6050" :
+                                  n.kind === "system"     ? "#7A8290" :
                                                             NOHO_BLUE,
                               }}>
                           {n.kind}
                         </span>
-                        {n.authorName && <span className="text-[10px] font-bold" style={{ color: "#7A6050" }}>{n.authorName}</span>}
+                        {n.authorName && <span className="text-[10px] font-bold" style={{ color: "#7A8290" }}>{n.authorName}</span>}
                         <span className="text-[10px]" style={{ color: "rgba(122,96,80,0.6)" }}>{n.createdAt}</span>
                       </div>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleTogglePin(n.id)} className="text-[10px] font-bold px-1.5 py-0.5 rounded hover:bg-[#337485]/10" style={{ color: n.pinned ? "#92400e" : NOHO_BLUE }}>
+                        <button onClick={() => handleTogglePin(n.id)} className="text-[10px] font-bold px-1.5 py-0.5 rounded hover:bg-[#1976FF]/10" style={{ color: n.pinned ? "#92400e" : NOHO_BLUE }}>
                           {n.pinned ? "Unpin" : "Pin"}
                         </button>
                         <button onClick={() => handleDeleteNote(n.id)} className="text-[10px] font-bold px-1.5 py-0.5 rounded hover:bg-red-50 text-red-600">
@@ -1722,14 +1767,14 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
           {/* Suite + Keys */}
           <div className="space-y-5">
             {/* Auto-renew toggle + wallet balance */}
-            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
+            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Auto-renew</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Auto-renew</p>
                 <button
                   onClick={handleToggleAutoRenew}
                   disabled={isPending}
                   className="relative w-11 h-6 rounded-full transition-colors disabled:opacity-50"
-                  style={{ background: selected.planAutoRenew ? "#16a34a" : "#E8DDD0" }}
+                  style={{ background: selected.planAutoRenew ? "#22C55E" : "#E8DDD0" }}
                   aria-label={selected.planAutoRenew ? "Disable auto-renew" : "Enable auto-renew"}
                   role="switch"
                   aria-checked={!!selected.planAutoRenew}
@@ -1741,8 +1786,8 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                 </button>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[11px]" style={{ color: "#7A6050" }}>
-                  Wallet: <strong style={{ color: (selected.walletBalanceCents ?? 0) > 0 ? NOHO_INK : "#b91c1c" }}>
+                <p className="text-[11px]" style={{ color: "#7A8290" }}>
+                  Wallet: <strong style={{ color: (selected.walletBalanceCents ?? 0) > 0 ? NOHO_INK : "#EF4444" }}>
                     ${((selected.walletBalanceCents ?? 0) / 100).toFixed(2)}
                   </strong>
                   {selected.planAutoRenew ? " · charges from wallet on due date" : " · admin renews manually"}
@@ -1758,7 +1803,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                 )}
               </div>
               {selected.planAutoRenew && (selected.walletBalanceCents ?? 0) === 0 && (
-                <p className="text-[10px] mt-1 font-bold" style={{ color: "#b91c1c" }}>
+                <p className="text-[10px] mt-1 font-bold" style={{ color: "#EF4444" }}>
                   Wallet at $0 — auto-renew will fail until topped up.
                 </p>
               )}
@@ -1775,9 +1820,9 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
               {walletHistOpen && (
                 <div className="mt-2 rounded-xl p-2 max-h-48 overflow-y-auto" style={{ background: "#FFF9F3", border: "1px solid #E8DDD0" }}>
                   {walletHistLoading ? (
-                    <p className="text-[10px] italic text-center py-2" style={{ color: "#7A6050" }}>Loading…</p>
+                    <p className="text-[10px] italic text-center py-2" style={{ color: "#7A8290" }}>Loading…</p>
                   ) : walletTxns.length === 0 ? (
-                    <p className="text-[10px] italic text-center py-2" style={{ color: "#7A6050" }}>No wallet activity yet.</p>
+                    <p className="text-[10px] italic text-center py-2" style={{ color: "#7A8290" }}>No wallet activity yet.</p>
                   ) : (
                     <ul className="space-y-1">
                       {walletTxns.map((t) => {
@@ -1792,13 +1837,13 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                                 }}>{t.kind}</span>
                                 {t.description}
                               </p>
-                              <p style={{ color: "#7A6050" }}>{t.createdAt as string}</p>
+                              <p style={{ color: "#7A8290" }}>{t.createdAt as string}</p>
                             </div>
                             <div className="text-right shrink-0">
                               <p className="font-black" style={{ color: credit ? "#15803d" : NOHO_INK }}>
                                 {credit ? "+" : ""}${(t.amountCents / 100).toFixed(2)}
                               </p>
-                              <p className="text-[8px]" style={{ color: "#7A6050" }}>bal ${(t.balanceAfterCents / 100).toFixed(2)}</p>
+                              <p className="text-[8px]" style={{ color: "#7A8290" }}>bal ${(t.balanceAfterCents / 100).toFixed(2)}</p>
                             </div>
                           </li>
                         );
@@ -1834,7 +1879,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                           className="text-[10px] font-black uppercase tracking-wider px-1.5 py-1.5 rounded transition-colors"
                           style={{
                             background: active ? (m === "Comp" ? "#92400e" : "#15803d") : "white",
-                            color: active ? "#fff" : "#7A6050",
+                            color: active ? "#fff" : "#7A8290",
                             border: active ? "none" : "1px solid #E8DDD0",
                           }}
                           title={m === "Comp" ? "Free credit (no money taken)" : `Paid via ${m}`}
@@ -1857,7 +1902,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                       onClick={() => { setTopUpOpen(false); setTopUpAmount(""); setTopUpReason(""); }}
                       disabled={isPending}
                       className="text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-50"
-                      style={{ color: "#7A6050" }}
+                      style={{ color: "#7A8290" }}
                     >
                       Cancel
                     </button>
@@ -1875,8 +1920,8 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             </div>
 
             {/* Suite reassign */}
-            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-1">Suite</p>
+            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-1">Suite</p>
               {!reassignOpen ? (
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-2xl font-extrabold tracking-tight" style={{ color: NOHO_BLUE }}>
@@ -1909,7 +1954,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                     style={{ background: "#FFF9F3", border: "1px solid #E8DDD0", color: NOHO_INK }}
                   />
                   <div className="flex gap-2 justify-end">
-                    <button onClick={() => setReassignOpen(false)} disabled={isPending} className="text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-50" style={{ color: "#7A6050" }}>
+                    <button onClick={() => setReassignOpen(false)} disabled={isPending} className="text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-50" style={{ color: "#7A8290" }}>
                       Cancel
                     </button>
                     <button onClick={handleReassignSuite} disabled={isPending || !newSuite.trim()} className="text-xs font-black px-3 py-1.5 rounded-lg text-white disabled:opacity-50" style={{ background: NOHO_BLUE }}>
@@ -1921,15 +1966,15 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             </div>
 
             {/* Keys */}
-            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
+            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Keys in hand</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Keys in hand</p>
                 <span className="text-[10px] font-black px-1.5 py-0.5 rounded" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>
                   {customerKeys.length}
                 </span>
               </div>
               {customerKeys.length === 0 ? (
-                <p className="text-xs text-[#7A6050] mb-3 italic">No keys issued yet.</p>
+                <p className="text-xs text-[#7A8290] mb-3 italic">No keys issued yet.</p>
               ) : (
                 <ul className="space-y-1.5 mb-3">
                   {customerKeys.map((k) => (
@@ -1939,7 +1984,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                         <button onClick={() => handleReturnKey(k.id)} disabled={isPending} className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded disabled:opacity-50" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>
                           Return
                         </button>
-                        <button onClick={() => handleMarkLost(k.id)} disabled={isPending} className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded disabled:opacity-50" style={{ background: "rgba(231,0,19,0.1)", color: "#b91c1c" }}>
+                        <button onClick={() => handleMarkLost(k.id)} disabled={isPending} className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded disabled:opacity-50" style={{ background: "rgba(231,0,19,0.1)", color: "#EF4444" }}>
                           Lost
                         </button>
                       </div>
@@ -1947,16 +1992,16 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                   ))}
                 </ul>
               )}
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-1">Available to issue</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-1">Available to issue</p>
               {availableKeysForSuite.length === 0 ? (
-                <p className="text-xs text-[#7A6050] italic">No keys in stock — add to inventory under Key Registry.</p>
+                <p className="text-xs text-[#7A8290] italic">No keys in stock — add to inventory under Key Registry.</p>
               ) : (
                 <ul className="space-y-1">
                   {availableKeysForSuite.slice(0, 5).map((k) => (
                     <li key={k.id} className="flex items-center justify-between gap-2 text-xs">
                       <span style={{ color: NOHO_INK }}>
                         <strong>{k.keyTag}</strong>
-                        <span className="ml-1 text-[10px]" style={{ color: "#7A6050" }}>
+                        <span className="ml-1 text-[10px]" style={{ color: "#7A8290" }}>
                           {k.suiteNumber === selected.suiteNumber ? "(matches suite)" : `suite ${k.suiteNumber}`}
                         </span>
                       </span>
@@ -1970,21 +2015,21 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             </div>
 
             {/* Security deposit */}
-            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
+            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
               <div className="flex items-center justify-between mb-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Security Deposit</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Security Deposit</p>
                 {!refundOpen && (selected.securityDepositCents ?? 0) > 0 && (
                   <button
                     onClick={() => { setRefundOpen(true); setRefundAmount(((selected.securityDepositCents ?? 0) / 100).toFixed(2)); }}
                     className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg"
-                    style={{ background: "rgba(231,0,19,0.08)", color: "#b91c1c" }}
+                    style={{ background: "rgba(231,0,19,0.08)", color: "#EF4444" }}
                     title="Refund all or part of the deposit"
                   >
                     Refund
                   </button>
                 )}
               </div>
-              <p className="text-2xl font-extrabold tracking-tight" style={{ color: (selected.securityDepositCents ?? 0) > 0 ? NOHO_INK : "#7A6050" }}>
+              <p className="text-2xl font-extrabold tracking-tight" style={{ color: (selected.securityDepositCents ?? 0) > 0 ? NOHO_INK : "#7A8290" }}>
                 {fmtMoney(selected.securityDepositCents ?? 0)}
               </p>
               {refundOpen && (
@@ -2013,7 +2058,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                           className="text-[10px] font-black uppercase tracking-wider px-2 py-1.5 rounded transition-colors"
                           style={{
                             background: active ? NOHO_INK : "white",
-                            color: active ? NOHO_CREAM : "#7A6050",
+                            color: active ? NOHO_CREAM : "#7A8290",
                             border: active ? `1px solid ${NOHO_INK}` : "1px solid #E8DDD0",
                           }}
                         >
@@ -2035,7 +2080,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                       onClick={() => { setRefundOpen(false); setRefundAmount(""); setRefundReason(""); }}
                       disabled={isPending}
                       className="text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-50"
-                      style={{ color: "#7A6050" }}
+                      style={{ color: "#7A8290" }}
                     >
                       Cancel
                     </button>
@@ -2043,7 +2088,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                       onClick={handleRefundDeposit}
                       disabled={isPending || !refundAmount}
                       className="text-xs font-black px-3 py-1.5 rounded-lg text-white disabled:opacity-50"
-                      style={{ background: "#b91c1c" }}
+                      style={{ background: "#EF4444" }}
                     >
                       Refund
                     </button>
@@ -2053,11 +2098,11 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
             </div>
 
             {/* Cancel + refund (terminate account) */}
-            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
-              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "#b91c1c" }}>Cancel Account</p>
+            <div className="rounded-md p-4" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "#EF4444" }}>Cancel Account</p>
               {!cancelOpen ? (
                 <>
-                  <p className="text-[11px] mt-1 mb-2" style={{ color: "#7A6050" }}>
+                  <p className="text-[11px] mt-1 mb-2" style={{ color: "#7A8290" }}>
                     {selected.mailboxStatus === "Cancelled" || selected.status === "Inactive"
                       ? "Customer is already cancelled."
                       : "Closes the box, disables auto-renew, optionally refunds remaining time."}
@@ -2070,7 +2115,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                     }}
                     disabled={selected.mailboxStatus === "Cancelled" || selected.status === "Inactive"}
                     className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg disabled:opacity-50"
-                    style={{ background: "rgba(231,0,19,0.08)", color: "#b91c1c", border: "1px solid rgba(231,0,19,0.18)" }}
+                    style={{ background: "rgba(231,0,19,0.08)", color: "#EF4444", border: "1px solid rgba(231,0,19,0.18)" }}
                   >
                     Cancel & refund
                   </button>
@@ -2078,7 +2123,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
               ) : (
                 <div className="space-y-2 mt-2 rounded-xl p-3" style={{ background: "rgba(231,0,19,0.04)", border: "1px solid rgba(231,0,19,0.18)" }}>
                   {cancelProrateCents > 0 && (
-                    <p className="text-[10px]" style={{ color: "#7A6050" }}>
+                    <p className="text-[10px]" style={{ color: "#7A8290" }}>
                       Suggested pro-rate: <strong style={{ color: NOHO_INK }}>${(cancelProrateCents / 100).toFixed(2)}</strong> (remaining months × monthly rate)
                     </p>
                   )}
@@ -2106,7 +2151,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                           className="text-[10px] font-black uppercase tracking-wider px-1.5 py-1.5 rounded transition-colors"
                           style={{
                             background: active ? NOHO_INK : "white",
-                            color: active ? NOHO_CREAM : "#7A6050",
+                            color: active ? NOHO_CREAM : "#7A8290",
                             border: active ? `1px solid ${NOHO_INK}` : "1px solid #E8DDD0",
                           }}
                         >
@@ -2128,7 +2173,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                       onClick={() => { setCancelOpen(false); setCancelRefundAmount(""); setCancelReason(""); }}
                       disabled={isPending}
                       className="text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-50"
-                      style={{ color: "#7A6050" }}
+                      style={{ color: "#7A8290" }}
                     >
                       Cancel
                     </button>
@@ -2136,7 +2181,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                       onClick={handleCancelCustomer}
                       disabled={isPending || !cancelReason.trim()}
                       className="text-xs font-black px-3 py-1.5 rounded-lg text-white disabled:opacity-50"
-                      style={{ background: "#b91c1c" }}
+                      style={{ background: "#EF4444" }}
                     >
                       Cancel account
                     </button>
@@ -2150,7 +2195,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
 
       {/* ─── Key Registry mode ─── */}
       {mode === "keys" && (
-        <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
+        <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>
               Key Registry
@@ -2166,7 +2211,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                       className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg transition-colors"
                       style={{
                         background: active ? NOHO_BLUE : "#FFF9F3",
-                        color: active ? "#fff" : "#7A6050",
+                        color: active ? "#fff" : "#7A8290",
                         border: active ? `1px solid ${NOHO_BLUE}` : "1px solid #E8DDD0",
                       }}
                     >
@@ -2216,8 +2261,8 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
 
           {filteredKeys.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-sm font-bold text-[#2D100F]/70">No keys match.</p>
-              <p className="text-xs text-[#2D100F]/50 mt-1">Add the first physical key to start the registry.</p>
+              <p className="text-sm font-bold text-[#1A1D23]/70">No keys match.</p>
+              <p className="text-xs text-[#1A1D23]/50 mt-1">Add the first physical key to start the registry.</p>
             </div>
           ) : (
             <ul className="divide-y divide-[#E8DDD0]">
@@ -2235,12 +2280,12 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                         <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
                               style={{
                                 background: issued ? "rgba(245,166,35,0.15)" : lost ? "rgba(231,0,19,0.12)" : "rgba(22,163,74,0.12)",
-                                color: issued ? "#92400e" : lost ? "#b91c1c" : "#15803d",
+                                color: issued ? "#92400e" : lost ? "#EF4444" : "#15803d",
                               }}>
                           {k.status}
                         </span>
                       </p>
-                      <p className="text-[11px] mt-0.5" style={{ color: "#7A6050" }}>
+                      <p className="text-[11px] mt-0.5" style={{ color: "#7A8290" }}>
                         {issued ? `Held by ${k.issuedToName ?? "(unknown)"} since ${k.issuedAt ?? "—"}` :
                          lost ? `Marked lost ${k.returnedAt ?? ""}` :
                          k.returnedAt ? `Returned ${k.returnedAt}` : "In stock"}
@@ -2252,7 +2297,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                           <button onClick={() => handleReturnKey(k.id)} disabled={isPending} className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded disabled:opacity-50" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>
                             Return
                           </button>
-                          <button onClick={() => handleMarkLost(k.id)} disabled={isPending} className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded disabled:opacity-50" style={{ background: "rgba(231,0,19,0.1)", color: "#b91c1c" }}>
+                          <button onClick={() => handleMarkLost(k.id)} disabled={isPending} className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded disabled:opacity-50" style={{ background: "rgba(231,0,19,0.1)", color: "#EF4444" }}>
                             Mark lost
                           </button>
                         </>
@@ -2267,7 +2312,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
       )}
 
       {(mode === "recent") && (
-        <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
+        <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>
               Recent Renewals
@@ -2283,8 +2328,8 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                 <path d="M6 18 L42 18" />
                 <path d="M14 4 L14 14 M34 4 L34 14" strokeLinecap="round" />
               </svg>
-              <p className="text-sm font-bold text-[#2D100F]/70">No renewals yet</p>
-              <p className="text-xs text-[#2D100F]/50 mt-1">Process your first renewal to start the audit log.</p>
+              <p className="text-sm font-bold text-[#1A1D23]/70">No renewals yet</p>
+              <p className="text-xs text-[#1A1D23]/50 mt-1">Process your first renewal to start the audit log.</p>
             </div>
           ) : (
             <ul className="divide-y divide-[#E8DDD0]">
@@ -2304,7 +2349,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                           {sent ? "Receipt sent" : "Receipt pending"}
                         </span>
                       </p>
-                      <p className="text-xs mt-0.5" style={{ color: "#7A6050" }}>
+                      <p className="text-xs mt-0.5" style={{ color: "#7A8290" }}>
                         {r.planAtRenewal} · {r.termMonths} mo · {fmtMoney(r.amountCents)} · {r.paymentMethod} · paid {r.paidAt} · new due {fmtDate(r.newPlanDueDate)}
                       </p>
                     </div>
@@ -2330,7 +2375,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                         onClick={() => handleVoidRenewal(r.id, `${r.userName} · ${r.termMonths}mo · ${fmtMoney(r.amountCents)}`)}
                         disabled={isPending}
                         className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 hover:bg-red-50"
-                        style={{ color: "#b91c1c", border: "1px solid rgba(231,0,19,0.2)" }}
+                        style={{ color: "#EF4444", border: "1px solid rgba(231,0,19,0.2)" }}
                         title="Void this renewal — refunds payment + reverts plan dates"
                       >
                         Void
@@ -2372,12 +2417,12 @@ function PlanDistributionCard({ distribution }: { distribution: Record<string, n
   const total = entries.reduce((s, [, n]) => s + n, 0);
   const colors: Record<string, string> = {
     Basic:    NOHO_BLUE,
-    Business: "#23596A",
+    Business: "#0F5BD9",
     Premium:  "#0E2340",
-    "(no plan)": "#7A6050",
+    "(no plan)": "#7A8290",
   };
   return (
-    <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
+    <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>Plan Distribution</h3>
         <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>
@@ -2387,12 +2432,12 @@ function PlanDistributionCard({ distribution }: { distribution: Record<string, n
       <ul className="space-y-3">
         {entries.map(([plan, count]) => {
           const pct = total > 0 ? (count / total) * 100 : 0;
-          const color = colors[plan] ?? "#7A6050";
+          const color = colors[plan] ?? "#7A8290";
           return (
             <li key={plan}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-black" style={{ color: NOHO_INK }}>{plan}</span>
-                <span className="text-xs font-bold" style={{ color: "#7A6050" }}>
+                <span className="text-xs font-bold" style={{ color: "#7A8290" }}>
                   {count} <span className="text-[10px] opacity-70">· {pct.toFixed(0)}%</span>
                 </span>
               </div>
@@ -2418,7 +2463,7 @@ function ForwardingMapCard({ byState }: { byState: Record<string, number> }) {
   const rest = entries.slice(8).reduce((s, [, n]) => s + n, 0);
   const max = top[0]?.[1] ?? 1;
   return (
-    <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
+    <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>Forwarding Reach</h3>
         <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>
@@ -2433,22 +2478,22 @@ function ForwardingMapCard({ byState }: { byState: Record<string, number> }) {
           return (
             <li key={state}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-black flex items-center gap-1.5" style={{ color: isUnknown ? "#7A6050" : NOHO_INK }}>
+                <span className="text-xs font-black flex items-center gap-1.5" style={{ color: isUnknown ? "#7A8290" : NOHO_INK }}>
                   {isUnknown ? "Unparseable" : state}
-                  {!isUnknown && <span className="text-[10px] font-normal" style={{ color: "#7A6050" }}>{stateName(state)}</span>}
+                  {!isUnknown && <span className="text-[10px] font-normal" style={{ color: "#7A8290" }}>{stateName(state)}</span>}
                 </span>
-                <span className="text-xs font-bold" style={{ color: "#7A6050" }}>
+                <span className="text-xs font-bold" style={{ color: "#7A8290" }}>
                   {count} <span className="text-[10px] opacity-70">· {pct.toFixed(0)}%</span>
                 </span>
               </div>
               <div className="h-2 rounded-full overflow-hidden" style={{ background: "#FFF9F3" }}>
-                <div className="h-full transition-all" style={{ width: `${wPct}%`, background: isUnknown ? "#7A6050" : NOHO_BLUE }} />
+                <div className="h-full transition-all" style={{ width: `${wPct}%`, background: isUnknown ? "#7A8290" : NOHO_BLUE }} />
               </div>
             </li>
           );
         })}
         {rest > 0 && (
-          <li className="text-[11px] italic" style={{ color: "#7A6050" }}>+ {rest} addresses across {entries.length - 8} more states</li>
+          <li className="text-[11px] italic" style={{ color: "#7A8290" }}>+ {rest} addresses across {entries.length - 8} more states</li>
         )}
       </ul>
     </div>
@@ -2484,7 +2529,7 @@ function TillCard({
   const fmt = (cents: number) => `$${(cents / 100).toFixed(2)}`;
   const pctOf = (cents: number) => (week.completedCents > 0 ? (cents / week.completedCents) * 100 : 0);
   return (
-    <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #E5DACA" }}>
+    <div className="rounded-md p-4 sm:p-5" style={{ background: "#FFFFFF", border: "1px solid #ECEEF1" }}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-extrabold tracking-tight" style={{ color: NOHO_INK }}>Cash Till</h3>
         <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(51,116,133,0.1)", color: NOHO_BLUE }}>
@@ -2494,31 +2539,31 @@ function TillCard({
 
       {/* Today summary */}
       <div className="mb-4 rounded-xl p-3" style={{ background: "#FFF9F3", border: "1px solid #E8DDD0" }}>
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Today</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Today</p>
         <p className="text-2xl font-extrabold tracking-tight" style={{ color: NOHO_INK }}>
           {fmt(todayTotal)}
         </p>
         {today && today.paymentsToday > 0 && (
-          <p className="text-[11px] mt-0.5" style={{ color: "#7A6050" }}>
+          <p className="text-[11px] mt-0.5" style={{ color: "#7A8290" }}>
             {today.paymentsToday} payment{today.paymentsToday === 1 ? "" : "s"} · cash {fmt(today.cashToday)} · card {fmt(today.cardToday)} · sq {fmt(today.squareToday)}
           </p>
         )}
         {(!today || today.paymentsToday === 0) && (
-          <p className="text-[11px] mt-0.5" style={{ color: "#7A6050" }}>No payments yet today</p>
+          <p className="text-[11px] mt-0.5" style={{ color: "#7A8290" }}>No payments yet today</p>
         )}
       </div>
 
       {/* 7-day breakdown */}
       <div className="space-y-2.5">
         {[
-          { label: "Cash",   cents: week.cashCents,   tone: "#16a34a" },
+          { label: "Cash",   cents: week.cashCents,   tone: "#22C55E" },
           { label: "Card",   cents: week.cardCents,   tone: NOHO_BLUE },
           { label: "Square", cents: week.squareCents, tone: "#0E2340" },
         ].map((row) => (
           <div key={row.label}>
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-black" style={{ color: NOHO_INK }}>{row.label}</span>
-              <span className="text-xs font-bold" style={{ color: "#7A6050" }}>
+              <span className="text-xs font-bold" style={{ color: "#7A8290" }}>
                 {fmt(row.cents)} <span className="text-[10px] opacity-70">· {pctOf(row.cents).toFixed(0)}%</span>
               </span>
             </div>
@@ -2531,19 +2576,66 @@ function TillCard({
 
       <div className="mt-4 pt-3 border-t flex items-center justify-between" style={{ borderColor: "#E8DDD0" }}>
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">7-day net</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">7-day net</p>
           <p className="text-lg font-extrabold tracking-tight" style={{ color: NOHO_INK }}>
             {fmt(week.completedCents - week.refundedCents)}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-[10px]" style={{ color: "#7A6050" }}>{week.count} sales</p>
+          <p className="text-[10px]" style={{ color: "#7A8290" }}>{week.count} sales</p>
           {week.refundCount > 0 && (
-            <p className="text-[10px]" style={{ color: "#b91c1c" }}>{week.refundCount} refund{week.refundCount === 1 ? "" : "s"} · −{fmt(week.refundedCents)}</p>
+            <p className="text-[10px]" style={{ color: "#EF4444" }}>{week.refundCount} refund{week.refundCount === 1 ? "" : "s"} · −{fmt(week.refundedCents)}</p>
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+// SubToolButton — iPad-OS-style pill that jumps to a sibling admin tab.
+// Rendered at the top of Mailbox Center for ID Expirations / CMRA Report
+// / Bulk Onboard so those workflows feel like sub-tools, not separate
+// destinations.
+function SubToolButton({
+  icon,
+  label,
+  count,
+  danger,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  count?: number;
+  danger?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full text-[12px] font-medium transition-colors"
+      style={{
+        background: "#FFFFFF",
+        color: "#3B4252",
+        border: "1px solid #ECEEF1",
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F7"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; }}
+    >
+      <span style={{ color: "#1976FF" }}>{icon}</span>
+      <span>{label}</span>
+      {typeof count === "number" && count > 0 && (
+        <span
+          className="text-[10px] font-semibold px-1.5 min-w-[16px] h-4 rounded-full inline-flex items-center justify-center"
+          style={{
+            background: danger ? "#FF3B30" : "#1976FF",
+            color: "#FFFFFF",
+          }}
+        >
+          {count}
+        </span>
+      )}
+    </button>
   );
 }
 
@@ -2577,17 +2669,19 @@ function StatTile({
   const animated = useAnimatedCount(value);
   const Tag = onClick ? "button" : "div";
 
-  // Premium look: glassy frosted bg, subtle gradient, 1px highlight on top,
-  // hover lift, urgent (accent) tiles get a pulsing dot indicator.
-  const baseBg = accent
-    ? "linear-gradient(135deg, rgba(231,0,19,0.22) 0%, rgba(231,0,19,0.10) 100%)"
-    : "linear-gradient(135deg, rgba(247,230,194,0.12) 0%, rgba(247,230,194,0.04) 100%)";
-  const baseBorder = accent ? "rgba(231,0,19,0.42)" : "rgba(247,230,194,0.20)";
-  const ring = active
-    ? `0 0 0 2px ${accent ? "rgba(231,0,19,0.55)" : "rgba(247,230,194,0.55)"}, 0 8px 24px rgba(0,0,0,0.35)`
+  // iPad-OS look: white surface, hairline border, ink text. Accent (red)
+  // tiles flag urgency with a soft red pulse dot.
+  const baseBg = "#FFFFFF";
+  const baseBorder = active
+    ? "#1976FF"
     : accent
-    ? "0 6px 18px rgba(231,0,19,0.18), inset 0 1px 0 rgba(255,255,255,0.05)"
-    : "0 4px 14px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.04)";
+    ? "rgba(255,59,48,0.40)"
+    : "#ECEEF1";
+  const ring = active
+    ? "0 0 0 2px rgba(25,118,255,0.20), 0 1px 2px rgba(0,0,0,0.04)"
+    : accent
+    ? "0 1px 2px rgba(255,59,48,0.06), 0 4px 12px rgba(255,59,48,0.06)"
+    : "0 1px 2px rgba(0,0,0,0.04)";
 
   return (
     <Tag
@@ -2599,7 +2693,6 @@ function StatTile({
         "relative overflow-hidden rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 min-w-[92px] sm:min-w-[116px]",
         "transition-all duration-200 ease-out",
         onClick ? "text-left cursor-pointer hover:-translate-y-0.5 active:translate-y-0" : "",
-        "backdrop-blur-sm",
       ].join(" ")}
       style={{
         background: baseBg,
@@ -2608,45 +2701,36 @@ function StatTile({
       }}
       title={title}
     >
-      {/* Top inner highlight — gives the glass a faint top edge */}
-      <span
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-px pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(255,255,255,0.20) 40%, rgba(255,255,255,0.20) 60%, transparent)",
-        }}
-      />
       {/* Pulsing dot for urgency tiles */}
       {accent && value > 0 && (
         <span
           aria-hidden
           className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full"
           style={{
-            background: "#FFB4BB",
-            boxShadow: "0 0 8px rgba(255,180,187,0.9)",
+            background: "#FF3B30",
+            boxShadow: "0 0 8px rgba(255,59,48,0.7)",
             animation: "stat-pulse 1.8s ease-in-out infinite",
           }}
         />
       )}
       <p
         aria-hidden
-        className="text-[9px] font-black uppercase tracking-[0.18em]"
-        style={{ color: accent ? "rgba(255,180,187,0.85)" : "rgba(247,230,194,0.7)" }}
+        className="text-[9px] font-bold uppercase tracking-[0.10em]"
+        style={{ color: accent ? "#FF3B30" : "#7A8290" }}
       >
         {label}
       </p>
       <p
         aria-hidden
         className="text-2xl font-extrabold tracking-tight tabular-nums"
-        style={{ color: accent ? "#FFB4BB" : NOHO_CREAM }}
+        style={{ color: accent ? "#FF3B30" : "#1A1D23" }}
       >
         {prefix ?? ""}{animated.toLocaleString("en-US")}
       </p>
       <p
         aria-hidden
-        className="text-[9px]"
-        style={{ color: accent ? "rgba(255,180,187,0.6)" : "rgba(247,230,194,0.5)" }}
+        className="text-[10px]"
+        style={{ color: "#7A8290" }}
       >
         {suffix}
       </p>

@@ -15,8 +15,8 @@
 import { useMemo } from "react";
 import type { POSCatalogEntry } from "@/lib/pos";
 
-const CREAM = "#F7E6C2";
-const BROWN = "#2D100F";
+const CREAM = "#EBF2FF";
+const BROWN = "#1A1D23";
 
 type Props = {
   slots: string[];

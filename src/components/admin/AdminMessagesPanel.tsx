@@ -23,7 +23,7 @@ const SERVICE_LABELS: Record<string, { label: string; color: string; bg: string 
   },
   mailbox: {
     label: "Mailbox",
-    color: "#337485",
+    color: "#1976FF",
     bg: "rgba(51,116,133,0.12)",
   },
   notary: {
@@ -33,49 +33,49 @@ const SERVICE_LABELS: Record<string, { label: string; color: string; bg: string 
   },
   business: {
     label: "Business Bundle",
-    color: "#B07030",
+    color: "#F59E0B",
     bg: "rgba(176,112,48,0.18)",
   },
   formation: {
     label: "Formation Only",
-    color: "#B07030",
+    color: "#F59E0B",
     bg: "rgba(176,112,48,0.12)",
   },
   branding: {
     label: "Branding",
-    color: "#B07030",
+    color: "#F59E0B",
     bg: "rgba(176,112,48,0.12)",
   },
   "brand-mgmt": {
     label: "Brand Mgmt",
-    color: "#B07030",
+    color: "#F59E0B",
     bg: "rgba(176,112,48,0.12)",
   },
   website: {
     label: "Website",
-    color: "#B07030",
+    color: "#F59E0B",
     bg: "rgba(176,112,48,0.12)",
   },
   social: {
     label: "Social Media",
-    color: "#B07030",
+    color: "#F59E0B",
     bg: "rgba(176,112,48,0.12)",
   },
   print: {
     label: "Print",
-    color: "#B07030",
+    color: "#F59E0B",
     bg: "rgba(176,112,48,0.12)",
   },
   other: {
     label: "Other",
-    color: "#7A6050",
+    color: "#7A8290",
     bg: "rgba(122,96,80,0.12)",
   },
 };
 
 function getServiceMeta(s: string | null | undefined) {
-  if (!s) return { label: "General", color: "#7A6050", bg: "rgba(122,96,80,0.12)" };
-  return SERVICE_LABELS[s] ?? { label: s, color: "#7A6050", bg: "rgba(122,96,80,0.12)" };
+  if (!s) return { label: "General", color: "#7A8290", bg: "rgba(122,96,80,0.12)" };
+  return SERVICE_LABELS[s] ?? { label: s, color: "#7A8290", bg: "rgba(122,96,80,0.12)" };
 }
 
 function ThreadReply({
@@ -117,8 +117,8 @@ function ThreadReply({
         onClick={send}
         className="text-[11px] font-bold uppercase tracking-[0.10em] px-3 h-9 rounded-md text-white disabled:opacity-50 transition-colors"
         style={{
-          background: "#2D100F",
-          border: "1px solid #2D100F",
+          background: "#1A1D23",
+          border: "1px solid #1A1D23",
           whiteSpace: "nowrap",
         }}
       >
@@ -211,9 +211,9 @@ export function AdminMessagesPanel({
           onClick={() => setServiceFilter("all")}
           className="text-xs font-bold px-3 py-1.5 rounded-full transition-all"
           style={{
-            background: serviceFilter === "all" ? "#337485" : "#FFFFFF",
-            color: serviceFilter === "all" ? "#FFFFFF" : "#1A1614",
-            border: "1px solid #1A161426",
+            background: serviceFilter === "all" ? "#1976FF" : "#FFFFFF",
+            color: serviceFilter === "all" ? "#FFFFFF" : "#1A1D23",
+            border: "1px solid #1A1D2326",
           }}
         >
           All ({counts.all ?? 0})
@@ -229,7 +229,7 @@ export function AdminMessagesPanel({
               style={{
                 background: active ? meta.color : meta.bg,
                 color: active ? "#FFFFFF" : meta.color,
-                border: active ? "1px solid transparent" : "1px solid #1A161426",
+                border: active ? "1px solid transparent" : "1px solid #1A1D2326",
               }}
             >
               {meta.label} ({counts[s] ?? 0})
@@ -253,7 +253,7 @@ export function AdminMessagesPanel({
           <h3 className="font-black text-sm uppercase tracking-wide text-text-light">
             Contact Form Submissions
           </h3>
-          <span className="text-xs font-bold text-[#1A1614]/50">
+          <span className="text-xs font-bold text-[#1A1D23]/50">
             {filtered.length} shown
           </span>
         </div>
@@ -288,7 +288,7 @@ export function AdminMessagesPanel({
                         </span>
                       </div>
                       <p className="text-xs text-text-light/50">
-                        <a href={`mailto:${c.email}`} className="hover:text-[#337485]">
+                        <a href={`mailto:${c.email}`} className="hover:text-[#1976FF]">
                           {c.email}
                         </a>
                         {" · "}
@@ -308,9 +308,9 @@ export function AdminMessagesPanel({
                         href={`mailto:${c.email}?subject=Re: Your NOHO Mailbox inquiry`}
                         className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md text-center inline-flex items-center justify-center transition-colors"
                         style={{
-                          background: "#2D100F",
+                          background: "#1A1D23",
                           color: "#FFFFFF",
-                          border: "1px solid #2D100F",
+                          border: "1px solid #1A1D23",
                           whiteSpace: "nowrap",
                         }}
                       >
@@ -322,8 +322,8 @@ export function AdminMessagesPanel({
                           className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md text-center inline-flex items-center justify-center transition-colors"
                           style={{
                             background: "#FFFFFF",
-                            color: "#16a34a",
-                            border: "1px solid #16a34a40",
+                            color: "#22C55E",
+                            border: "1px solid #22C55E40",
                             whiteSpace: "nowrap",
                           }}
                         >
@@ -388,7 +388,7 @@ export function AdminMessagesPanel({
                           {t.subject}
                         </p>
                         {unread && (
-                          <span className="w-2 h-2 rounded-full bg-[#337485] shrink-0" />
+                          <span className="w-2 h-2 rounded-full bg-[#1976FF] shrink-0" />
                         )}
                       </div>
                       <p className="text-xs text-text-light/50 mt-0.5 truncate">

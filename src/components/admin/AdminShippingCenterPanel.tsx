@@ -35,11 +35,11 @@ type Props = {
   labelOrders: LabelOrderRow[];
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_RED = "#E70013";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
+const NOHO_CREAM = "#EBF2FF";
+const NOHO_RED = "#FF3B30";
 
 const SUBVIEWS: Array<{
   id: SubviewId;
@@ -297,7 +297,7 @@ export function AdminShippingCenterPanel({
       <button
         type="button"
         onClick={() => setHelpOpen(true)}
-        className="fixed bottom-20 right-5 z-40 hidden md:flex items-center gap-1.5 px-3 h-8 rounded-md text-[11px] font-bold bg-white border border-[#E5DACA] text-[#2D100F] hover:bg-[#F4EEE3] hover:border-[#2D100F] transition-colors"
+        className="fixed bottom-20 right-5 z-40 hidden md:flex items-center gap-1.5 px-3 h-8 rounded-md text-[11px] font-bold bg-white border border-[#ECEEF1] text-[#1A1D23] hover:bg-[#F4F5F7] hover:border-[#1A1D23] transition-colors"
         style={{ boxShadow: "0 4px 12px rgba(26,23,20,0.10)" }}
         title="Keyboard shortcuts (?)"
         aria-label="Show keyboard shortcuts"
@@ -455,9 +455,9 @@ function HealthCard({
 
 function SeverityDot({ severity, pulse }: { severity: "ok" | "warn" | "fail"; pulse?: boolean }) {
   const map = {
-    ok: { bg: "#16a34a", glow: "rgba(22,163,74,0.45)" },
+    ok: { bg: "#22C55E", glow: "rgba(22,163,74,0.45)" },
     warn: { bg: "#F5A623", glow: "rgba(245,166,35,0.45)" },
-    fail: { bg: "#E70013", glow: "rgba(231,0,19,0.55)" },
+    fail: { bg: "#FF3B30", glow: "rgba(231,0,19,0.55)" },
   };
   const c = map[severity];
   return (
@@ -525,13 +525,13 @@ function ShortcutHelpOverlay({ onClose }: { onClose: () => void }) {
           style={{ background: "linear-gradient(180deg, #FAF6F0, #fff)", borderBottom: `1px solid rgba(45,16,15,0.10)` }}
         >
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#337485]">MailOS</p>
-            <p className="text-sm font-black text-[#2D100F]">Keyboard shortcuts</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1976FF]">MailOS</p>
+            <p className="text-sm font-black text-[#1A1D23]">Keyboard shortcuts</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-[11px] font-bold px-2 py-1 rounded-lg border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8]"
+            className="text-[11px] font-bold px-2 py-1 rounded-lg border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8]"
             aria-label="Close"
           >
             Esc
@@ -541,11 +541,11 @@ function ShortcutHelpOverlay({ onClose }: { onClose: () => void }) {
         <div className="px-4 py-3 space-y-3">
           {sections.map((sec) => (
             <div key={sec.title}>
-              <p className="text-[9.5px] font-black uppercase tracking-wider text-[#2D100F]/45 mb-1.5">{sec.title}</p>
+              <p className="text-[9.5px] font-black uppercase tracking-wider text-[#1A1D23]/45 mb-1.5">{sec.title}</p>
               <ul className="space-y-1">
                 {sec.rows.map((r) => (
                   <li key={r.key + r.what} className="flex items-center justify-between gap-3 text-[12px]">
-                    <span className="text-[#2D100F]/80 min-w-0 flex-1">{r.what}</span>
+                    <span className="text-[#1A1D23]/80 min-w-0 flex-1">{r.what}</span>
                     <kbd
                       className="shrink-0 text-[10.5px] font-black px-2 py-0.5 rounded"
                       style={{
@@ -564,7 +564,7 @@ function ShortcutHelpOverlay({ onClose }: { onClose: () => void }) {
           ))}
         </div>
 
-        <div className="px-4 py-2.5 text-[10.5px] text-[#2D100F]/50 border-t border-[#e8e5e0]">
+        <div className="px-4 py-2.5 text-[10.5px] text-[#1A1D23]/50 border-t border-[#e8e5e0]">
           Tip: every Shipping Center search input is `/`-jumpable.
         </div>
       </div>
@@ -580,8 +580,8 @@ function ShortcutHelpOverlay({ onClose }: { onClose: () => void }) {
 // underneath. Renders inline in the hero header so admin sees the day's
 // channel mix at a glance.
 const CARRIER_MIX_COLOR: Record<string, string> = {
-  quickship: "#337485", // generic / FedEx fallback
-  prepaid: "#23596A",
+  quickship: "#1976FF", // generic / FedEx fallback
+  prepaid: "#0F5BD9",
   ups: "#6B3F1A",
   stamps: "#2D5BA8", // USPS via Stamps.com
   dhl: "#FFCC00",
@@ -626,7 +626,7 @@ function CarrierTodayMix({ counts, total }: { counts: Map<SubviewId, number>; to
           >
             <span className="inline-block w-1.5 h-1.5 rounded-sm" style={{ background: CARRIER_MIX_COLOR[id] ?? NOHO_BLUE }} />
             {CARRIER_MIX_LABEL[id] ?? id}
-            <span className="text-[#F7E6C2] font-black">·{n}</span>
+            <span className="text-[#EBF2FF] font-black">·{n}</span>
           </span>
         ))}
       </div>
@@ -902,7 +902,7 @@ function FleetScene({
   }> = [
     { id: "quickship", x: 140, y: 80,  label: "QUICK SHIP", color: NOHO_BLUE },
     { id: "prepaid",   x: 140, y: 180, label: "PRE-PAID",   color: NOHO_BLUE_DEEP },
-    { id: "scan",      x: 140, y: 280, label: "SCAN INBOUND", color: "#16A34A" },
+    { id: "scan",      x: 140, y: 280, label: "SCAN INBOUND", color: "#22C55E" },
     { id: "ups",       x: 660, y: 90,  label: "UPS",        color: "#6B3F1A" },
     { id: "stamps",    x: 660, y: 200, label: "STAMPS.COM", color: NOHO_BLUE },
     { id: "dhl",       x: 660, y: 290, label: "DHL",        color: "#FFCC00" },

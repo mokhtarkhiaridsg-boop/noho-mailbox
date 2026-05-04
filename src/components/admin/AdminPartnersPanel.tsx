@@ -59,26 +59,26 @@ const CATEGORIES = [
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-[#fbbf24]/15 text-[#92400e]",
-  active: "bg-[#16a34a]/15 text-[#15803d]",
-  paused: "bg-[#1A1614]/10 text-[#1A1614]/60",
+  active: "bg-[#22C55E]/15 text-[#15803d]",
+  paused: "bg-[#1A1D23]/10 text-[#1A1D23]/60",
   terminated: "bg-red-100 text-red-700",
 };
 
 const COMMISSION_STATUS_COLORS: Record<string, string> = {
   lead: "bg-[#fbbf24]/15 text-[#92400e]",
-  quoted: "bg-[#337485]/15 text-[#337485]",
-  closed: "bg-[#16a34a]/15 text-[#15803d]",
-  cancelled: "bg-[#1A1614]/10 text-[#1A1614]/60",
+  quoted: "bg-[#1976FF]/15 text-[#1976FF]",
+  closed: "bg-[#22C55E]/15 text-[#15803d]",
+  cancelled: "bg-[#1A1D23]/10 text-[#1A1D23]/60",
   paid: "bg-[#7c3aed]/15 text-[#5b21b6]",
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
-const NOHO_RED = "#E70013";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_GREEN = "#16A34A";
+const NOHO_RED = "#FF3B30";
+const NOHO_CREAM = "#EBF2FF";
+const NOHO_GREEN = "#22C55E";
 
 function dollars(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
@@ -102,7 +102,7 @@ function huesFor(seed: string): { from: string; to: string } {
     [NOHO_BLUE, NOHO_BLUE_DEEP],
     [NOHO_INK, "#1F0807"],
     ["#7C3AED", "#5B21B6"],
-    ["#B07030", "#8B5A24"],
+    ["#F59E0B", "#8B5A24"],
     [NOHO_GREEN, "#166534"],
     [NOHO_RED, "#991b1b"],
   ];
@@ -347,40 +347,40 @@ export function AdminPartnersPanel({ partners }: Props) {
         <form
           action={handleAdd}
           className="rounded-md bg-white p-5 space-y-3"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
-          <h3 className="font-black text-sm text-[#1A1614]">Add Partner</h3>
+          <h3 className="font-black text-sm text-[#1A1D23]">Add Partner</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <input
               name="businessName"
               required
               placeholder="Business name (e.g. Roland Fink, CPA)"
-              className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm"
+              className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm"
             />
             <input
               name="contactName"
               required
               placeholder="Contact name"
-              className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm"
+              className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm"
             />
             <input
               name="email"
               type="email"
               required
               placeholder="Email"
-              className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm"
+              className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm"
             />
             <input
               name="phone"
               type="tel"
               placeholder="Phone (optional)"
-              className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm"
+              className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm"
             />
             <select
               name="category"
               required
               defaultValue=""
-              className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm"
+              className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm"
             >
               <option value="" disabled>Pick category</option>
               {CATEGORIES.map((c) => (
@@ -397,33 +397,33 @@ export function AdminPartnersPanel({ partners }: Props) {
               max="1"
               defaultValue="0.15"
               placeholder="Commission rate (e.g. 0.15 for 15%)"
-              className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm"
+              className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm"
             />
           </div>
           <textarea
             name="notes"
             rows={2}
             placeholder="Notes (optional)"
-            className="w-full px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm resize-none"
+            className="w-full px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm resize-none"
           />
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={isPending}
-              className="px-4 py-2 rounded-xl text-xs font-black bg-[#16a34a] text-white hover:bg-[#15803d] disabled:opacity-50"
+              className="px-4 py-2 rounded-xl text-xs font-black bg-[#22C55E] text-white hover:bg-[#15803d] disabled:opacity-50"
             >
               ✓ Create
             </button>
             <button
               type="button"
               onClick={() => setShowAdd(false)}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-[#1A1614]/70 hover:bg-[#1A1614]/5"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-[#1A1D23]/70 hover:bg-[#1A1D23]/5"
             >
               Cancel
             </button>
           </div>
           {feedback?.id === "__add" && (
-            <div className="text-xs font-bold text-[#337485] bg-[#337485]/8 px-3 py-2 rounded-lg">
+            <div className="text-xs font-bold text-[#1976FF] bg-[#1976FF]/8 px-3 py-2 rounded-lg">
               {feedback.msg}
             </div>
           )}
@@ -431,19 +431,19 @@ export function AdminPartnersPanel({ partners }: Props) {
       )}
 
       {/* Partner list */}
-      <div className="rounded-md bg-white overflow-hidden" style={{ border: "1px solid #E5DACA" }}>
+      <div className="rounded-md bg-white overflow-hidden" style={{ border: "1px solid #ECEEF1" }}>
         {partners.length === 0 ? (
           <div className="p-12 text-center">
-            <p className="text-sm font-bold text-[#1A1614]/70">
+            <p className="text-sm font-bold text-[#1A1D23]/70">
               No partners yet
             </p>
-            <p className="text-xs text-[#1A1614]/50 mt-1">
+            <p className="text-xs text-[#1A1D23]/50 mt-1">
               Approve incoming partner applications from the Messages panel, or
               add one manually with &quot;+ Add Partner&quot; above.
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-[#1A1614]/8">
+          <ul className="divide-y divide-[#1A1D23]/8">
             {partners.map((p) => {
               const open = expandedId === p.id;
               const earnedClosed = p.commissions
@@ -455,15 +455,15 @@ export function AdminPartnersPanel({ partners }: Props) {
               const { from, to } = huesFor(p.businessName);
               const catEmoji = CATEGORY_EMOJI[p.category] ?? "✨";
               return (
-                <li key={p.id} className="p-5 transition-colors hover:bg-[#F7E6C2]/20">
+                <li key={p.id} className="p-5 transition-colors hover:bg-[#EBF2FF]/20">
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       <div
                         className="w-10 h-10 rounded-md shrink-0 flex items-center justify-center font-bold text-[12px]"
                         style={{
-                          background: "#F4EEE3",
-                          color: "#1A1614",
-                          border: "1px solid #E5DACA",
+                          background: "#F4F5F7",
+                          color: "#1A1D23",
+                          border: "1px solid #ECEEF1",
                         }}
                       >
                         {initials(p.businessName)}
@@ -483,7 +483,7 @@ export function AdminPartnersPanel({ partners }: Props) {
                             {p.code}
                           </span>
                           <span
-                            className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${STATUS_COLORS[p.status] ?? "bg-[#1A1614]/10 text-[#1A1614]/60"}`}
+                            className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${STATUS_COLORS[p.status] ?? "bg-[#1A1D23]/10 text-[#1A1D23]/60"}`}
                           >
                             {p.status}
                           </span>
@@ -540,13 +540,13 @@ export function AdminPartnersPanel({ partners }: Props) {
                     <div className="flex flex-col gap-2 md:w-56 shrink-0">
                       <button
                         onClick={() => setExpandedId(open ? null : p.id)}
-                        className="px-3 py-2 rounded-xl text-xs font-black bg-[#1A1614]/5 text-[#1A1614] hover:bg-[#1A1614]/10"
+                        className="px-3 py-2 rounded-xl text-xs font-black bg-[#1A1D23]/5 text-[#1A1D23] hover:bg-[#1A1D23]/10"
                       >
                         {open ? "Hide" : "View"} commissions ({p.commissions.length})
                       </button>
                       <button
                         onClick={() => setShowLogFor(showLogFor === p.id ? null : p.id)}
-                        className="px-3 py-2 rounded-xl text-xs font-black bg-[#16a34a] text-white hover:bg-[#15803d]"
+                        className="px-3 py-2 rounded-xl text-xs font-black bg-[#22C55E] text-white hover:bg-[#15803d]"
                       >
                         + Log referral
                       </button>
@@ -554,7 +554,7 @@ export function AdminPartnersPanel({ partners }: Props) {
                         value={p.status}
                         onChange={(e) => handleStatusChange(p, e.target.value)}
                         disabled={isPending}
-                        className="px-2 py-1.5 rounded-lg border border-[#1A1614]/15 text-xs"
+                        className="px-2 py-1.5 rounded-lg border border-[#1A1D23]/15 text-xs"
                       >
                         <option value="pending">pending</option>
                         <option value="active">active</option>
@@ -572,7 +572,7 @@ export function AdminPartnersPanel({ partners }: Props) {
                   </div>
 
                   {feedback?.id === p.id && (
-                    <div className="mt-3 text-xs font-bold text-[#337485] bg-[#337485]/8 px-3 py-2 rounded-lg">
+                    <div className="mt-3 text-xs font-bold text-[#1976FF] bg-[#1976FF]/8 px-3 py-2 rounded-lg">
                       {feedback.msg}
                     </div>
                   )}
@@ -580,14 +580,14 @@ export function AdminPartnersPanel({ partners }: Props) {
                   {showLogFor === p.id && (
                     <form
                       action={(fd) => handleLogCommission(p.id, fd)}
-                      className="mt-4 p-4 rounded-xl bg-[#16a34a]/5 border border-[#16a34a]/20 space-y-3"
+                      className="mt-4 p-4 rounded-xl bg-[#22C55E]/5 border border-[#22C55E]/20 space-y-3"
                     >
-                      <p className="text-xs font-black text-[#1A1614]">Log a referral from {p.businessName}</p>
+                      <p className="text-xs font-black text-[#1A1D23]">Log a referral from {p.businessName}</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <input name="prospectName" required placeholder="Prospect name" className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm" />
-                        <input name="prospectEmail" type="email" placeholder="Prospect email (optional)" className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm" />
-                        <input name="prospectPhone" type="tel" placeholder="Prospect phone (optional)" className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm" />
-                        <select name="product" required defaultValue="" className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm">
+                        <input name="prospectName" required placeholder="Prospect name" className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm" />
+                        <input name="prospectEmail" type="email" placeholder="Prospect email (optional)" className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm" />
+                        <input name="prospectPhone" type="tel" placeholder="Prospect phone (optional)" className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm" />
+                        <select name="product" required defaultValue="" className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm">
                           <option value="" disabled>Product</option>
                           <option value="Bundle">Business Launch Bundle ($2,000)</option>
                           <option value="Retainer">Brand Retainer ($1,200/mo)</option>
@@ -595,8 +595,8 @@ export function AdminPartnersPanel({ partners }: Props) {
                           <option value="Delivery">Same-day delivery</option>
                           <option value="Other">Other</option>
                         </select>
-                        <input name="invoiceDollars" required type="number" step="0.01" min="0" placeholder="Invoice $ (e.g. 2000)" className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm" />
-                        <select name="status" defaultValue="lead" className="px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm">
+                        <input name="invoiceDollars" required type="number" step="0.01" min="0" placeholder="Invoice $ (e.g. 2000)" className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm" />
+                        <select name="status" defaultValue="lead" className="px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm">
                           <option value="lead">Lead (just referred)</option>
                           <option value="quoted">Quoted</option>
                           <option value="closed">Closed (commission earned)</option>
@@ -604,12 +604,12 @@ export function AdminPartnersPanel({ partners }: Props) {
                           <option value="cancelled">Cancelled</option>
                         </select>
                       </div>
-                      <textarea name="notes" rows={2} placeholder="Notes" className="w-full px-3 py-2 rounded-lg border border-[#1A1614]/15 text-sm resize-none" />
+                      <textarea name="notes" rows={2} placeholder="Notes" className="w-full px-3 py-2 rounded-lg border border-[#1A1D23]/15 text-sm resize-none" />
                       <div className="flex gap-2">
-                        <button type="submit" disabled={isPending} className="px-4 py-2 rounded-xl text-xs font-black bg-[#16a34a] text-white hover:bg-[#15803d] disabled:opacity-50">
+                        <button type="submit" disabled={isPending} className="px-4 py-2 rounded-xl text-xs font-black bg-[#22C55E] text-white hover:bg-[#15803d] disabled:opacity-50">
                           ✓ Log referral
                         </button>
-                        <button type="button" onClick={() => setShowLogFor(null)} className="px-4 py-2 rounded-xl text-xs font-bold text-[#1A1614]/70 hover:bg-[#1A1614]/5">
+                        <button type="button" onClick={() => setShowLogFor(null)} className="px-4 py-2 rounded-xl text-xs font-bold text-[#1A1D23]/70 hover:bg-[#1A1D23]/5">
                           Cancel
                         </button>
                       </div>
@@ -617,29 +617,29 @@ export function AdminPartnersPanel({ partners }: Props) {
                   )}
 
                   {open && p.commissions.length > 0 && (
-                    <div className="mt-4 rounded-xl bg-[#1A1614]/3 p-3 space-y-2">
+                    <div className="mt-4 rounded-xl bg-[#1A1D23]/3 p-3 space-y-2">
                       {p.commissions.map((c) => (
-                        <div key={c.id} className="flex items-start justify-between gap-3 p-3 bg-white rounded-lg border border-[#1A1614]/8">
+                        <div key={c.id} className="flex items-start justify-between gap-3 p-3 bg-white rounded-lg border border-[#1A1D23]/8">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs font-black text-[#1A1614]">{c.prospectName}</span>
-                              <span className="text-[10px] font-bold text-[#1A1614]/55">{c.product}</span>
-                              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${COMMISSION_STATUS_COLORS[c.status] ?? "bg-[#1A1614]/10 text-[#1A1614]/60"}`}>
+                              <span className="text-xs font-black text-[#1A1D23]">{c.prospectName}</span>
+                              <span className="text-[10px] font-bold text-[#1A1D23]/55">{c.product}</span>
+                              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${COMMISSION_STATUS_COLORS[c.status] ?? "bg-[#1A1D23]/10 text-[#1A1D23]/60"}`}>
                                 {c.status}
                               </span>
                             </div>
-                            <p className="text-[11px] text-[#1A1614]/65 mt-0.5">
+                            <p className="text-[11px] text-[#1A1D23]/65 mt-0.5">
                               Invoice {dollars(c.invoiceCents)} → Commission <strong>{dollars(c.commissionCents)}</strong>
                               {c.prospectEmail && ` · ${c.prospectEmail}`}
                             </p>
-                            {c.notes && <p className="text-[11px] text-[#1A1614]/70 mt-1 whitespace-pre-wrap">{c.notes}</p>}
+                            {c.notes && <p className="text-[11px] text-[#1A1D23]/70 mt-1 whitespace-pre-wrap">{c.notes}</p>}
                           </div>
                           <div className="flex flex-col gap-1 shrink-0">
                             <select
                               value={c.status}
                               onChange={(e) => handleCommissionStatus(p, c.id, e.target.value as "lead" | "quoted" | "closed" | "cancelled" | "paid")}
                               disabled={isPending}
-                              className="px-2 py-1 rounded-md border border-[#1A1614]/15 text-[11px]"
+                              className="px-2 py-1 rounded-md border border-[#1A1D23]/15 text-[11px]"
                             >
                               <option value="lead">lead</option>
                               <option value="quoted">quoted</option>

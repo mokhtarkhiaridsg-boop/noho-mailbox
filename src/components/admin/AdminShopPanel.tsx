@@ -12,9 +12,9 @@ const NEXT_STATUS: Record<string, { label: string; value: string }[]> = {
   Completed: [],
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
 
 type Props = {
@@ -61,9 +61,9 @@ const BUCKET_META: Record<StatusBucket, { title: string; sub: string; accent: st
   completed: {
     title: "Completed",
     sub: "Picked up by customer",
-    accent: "#16A34A",
+    accent: "#22C55E",
     bg: "#FFFFFF",
-    iconStroke: "#16A34A",
+    iconStroke: "#22C55E",
     iconPath: <path d="M5 12 L10 17 L19 7" strokeLinecap="round" strokeLinejoin="round" />,
   },
 };
@@ -78,7 +78,7 @@ function initials(name: string): string {
 // Avatar — neutral cream surface (no rainbow palette).
 function huesFor(_seed: string): { from: string; to: string } {
   void _seed;
-  return { from: "#F4EEE3", to: "#F4EEE3" };
+  return { from: "#F4F5F7", to: "#F4F5F7" };
 }
 
 function ShopOrderCard({
@@ -108,9 +108,9 @@ function ShopOrderCard({
         <div
           className="w-9 h-9 shrink-0 rounded-md flex items-center justify-center font-bold text-[11px]"
           style={{
-            background: "#F4EEE3",
-            color: "#1A1614",
-            border: "1px solid #E5DACA",
+            background: "#F4F5F7",
+            color: "#1A1D23",
+            border: "1px solid #ECEEF1",
           }}
         >
           {initials(o.customerName)}
@@ -358,7 +358,7 @@ export function AdminShopPanel({ shopOrders }: Props) {
       {view === "table" && (
         <div
           className="bg-white rounded-md overflow-hidden"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
           <div className="px-5 py-4 border-b border-border-light">
             <h3 className="font-black text-sm uppercase text-text-light">Shop orders</h3>
@@ -446,12 +446,12 @@ function KpiTile({
       className="rounded-md p-4 transition-colors"
       style={{
         background: accent ? NOHO_INK : "#FFFFFF",
-        border: `1px solid ${accent ? NOHO_INK : "#E5DACA"}`,
+        border: `1px solid ${accent ? NOHO_INK : "#ECEEF1"}`,
       }}
     >
       <p
         className="text-[10px] font-bold uppercase tracking-[0.14em]"
-        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#7A8290" }}
       >
         {label}
       </p>

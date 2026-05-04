@@ -83,7 +83,7 @@ All 30 original items shipped iter-83 → iter-111. New ideas to keep the loop g
 39. **Mailbox suite occupancy heatmap** — admin visual grid of all suites + utilization %.
 40. **Bulk forward batch** — admin runs forwarding for multiple suites at once.
 41. **Affiliate earnings dashboard** ✓ shipped iter-121 — leaderboard with medal ranks + 12-month closed-vs-paid SVG bar chart + payout queue with mark-paid action + 4 stat tiles.
-42. **Customer time-zone awareness** — emails respect their TZ for "delivered today" copy.
+42. **Customer time-zone awareness** ✓ shipped iter-123 — User.timeZone column + member card with 16 common TZs + browser-detect shortcut + custom IANA input + live "now in X" preview + helper for emails to render times in user's TZ.
 43. **Backup verification panel** — admin sees latest DB backup health + last-restore-test.
-44. **Member self-service mailbox transfer** — request to swap suite (e.g. someone wants a memorable number).
+44. **Member self-service mailbox transfer** ✓ shipped iter-122 — schema + vacant-suite picker + reason form + admin queue with race-safe approval (atomic User.suiteNumber swap + audit) + decision emails + webhook.
 45. **Carrier wait-time predictor** — historical avg time-to-pickup per customer, use to nudge stale ones.

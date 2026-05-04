@@ -21,10 +21,10 @@ type RecentPickup = {
   items: PickupItem[];
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_CREAM = "#F7E6C2";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
+const NOHO_CREAM = "#EBF2FF";
 
 function timeAgo(ts: number): string {
   const diff = Date.now() - ts;
@@ -87,7 +87,7 @@ export function AdminQRPickupPanel() {
     .reduce((sum, r) => sum + r.count, 0);
 
   const scanZoneAccent =
-    scanState === "success" ? "#16A34A" : scanState === "error" ? "#dc2626" : NOHO_BLUE;
+    scanState === "success" ? "#22C55E" : scanState === "error" ? "#dc2626" : NOHO_BLUE;
 
   return (
     <div className="space-y-5">
@@ -274,11 +274,11 @@ export function AdminQRPickupPanel() {
         >
           {result.error ? (
             <div className="text-center py-2">
-              <svg viewBox="0 0 48 48" className="w-12 h-12 mx-auto mb-2" fill="none" stroke="#b91c1c" strokeWidth="3" strokeLinecap="round">
+              <svg viewBox="0 0 48 48" className="w-12 h-12 mx-auto mb-2" fill="none" stroke="#EF4444" strokeWidth="3" strokeLinecap="round">
                 <circle cx="24" cy="24" r="20" />
                 <path d="M16 16 L32 32 M32 16 L16 32" />
               </svg>
-              <p className="font-black text-base" style={{ color: "#b91c1c" }}>{result.error}</p>
+              <p className="font-black text-base" style={{ color: "#EF4444" }}>{result.error}</p>
             </div>
           ) : (
             <>
@@ -287,7 +287,7 @@ export function AdminQRPickupPanel() {
                   <div
                     className="w-10 h-10 rounded-md flex items-center justify-center shrink-0"
                     style={{
-                      background: "#16A34A",
+                      background: "#22C55E",
                       border: "1px solid #166534",
                     }}
                   >
@@ -341,8 +341,8 @@ export function AdminQRPickupPanel() {
                       <span
                         className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
                         style={{
-                          background: "#F4EEE3",
-                          border: "1px solid #E5DACA",
+                          background: "#F4F5F7",
+                          border: "1px solid #ECEEF1",
                         }}
                       >
                         {item.type === "Package" ? (
@@ -371,7 +371,7 @@ export function AdminQRPickupPanel() {
       {recents.length > 0 && (
         <div
           className="rounded-2xl bg-white p-5"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
           <h3 className="text-[10px] font-black uppercase tracking-[0.18em] mb-3" style={{ color: NOHO_INK }}>
             Recent in this session
@@ -389,7 +389,7 @@ export function AdminQRPickupPanel() {
                 <span
                   className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
                   style={{
-                    background: "#16A34A",
+                    background: "#22C55E",
                     border: "1px solid #166534",
                     color: "white",
                   }}
@@ -464,19 +464,19 @@ function KpiTile({
       className="rounded-md p-4 transition-colors"
       style={{
         background: accent ? NOHO_INK : "#FFFFFF",
-        border: `1px solid ${accent ? NOHO_INK : "#E5DACA"}`,
+        border: `1px solid ${accent ? NOHO_INK : "#ECEEF1"}`,
       }}
     >
       <p
         className="text-[10px] font-bold uppercase tracking-[0.14em]"
-        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#7A8290" }}
       >
         {label}
       </p>
       <p
         className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
-          color: accent ? "#F7E6C2" : NOHO_INK,
+          color: accent ? "#EBF2FF" : NOHO_INK,
           fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
           fontVariantNumeric: "tabular-nums",
         }}

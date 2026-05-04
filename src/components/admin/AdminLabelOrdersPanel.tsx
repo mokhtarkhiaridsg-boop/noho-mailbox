@@ -113,9 +113,9 @@ function exportOrdersCsv(orders: LabelOrderRow[]) {
 
 const STATUS_STYLE: Record<string, { bg: string; fg: string; label: string }> = {
   AwaitingPayment: { bg: "bg-[#fbbf24]/15", fg: "text-[#92400e]", label: "Awaiting payment" },
-  LinkSent:        { bg: "bg-[#337485]/15", fg: "text-[#337485]", label: "Link sent" },
-  Paid:            { bg: "bg-[#16a34a]/15", fg: "text-[#15803d]", label: "Paid · ready to print" },
-  Printed:         { bg: "bg-[#1A1614]/10", fg: "text-[#1A1614]/70", label: "Printed" },
+  LinkSent:        { bg: "bg-[#1976FF]/15", fg: "text-[#1976FF]", label: "Link sent" },
+  Paid:            { bg: "bg-[#22C55E]/15", fg: "text-[#15803d]", label: "Paid · ready to print" },
+  Printed:         { bg: "bg-[#1A1D23]/10", fg: "text-[#1A1D23]/70", label: "Printed" },
   Cancelled:       { bg: "bg-red-50", fg: "text-red-700", label: "Cancelled" },
 };
 
@@ -256,14 +256,14 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
       {/* Header strip */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#337485]/70">
-            <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle bg-[#337485]" style={{ boxShadow: "0 0 6px #337485" }} />
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1976FF]/70">
+            <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle bg-[#1976FF]" style={{ boxShadow: "0 0 6px #1976FF" }} />
             Pre-paid orders · Live
           </p>
-          <h2 className="text-xl font-black text-[#2D100F] tracking-tight">Label Print Requests</h2>
+          <h2 className="text-xl font-black text-[#1A1D23] tracking-tight">Label Print Requests</h2>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-white border border-[#e8e5e0] text-[#2D100F]/65">
+          <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-white border border-[#e8e5e0] text-[#1A1D23]/65">
             {orders.length} on file
           </span>
           {totalMargin > 0 && (
@@ -295,14 +295,14 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
       <LifecycleStepper counts={counts} />
 
       {/* Filter strip */}
-      <div className="rounded-md bg-white p-3 flex items-center gap-2 flex-wrap" style={{ border: "1px solid #E5DACA" }}>
+      <div className="rounded-md bg-white p-3 flex items-center gap-2 flex-wrap" style={{ border: "1px solid #ECEEF1" }}>
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search name · email · destination · carrier   ( / to focus)"
           data-quick-search="prepaid-orders"
-          className="flex-1 min-w-[200px] rounded-xl border border-[#e8e5e0] px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485] bg-white"
+          className="flex-1 min-w-[200px] rounded-xl border border-[#e8e5e0] px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF] bg-white"
         />
         {([
           { id: "open" as const, label: "Open" },
@@ -319,7 +319,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
           // Stuck = urgent red; Stale = amber warn (less urgent — these are
           // abandoned by customers, not stuck on staff side).
           const tone = isStuck
-            ? { active: "#E70013", border: "rgba(231,0,19,0.40)", bg: "rgba(231,0,19,0.10)", fg: "#991b1b", glow: "0 0 8px rgba(231,0,19,0.25)" }
+            ? { active: "#FF3B30", border: "rgba(231,0,19,0.40)", bg: "rgba(231,0,19,0.10)", fg: "#991b1b", glow: "0 0 8px rgba(231,0,19,0.25)" }
             : isStale
               ? { active: "#F5A623", border: "rgba(245,166,35,0.45)", bg: "rgba(245,166,35,0.10)", fg: "#92400e", glow: "0 0 6px rgba(245,166,35,0.20)" }
               : null;
@@ -330,11 +330,11 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
               className="px-2.5 py-1 rounded-lg text-[10.5px] font-bold uppercase tracking-wider transition-colors"
               style={{
                 background: active
-                  ? (tone?.active ?? "#337485")
+                  ? (tone?.active ?? "#1976FF")
                   : (tone?.bg ?? "transparent"),
-                color: active ? "#fff" : (tone?.fg ?? "#2D100F"),
+                color: active ? "#fff" : (tone?.fg ?? "#1A1D23"),
                 border: active
-                  ? `1px solid ${tone?.active ?? "#337485"}`
+                  ? `1px solid ${tone?.active ?? "#1976FF"}`
                   : `1px solid ${tone?.border ?? "#e8e5e0"}`,
                 boxShadow: !active && tone?.glow ? tone.glow : undefined,
               }}
@@ -346,7 +346,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
         <button
           type="button"
           onClick={() => exportOrdersCsv(filtered)}
-          className="px-2.5 py-1 rounded-lg text-[10.5px] font-bold uppercase tracking-wider border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8] flex items-center gap-1.5"
+          className="px-2.5 py-1 rounded-lg text-[10.5px] font-bold uppercase tracking-wider border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8] flex items-center gap-1.5"
           title="Export current filtered orders to a spreadsheet (CSV)"
         >
           <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -356,27 +356,27 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
         </button>
       </div>
 
-      <p className="text-xs text-[#2D100F]/55">
+      <p className="text-xs text-[#1A1D23]/55">
         Customers pre-pay through <strong>/shipping</strong>. Tap{" "}
         <strong>Text Square link</strong>, then <strong>Mark paid</strong> after Square confirms,
         then <strong>Print label</strong> — Shippo purchase happens at print time.
       </p>
 
-      <div className="rounded-md bg-white overflow-hidden" style={{ border: "1px solid #E5DACA" }}>
+      <div className="rounded-md bg-white overflow-hidden" style={{ border: "1px solid #ECEEF1" }}>
         {filtered.length === 0 ? (
           <div className="p-12 text-center">
             <svg viewBox="0 0 48 48" className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none">
-              <rect x="6" y="14" width="36" height="28" rx="4" fill="#EBF2FA" stroke="#1A1614" strokeWidth="2" />
-              <path d="M14 14 L14 8 L34 8 L34 14" stroke="#1A1614" strokeWidth="2" />
+              <rect x="6" y="14" width="36" height="28" rx="4" fill="#EBF2FA" stroke="#1A1D23" strokeWidth="2" />
+              <path d="M14 14 L14 8 L34 8 L34 14" stroke="#1A1D23" strokeWidth="2" />
             </svg>
-            <p className="text-sm font-bold text-[#1A1614]/70">
+            <p className="text-sm font-bold text-[#1A1D23]/70">
               {orders.length === 0
                 ? "No open label orders"
                 : query.trim() ? `No orders match "${query}"` : "No orders match this filter"}
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-[#1A1614]/8">
+          <ul className="divide-y divide-[#1A1D23]/8">
             {filtered.map((o) => {
               const stl = STATUS_STYLE[o.status] ?? STATUS_STYLE.AwaitingPayment;
               return (
@@ -384,7 +384,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-black text-[#1A1614]">{o.customerName}</p>
+                        <p className="text-sm font-black text-[#1A1D23]">{o.customerName}</p>
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${stl.bg} ${stl.fg}`}>
                           {stl.label}
                         </span>
@@ -403,7 +403,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                               return `Paid ${h}h ago — Shippo label not yet purchased.`;
                             })()}
                           >
-                            <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#E70013" }} />
+                            <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#FF3B30" }} />
                             STUCK
                           </span>
                         )}
@@ -426,36 +426,36 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-[#1A1614]/65 mt-1">
-                        <a href={`mailto:${o.customerEmail}`} className="hover:text-[#337485]">
+                      <p className="text-xs text-[#1A1D23]/65 mt-1">
+                        <a href={`mailto:${o.customerEmail}`} className="hover:text-[#1976FF]">
                           {o.customerEmail}
                         </a>
                         {o.customerPhone && (
                           <>
                             {" · "}
-                            <a href={`tel:${o.customerPhone}`} className="hover:text-[#337485]">
+                            <a href={`tel:${o.customerPhone}`} className="hover:text-[#1976FF]">
                               {o.customerPhone}
                             </a>
                           </>
                         )}
                       </p>
-                      <p className="text-[10px] text-[#1A1614]/40 mt-0.5">Submitted {o.createdAt}</p>
+                      <p className="text-[10px] text-[#1A1D23]/40 mt-0.5">Submitted {o.createdAt}</p>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 p-3 rounded-xl bg-[#1A1614]/3" style={{ background: "#FAF6F0" }}>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 p-3 rounded-xl bg-[#1A1D23]/3" style={{ background: "#FAF6F0" }}>
                         <div>
-                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#1A1614]/50">To</p>
-                          <p className="text-xs text-[#1A1614] font-semibold">{o.toName}</p>
-                          <p className="text-[11px] text-[#1A1614]/70">{o.toCity}, {o.toState} {o.toZip}</p>
+                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#1A1D23]/50">To</p>
+                          <p className="text-xs text-[#1A1D23] font-semibold">{o.toName}</p>
+                          <p className="text-[11px] text-[#1A1D23]/70">{o.toCity}, {o.toState} {o.toZip}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#1A1614]/50">Service</p>
-                          <p className="text-xs text-[#1A1614] font-semibold">{o.carrier}</p>
-                          <p className="text-[11px] text-[#1A1614]/70">{o.servicelevel}</p>
+                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#1A1D23]/50">Service</p>
+                          <p className="text-xs text-[#1A1D23] font-semibold">{o.carrier}</p>
+                          <p className="text-[11px] text-[#1A1D23]/70">{o.servicelevel}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#1A1614]/50">Parcel</p>
-                          <p className="text-xs text-[#1A1614] font-semibold">{(o.weightOz / 16).toFixed(2)} lb</p>
-                          <p className="text-[11px] text-[#1A1614]/70">{o.lengthIn}&times;{o.widthIn}&times;{o.heightIn}&quot;</p>
+                          <p className="text-[10px] uppercase font-bold tracking-wider text-[#1A1D23]/50">Parcel</p>
+                          <p className="text-xs text-[#1A1D23] font-semibold">{(o.weightOz / 16).toFixed(2)} lb</p>
+                          <p className="text-[11px] text-[#1A1D23]/70">{o.lengthIn}&times;{o.widthIn}&times;{o.heightIn}&quot;</p>
                         </div>
                       </div>
 
@@ -463,19 +463,19 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                         <span className="px-2.5 py-1 rounded-lg bg-[#fef3c7] text-[#92400e] font-bold">
                           Customer pays {fmtMoney(o.customerPriceCents)}
                         </span>
-                        <span className="px-2.5 py-1 rounded-lg bg-[#1A1614]/8 text-[#1A1614]/80 font-bold">
+                        <span className="px-2.5 py-1 rounded-lg bg-[#1A1D23]/8 text-[#1A1D23]/80 font-bold">
                           Shippo cost {fmtMoney(o.shippoCostCents)}
                         </span>
-                        <span className="px-2.5 py-1 rounded-lg bg-[#16a34a]/15 text-[#15803d] font-bold">
+                        <span className="px-2.5 py-1 rounded-lg bg-[#22C55E]/15 text-[#15803d] font-bold">
                           +{fmtMoney(o.marginCents)} margin
                         </span>
                       </div>
 
                       {o.notes && (
-                        <p className="text-xs text-[#1A1614]/80 mt-2 italic">&ldquo;{o.notes}&rdquo;</p>
+                        <p className="text-xs text-[#1A1D23]/80 mt-2 italic">&ldquo;{o.notes}&rdquo;</p>
                       )}
                       {o.squareLink && (
-                        <p className="text-[10px] text-[#337485] mt-1 break-all">
+                        <p className="text-[10px] text-[#1976FF] mt-1 break-all">
                           Link sent: <a href={o.squareLink} target="_blank" rel="noreferrer" className="underline">{o.squareLink}</a>
                         </p>
                       )}
@@ -488,7 +488,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                           href={`/r/po/${o.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[10px] font-bold text-[#337485] hover:underline"
+                          className="text-[10px] font-bold text-[#1976FF] hover:underline"
                           title="Open the customer-facing order page in a new tab"
                         >
                           Open ↗
@@ -514,7 +514,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                         <button
                           onClick={() => handleTextSquareLink(o)}
                           disabled={isPending}
-                          className="px-3 py-2 rounded-xl text-xs font-black bg-[#16a34a] text-white hover:bg-[#15803d] disabled:opacity-50"
+                          className="px-3 py-2 rounded-xl text-xs font-black bg-[#22C55E] text-white hover:bg-[#15803d] disabled:opacity-50"
                           title={o.customerPhone ? `Text link to ${o.customerPhone}` : "No phone on file"}
                         >
                           Text Square link
@@ -524,7 +524,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                         <button
                           onClick={() => handleTextSquareLink(o)}
                           disabled={isPending}
-                          className="px-3 py-2 rounded-xl text-xs font-bold bg-[#337485]/10 text-[#337485] hover:bg-[#337485]/20 disabled:opacity-50"
+                          className="px-3 py-2 rounded-xl text-xs font-bold bg-[#1976FF]/10 text-[#1976FF] hover:bg-[#1976FF]/20 disabled:opacity-50"
                         >
                           Re-send link
                         </button>
@@ -533,7 +533,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                         <button
                           onClick={() => handleMarkPaid(o)}
                           disabled={isPending}
-                          className="px-3 py-2 rounded-xl text-xs font-black bg-[#337485] text-white hover:bg-[#23596A] disabled:opacity-50"
+                          className="px-3 py-2 rounded-xl text-xs font-black bg-[#1976FF] text-white hover:bg-[#0F5BD9] disabled:opacity-50"
                         >
                           Mark paid
                         </button>
@@ -542,7 +542,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                         <button
                           onClick={() => handlePrint(o)}
                           disabled={isPending}
-                          className="px-3 py-2 rounded-xl text-xs font-black bg-[#2D100F] text-[#F7E6C2] hover:bg-[#1a0908] disabled:opacity-50"
+                          className="px-3 py-2 rounded-xl text-xs font-black bg-[#1A1D23] text-[#EBF2FF] hover:bg-[#1a0908] disabled:opacity-50"
                         >
                           Print label
                         </button>
@@ -552,7 +552,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                           href={o.labelUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-2 rounded-xl text-xs font-black text-center bg-[#337485] text-white hover:bg-[#23596A]"
+                          className="px-3 py-2 rounded-xl text-xs font-black text-center bg-[#1976FF] text-white hover:bg-[#0F5BD9]"
                         >
                           Open label
                         </a>
@@ -570,7 +570,7 @@ export function AdminLabelOrdersPanel({ orders }: Props) {
                   </div>
 
                   {feedback?.id === o.id && (
-                    <div className="mt-3 text-xs font-bold text-[#337485] bg-[#337485]/8 px-3 py-2 rounded-lg">
+                    <div className="mt-3 text-xs font-bold text-[#1976FF] bg-[#1976FF]/8 px-3 py-2 rounded-lg">
                       {feedback.msg}
                     </div>
                   )}
@@ -626,14 +626,14 @@ function PrintedOrderTracking({
       }}
     >
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-black uppercase tracking-wider text-[#2D100F]/55">
+        <p className="text-[10px] font-black uppercase tracking-wider text-[#1A1D23]/55">
           {isRefunded ? "Refunded label" : "Live tracking"}
         </p>
         <a
           href={trackingUrl ?? "#"}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-mono text-[12px] text-[#337485] hover:underline break-all"
+          className="font-mono text-[12px] text-[#1976FF] hover:underline break-all"
         >
           {trackingNumber}
         </a>
@@ -647,7 +647,7 @@ function PrintedOrderTracking({
               : live.status === "PRE_TRANSIT" ? "rgba(245,166,35,0.14)"
               : "rgba(231,0,19,0.14)",
             color: live.status === "DELIVERED" ? "#15803d"
-              : live.status === "TRANSIT" ? "#23596A"
+              : live.status === "TRANSIT" ? "#0F5BD9"
               : live.status === "PRE_TRANSIT" ? "#92400e"
               : "#991b1b",
           }}
@@ -664,7 +664,7 @@ function PrintedOrderTracking({
         type="button"
         onClick={refresh}
         disabled={pending}
-        className="px-2.5 py-1 rounded-lg text-[10.5px] font-bold border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8] disabled:opacity-50 shrink-0"
+        className="px-2.5 py-1 rounded-lg text-[10.5px] font-bold border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8] disabled:opacity-50 shrink-0"
       >
         {pending ? "Tracking…" : live ? "Refresh" : "Track"}
       </button>
@@ -691,7 +691,7 @@ function CopyOrderLinkButton({ orderId }: { orderId: string }) {
     <button
       type="button"
       onClick={copy}
-      className="text-[10px] font-bold px-2 py-1 rounded-lg border border-[#e8e5e0] text-[#2D100F] hover:bg-[#f4f6f8]"
+      className="text-[10px] font-bold px-2 py-1 rounded-lg border border-[#e8e5e0] text-[#1A1D23] hover:bg-[#f4f6f8]"
       title="Copy the customer-facing order-receipt URL to the clipboard"
     >
       {copied ? "Copied ✓" : "Copy public link"}
@@ -708,13 +708,13 @@ function CopyOrderLinkButton({ orderId }: { orderId: string }) {
 function LifecycleStepper({ counts }: { counts: { AwaitingPayment: number; LinkSent: number; Paid: number; Printed: number; Cancelled: number } }) {
   const steps = [
     { id: "AwaitingPayment", n: 1, title: "Awaiting", sub: "Submitted · text Square link",  count: counts.AwaitingPayment, color: "#F5A623" },
-    { id: "LinkSent",        n: 2, title: "Link sent", sub: "Customer pays via Square",     count: counts.LinkSent,        color: "#337485" },
-    { id: "Paid",            n: 3, title: "Paid",      sub: "Ready to print Shippo label",  count: counts.Paid,            color: "#23596A" },
-    { id: "Printed",         n: 4, title: "Printed",   sub: "Label purchased · done",       count: counts.Printed,         color: "#16a34a" },
+    { id: "LinkSent",        n: 2, title: "Link sent", sub: "Customer pays via Square",     count: counts.LinkSent,        color: "#1976FF" },
+    { id: "Paid",            n: 3, title: "Paid",      sub: "Ready to print Shippo label",  count: counts.Paid,            color: "#0F5BD9" },
+    { id: "Printed",         n: 4, title: "Printed",   sub: "Label purchased · done",       count: counts.Printed,         color: "#22C55E" },
   ] as const;
 
   return (
-    <div className="rounded-md bg-white p-4" style={{ border: "1px solid #E5DACA" }}>
+    <div className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}>
       <div className="flex items-stretch gap-2 flex-wrap">
         {steps.map((s, i) => {
           const active = s.count > 0;
@@ -739,7 +739,7 @@ function LifecycleStepper({ counts }: { counts: { AwaitingPayment: number; LinkS
                     >
                       {s.n}
                     </span>
-                    <p className="text-[12px] font-black text-[#2D100F] tracking-tight">{s.title}</p>
+                    <p className="text-[12px] font-black text-[#1A1D23] tracking-tight">{s.title}</p>
                   </div>
                   <span
                     className="text-[14px] font-extrabold tabular-nums"
@@ -748,10 +748,10 @@ function LifecycleStepper({ counts }: { counts: { AwaitingPayment: number; LinkS
                     {s.count}
                   </span>
                 </div>
-                <p className="text-[10px] text-[#2D100F]/50 mt-1 leading-snug">{s.sub}</p>
+                <p className="text-[10px] text-[#1A1D23]/50 mt-1 leading-snug">{s.sub}</p>
               </div>
               {i < steps.length - 1 && (
-                <div className="self-center text-[#2D100F]/25 px-0.5 hidden sm:block">→</div>
+                <div className="self-center text-[#1A1D23]/25 px-0.5 hidden sm:block">→</div>
               )}
             </div>
           );
@@ -762,7 +762,7 @@ function LifecycleStepper({ counts }: { counts: { AwaitingPayment: number; LinkS
             style={{ background: "rgba(231,0,19,0.06)", borderColor: "rgba(231,0,19,0.30)" }}
           >
             <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "#991b1b" }}>Off-ramp</p>
-            <p className="text-[12px] font-black text-[#2D100F] mt-0.5">Cancelled <span className="text-[14px] font-extrabold tabular-nums" style={{ color: "#E70013" }}>{counts.Cancelled}</span></p>
+            <p className="text-[12px] font-black text-[#1A1D23] mt-0.5">Cancelled <span className="text-[14px] font-extrabold tabular-nums" style={{ color: "#FF3B30" }}>{counts.Cancelled}</span></p>
           </div>
         )}
       </div>

@@ -17,9 +17,9 @@ import {
   removeHoliday,
 } from "@/app/actions/operatingHours";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 
 export default function AdminOperatingHoursPanel() {
@@ -166,7 +166,7 @@ export default function AdminOperatingHoursPanel() {
                   <td className="py-2 pr-3">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={d.open} onChange={(e) => patchDay(idx, { open: e.target.checked })}
-                        className="w-3.5 h-3.5 accent-[#337485]" />
+                        className="w-3.5 h-3.5 accent-[#1976FF]" />
                       <span className="font-black" style={{ color: NOHO_INK }}>{DAY_LABELS[idx]}</span>
                     </label>
                   </td>
@@ -230,7 +230,7 @@ export default function AdminOperatingHoursPanel() {
               style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
             <label className="flex items-center gap-2 text-xs font-bold cursor-pointer" style={{ color: NOHO_INK }}>
               <input type="checkbox" checked={hClosed} onChange={(e) => setHClosed(e.target.checked)}
-                className="w-3.5 h-3.5 accent-[#337485]" />
+                className="w-3.5 h-3.5 accent-[#1976FF]" />
               Closed all day
             </label>
             <button type="button" onClick={addHol} disabled={pending}

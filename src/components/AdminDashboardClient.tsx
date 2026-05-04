@@ -71,9 +71,9 @@ const navGroups: NavGroup[] = [
       { id: "customers",      label: "Customers",      Icon: IconCustomers },
       { id: "mailboxcenter",  label: "Mailbox Center", Icon: IconBox },
       { id: "compliance",     label: "Compliance",     Icon: IconCompliance },
-      { id: "idexpiring",     label: "ID Expirations", Icon: IconCompliance },
-      { id: "cmrareport",     label: "CMRA Report",    Icon: IconCompliance },
-      { id: "csvonboard",     label: "Bulk Onboard",   Icon: IconCustomers },
+      // ID Expirations / CMRA Report / Bulk Onboard are reachable as
+      // sub-tool buttons inside Mailbox Center — removed from the
+      // sidebar to cut nav noise. Tabs themselves still resolve via URL.
     ],
   },
   {
@@ -90,6 +90,7 @@ const navGroups: NavGroup[] = [
       { id: "pickupqueue",     label: "Pickup Queue",    Icon: IconCalendar },
       { id: "occupancy",       label: "Occupancy Map",   Icon: IconBox },
       { id: "stickynotes",     label: "Sticky Notes",    Icon: IconClipboard },
+      { id: "suitetransfers",  label: "Suite Transfers", Icon: IconBox },
       { id: "notary",          label: "Notary",          Icon: IconNotary },
       { id: "shippingcenter",  label: "Shipping",        Icon: IconShipping },
       { id: "shop",            label: "Shop",            Icon: IconShop },
@@ -127,8 +128,24 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-// Flat list for mobile pills + label lookup.
-const flatNav: NavItem[] = navGroups.flatMap((g) => g.items);
+// Hidden nav items — reachable via URL or panel buttons but not shown
+// in the sidebar. Kept here so getNavItem() can resolve labels/icons for
+// the live breadcrumb when those tabs are active.
+const hiddenNav: NavItem[] = [
+  { id: "idexpiring", label: "ID Expirations", Icon: IconCompliance },
+  { id: "cmrareport", label: "CMRA Report",    Icon: IconCompliance },
+  { id: "csvonboard", label: "Bulk Onboard",   Icon: IconCustomers },
+];
+
+// Flat list for mobile pills + label lookup. Includes hidden items so
+// the breadcrumb still renders correctly when their tabs are active.
+const flatNav: NavItem[] = [
+  ...navGroups.flatMap((g) => g.items),
+  ...hiddenNav,
+];
+// Visible-only flat nav for the mobile pill nav row — keeps the row
+// short by excluding hidden tabs.
+const visibleFlatNav: NavItem[] = navGroups.flatMap((g) => g.items);
 function getNavItem(id: string) {
   return flatNav.find((i) => i.id === id);
 }
@@ -480,6 +497,7 @@ import AdminCmraReportPanel from "@/components/admin/AdminCmraReportPanel";
 import AdminSuiteOccupancyPanel from "@/components/admin/AdminSuiteOccupancyPanel";
 import AdminPinnedNotesPanel from "@/components/admin/AdminPinnedNotesPanel";
 import AdminAffiliateEarningsPanel from "@/components/admin/AdminAffiliateEarningsPanel";
+import AdminSuiteTransfersPanel from "@/components/admin/AdminSuiteTransfersPanel";
 import { AdminQRPickupPanel } from "@/components/admin/AdminQRPickupPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
@@ -918,7 +936,14 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   // panel history instead of escaping to /. Initial value reads from the URL.
   // Normalize hyphenated slugs (`mailbox-center`) to the camelcase IDs used
   // internally (`mailboxcenter`) so old bookmarks / external links resolve.
-  const ALL_TAB_IDS = navGroups.flatMap((g) => g.items.map((i) => i.id));
+  // Hidden tab IDs — reachable via URL or via sub-tool buttons inside
+  // other panels (e.g. Mailbox Center → ID Expirations) but NOT shown in
+  // the sidebar to keep the nav clean.
+  const HIDDEN_TAB_IDS = ["idexpiring", "cmrareport", "csvonboard"] as const;
+  const ALL_TAB_IDS = [
+    ...navGroups.flatMap((g) => g.items.map((i) => i.id)),
+    ...HIDDEN_TAB_IDS,
+  ];
   function normalizeTabSlug(raw: string | null): string {
     if (!raw) return "overview";
     if (ALL_TAB_IDS.includes(raw)) return raw;
@@ -1470,7 +1495,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {/* Mobile pill nav — clean iPad-OS white/blue */}
           <div className="lg:hidden mb-3">
             <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
-              {flatNav.map((item) => {
+              {visibleFlatNav.map((item) => {
                 const active = tab === item.id;
                 const badge = badgeFor(item.id);
                 return (
@@ -1595,6 +1620,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {tab === "pickupqueue" && <AdminPickupAppointmentsPanel />}
           {tab === "occupancy" && <AdminSuiteOccupancyPanel />}
           {tab === "stickynotes" && <AdminPinnedNotesPanel />}
+          {tab === "suitetransfers" && <AdminSuiteTransfersPanel />}
           {tab === "affiliates" && <AdminAffiliateEarningsPanel />}
           {tab === "idexpiring" && <AdminIdExpiringPanel />}
           {tab === "webhooks" && <AdminWebhooksPanel />}
@@ -1634,6 +1660,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
               churn30dCount={churn30dCount}
               churnAnnualizedPct={churnAnnualizedPct}
               forwardingByState={forwardingByState}
+              setTab={setTab}
             />
           )}
           {tab === "square" && (

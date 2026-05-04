@@ -13,6 +13,8 @@ import PickupAppointmentCard from "./PickupAppointmentCard";
 import AutoRenewCard from "./AutoRenewCard";
 import WalletAutoTopUpCard from "./WalletAutoTopUpCard";
 import PlanUpgradeCard from "./PlanUpgradeCard";
+import SuiteTransferCard from "./SuiteTransferCard";
+import TimeZoneCard from "./TimeZoneCard";
 import {
   IconSettings,
   IconKey,
@@ -1039,6 +1041,10 @@ export default function SettingsPanel({
     <WalletAutoTopUpCard />
     {/* iter-116: Plan upgrade — prorated diff for remaining months. */}
     <PlanUpgradeCard />
+    {/* iter-122: Suite transfer — request a different suite #. */}
+    <SuiteTransferCard />
+    {/* iter-123: Time zone — emails render times in your TZ. */}
+    <TimeZoneCard />
     </div>
   );
 }

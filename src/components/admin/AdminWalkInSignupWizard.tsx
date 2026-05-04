@@ -34,11 +34,11 @@ type IdSlot = {
   imageUrl: string | null;
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_RED = "#E70013";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
+const NOHO_CREAM = "#EBF2FF";
+const NOHO_RED = "#FF3B30";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -217,7 +217,7 @@ export function AdminWalkInSignupWizard({
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8" style={{ background: "rgba(10,8,7,0.6)" }}>
       <div
         className="bg-white rounded-md w-full max-w-2xl max-h-[92vh] overflow-y-auto"
-        style={{ border: "1px solid #E5DACA", boxShadow: "0 16px 48px rgba(10,8,7,0.32)" }}
+        style={{ border: "1px solid #ECEEF1", boxShadow: "0 16px 48px rgba(10,8,7,0.32)" }}
       >
         {/* Header */}
         <div
@@ -255,7 +255,7 @@ export function AdminWalkInSignupWizard({
         {/* Body */}
         <div className="px-6 py-5 space-y-4">
           {error && (
-            <div className="rounded-xl px-3 py-2 text-xs font-bold" style={{ background: "rgba(231,0,19,0.06)", color: "#b91c1c", border: "1px solid rgba(231,0,19,0.18)" }}>
+            <div className="rounded-xl px-3 py-2 text-xs font-bold" style={{ background: "rgba(231,0,19,0.06)", color: "#EF4444", border: "1px solid rgba(231,0,19,0.18)" }}>
               {error}
             </div>
           )}
@@ -264,7 +264,7 @@ export function AdminWalkInSignupWizard({
           {step === 1 && (
             <>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">Plan</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">Plan</p>
                 <div className="grid grid-cols-3 gap-2">
                   {cfg.plans.map((p) => {
                     const active = planName === p.name;
@@ -288,7 +288,7 @@ export function AdminWalkInSignupWizard({
               </div>
 
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">Term</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">Term</p>
                 <div className="grid grid-cols-3 gap-2">
                   {([
                     { v: 3 as const, label: "3 mo", sub: "Quarterly" },
@@ -308,7 +308,7 @@ export function AdminWalkInSignupWizard({
                         }}
                       >
                         <p className="text-sm font-extrabold tracking-tight">{t.label}</p>
-                        <p className="text-[10px] mt-0.5" style={{ color: active ? "rgba(255,255,255,0.7)" : "#7A6050" }}>{t.sub}</p>
+                        <p className="text-[10px] mt-0.5" style={{ color: active ? "rgba(255,255,255,0.7)" : "#7A8290" }}>{t.sub}</p>
                       </button>
                     );
                   })}
@@ -316,14 +316,14 @@ export function AdminWalkInSignupWizard({
               </div>
 
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">First-time fees</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">First-time fees</p>
                 <div className="space-y-2">
                   <label className="flex items-center justify-between rounded-xl px-3 py-2.5 cursor-pointer" style={{ background: "#FFF9F3", border: "1px solid #E8DDD0" }}>
                     <span className="flex items-center gap-2">
                       <input type="checkbox" checked={includeDeposit} onChange={(e) => setIncludeDeposit(e.target.checked)} />
                       <span className="text-sm font-bold" style={{ color: NOHO_INK }}>Security deposit</span>
                     </span>
-                    <span className="flex items-center gap-1 text-sm font-black" style={{ color: includeDeposit ? NOHO_BLUE : "#7A6050" }}>
+                    <span className="flex items-center gap-1 text-sm font-black" style={{ color: includeDeposit ? NOHO_BLUE : "#7A8290" }}>
                       $<input type="number" min={0} step={1} value={depositCents / 100} onChange={(e) => setDepositCents(Math.round(parseFloat(e.target.value || "0") * 100))} disabled={!includeDeposit} className="w-16 text-right rounded-lg px-2 py-0.5 text-sm font-black focus:outline-none disabled:opacity-50" style={{ background: "white", border: "1px solid #E8DDD0", color: NOHO_INK }} />
                     </span>
                   </label>
@@ -332,7 +332,7 @@ export function AdminWalkInSignupWizard({
                       <input type="checkbox" checked={includeKeyFee} onChange={(e) => setIncludeKeyFee(e.target.checked)} />
                       <span className="text-sm font-bold" style={{ color: NOHO_INK }}>Mailbox key fee</span>
                     </span>
-                    <span className="flex items-center gap-1 text-sm font-black" style={{ color: includeKeyFee ? NOHO_BLUE : "#7A6050" }}>
+                    <span className="flex items-center gap-1 text-sm font-black" style={{ color: includeKeyFee ? NOHO_BLUE : "#7A8290" }}>
                       $<input type="number" min={0} step={1} value={keyFeeCents / 100} onChange={(e) => setKeyFeeCents(Math.round(parseFloat(e.target.value || "0") * 100))} disabled={!includeKeyFee} className="w-16 text-right rounded-lg px-2 py-0.5 text-sm font-black focus:outline-none disabled:opacity-50" style={{ background: "white", border: "1px solid #E8DDD0", color: NOHO_INK }} />
                     </span>
                   </label>
@@ -340,9 +340,9 @@ export function AdminWalkInSignupWizard({
               </div>
 
               <div className="rounded-xl p-3" style={{ background: "linear-gradient(135deg, #FFF9F3, #F0DBA9)" }}>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Total today</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Total today</p>
                 <p className="text-3xl font-extrabold tracking-tight" style={{ color: NOHO_BLUE }}>{fmtMoney(totalCents)}</p>
-                <p className="text-[11px] mt-1" style={{ color: "#7A6050" }}>
+                <p className="text-[11px] mt-1" style={{ color: "#7A8290" }}>
                   {fmtMoney(planPriceCents)} plan{includeDeposit ? ` + ${fmtMoney(depositCents)} deposit` : ""}{includeKeyFee ? ` + ${fmtMoney(keyFeeCents)} key fee` : ""}
                 </p>
               </div>
@@ -353,7 +353,7 @@ export function AdminWalkInSignupWizard({
           {step === 2 && (
             <>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">Box type</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">Box type</p>
                 <div className="grid grid-cols-2 gap-2">
                   {(["Personal", "Business"] as const).map((t) => {
                     const active = boxType === t;
@@ -376,7 +376,7 @@ export function AdminWalkInSignupWizard({
               </div>
 
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">Customer</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">Customer</p>
                 <input value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder="Full name *" className="w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none mb-2" style={{ background: "#FFF9F3", border: "1px solid #E8DDD0", color: NOHO_INK }} />
                 <div className="grid grid-cols-2 gap-2">
                   <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone (for SMS)" type="tel" className="rounded-xl px-3 py-2.5 text-sm focus:outline-none" style={{ background: "#FFF9F3", border: "1px solid #E8DDD0", color: NOHO_INK }} />
@@ -386,7 +386,7 @@ export function AdminWalkInSignupWizard({
 
               {boxType === "Business" && (
                 <div className="rounded-xl p-3 space-y-2" style={{ background: "rgba(51,116,133,0.06)", border: "1px solid rgba(51,116,133,0.18)" }}>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Business — required for CMRA</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Business — required for CMRA</p>
                   <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Business / DBA name *" className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none" style={{ background: "white", border: "1px solid #E8DDD0", color: NOHO_INK }} />
                   <div className="grid grid-cols-2 gap-2">
                     <input value={businessOwnerName} onChange={(e) => setBusinessOwnerName(e.target.value)} placeholder="Owner / officer name *" className="rounded-lg px-3 py-2 text-sm focus:outline-none" style={{ background: "white", border: "1px solid #E8DDD0", color: NOHO_INK }} />
@@ -404,7 +404,7 @@ export function AdminWalkInSignupWizard({
           {step === 3 && (
             <>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">Suite number</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">Suite number</p>
                 <div className="flex gap-2 items-center">
                   <input
                     value={suiteNumber}
@@ -429,11 +429,11 @@ export function AdminWalkInSignupWizard({
                   )}
                 </div>
                 {suiteConflict ? (
-                  <p className="text-[11px] mt-1.5 font-bold" style={{ color: "#b91c1c" }}>
+                  <p className="text-[11px] mt-1.5 font-bold" style={{ color: "#EF4444" }}>
                     Suite {suiteNumber} is already assigned to another customer.
                   </p>
                 ) : (
-                  <p className="text-[11px] mt-1.5" style={{ color: "#7A6050" }}>
+                  <p className="text-[11px] mt-1.5" style={{ color: "#7A8290" }}>
                     Suggested is the lowest free number ≥100. Override if you want a specific suite.
                   </p>
                 )}
@@ -444,7 +444,7 @@ export function AdminWalkInSignupWizard({
                   <input type="checkbox" checked={sendWelcome} onChange={(e) => setSendWelcome(e.target.checked)} />
                   <span>
                     <span className="text-sm font-bold block" style={{ color: NOHO_INK }}>Send welcome email</span>
-                    <span className="text-[10px]" style={{ color: "#7A6050" }}>
+                    <span className="text-[10px]" style={{ color: "#7A8290" }}>
                       {email.trim() ? `Will email ${email.trim()}` : "Disabled — no email on file"}
                     </span>
                   </span>
@@ -458,7 +458,7 @@ export function AdminWalkInSignupWizard({
             <>
               <div className="rounded-xl p-3 mb-2" style={{ background: "rgba(51,116,133,0.06)", border: "1px solid rgba(51,116,133,0.18)" }}>
                 <p className="text-[11px] font-bold" style={{ color: NOHO_INK }}>USPS requires 2 IDs for CMRA boxes — at least one government-issued.</p>
-                <p className="text-[10px] mt-0.5" style={{ color: "#7A6050" }}>Tap &ldquo;Scan&rdquo; to auto-fill from a US driver&apos;s license barcode (PDF417). Skip below if you&apos;ll capture later.</p>
+                <p className="text-[10px] mt-0.5" style={{ color: "#7A8290" }}>Tap &ldquo;Scan&rdquo; to auto-fill from a US driver&apos;s license barcode (PDF417). Skip below if you&apos;ll capture later.</p>
               </div>
 
               <label className="flex items-center justify-between rounded-xl px-3 py-2 cursor-pointer" style={{ background: "#FFF9F3", border: "1px solid #E8DDD0" }}>
@@ -466,7 +466,7 @@ export function AdminWalkInSignupWizard({
                   <input type="checkbox" checked={skipIds} onChange={(e) => setSkipIds(e.target.checked)} />
                   <span className="text-xs font-bold" style={{ color: NOHO_INK }}>Skip and capture later</span>
                 </span>
-                <span className="text-[10px]" style={{ color: "#7A6050" }}>Customer profile has full ID UI</span>
+                <span className="text-[10px]" style={{ color: "#7A8290" }}>Customer profile has full ID UI</span>
               </label>
 
               {!skipIds && (
@@ -494,7 +494,7 @@ export function AdminWalkInSignupWizard({
                           {row.state.imageUrl ? (
                             <a href={row.state.imageUrl} target="_blank" rel="noreferrer" className="text-[10px] font-bold" style={{ color: NOHO_BLUE }}>View →</a>
                           ) : (
-                            <span className="text-[10px]" style={{ color: "#7A6050" }}>{uploadingSlot === row.slot ? "Uploading…" : "No file"}</span>
+                            <span className="text-[10px]" style={{ color: "#7A8290" }}>{uploadingSlot === row.slot ? "Uploading…" : "No file"}</span>
                           )}
                         </div>
                       </div>
@@ -537,7 +537,7 @@ export function AdminWalkInSignupWizard({
                         type="file"
                         accept="image/*,application/pdf"
                         onChange={(e) => handleIdUpload(row.slot, e.target.files?.[0] ?? null)}
-                        className="block w-full text-[10px] file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:bg-[#337485]/10 file:text-[#337485] hover:file:bg-[#337485]/20 cursor-pointer"
+                        className="block w-full text-[10px] file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:bg-[#1976FF]/10 file:text-[#1976FF] hover:file:bg-[#1976FF]/20 cursor-pointer"
                       />
                     </div>
                   ))}
@@ -551,24 +551,24 @@ export function AdminWalkInSignupWizard({
             <>
               <div className="rounded-xl p-4 space-y-3" style={{ background: "#FFF9F3", border: "1px solid #E8DDD0" }}>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Customer</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Customer</p>
                   <p className="text-sm font-extrabold" style={{ color: NOHO_INK }}>
                     {name} {boxType === "Business" && businessName ? `· ${businessName}` : ""}
                   </p>
-                  <p className="text-[11px]" style={{ color: "#7A6050" }}>
+                  <p className="text-[11px]" style={{ color: "#7A8290" }}>
                     Suite #{suiteNumber} · {boxType}{phone ? ` · ${phone}` : ""}{email ? ` · ${email}` : ""}
                   </p>
                 </div>
                 <div className="border-t" style={{ borderColor: "#E8DDD0" }} />
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050]">Plan</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290]">Plan</p>
                   <p className="text-sm font-extrabold" style={{ color: NOHO_INK }}>{planName} · {termMonths} mo</p>
-                  <p className="text-[11px]" style={{ color: "#7A6050" }}>Plan period {fmtMoney(planPriceCents)}{effectiveDeposit > 0 ? ` · Deposit ${fmtMoney(effectiveDeposit)}` : ""}{effectiveKeyFee > 0 ? ` · Key fee ${fmtMoney(effectiveKeyFee)}` : ""}</p>
+                  <p className="text-[11px]" style={{ color: "#7A8290" }}>Plan period {fmtMoney(planPriceCents)}{effectiveDeposit > 0 ? ` · Deposit ${fmtMoney(effectiveDeposit)}` : ""}{effectiveKeyFee > 0 ? ` · Key fee ${fmtMoney(effectiveKeyFee)}` : ""}</p>
                 </div>
               </div>
 
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A6050] mb-2">Payment method</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#7A8290] mb-2">Payment method</p>
                 <div className="grid grid-cols-3 gap-2">
                   {(["Cash", "Square", "CardOnFile"] as const).map((m) => {
                     const active = paymentMethod === m;
@@ -607,7 +607,7 @@ export function AdminWalkInSignupWizard({
             onClick={step === 1 ? onClose : back}
             disabled={isPending}
             className="text-xs font-bold px-4 py-2.5 rounded-xl disabled:opacity-50"
-            style={{ color: "#7A6050" }}
+            style={{ color: "#7A8290" }}
           >
             {step === 1 ? "Cancel" : "← Back"}
           </button>

@@ -113,13 +113,13 @@ export function EditCustomerModal({
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-black text-base text-text-light">Edit Customer</h3>
               {viewCustomer.boxType === "Business" && (
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#337485]/10 text-[#337485]">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#1976FF]/10 text-[#1976FF]">
                   Business
                 </span>
               )}
             </div>
             {viewCustomer.businessName && (
-              <p className="text-[12px] font-bold text-[#23596A] mt-0.5">
+              <p className="text-[12px] font-bold text-[#0F5BD9] mt-0.5">
                 🏢 {viewCustomer.businessName}
               </p>
             )}
@@ -149,7 +149,7 @@ export function EditCustomerModal({
                   value={editForm[key as keyof typeof editForm] as string}
                   onChange={(e) => setEditForm((p) => ({ ...p, [key]: e.target.value }))}
                   placeholder={placeholder}
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
             ))}
@@ -166,7 +166,7 @@ export function EditCustomerModal({
                   value={editForm.suiteNumber}
                   onChange={(e) => setEditForm((p) => ({ ...p, suiteNumber: e.target.value }))}
                   placeholder="e.g. 24"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <div>
@@ -174,7 +174,7 @@ export function EditCustomerModal({
                 <select
                   value={editForm.mailboxStatus}
                   onChange={(e) => setEditForm((p) => ({ ...p, mailboxStatus: e.target.value }))}
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 >
                   <option value="Pending">Pending</option>
                   <option value="Assigned">Assigned</option>
@@ -194,7 +194,7 @@ export function EditCustomerModal({
                 <select
                   value={editForm.plan}
                   onChange={(e) => setEditForm((p) => ({ ...p, plan: e.target.value }))}
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 >
                   <option value="">— None —</option>
                   <option value="Basic">Basic</option>
@@ -212,7 +212,7 @@ export function EditCustomerModal({
                   value={editForm.planTerm}
                   onChange={(e) => setEditForm((p) => ({ ...p, planTerm: e.target.value }))}
                   placeholder="Any month count"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
                 <div className="flex gap-1 flex-wrap mt-1.5">
                   {[1, 3, 6, 12, 14, 24].map((m) => (
@@ -222,8 +222,8 @@ export function EditCustomerModal({
                       onClick={() => setEditForm((p) => ({ ...p, planTerm: String(m) }))}
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-md transition-colors ${
                         editForm.planTerm === String(m)
-                          ? "bg-[#337485] text-white"
-                          : "bg-[#337485]/10 text-[#337485] hover:bg-[#337485]/20"
+                          ? "bg-[#1976FF] text-white"
+                          : "bg-[#1976FF]/10 text-[#1976FF] hover:bg-[#1976FF]/20"
                       }`}
                     >
                       {m}mo
@@ -253,13 +253,13 @@ export function EditCustomerModal({
               type="date"
               value={editForm.planDueDate}
               onChange={(e) => setEditForm((p) => ({ ...p, planDueDate: e.target.value }))}
-              className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+              className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
             />
             <div className="flex gap-1.5 flex-wrap">
               {[{ label: "+1 mo", m: 1 }, { label: "+3 mo", m: 3 }, { label: "+6 mo", m: 6 }, { label: "+1 yr", m: 12 }].map(({ label, m }) => (
                 <button key={label} type="button"
                   onClick={() => setEditForm((p) => ({ ...p, planDueDate: addMonths(p.planDueDate, m) }))}
-                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-[#337485]/10 text-[#337485] hover:bg-[#337485]/20"
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-[#1976FF]/10 text-[#1976FF] hover:bg-[#1976FF]/20"
                 >{label}</button>
               ))}
               <button type="button"
@@ -281,7 +281,7 @@ export function EditCustomerModal({
                   step={1}
                   value={(editForm.depositCents / 100).toFixed(0)}
                   onChange={(e) => setEditForm((p) => ({ ...p, depositCents: Math.round(parseFloat(e.target.value || "0") * 100) }))}
-                  className="w-full rounded-xl border border-[#e8e5e0] pl-7 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] pl-7 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <button type="button"
@@ -306,8 +306,8 @@ export function EditCustomerModal({
                   onClick={() => setEditForm((p) => ({ ...p, boxType: t }))}
                   className={`px-4 py-2.5 rounded-xl text-xs font-black border-2 transition-colors ${
                     (editForm.boxType ?? "Personal") === t
-                      ? "bg-[#337485] text-white border-[#337485]"
-                      : "border-[#e8e5e0] text-text-light hover:border-[#337485]"
+                      ? "bg-[#1976FF] text-white border-[#1976FF]"
+                      : "border-[#e8e5e0] text-text-light hover:border-[#1976FF]"
                   }`}
                 >
                   {t === "Personal" ? "🏠 Personal" : "🏢 Business"}
@@ -325,7 +325,7 @@ export function EditCustomerModal({
                 border: "1px solid rgba(51,116,133,0.18)",
               }}
             >
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#337485]">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1976FF]">
                 Business — Owner On File
               </p>
               <div>
@@ -337,7 +337,7 @@ export function EditCustomerModal({
                   value={editForm.businessName ?? ""}
                   onChange={(e) => setEditForm((p) => ({ ...p, businessName: e.target.value }))}
                   placeholder="Acme LLC"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -350,7 +350,7 @@ export function EditCustomerModal({
                     value={editForm.businessOwnerName ?? ""}
                     onChange={(e) => setEditForm((p) => ({ ...p, businessOwnerName: e.target.value }))}
                     placeholder="Jane Smith"
-                    className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                    className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                   />
                 </div>
                 <div>
@@ -360,7 +360,7 @@ export function EditCustomerModal({
                   <select
                     value={editForm.businessOwnerRelation ?? ""}
                     onChange={(e) => setEditForm((p) => ({ ...p, businessOwnerRelation: e.target.value }))}
-                    className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                    className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                   >
                     <option value="">— Select —</option>
                     <option value="Owner">Owner</option>
@@ -381,7 +381,7 @@ export function EditCustomerModal({
                   value={editForm.businessOwnerPhone ?? ""}
                   onChange={(e) => setEditForm((p) => ({ ...p, businessOwnerPhone: e.target.value }))}
                   placeholder="(818) 506-7744"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
             </div>
@@ -394,7 +394,7 @@ export function EditCustomerModal({
               {["Pending", "Submitted", "Approved", "Rejected"].map((s) => (
                 <button key={s} type="button"
                   onClick={() => setEditForm((p) => ({ ...p, kycStatus: s }))}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${editForm.kycStatus === s ? "bg-[#337485] text-white border-[#337485]" : "border-[#e8e5e0] text-text-light hover:border-[#337485]"}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${editForm.kycStatus === s ? "bg-[#1976FF] text-white border-[#1976FF]" : "border-[#e8e5e0] text-text-light hover:border-[#1976FF]"}`}
                 >{s}</button>
               ))}
             </div>
@@ -456,7 +456,7 @@ export function EditCustomerModal({
                         href={row.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] font-bold text-[#337485] hover:underline"
+                        className="text-[11px] font-bold text-[#1976FF] hover:underline"
                       >
                         View file →
                       </a>
@@ -469,7 +469,7 @@ export function EditCustomerModal({
                   type="file"
                   accept="image/*,application/pdf"
                   onChange={(e) => handleIdUpload(row.slot, e.target.files?.[0] ?? null)}
-                  className="block w-full text-[11px] text-text-light file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-[#337485]/10 file:text-[#337485] hover:file:bg-[#337485]/20 cursor-pointer"
+                  className="block w-full text-[11px] text-text-light file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-[#1976FF]/10 file:text-[#1976FF] hover:file:bg-[#1976FF]/20 cursor-pointer"
                 />
                 {!row.hideDetails && "typeKey" in row && (
                   <>
@@ -479,7 +479,7 @@ export function EditCustomerModal({
                         onChange={(e) =>
                           setEditForm((p) => ({ ...p, [row.typeKey]: e.target.value }))
                         }
-                        className="rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+                        className="rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
                       >
                         <option value="">ID Type…</option>
                         <option value="Driver License">Driver License</option>
@@ -501,7 +501,7 @@ export function EditCustomerModal({
                           setEditForm((p) => ({ ...p, [row.expKey]: e.target.value }))
                         }
                         title="Expiration date"
-                        className="rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+                        className="rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
                       />
                     </div>
                     <input
@@ -511,7 +511,7 @@ export function EditCustomerModal({
                         setEditForm((p) => ({ ...p, [row.numKey]: e.target.value }))
                       }
                       placeholder="ID / Policy / Document # (any format)"
-                      className="w-full rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+                      className="w-full rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
                     />
                     <input
                       type="text"
@@ -520,7 +520,7 @@ export function EditCustomerModal({
                         setEditForm((p) => ({ ...p, [row.issuerKey]: e.target.value }))
                       }
                       placeholder="Issuer (state, country, insurer, landlord…)"
-                      className="w-full rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+                      className="w-full rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
                     />
                   </>
                 )}
@@ -575,14 +575,14 @@ export function EditCustomerModal({
                           href={`/admin/statements/${s.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[11px] font-bold text-[#337485] hover:underline"
+                          className="text-[11px] font-bold text-[#1976FF] hover:underline"
                         >
                           View / Print
                         </a>
                         <button
                           disabled={stmtBusy}
                           onClick={() => handleRegenerate(s.year, s.quarter)}
-                          className="text-[11px] font-bold text-text-light/55 hover:text-[#337485] disabled:opacity-40"
+                          className="text-[11px] font-bold text-text-light/55 hover:text-[#1976FF] disabled:opacity-40"
                           title="Re-snapshot this quarter using the current customer data"
                         >
                           Refresh
@@ -604,14 +604,14 @@ export function EditCustomerModal({
                 <input type="text" value={editForm.cardholderName}
                   onChange={(e) => setEditForm((p) => ({ ...p, cardholderName: e.target.value }))}
                   placeholder="Jane Smith"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-text-light/40 mb-1">Card Brand</label>
                 <select value={editForm.cardBrand}
                   onChange={(e) => setEditForm((p) => ({ ...p, cardBrand: e.target.value }))}
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 >
                   <option value="">— None —</option>
                   <option value="Visa">Visa</option>
@@ -627,7 +627,7 @@ export function EditCustomerModal({
                 <input type="text" value={editForm.cardLast4} maxLength={4}
                   onChange={(e) => setEditForm((p) => ({ ...p, cardLast4: e.target.value.replace(/\D/g, "").slice(0, 4) }))}
                   placeholder="4242"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <div>
@@ -639,7 +639,7 @@ export function EditCustomerModal({
                     setEditForm((p) => ({ ...p, cardExpiry: v }));
                   }}
                   placeholder="09/27"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
             </div>
@@ -648,14 +648,14 @@ export function EditCustomerModal({
               <div className="flex items-center gap-3">
                 <input type="number" min={0} max={100} value={editForm.cardDiscountPct}
                   onChange={(e) => setEditForm((p) => ({ ...p, cardDiscountPct: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
-                  className="w-24 rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-24 rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
                 <span className="text-sm font-bold text-text-light/50">%</span>
                 <div className="flex gap-1.5">
                   {[0, 10, 15, 20, 25].map((pct) => (
                     <button key={pct} type="button"
                       onClick={() => setEditForm((p) => ({ ...p, cardDiscountPct: pct }))}
-                      className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${editForm.cardDiscountPct === pct ? "bg-[#337485] text-white" : "bg-[#337485]/10 text-[#337485] hover:bg-[#337485]/20"}`}
+                      className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${editForm.cardDiscountPct === pct ? "bg-[#1976FF] text-white" : "bg-[#1976FF]/10 text-[#1976FF] hover:bg-[#1976FF]/20"}`}
                     >{pct}%</button>
                   ))}
                 </div>
@@ -711,14 +711,14 @@ export function EditCustomerModal({
                 }
               });
             }}
-            className="w-full py-3 rounded-xl bg-[#337485] text-white font-black text-sm hover:bg-[#23596A] disabled:opacity-50 transition-colors"
+            className="w-full py-3 rounded-xl bg-[#1976FF] text-white font-black text-sm hover:bg-[#0F5BD9] disabled:opacity-50 transition-colors"
           >
             {isPending ? "Saving…" : "Save All Changes"}
           </button>
 
           {/* Wallet Credit / Refund */}
           <div className="rounded-xl border border-[#e8e5e0] p-4 space-y-3">
-            <p className="text-[10px] font-black uppercase tracking-wider text-[#337485]">Wallet Credit / Refund</p>
+            <p className="text-[10px] font-black uppercase tracking-wider text-[#1976FF]">Wallet Credit / Refund</p>
             <p className="text-[11px] text-text-light/55">
               Positive = credit (refund), negative = debit. Max $1000 per adjustment.
             </p>
@@ -765,7 +765,7 @@ export function EditCustomerModal({
                   }
                 });
               }}
-              className="w-full py-2 rounded-lg bg-[#337485]/10 text-[#23596A] border border-[#337485]/30 text-xs font-black hover:bg-[#337485]/15 disabled:opacity-50"
+              className="w-full py-2 rounded-lg bg-[#1976FF]/10 text-[#0F5BD9] border border-[#1976FF]/30 text-xs font-black hover:bg-[#1976FF]/15 disabled:opacity-50"
             >
               {isPending ? "Adjusting…" : "Apply Wallet Adjustment"}
             </button>

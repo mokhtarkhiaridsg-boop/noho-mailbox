@@ -17,16 +17,16 @@ type HeldItem = {
   suiteNumber: string | null;
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
 
 const URGENCY_META: Record<HeldItem["urgency"], { label: string; sub: string; color: string; bg: string }> = {
   low: {
     label: "OK",
     sub: "Within 7 days",
-    color: "#16A34A",
+    color: "#22C55E",
     bg: "#FFFFFF",
   },
   medium: {
@@ -60,7 +60,7 @@ function initials(name: string): string {
 // read as "circus" against the formal admin chrome.
 function huesFor(_seed: string): { from: string; to: string } {
   void _seed;
-  return { from: "#F4EEE3", to: "#F4EEE3" };
+  return { from: "#F4F5F7", to: "#F4F5F7" };
 }
 
 function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }) {
@@ -98,9 +98,9 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
         <div
           className="w-9 h-9 shrink-0 rounded-md flex items-center justify-center font-bold text-[11px]"
           style={{
-            background: "#F4EEE3",
-            color: "#1A1614",
-            border: "1px solid #E5DACA",
+            background: "#F4F5F7",
+            color: "#1A1D23",
+            border: "1px solid #ECEEF1",
           }}
         >
           {initials(item.userName)}
@@ -141,7 +141,7 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
                 of 30
               </span>
             </div>
-            <div className="h-1 rounded-full overflow-hidden" style={{ background: "#E5DACA" }}>
+            <div className="h-1 rounded-full overflow-hidden" style={{ background: "#ECEEF1" }}>
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
@@ -171,8 +171,8 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
               className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md disabled:opacity-40 transition-colors"
               style={{
                 background: "#FFFFFF",
-                color: "#5C4540",
-                border: "1px solid #E5DACA",
+                color: "#3B4252",
+                border: "1px solid #ECEEF1",
               }}
             >
               Return
@@ -180,7 +180,7 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
             {msg && (
               <span
                 className="ml-auto text-[10px] font-black"
-                style={{ color: msg.startsWith("✓") ? "#16A34A" : "#dc2626" }}
+                style={{ color: msg.startsWith("✓") ? "#22C55E" : "#dc2626" }}
               >
                 {msg}
               </span>
@@ -299,7 +299,7 @@ export function AdminMailHoldPanel() {
           className="rounded-xl px-4 py-2.5 text-sm font-bold"
           style={{
             background: batchMsg.startsWith("✓") ? "rgba(22,163,74,0.10)" : "rgba(220,38,38,0.10)",
-            color: batchMsg.startsWith("✓") ? "#16a34a" : "#dc2626",
+            color: batchMsg.startsWith("✓") ? "#22C55E" : "#dc2626",
             border: `1px solid ${batchMsg.startsWith("✓") ? "rgba(22,163,74,0.18)" : "rgba(220,38,38,0.18)"}`,
           }}
         >
@@ -322,7 +322,7 @@ export function AdminMailHoldPanel() {
       {counts && counts.total > 0 && (
         <div
           className="rounded-md bg-white p-4"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: NOHO_INK }}>
@@ -332,9 +332,9 @@ export function AdminMailHoldPanel() {
               {counts.total} items
             </p>
           </div>
-          <div className="h-2 rounded-full overflow-hidden flex" style={{ background: "#E5DACA" }}>
+          <div className="h-2 rounded-full overflow-hidden flex" style={{ background: "#ECEEF1" }}>
             {[
-              { count: counts.low, color: "#16A34A", label: "OK" },
+              { count: counts.low, color: "#22C55E", label: "OK" },
               { count: counts.medium, color: NOHO_AMBER, label: "7+" },
               { count: counts.high, color: "#ea580c", label: "14+" },
               { count: counts.overdue, color: "#dc2626", label: "Overdue" },
@@ -352,7 +352,7 @@ export function AdminMailHoldPanel() {
             })}
           </div>
           <div className="flex items-center gap-4 mt-3 text-[10px] font-bold flex-wrap">
-            <LegendDot color="#16A34A" label={`OK ${counts.low}`} />
+            <LegendDot color="#22C55E" label={`OK ${counts.low}`} />
             <LegendDot color={NOHO_AMBER} label={`7+ ${counts.medium}`} />
             <LegendDot color="#ea580c" label={`14+ ${counts.high}`} />
             <LegendDot color="#dc2626" label={`Overdue ${counts.overdue}`} />
@@ -449,7 +449,7 @@ export function AdminMailHoldPanel() {
       {items !== null && items.length === 0 && (
         <div
           className="rounded-md bg-white p-8 text-center"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
           <p className="text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
             No items currently held.
@@ -494,13 +494,13 @@ function KpiTile({
 }) {
   const isAccent = accent && !danger;
   const isDanger = danger;
-  const bg = isAccent ? NOHO_INK : isDanger ? "#B91C1C" : "#FFFFFF";
+  const bg = isAccent ? NOHO_INK : isDanger ? "#EF4444" : "#FFFFFF";
   return (
     <div
       className="rounded-md p-4 transition-colors"
       style={{
         background: bg,
-        border: `1px solid ${isAccent ? NOHO_INK : isDanger ? "#B91C1C" : "#E5DACA"}`,
+        border: `1px solid ${isAccent ? NOHO_INK : isDanger ? "#EF4444" : "#ECEEF1"}`,
       }}
     >
       <p

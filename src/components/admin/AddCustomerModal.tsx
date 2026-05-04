@@ -147,7 +147,7 @@ export function AddCustomerModal({ onClose }: Props) {
   if (success) {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-        <div className="bg-white rounded-md p-8 text-center w-full max-w-sm mx-4" style={{ border: "1px solid #E5DACA", boxShadow: "0 12px 36px rgba(26,23,20,0.18)" }}>
+        <div className="bg-white rounded-md p-8 text-center w-full max-w-sm mx-4" style={{ border: "1px solid #ECEEF1", boxShadow: "0 12px 36px rgba(26,23,20,0.18)" }}>
           <p className="text-4xl mb-3">✓</p>
           <p className="font-black text-lg text-text-light">Customer Created!</p>
           <p className="text-sm text-text-light/50 mt-1">Closing…</p>
@@ -189,8 +189,8 @@ export function AddCustomerModal({ onClose }: Props) {
                   onClick={() => setForm((p) => ({ ...p, boxType: t }))}
                   className={`px-4 py-3 rounded-xl text-sm font-black border-2 transition-colors ${
                     form.boxType === t
-                      ? "bg-[#337485] text-white border-[#337485]"
-                      : "border-[#e8e5e0] text-text-light hover:border-[#337485]"
+                      ? "bg-[#1976FF] text-white border-[#1976FF]"
+                      : "border-[#e8e5e0] text-text-light hover:border-[#1976FF]"
                   }`}
                 >
                   {t === "Personal" ? "🏠 Personal" : "🏢 Business"}
@@ -222,7 +222,7 @@ export function AddCustomerModal({ onClose }: Props) {
                   value={form[key as keyof typeof form] as string}
                   onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value }))}
                   placeholder={placeholder}
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
             ))}
@@ -237,7 +237,7 @@ export function AddCustomerModal({ onClose }: Props) {
                 border: "1px solid rgba(51,116,133,0.18)",
               }}
             >
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#337485]">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1976FF]">
                 Business Details (CMRA-required)
               </p>
               <div>
@@ -249,7 +249,7 @@ export function AddCustomerModal({ onClose }: Props) {
                   value={form.businessName}
                   onChange={(e) => setForm((p) => ({ ...p, businessName: e.target.value }))}
                   placeholder="Acme LLC"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -262,7 +262,7 @@ export function AddCustomerModal({ onClose }: Props) {
                     value={form.businessOwnerName}
                     onChange={(e) => setForm((p) => ({ ...p, businessOwnerName: e.target.value }))}
                     placeholder="Jane Smith"
-                    className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                    className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                   />
                 </div>
                 <div>
@@ -272,7 +272,7 @@ export function AddCustomerModal({ onClose }: Props) {
                   <select
                     value={form.businessOwnerRelation}
                     onChange={(e) => setForm((p) => ({ ...p, businessOwnerRelation: e.target.value }))}
-                    className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                    className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                   >
                     <option value="Owner">Owner</option>
                     <option value="Officer">Officer</option>
@@ -292,7 +292,7 @@ export function AddCustomerModal({ onClose }: Props) {
                   value={form.businessOwnerPhone}
                   onChange={(e) => setForm((p) => ({ ...p, businessOwnerPhone: e.target.value }))}
                   placeholder="(818) 506-7744"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <p className="text-[11px] text-text-light/55 leading-relaxed">
@@ -312,7 +312,7 @@ export function AddCustomerModal({ onClose }: Props) {
                   value={form.suiteNumber}
                   onChange={(e) => setForm((p) => ({ ...p, suiteNumber: e.target.value }))}
                   placeholder="e.g. 24"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <div>
@@ -320,7 +320,7 @@ export function AddCustomerModal({ onClose }: Props) {
                 <select
                   value={form.mailboxStatus}
                   onChange={(e) => setForm((p) => ({ ...p, mailboxStatus: e.target.value }))}
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 >
                   <option value="Pending">Pending</option>
                   <option value="Assigned">Assigned</option>
@@ -340,7 +340,7 @@ export function AddCustomerModal({ onClose }: Props) {
                 <select
                   value={form.plan}
                   onChange={(e) => setForm((p) => ({ ...p, plan: e.target.value }))}
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 >
                   <option value="Basic">Basic</option>
                   <option value="Business">Business</option>
@@ -357,7 +357,7 @@ export function AddCustomerModal({ onClose }: Props) {
                   value={form.planTerm}
                   onChange={(e) => setForm((p) => ({ ...p, planTerm: e.target.value }))}
                   placeholder="Any month count"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
                 <div className="flex gap-1 flex-wrap mt-1.5">
                   {[1, 3, 6, 12, 14, 24].map((m) => (
@@ -367,8 +367,8 @@ export function AddCustomerModal({ onClose }: Props) {
                       onClick={() => setForm((p) => ({ ...p, planTerm: String(m) }))}
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-md transition-colors ${
                         form.planTerm === String(m)
-                          ? "bg-[#337485] text-white"
-                          : "bg-[#337485]/10 text-[#337485] hover:bg-[#337485]/20"
+                          ? "bg-[#1976FF] text-white"
+                          : "bg-[#1976FF]/10 text-[#1976FF] hover:bg-[#1976FF]/20"
                       }`}
                     >
                       {m}mo
@@ -393,13 +393,13 @@ export function AddCustomerModal({ onClose }: Props) {
               type="date"
               value={form.planDueDate}
               onChange={(e) => setForm((p) => ({ ...p, planDueDate: e.target.value }))}
-              className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+              className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
             />
             <div className="flex gap-1.5 flex-wrap">
               {[{ label: "+1 mo", m: 1 }, { label: "+3 mo", m: 3 }, { label: "+6 mo", m: 6 }, { label: "+1 yr", m: 12 }].map(({ label, m }) => (
                 <button key={label} type="button"
                   onClick={() => setForm((p) => ({ ...p, planDueDate: addMonths(p.planDueDate, m) }))}
-                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-[#337485]/10 text-[#337485] hover:bg-[#337485]/20"
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-[#1976FF]/10 text-[#1976FF] hover:bg-[#1976FF]/20"
                 >{label}</button>
               ))}
               <button type="button"
@@ -421,7 +421,7 @@ export function AddCustomerModal({ onClose }: Props) {
                   step={1}
                   value={(form.depositCents / 100).toFixed(0)}
                   onChange={(e) => setForm((p) => ({ ...p, depositCents: Math.round(parseFloat(e.target.value || "0") * 100) }))}
-                  className="w-full rounded-xl border border-[#e8e5e0] pl-7 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] pl-7 pr-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <button type="button"
@@ -442,7 +442,7 @@ export function AddCustomerModal({ onClose }: Props) {
               {["Pending", "Submitted", "Approved", "Rejected"].map((s) => (
                 <button key={s} type="button"
                   onClick={() => setForm((p) => ({ ...p, kycStatus: s }))}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${form.kycStatus === s ? "bg-[#337485] text-white border-[#337485]" : "border-[#e8e5e0] text-text-light hover:border-[#337485]"}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${form.kycStatus === s ? "bg-[#1976FF] text-white border-[#1976FF]" : "border-[#e8e5e0] text-text-light hover:border-[#1976FF]"}`}
                 >{s}</button>
               ))}
             </div>
@@ -473,7 +473,7 @@ export function AddCustomerModal({ onClose }: Props) {
                       />
                     )}
                     {row.url ? (
-                      <a href={row.url} target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-[#337485] hover:underline">View file →</a>
+                      <a href={row.url} target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-[#1976FF] hover:underline">View file →</a>
                     ) : (
                       <span className="text-[11px] font-bold text-text-light/40">No file</span>
                     )}
@@ -483,7 +483,7 @@ export function AddCustomerModal({ onClose }: Props) {
                   type="file"
                   accept="image/*,application/pdf"
                   onChange={(e) => handleIdUpload(row.slot, e.target.files?.[0] ?? null)}
-                  className="block w-full text-[11px] text-text-light file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-[#337485]/10 file:text-[#337485] hover:file:bg-[#337485]/20 cursor-pointer"
+                  className="block w-full text-[11px] text-text-light file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-[#1976FF]/10 file:text-[#1976FF] hover:file:bg-[#1976FF]/20 cursor-pointer"
                 />
                 {!row.hideDetails && "typeKey" in row && (
                   <>
@@ -491,7 +491,7 @@ export function AddCustomerModal({ onClose }: Props) {
                       <select
                         value={(form[row.typeKey] as string) ?? ""}
                         onChange={(e) => setForm((p) => ({ ...p, [row.typeKey]: e.target.value }))}
-                        className="rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+                        className="rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
                       >
                         <option value="">ID Type…</option>
                         <option value="Driver License">Driver License</option>
@@ -511,7 +511,7 @@ export function AddCustomerModal({ onClose }: Props) {
                         value={(form[row.expKey] as string) ?? ""}
                         onChange={(e) => setForm((p) => ({ ...p, [row.expKey]: e.target.value }))}
                         title="Expiration date"
-                        className="rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+                        className="rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
                       />
                     </div>
                     <input
@@ -519,14 +519,14 @@ export function AddCustomerModal({ onClose }: Props) {
                       value={(form[row.numKey] as string) ?? ""}
                       onChange={(e) => setForm((p) => ({ ...p, [row.numKey]: e.target.value }))}
                       placeholder="ID / Policy / Document # (any format)"
-                      className="w-full rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+                      className="w-full rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
                     />
                     <input
                       type="text"
                       value={(form[row.issuerKey] as string) ?? ""}
                       onChange={(e) => setForm((p) => ({ ...p, [row.issuerKey]: e.target.value }))}
                       placeholder="Issuer (state, country, insurer, landlord…)"
-                      className="w-full rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+                      className="w-full rounded-lg border border-[#e8e5e0] px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
                     />
                   </>
                 )}
@@ -543,14 +543,14 @@ export function AddCustomerModal({ onClose }: Props) {
                 <input type="text" value={form.cardholderName}
                   onChange={(e) => setForm((p) => ({ ...p, cardholderName: e.target.value }))}
                   placeholder="Jane Smith"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-text-light/40 mb-1">Card Brand</label>
                 <select value={form.cardBrand}
                   onChange={(e) => setForm((p) => ({ ...p, cardBrand: e.target.value }))}
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold bg-white focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 >
                   <option value="">— None —</option>
                   <option value="Visa">Visa</option>
@@ -566,7 +566,7 @@ export function AddCustomerModal({ onClose }: Props) {
                 <input type="text" value={form.cardLast4} maxLength={4}
                   onChange={(e) => setForm((p) => ({ ...p, cardLast4: e.target.value.replace(/\D/g, "").slice(0, 4) }))}
                   placeholder="4242"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
               <div>
@@ -578,7 +578,7 @@ export function AddCustomerModal({ onClose }: Props) {
                     setForm((p) => ({ ...p, cardExpiry: v }));
                   }}
                   placeholder="09/27"
-                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-full rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold font-mono focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
               </div>
             </div>
@@ -587,14 +587,14 @@ export function AddCustomerModal({ onClose }: Props) {
               <div className="flex items-center gap-3">
                 <input type="number" min={0} max={100} value={form.cardDiscountPct}
                   onChange={(e) => setForm((p) => ({ ...p, cardDiscountPct: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
-                  className="w-24 rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485]"
+                  className="w-24 rounded-xl border border-[#e8e5e0] px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF]"
                 />
                 <span className="text-sm font-bold text-text-light/50">%</span>
                 <div className="flex gap-1.5">
                   {[0, 10, 15, 20, 25].map((pct) => (
                     <button key={pct} type="button"
                       onClick={() => setForm((p) => ({ ...p, cardDiscountPct: pct }))}
-                      className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${form.cardDiscountPct === pct ? "bg-[#337485] text-white" : "bg-[#337485]/10 text-[#337485] hover:bg-[#337485]/20"}`}
+                      className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${form.cardDiscountPct === pct ? "bg-[#1976FF] text-white" : "bg-[#1976FF]/10 text-[#1976FF] hover:bg-[#1976FF]/20"}`}
                     >{pct}%</button>
                   ))}
                 </div>
@@ -613,7 +613,7 @@ export function AddCustomerModal({ onClose }: Props) {
             }
             onClick={handleSubmit}
             className="w-full h-11 rounded-md text-white text-[12px] font-bold uppercase tracking-[0.10em] disabled:opacity-40 transition-colors"
-            style={{ background: "#2D100F", border: "1px solid #2D100F" }}
+            style={{ background: "#1A1D23", border: "1px solid #1A1D23" }}
           >
             {isPending ? "Creating…" : "Create customer"}
           </button>

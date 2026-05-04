@@ -28,26 +28,26 @@ type Overview = {
   upToDate: BillingCustomer[];
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_CREAM = "#F7E6C2";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
+const NOHO_CREAM = "#EBF2FF";
 const NOHO_AMBER = "#F5A623";
 
 // Shared formal hairline tokens (mirrors AdminCashRegister / AdminMailPanel).
 const T = {
-  bg: "#FAF7F2",
+  bg: "#F4F5F7",
   surface: "#FFFFFF",
-  surfaceAlt: "#F4EEE3",
-  border: "#E5DACA",
-  ink: "#1A1614",
-  inkSoft: "#5C4540",
-  inkFaint: "#998877",
+  surfaceAlt: "#F4F5F7",
+  border: "#ECEEF1",
+  ink: "#1A1D23",
+  inkSoft: "#3B4252",
+  inkFaint: "#7A8290",
   accent: NOHO_INK,
   blue: NOHO_BLUE,
-  success: "#16A34A",
-  danger: "#B91C1C",
-  warning: "#B07030",
+  success: "#22C55E",
+  danger: "#EF4444",
+  warning: "#F59E0B",
 };
 const MONO = "ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace";
 const TAB_NUM: React.CSSProperties = {
@@ -387,7 +387,7 @@ export default function AdminBillingPanel() {
     ? [
         { key: "overdue" as const, label: "Overdue", count: overview.overdue.length, customers: overview.overdue, color: "#dc2626" },
         { key: "warning" as const, label: "Expiring Soon", count: overview.warning.length, customers: overview.warning, color: NOHO_AMBER },
-        { key: "uptodate" as const, label: "Up to Date", count: overview.upToDate.length, customers: overview.upToDate, color: "#16a34a" },
+        { key: "uptodate" as const, label: "Up to Date", count: overview.upToDate.length, customers: overview.upToDate, color: "#22C55E" },
       ]
     : [];
   const activeCustomers = sections.find((s) => s.key === activeSection)?.customers ?? [];
@@ -467,7 +467,7 @@ export default function AdminBillingPanel() {
           className="rounded-xl px-4 py-2.5 text-sm font-bold"
           style={{
             background: batchMsg.startsWith("✓") ? "rgba(22,163,74,0.10)" : "rgba(220,38,38,0.10)",
-            color: batchMsg.startsWith("✓") ? "#16a34a" : "#dc2626",
+            color: batchMsg.startsWith("✓") ? "#22C55E" : "#dc2626",
             border: `1px solid ${batchMsg.startsWith("✓") ? "rgba(22,163,74,0.18)" : "rgba(220,38,38,0.18)"}`,
           }}
         >
@@ -606,7 +606,7 @@ export default function AdminBillingPanel() {
       {overview && (
         <div
           className="inline-flex p-0.5 rounded-md"
-          style={{ background: "#F4EEE3", border: "1px solid #E5DACA" }}
+          style={{ background: "#F4F5F7", border: "1px solid #ECEEF1" }}
         >
           {sections.map((s) => {
             const active = activeSection === s.key;
@@ -617,7 +617,7 @@ export default function AdminBillingPanel() {
                 className="px-3 h-8 rounded text-[11px] font-bold uppercase tracking-[0.10em] inline-flex items-center gap-1.5 transition-colors"
                 style={{
                   background: active ? "#FFFFFF" : "transparent",
-                  color: active ? "#1A1614" : "#5C4540",
+                  color: active ? "#1A1D23" : "#3B4252",
                   boxShadow: active ? "0 1px 0 rgba(45,16,15,0.06)" : "none",
                 }}
               >
@@ -625,8 +625,8 @@ export default function AdminBillingPanel() {
                 <span
                   className="px-1 h-4 rounded inline-flex items-center text-[10px]"
                   style={{
-                    background: active ? "#F4EEE3" : "transparent",
-                    color: active ? "#1A1614" : "#998877",
+                    background: active ? "#F4F5F7" : "transparent",
+                    color: active ? "#1A1D23" : "#7A8290",
                     fontVariantNumeric: "tabular-nums",
                     fontFamily: "ui-monospace, monospace",
                   }}
@@ -651,7 +651,7 @@ export default function AdminBillingPanel() {
           {activeCustomers.length === 0 ? (
             <div
               className="rounded-md bg-white p-8 text-center"
-              style={{ border: "1px solid #E5DACA" }}
+              style={{ border: "1px solid #ECEEF1" }}
             >
               <p className="text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
                 No customers in this category.
@@ -708,8 +708,8 @@ function KpiTile({
     <div
       className="p-4 rounded-md"
       style={{
-        background: isAccent ? "#2D100F" : "#FFFFFF",
-        border: `1px solid ${isAccent ? "#2D100F" : isDanger ? "#B91C1C" : "#E5DACA"}`,
+        background: isAccent ? "#1A1D23" : "#FFFFFF",
+        border: `1px solid ${isAccent ? "#1A1D23" : isDanger ? "#EF4444" : "#ECEEF1"}`,
       }}
     >
       <p
@@ -718,8 +718,8 @@ function KpiTile({
           color: isAccent
             ? "rgba(255,255,255,0.65)"
             : isDanger
-            ? "#B91C1C"
-            : "#998877",
+            ? "#EF4444"
+            : "#7A8290",
         }}
       >
         {label}
@@ -727,7 +727,7 @@ function KpiTile({
       <p
         className="text-[28px] font-bold leading-none mt-2"
         style={{
-          color: isAccent ? "#FFFFFF" : "#1A1614",
+          color: isAccent ? "#FFFFFF" : "#1A1D23",
           fontVariantNumeric: "tabular-nums",
           fontFeatureSettings: "'tnum' 1",
           fontFamily: "ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace",
@@ -743,7 +743,7 @@ function KpiTile({
               ? "rgba(255,255,255,0.6)"
               : isDanger
               ? "#7F1D1D"
-              : "#5C4540",
+              : "#3B4252",
           }}
         >
           {sub}

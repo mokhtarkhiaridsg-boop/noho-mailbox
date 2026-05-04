@@ -14,9 +14,9 @@ import {
   type KpiSnapshot,
 } from "@/app/actions/kpiDigest";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 export default function AdminKpiDigestPanel() {
   const [snap, setSnap] = useState<KpiSnapshot | null>(null);
@@ -66,7 +66,7 @@ export default function AdminKpiDigestPanel() {
         </div>
       )}
 
-      <div className="rounded-md bg-white p-4" style={{ border: "1px solid #E5DACA" }}>
+      <div className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}>
         <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <div>
             <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
@@ -118,7 +118,7 @@ export default function AdminKpiDigestPanel() {
         )}
       </div>
 
-      <div className="rounded-md bg-white p-4" style={{ border: "1px solid #E5DACA" }}>
+      <div className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}>
         <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
           Cron setup
         </p>

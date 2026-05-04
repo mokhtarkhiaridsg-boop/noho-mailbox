@@ -43,10 +43,10 @@ import {
 import { MacroToolbar } from "@/components/admin/AdminPOSMacros";
 
 // ─── Brand tokens (mirror globals.css; inline for clarity) ────────────────
-const CREAM = "#F7E6C2";
-const BLUE = "#337485";
-const BROWN = "#2D100F";
-const RED = "#E70013";
+const CREAM = "#EBF2FF";
+const BLUE = "#1976FF";
+const BROWN = "#1A1D23";
+const RED = "#FF3B30";
 const GOLD = "#C9A24A";
 const GOLD_DARK = "#8C6E27";
 const LCD_BG = "#0E1A14";
@@ -494,9 +494,9 @@ export default function AdminPOSPanel() {
   // ─── Cashier Identity (iter-29) ───
   type CashierIdentity = { nickname: string; color: string };
   const CASHIER_PALETTE = [
-    "#337485", // Brand blue
+    "#1976FF", // Brand blue
     "#C9A24A", // Brass gold
-    "#E70013", // Tunisian red
+    "#FF3B30", // Tunisian red
     "#4793a6", // Steel blue
     "#7c5e30", // Walnut
     "#8a1010", // Coral red
@@ -2701,7 +2701,7 @@ export default function AdminPOSPanel() {
           color: ${BROWN};
         }
         .z-bar-vert {
-          background: linear-gradient(180deg, ${BLUE} 0%, #23596A 100%);
+          background: linear-gradient(180deg, ${BLUE} 0%, #0F5BD9 100%);
           border-radius: 4px 4px 0 0;
           width: 100%;
           transform-origin: bottom center;
@@ -3455,7 +3455,7 @@ export default function AdminPOSPanel() {
         .preview-paper .row {
           display: flex; justify-content: space-between; gap: 8px;
         }
-        .preview-paper .row.b { font-weight: 900; color: #2D100F; border-top: 1px solid #2D100F; padding-top: 4px; margin-top: 3px; font-size: 14px; }
+        .preview-paper .row.b { font-weight: 900; color: #1A1D23; border-top: 1px solid #1A1D23; padding-top: 4px; margin-top: 3px; font-size: 14px; }
         .preview-paper .h {
           font-size: 9px; font-weight: 800; letter-spacing: 0.16em;
           text-transform: uppercase; color: #666; margin: 8px 0 3px;
@@ -3701,7 +3701,7 @@ export default function AdminPOSPanel() {
 
         .promo-rose   { background: linear-gradient(120deg, #c92a4d, #ff7799, #c92a4d); }
         .promo-indigo { background: linear-gradient(120deg, #2b3e7d, #5a78c2, #2b3e7d); }
-        .promo-gold   { background: linear-gradient(120deg, #8c6e27, #f0c878, #8c6e27); color: #2D100F; }
+        .promo-gold   { background: linear-gradient(120deg, #8c6e27, #f0c878, #8c6e27); color: #1A1D23; }
         .promo-teal   { background: linear-gradient(120deg, #1a3e48, #4793a6, #1a3e48); }
         .promo-ember  { background: linear-gradient(120deg, #6c2010, #e2483d, #6c2010); }
         .promo-olive  { background: linear-gradient(120deg, #3d4a1c, #7e8e3e, #3d4a1c); }
@@ -5110,12 +5110,12 @@ export default function AdminPOSPanel() {
           stroke-width: 0.4;
         }
         .gauge-tick-major {
-          stroke: #2D100F;
+          stroke: #1A1D23;
           stroke-width: 1.4;
           stroke-linecap: round;
         }
         .gauge-tick-minor {
-          stroke: #2D100F;
+          stroke: #1A1D23;
           stroke-width: 0.7;
           stroke-linecap: round;
           opacity: 0.65;
@@ -5155,7 +5155,7 @@ export default function AdminPOSPanel() {
         .gauge-unit-label {
           font-size: 7px;
           font-weight: 900;
-          fill: #2D100F;
+          fill: #1A1D23;
           letter-spacing: 0.18em;
           font-family: "Courier New", monospace;
         }
@@ -5288,7 +5288,7 @@ export default function AdminPOSPanel() {
           width: 4px;
           height: 4px;
           border-radius: 50%;
-          background: radial-gradient(circle, #c9a24a 0%, #5a4318 60%, #2D100F 100%);
+          background: radial-gradient(circle, #c9a24a 0%, #5a4318 60%, #1A1D23 100%);
           margin-top: -2px;
         }
         .vacuum-tube-base {
@@ -5297,7 +5297,7 @@ export default function AdminPOSPanel() {
           margin-top: 0;
           background:
             linear-gradient(180deg, #c9a24a 0%, #8c6e27 60%, #5a4318 100%);
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 2px;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.4),
@@ -5310,7 +5310,7 @@ export default function AdminPOSPanel() {
           position: absolute;
           bottom: -3px;
           width: 1.5px; height: 4px;
-          background: linear-gradient(180deg, #5a4318, #2D100F);
+          background: linear-gradient(180deg, #5a4318, #1A1D23);
           border-radius: 0 0 1px 1px;
         }
         .vacuum-tube-base::before { left: 4px; }
@@ -5553,7 +5553,7 @@ export default function AdminPOSPanel() {
           right: 18px;
           width: 1.4px;
           height: 92px;
-          background: linear-gradient(180deg, #2D100F 0%, #5a4318 100%);
+          background: linear-gradient(180deg, #1A1D23 0%, #5a4318 100%);
           z-index: 2;
           transform-origin: 50% 0%;
           animation: awningCordSway 8s ease-in-out infinite reverse;
@@ -5583,7 +5583,7 @@ export default function AdminPOSPanel() {
           top: -4px;
           width: 18px; height: 12px;
           background: linear-gradient(180deg, #c9a24a 0%, #8c6e27 60%, #5a4318 100%);
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 2px;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.3),
@@ -5602,7 +5602,7 @@ export default function AdminPOSPanel() {
           transform: translate(-50%, -50%);
           width: 4px; height: 4px;
           border-radius: 50%;
-          background: radial-gradient(circle at 30% 30%, #5a4318, #2D100F);
+          background: radial-gradient(circle at 30% 30%, #5a4318, #1A1D23);
         }
         @media (max-width: 640px) {
           .awning { height: 42px; }
@@ -5629,7 +5629,7 @@ export default function AdminPOSPanel() {
           top: -8px; left: 50%; transform: translateX(-50%);
           width: 26px; height: 14px;
           background: linear-gradient(180deg, #c9a24a 0%, #8c6e27 60%, #5a4318 100%);
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 3px 3px 1px 1px;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.4),
@@ -5644,7 +5644,7 @@ export default function AdminPOSPanel() {
           top: 50%; transform: translateY(-50%);
           width: 3px; height: 3px;
           border-radius: 50%;
-          background: radial-gradient(circle at 30% 30%, #5a4318, #2D100F);
+          background: radial-gradient(circle at 30% 30%, #5a4318, #1A1D23);
         }
         .service-bell-bracket::before { left: 4px; }
         .service-bell-bracket::after  { right: 4px; }
@@ -5654,10 +5654,10 @@ export default function AdminPOSPanel() {
           width: 56px;
           height: 14px;
           background:
-            linear-gradient(180deg, #6b4a26 0%, #4a2a1a 60%, #2D100F 100%),
+            linear-gradient(180deg, #6b4a26 0%, #4a2a1a 60%, #1A1D23 100%),
             repeating-linear-gradient(90deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 4px);
           background-blend-mode: multiply;
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 3px;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.18),
@@ -5801,7 +5801,7 @@ export default function AdminPOSPanel() {
           width: 26px;
           height: 14px;
           background: linear-gradient(180deg, #c9a24a 0%, #8c6e27 60%, #5a4318 100%);
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 3px 3px 1px 1px;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.4),
@@ -5816,7 +5816,7 @@ export default function AdminPOSPanel() {
           top: 50%; transform: translateY(-50%);
           width: 3px; height: 3px;
           border-radius: 50%;
-          background: radial-gradient(circle at 30% 30%, #5a4318, #2D100F);
+          background: radial-gradient(circle at 30% 30%, #5a4318, #1A1D23);
         }
         .wall-calendar-bracket::before { left: 4px; }
         .wall-calendar-bracket::after  { right: 4px; }
@@ -5825,7 +5825,7 @@ export default function AdminPOSPanel() {
           top: 4px;
           left: 0; right: 0; bottom: 0;
           background: linear-gradient(180deg, #c9a24a 0%, #8c6e27 60%, #5a4318 100%);
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 5px;
           padding: 3px;
           box-shadow:
@@ -5859,7 +5859,7 @@ export default function AdminPOSPanel() {
         .wall-calendar-weekday {
           font-size: 9px;
           height: 14px;
-          color: #2D100F;
+          color: #1A1D23;
           text-shadow: 0 1px 0 rgba(255,255,255,0.4);
         }
         .wall-calendar-day {
@@ -5868,7 +5868,7 @@ export default function AdminPOSPanel() {
             linear-gradient(180deg, #fdf7e6 0%, #fdf7e6 50%, #f5e7c2 50%, #f5e7c2 100%);
           font-family: Georgia, "Times New Roman", serif;
           font-weight: 900;
-          color: #2D100F;
+          color: #1A1D23;
           border-radius: 2px;
           position: relative;
           display: grid;
@@ -6140,7 +6140,7 @@ export default function AdminPOSPanel() {
           height: 14px;
           background:
             linear-gradient(180deg, #ffd86b 0%, #c9a24a 30%, #8c6e27 70%, #5a4318 100%);
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 3px;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.45),
@@ -6157,7 +6157,7 @@ export default function AdminPOSPanel() {
           top: 50%; transform: translateY(-50%);
           width: 2.5px; height: 2.5px;
           border-radius: 50%;
-          background: radial-gradient(circle at 30% 30%, #5a4318, #2D100F);
+          background: radial-gradient(circle at 30% 30%, #5a4318, #1A1D23);
         }
         .pneumatic-tube-cap::before { left: 3px; }
         .pneumatic-tube-cap::after  { right: 3px; }
@@ -6167,8 +6167,8 @@ export default function AdminPOSPanel() {
           height: 6px;
           background:
             linear-gradient(180deg, #c9a24a 0%, #8c6e27 60%, #5a4318 100%);
-          border-top: 1px solid #2D100F;
-          border-bottom: 1px solid #2D100F;
+          border-top: 1px solid #1A1D23;
+          border-bottom: 1px solid #1A1D23;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.3),
             inset 0 -1px 0 rgba(0,0,0,0.45);
@@ -6192,8 +6192,8 @@ export default function AdminPOSPanel() {
               #8c6e27 65%,
               #c9a24a 82%,
               #ffd86b 100%);
-          border-left: 0.5px solid #2D100F;
-          border-right: 0.5px solid #2D100F;
+          border-left: 0.5px solid #1A1D23;
+          border-right: 0.5px solid #1A1D23;
           border-radius: 5px;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.45),
@@ -6209,7 +6209,7 @@ export default function AdminPOSPanel() {
           top: 50%;
           transform: translateY(-50%);
           height: 3px;
-          background: linear-gradient(180deg, #5a3220 0%, #2D100F 60%, #1a0a06 100%);
+          background: linear-gradient(180deg, #5a3220 0%, #1A1D23 60%, #1a0a06 100%);
           border-top: 0.5px solid rgba(255,255,255,0.1);
           border-bottom: 0.5px solid rgba(0,0,0,0.5);
         }
@@ -6272,8 +6272,8 @@ export default function AdminPOSPanel() {
           height: 5px;
           background:
             linear-gradient(180deg, #ffd86b 0%, #c9a24a 30%, #8c6e27 70%, #5a4318 100%);
-          border-top: 1px solid #2D100F;
-          border-bottom: 1px solid #2D100F;
+          border-top: 1px solid #1A1D23;
+          border-bottom: 1px solid #1A1D23;
           border-radius: 1.5px;
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.4),
@@ -6320,7 +6320,7 @@ export default function AdminPOSPanel() {
           background:
             radial-gradient(ellipse 50% 18% at 30% 12%, rgba(255, 255, 255, 0.4) 0%, transparent 60%),
             linear-gradient(135deg, #ffd86b 0%, #c9a24a 30%, #8c6e27 70%, #5a4318 100%);
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 2px 2px 1.5px 1.5px;
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.4),
@@ -6337,7 +6337,7 @@ export default function AdminPOSPanel() {
           right: 1px;
           font-size: 6.5px;
           font-weight: 900;
-          color: #2D100F;
+          color: #1A1D23;
           text-align: center;
           font-family: Georgia, "Times New Roman", serif;
           letter-spacing: 0.05em;
@@ -6351,7 +6351,7 @@ export default function AdminPOSPanel() {
           height: 4px;
           background:
             radial-gradient(ellipse at 30% 30%, #ffd86b 0%, #8c6e27 70%);
-          border: 0.5px solid #2D100F;
+          border: 0.5px solid #1A1D23;
           border-radius: 1px;
           box-shadow: 0 0.5px 0.5px rgba(0, 0, 0, 0.4);
         }
@@ -6366,7 +6366,7 @@ export default function AdminPOSPanel() {
           height: 5px;
           border-radius: 50%;
           background:
-            radial-gradient(circle at 50% 60%, #2D100F 0%, #1a0a06 80%, #0a0503 100%);
+            radial-gradient(circle at 50% 60%, #1A1D23 0%, #1a0a06 80%, #0a0503 100%);
           border: 0.4px solid #5a4318;
           box-shadow:
             inset 0 0.5px 1px rgba(0, 0, 0, 0.85),
@@ -6610,7 +6610,7 @@ export default function AdminPOSPanel() {
           display: block;
           width: 0.6px;
           height: 1.6px;
-          background: #2D100F;
+          background: #1A1D23;
           margin-top: 0.6px;
         }
         .wall-clock-mark-major span {
@@ -6622,7 +6622,7 @@ export default function AdminPOSPanel() {
           left: 50%;
           bottom: 50%;
           transform-origin: 50% 100%;
-          background: #2D100F;
+          background: #1A1D23;
           border-radius: 0.5px;
         }
         .wall-clock-hand-hour {
@@ -6642,7 +6642,7 @@ export default function AdminPOSPanel() {
           height: 1.8px;
           border-radius: 50%;
           background: radial-gradient(circle at 30% 30%, #ffd86b, #c9a24a 50%, #5a4318 100%);
-          box-shadow: 0 0 0 0.4px #2D100F;
+          box-shadow: 0 0 0 0.4px #1A1D23;
           z-index: 5;
         }
         .wall-clock-pendulum-case {
@@ -6653,7 +6653,7 @@ export default function AdminPOSPanel() {
           background:
             radial-gradient(ellipse at 50% 30%, #2a1a0a 0%, #0a0503 100%);
           border: 1px solid #5a4318;
-          border-top: 0.5px solid #2D100F;
+          border-top: 0.5px solid #1A1D23;
           border-radius: 0 0 5px 5px;
           box-shadow:
             inset 0 1px 1px rgba(0, 0, 0, 0.6),
@@ -6738,7 +6738,7 @@ export default function AdminPOSPanel() {
           height: 4px;
           background:
             linear-gradient(180deg, #ffd86b 0%, #c9a24a 30%, #8c6e27 70%, #5a4318 100%);
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 1px;
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.4),
@@ -6754,7 +6754,7 @@ export default function AdminPOSPanel() {
           background:
             repeating-linear-gradient(0deg,
               #5a4318 0px, #5a4318 1.5px,
-              #2D100F 1.5px, #2D100F 2.5px,
+              #1A1D23 1.5px, #1A1D23 2.5px,
               #5a4318 2.5px, #5a4318 4px);
           border-radius: 1px;
           filter: drop-shadow(0 0.5px 0.5px rgba(0, 0, 0, 0.6));
@@ -6769,7 +6769,7 @@ export default function AdminPOSPanel() {
           background:
             radial-gradient(ellipse 35% 25% at 30% 22%, rgba(255, 255, 255, 0.55) 0%, transparent 65%),
             linear-gradient(180deg, #ffd86b 0%, #c9a24a 22%, #8c6e27 60%, #5a4318 100%);
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 4px 4px 50% 50% / 4px 4px 60% 60%;
           box-shadow:
             inset 0 -2px 4px rgba(0, 0, 0, 0.45),
@@ -6882,7 +6882,7 @@ export default function AdminPOSPanel() {
           font-family: Georgia, "Times New Roman", serif;
           font-weight: 900;
           font-size: 17px;
-          color: #2D100F;
+          color: #1A1D23;
           letter-spacing: 0.04em;
           line-height: 1;
           text-shadow:
@@ -6929,7 +6929,7 @@ export default function AdminPOSPanel() {
           height: 30px;
           background:
             radial-gradient(ellipse at 30% 22%, #3a1a18 0%, #1a0a06 60%, #0a0503 100%);
-          border: 1px solid #2D100F;
+          border: 1px solid #1A1D23;
           border-radius: 5px 5px 7px 7px / 5px 5px 6px 6px;
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -6947,7 +6947,7 @@ export default function AdminPOSPanel() {
           background:
             radial-gradient(circle at 30% 25%, #ffd86b 0%, #c9a24a 35%, #8c6e27 75%, #5a4318 100%);
           box-shadow:
-            inset 0 0 0 0.5px #2D100F,
+            inset 0 0 0 0.5px #1A1D23,
             inset 0 1px 0 rgba(255, 255, 255, 0.45),
             inset 0 -1px 1px rgba(0, 0, 0, 0.5),
             0 0 0 0.4px rgba(45, 16, 15, 0.6);
@@ -7000,7 +7000,7 @@ export default function AdminPOSPanel() {
           background:
             linear-gradient(180deg, #3a1a18 0%, #1a0a06 45%, #0a0503 100%);
           border-radius: 50% / 60%;
-          border: 0.8px solid #2D100F;
+          border: 0.8px solid #1A1D23;
           box-shadow:
             inset 0 0.5px 0 rgba(255, 255, 255, 0.25),
             inset 0 -0.5px 0.5px rgba(0, 0, 0, 0.5),
@@ -7016,7 +7016,7 @@ export default function AdminPOSPanel() {
           height: 4px;
           border-radius: 50%;
           background: radial-gradient(circle at 30% 30%, #1a0a06, #0a0503 70%);
-          border: 0.4px solid #2D100F;
+          border: 0.4px solid #1A1D23;
           transform: translateY(-50%);
         }
         .vintage-phone-handset::before { left: 1px; }
@@ -7029,7 +7029,7 @@ export default function AdminPOSPanel() {
           height: 18px;
           background:
             repeating-linear-gradient(0deg,
-              #2D100F 0px, #2D100F 1.4px,
+              #1A1D23 0px, #1A1D23 1.4px,
               #1a0a06 1.4px, #1a0a06 2.6px);
           border-radius: 1px;
           transform-origin: 50% 0;
@@ -7069,8 +7069,8 @@ export default function AdminPOSPanel() {
           width: 16px;
           height: 5px;
           background:
-            linear-gradient(180deg, #6b3e2a 0%, #4a2818 60%, #2D100F 100%);
-          border: 0.5px solid #2D100F;
+            linear-gradient(180deg, #6b3e2a 0%, #4a2818 60%, #1A1D23 100%);
+          border: 0.5px solid #1A1D23;
           border-radius: 1.5px;
           box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.18),
@@ -7142,8 +7142,8 @@ export default function AdminPOSPanel() {
           width: 100%;
           height: 100%;
           background:
-            linear-gradient(180deg, #6b3e2a 0%, #4a2818 50%, #2D100F 100%);
-          border: 0.5px solid #2D100F;
+            linear-gradient(180deg, #6b3e2a 0%, #4a2818 50%, #1A1D23 100%);
+          border: 0.5px solid #1A1D23;
           border-radius: 1.5px;
           padding: 2px 2px 6px;
           box-shadow:
@@ -7286,7 +7286,7 @@ export default function AdminPOSPanel() {
             style={{
               color: previewMode ? CREAM : BROWN,
               borderColor: previewMode ? GOLD_DARK : "rgba(45,16,15,0.3)",
-              background: previewMode ? `linear-gradient(180deg, ${BLUE} 0%, #23596A 100%)` : "rgba(255,255,255,0.5)",
+              background: previewMode ? `linear-gradient(180deg, ${BLUE} 0%, #0F5BD9 100%)` : "rgba(255,255,255,0.5)",
             }}
             title={previewMode ? "Receipt preview is ON — preview shows before each charge" : "Toggle 4×6 receipt preview before charging"}
           >
@@ -10475,7 +10475,7 @@ function ClockworkGears() {
             strokeWidth="0.6"
           />
           <circle cx="50" cy="50" r="14" fill="#8c6e27" stroke="#5a4318" strokeWidth="0.4" />
-          <circle cx="50" cy="50" r="3" fill="#2D100F" />
+          <circle cx="50" cy="50" r="3" fill="#1A1D23" />
           {/* Spoke holes */}
           {[0, 60, 120, 180, 240, 300].map((deg) => {
             const a = (deg * Math.PI) / 180;
@@ -10486,7 +10486,7 @@ function ClockworkGears() {
                 cx={50 + Math.cos(a) * r}
                 cy={50 + Math.sin(a) * r}
                 r="1.6"
-                fill="#2D100F"
+                fill="#1A1D23"
               />
             );
           })}
@@ -10500,7 +10500,7 @@ function ClockworkGears() {
             strokeWidth="0.5"
           />
           <circle cx="26" cy="26" r="6" fill="#8c6e27" stroke="#5a4318" strokeWidth="0.3" />
-          <circle cx="26" cy="26" r="1.6" fill="#2D100F" />
+          <circle cx="26" cy="26" r="1.6" fill="#1A1D23" />
         </g>
         {/* Tiny gear lower-right */}
         <g className="gear gear-tiny">
@@ -10511,7 +10511,7 @@ function ClockworkGears() {
             strokeWidth="0.4"
           />
           <circle cx="72" cy="72" r="4" fill="#8c6e27" stroke="#5a4318" strokeWidth="0.3" />
-          <circle cx="72" cy="72" r="1.2" fill="#2D100F" />
+          <circle cx="72" cy="72" r="1.2" fill="#1A1D23" />
         </g>
         <defs>
           <linearGradient id="gear-brass" x1="0" y1="0" x2="1" y2="1">
@@ -11612,10 +11612,10 @@ function CustomerPresenceCard({
   // Deterministic gradient — pick from a brand-aligned palette by name hash
   const gradient = useMemo(() => {
     const palette = [
-      ["#337485", "#23596A"],   // Brand blue
+      ["#1976FF", "#0F5BD9"],   // Brand blue
       ["#C9A24A", "#8C6E27"],   // Brass gold
-      ["#E70013", "#A40010"],   // Tunisian red
-      ["#2D100F", "#5a3d20"],   // Dark brown
+      ["#FF3B30", "#A40010"],   // Tunisian red
+      ["#1A1D23", "#5a3d20"],   // Dark brown
       ["#4793a6", "#1a3e48"],   // Steel blue
       ["#e2483d", "#8a1010"],   // Coral red
       ["#7c5e30", "#4a3613"],   // Walnut
@@ -12288,8 +12288,8 @@ function ReturnsModal({
                   </div>
                 )}
                 <div className="returns-detail-paper">
-                  <div style={{ textAlign: "center", borderBottom: "1.5px solid #2D100F", paddingBottom: 6 }}>
-                    <div className="font-black tracking-[0.32em]" style={{ fontSize: 10, color: "#337485" }}>
+                  <div style={{ textAlign: "center", borderBottom: "1.5px solid #1A1D23", paddingBottom: 6 }}>
+                    <div className="font-black tracking-[0.32em]" style={{ fontSize: 10, color: "#1976FF" }}>
                       ◆ NOHO MAILBOX ◆
                     </div>
                     <div style={{ fontSize: 9, color: "#888", marginTop: 4, fontWeight: 700, letterSpacing: "0.16em" }}>
@@ -12308,7 +12308,7 @@ function ReturnsModal({
                       <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.16em", textTransform: "uppercase", color: "#666", marginBottom: 2 }}>Customer</div>
                       <div style={{ fontSize: 12, fontWeight: 800 }}>
                         {active.customerName}
-                        {active.customerSuite ? <span style={{ color: "#337485" }}> · #{active.customerSuite}</span> : null}
+                        {active.customerSuite ? <span style={{ color: "#1976FF" }}> · #{active.customerSuite}</span> : null}
                       </div>
                     </div>
                   )}
@@ -12331,7 +12331,7 @@ function ReturnsModal({
                     {active.discountCents > 0 && <div className="row"><span>Discount</span><span style={{ fontVariantNumeric: "tabular-nums" }}>− {fmt(active.discountCents)}</span></div>}
                     {active.taxCents > 0 && <div className="row"><span>Tax</span><span style={{ fontVariantNumeric: "tabular-nums" }}>{fmt(active.taxCents)}</span></div>}
                     {active.tipCents > 0 && <div className="row"><span>Tip</span><span style={{ fontVariantNumeric: "tabular-nums" }}>{fmt(active.tipCents)}</span></div>}
-                    <div className="row b" style={{ fontSize: 14, fontWeight: 900, color: "#2D100F", borderTop: "1px solid #2D100F", marginTop: 3, paddingTop: 4 }}>
+                    <div className="row b" style={{ fontSize: 14, fontWeight: 900, color: "#1A1D23", borderTop: "1px solid #1A1D23", marginTop: 3, paddingTop: 4 }}>
                       <span>Total</span><span style={{ fontVariantNumeric: "tabular-nums" }}>{fmt(active.totalCents)}</span>
                     </div>
                   </div>
@@ -12557,8 +12557,8 @@ function ReceiptPreviewModal({
 
         {/* Live receipt rendering */}
         <div className="preview-paper">
-          <div className="text-center" style={{ borderBottom: "1.5px solid #2D100F", paddingBottom: 6 }}>
-            <div className="font-black tracking-[0.32em]" style={{ fontSize: 10, color: "#337485" }}>
+          <div className="text-center" style={{ borderBottom: "1.5px solid #1A1D23", paddingBottom: 6 }}>
+            <div className="font-black tracking-[0.32em]" style={{ fontSize: 10, color: "#1976FF" }}>
               ◆ NOHO MAILBOX ◆
             </div>
             <div style={{ fontSize: 9, color: "#444", marginTop: 2 }}>
@@ -12575,7 +12575,7 @@ function ReceiptPreviewModal({
               <div className="h">Customer</div>
               <div style={{ fontSize: 12, fontWeight: 800 }}>
                 {customer.name}
-                {customer.suiteNumber && <span style={{ color: "#337485" }}> · #{customer.suiteNumber}</span>}
+                {customer.suiteNumber && <span style={{ color: "#1976FF" }}> · #{customer.suiteNumber}</span>}
               </div>
               {customer.email && <div style={{ fontSize: 10, color: "#666" }}>{customer.email}</div>}
             </>
@@ -12622,8 +12622,8 @@ function ReceiptPreviewModal({
             {method === "Zelle" ? <div style={{ fontSize: 9, color: "#1a3a6a", marginTop: 2 }}>Zelle to <b>{ZELLE_RECIPIENT_EMAIL}</b></div> : null}
           </div>
 
-          <div style={{ marginTop: 10, paddingTop: 6, borderTop: "1.5px solid #2D100F", textAlign: "center" }}>
-            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#337485" }}>
+          <div style={{ marginTop: 10, paddingTop: 6, borderTop: "1.5px solid #1A1D23", textAlign: "center" }}>
+            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#1976FF" }}>
               Thank you for choosing NOHO Mailbox
             </div>
           </div>
@@ -12878,7 +12878,7 @@ function ZBigStat({ label, value, accent, subdued }: { label: string; value: str
     <div
       className="rounded-xl p-3 sm:p-4"
       style={{
-        background: accent ? `linear-gradient(180deg, ${BLUE} 0%, #23596A 100%)` : "rgba(255,255,255,0.55)",
+        background: accent ? `linear-gradient(180deg, ${BLUE} 0%, #0F5BD9 100%)` : "rgba(255,255,255,0.55)",
         color: accent ? CREAM : BROWN,
         border: accent ? "1px solid #1a3e48" : "1px solid #b69256",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5)",
@@ -13092,7 +13092,7 @@ function CashDrawer({
         }}
       >
         <div className="flex items-center gap-2">
-          <span aria-hidden style={{ color: "#2D100F" }}>
+          <span aria-hidden style={{ color: "#1A1D23" }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="9" width="18" height="11" rx="1.5" />
               <path d="M3 13h18" />
@@ -13100,14 +13100,14 @@ function CashDrawer({
               <circle cx="12" cy="4.5" r="0.9" />
             </svg>
           </span>
-          <div className="text-[10px] font-black tracking-[0.28em] uppercase" style={{ color: "#2D100F" }}>
+          <div className="text-[10px] font-black tracking-[0.28em] uppercase" style={{ color: "#1A1D23" }}>
             Cash Drawer · Open
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <div className="text-[8px] font-black tracking-[0.18em] uppercase" style={{ color: "#2D100F", opacity: 0.65 }}>In Drawer</div>
-            <div className="text-base font-black tabular-nums" style={{ color: "#2D100F" }}>{fmt(totalCents)}</div>
+            <div className="text-[8px] font-black tracking-[0.18em] uppercase" style={{ color: "#1A1D23", opacity: 0.65 }}>In Drawer</div>
+            <div className="text-base font-black tabular-nums" style={{ color: "#1A1D23" }}>{fmt(totalCents)}</div>
           </div>
           <button
             onClick={onClose}
@@ -13115,7 +13115,7 @@ function CashDrawer({
             style={{
               background: "linear-gradient(180deg,#fdf7e6 0%,#ebd4a8 100%)",
               border: "1px solid #5a4318",
-              color: "#2D100F",
+              color: "#1A1D23",
               boxShadow: "0 2px 0 #5a4318",
             }}
           >

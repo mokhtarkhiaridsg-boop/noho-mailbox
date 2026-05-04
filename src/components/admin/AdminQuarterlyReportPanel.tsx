@@ -16,13 +16,13 @@ import {
 
 type Row = Awaited<ReturnType<typeof getStatementsForQuarter>>[number];
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
-const NOHO_RED = "#E70013";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_GREEN = "#16A34A";
+const NOHO_RED = "#FF3B30";
+const NOHO_CREAM = "#EBF2FF";
+const NOHO_GREEN = "#22C55E";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const CURRENT_Q = Math.floor(new Date().getMonth() / 3) + 1;
@@ -44,7 +44,7 @@ function initials(name: string): string {
 // Avatar — neutral cream surface (no rainbow palette).
 function huesFor(_seed: string): { from: string; to: string } {
   void _seed;
-  return { from: "#F4EEE3", to: "#F4EEE3" };
+  return { from: "#F4F5F7", to: "#F4F5F7" };
 }
 
 export function AdminQuarterlyReportPanel() {
@@ -300,7 +300,7 @@ export function AdminQuarterlyReportPanel() {
         {/* Period picker — 1 col */}
         <div
           className="rounded-md bg-white p-4"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
           <div className="flex items-center gap-2 mb-3">
             <span
@@ -552,9 +552,9 @@ function StatementRow({
         <div
           className="w-9 h-9 rounded-md shrink-0 flex items-center justify-center font-bold text-[11px]"
           style={{
-            background: "#F4EEE3",
+            background: "#F4F5F7",
             color: NOHO_INK,
-            border: "1px solid #E5DACA",
+            border: "1px solid #ECEEF1",
           }}
         >
           {initials(r.userName)}

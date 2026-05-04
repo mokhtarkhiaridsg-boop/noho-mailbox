@@ -60,19 +60,19 @@ export function NewClientModal({ clientForm, setClientForm, onClose }: Props) {
         <div className="space-y-3">
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Business / Client Name</label>
-            <input type="text" value={clientForm.name} onChange={(e) => setClientForm((p) => ({ ...p, name: e.target.value }))} placeholder="e.g. Sunrise Bakery" className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]" />
+            <input type="text" value={clientForm.name} onChange={(e) => setClientForm((p) => ({ ...p, name: e.target.value }))} placeholder="e.g. Sunrise Bakery" className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]" />
           </div>
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Email</label>
-            <input type="email" value={clientForm.email} onChange={(e) => setClientForm((p) => ({ ...p, email: e.target.value }))} placeholder="email@business.com" className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]" />
+            <input type="email" value={clientForm.email} onChange={(e) => setClientForm((p) => ({ ...p, email: e.target.value }))} placeholder="email@business.com" className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]" />
           </div>
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Phone</label>
-            <input type="tel" value={clientForm.phone} onChange={(e) => setClientForm((p) => ({ ...p, phone: e.target.value }))} placeholder="(818) 555-0000" className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]" />
+            <input type="tel" value={clientForm.phone} onChange={(e) => setClientForm((p) => ({ ...p, phone: e.target.value }))} placeholder="(818) 555-0000" className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]" />
           </div>
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-text-light/50 mb-1 block">Package</label>
-            <select value={clientForm.package} onChange={(e) => setClientForm((p) => ({ ...p, package: e.target.value }))} className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485] bg-white">
+            <select value={clientForm.package} onChange={(e) => setClientForm((p) => ({ ...p, package: e.target.value }))} className="w-full rounded-xl border border-border-light px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF] bg-white">
               <option value="Full Package">Full Package ($2,000)</option>
               <option value="Formation Only">Business Formation ($500)</option>
               <option value="Branding Only">Brand Identity & Design ($750)</option>
@@ -87,11 +87,11 @@ export function NewClientModal({ clientForm, setClientForm, onClose }: Props) {
             onClick={handleSubmit}
             disabled={pending || !clientForm.name || !clientForm.email}
             className="flex-1 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] text-white disabled:opacity-40 transition-colors"
-            style={{ background: "#2D100F", border: "1px solid #2D100F" }}
+            style={{ background: "#1A1D23", border: "1px solid #1A1D23" }}
           >
             {pending ? "Adding…" : "Add client"}
           </button>
-          <button onClick={onClose} disabled={pending} className="flex-1 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] disabled:opacity-50 transition-colors" style={{ background: "#FFFFFF", color: "#5C4540", border: "1px solid #E5DACA" }}>
+          <button onClick={onClose} disabled={pending} className="flex-1 h-10 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] disabled:opacity-50 transition-colors" style={{ background: "#FFFFFF", color: "#3B4252", border: "1px solid #ECEEF1" }}>
             Cancel
           </button>
         </div>

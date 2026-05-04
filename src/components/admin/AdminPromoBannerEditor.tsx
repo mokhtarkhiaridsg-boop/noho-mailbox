@@ -19,7 +19,7 @@ const PRESETS: { name: string; config: Partial<PromoBannerConfig> }[] = [
       ctaText: "Reserve",
       ctaHref: "/delivery/for-florists",
       iconEmoji: "🌹",
-      bgFrom: "#B07030",
+      bgFrom: "#F59E0B",
       bgTo: "#8A5520",
       textColor: "#FFE4A0",
     },
@@ -47,9 +47,9 @@ const PRESETS: { name: string; config: Partial<PromoBannerConfig> }[] = [
       ctaText: "Get a courier",
       ctaHref: "/delivery",
       iconEmoji: "🍽️",
-      bgFrom: "#337485",
-      bgTo: "#23596A",
-      textColor: "#F7E6C2",
+      bgFrom: "#1976FF",
+      bgTo: "#0F5BD9",
+      textColor: "#EBF2FF",
       countdownDate: "",
     },
   },
@@ -61,20 +61,20 @@ const PRESETS: { name: string; config: Partial<PromoBannerConfig> }[] = [
       ctaText: "Book delivery",
       ctaHref: "/delivery",
       iconEmoji: "",
-      bgFrom: "#2D100F",
+      bgFrom: "#1A1D23",
       bgTo: "#1F0807",
-      textColor: "#F7E6C2",
+      textColor: "#EBF2FF",
       countdownDate: "",
     },
   },
 ];
 
-const INK = "#2D100F";
-const INK_SOFT = "#5C4540";
+const INK = "#1A1D23";
+const INK_SOFT = "#3B4252";
 const BORDER = "#E8DDD0";
-const CREAM = "#F7E6C2";
-const BLUE = "#337485";
-const BLUE_DEEP = "#23596A";
+const CREAM = "#EBF2FF";
+const BLUE = "#1976FF";
+const BLUE_DEEP = "#0F5BD9";
 
 function fieldLabel(text: string) {
   return (
@@ -196,7 +196,7 @@ export default function AdminPromoBannerEditor() {
               type="checkbox"
               checked={cfg.enabled}
               onChange={(e) => update("enabled", e.target.checked)}
-              className="w-4 h-4 accent-[#2D100F]"
+              className="w-4 h-4 accent-[#1A1D23]"
             />
             Enabled
           </label>
@@ -285,7 +285,7 @@ export default function AdminPromoBannerEditor() {
             value={cfg.audience}
             onChange={(e) => update("audience", e.target.value)}
             placeholder="Florists"
-            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D100F]/30"
+            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A1D23]/30"
             style={inputStyle()}
           />
         </div>
@@ -296,7 +296,7 @@ export default function AdminPromoBannerEditor() {
             value={cfg.iconEmoji}
             onChange={(e) => update("iconEmoji", e.target.value)}
             placeholder="🌹"
-            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D100F]/30"
+            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A1D23]/30"
             style={inputStyle()}
           />
         </div>
@@ -308,7 +308,7 @@ export default function AdminPromoBannerEditor() {
           value={cfg.message}
           onChange={(e) => update("message", e.target.value)}
           rows={3}
-          className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D100F]/30"
+          className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A1D23]/30"
           style={inputStyle()}
         />
         <p className="text-[11px] mt-1" style={{ color: INK_SOFT }}>
@@ -325,7 +325,7 @@ export default function AdminPromoBannerEditor() {
             value={cfg.ctaText}
             onChange={(e) => update("ctaText", e.target.value)}
             placeholder="Reserve"
-            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D100F]/30"
+            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A1D23]/30"
             style={inputStyle()}
           />
         </div>
@@ -336,7 +336,7 @@ export default function AdminPromoBannerEditor() {
             value={cfg.ctaHref}
             onChange={(e) => update("ctaHref", e.target.value)}
             placeholder="/delivery/for-florists"
-            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D100F]/30"
+            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A1D23]/30"
             style={inputStyle()}
           />
         </div>
@@ -349,7 +349,7 @@ export default function AdminPromoBannerEditor() {
             type="datetime-local"
             value={cfg.countdownDate ? toLocalInput(cfg.countdownDate) : ""}
             onChange={(e) => update("countdownDate", fromLocalInput(e.target.value))}
-            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D100F]/30"
+            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A1D23]/30"
             style={inputStyle()}
           />
           <p className="text-[11px] mt-1" style={{ color: INK_SOFT }}>
@@ -362,7 +362,7 @@ export default function AdminPromoBannerEditor() {
             type="datetime-local"
             value={cfg.hideAfter ? toLocalInput(cfg.hideAfter) : ""}
             onChange={(e) => update("hideAfter", fromLocalInput(e.target.value))}
-            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D100F]/30"
+            className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A1D23]/30"
             style={inputStyle()}
           />
           <p className="text-[11px] mt-1" style={{ color: INK_SOFT }}>

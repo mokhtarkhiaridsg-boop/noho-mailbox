@@ -10,9 +10,9 @@ type Props = {
   handleDeliveryStatus: (orderId: string, status: string, courier?: string) => void;
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
 
 type StatusBucket = "pending" | "transit" | "delivered";
@@ -55,9 +55,9 @@ const BUCKET_META: Record<StatusBucket, { title: string; sub: string; accent: st
   delivered: {
     title: "Delivered",
     sub: "Completed today",
-    accent: "#16A34A",
+    accent: "#22C55E",
     bg: "#FFFFFF",
-    iconStroke: "#16A34A",
+    iconStroke: "#22C55E",
     iconPath: <path d="M5 12 L10 17 L19 7" strokeLinecap="round" strokeLinejoin="round" />,
   },
 };
@@ -346,7 +346,7 @@ export function AdminDeliveriesPanel({ deliveryOrders, isPending, handleDelivery
       {view === "table" && (
         <div
           className="bg-white rounded-md overflow-hidden"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
           <div className="px-5 py-4 border-b border-border-light">
             <h3 className="font-black text-sm uppercase text-text-light">Delivery Orders</h3>
@@ -392,7 +392,7 @@ export function AdminDeliveriesPanel({ deliveryOrders, isPending, handleDelivery
                         value={d.status}
                         onChange={(e) => handleDeliveryStatus(d.id, e.target.value)}
                         disabled={isPending}
-                        className="text-[10px] font-bold rounded-lg px-2 py-1 border border-[#e8e5e0] bg-white focus:outline-none focus:ring-1 focus:ring-[#337485]"
+                        className="text-[10px] font-bold rounded-lg px-2 py-1 border border-[#e8e5e0] bg-white focus:outline-none focus:ring-1 focus:ring-[#1976FF]"
                       >
                         <option value="Pending">Pending</option>
                         <option value="Picked Up">Picked Up</option>
@@ -426,13 +426,13 @@ function KpiTile({
     <div
       className="rounded-md p-4 transition-colors"
       style={{
-        background: accent ? "#2D100F" : "#FFFFFF",
-        border: `1px solid ${accent ? "#2D100F" : "#E5DACA"}`,
+        background: accent ? "#1A1D23" : "#FFFFFF",
+        border: `1px solid ${accent ? "#1A1D23" : "#ECEEF1"}`,
       }}
     >
       <p
         className="text-[10px] font-bold uppercase tracking-[0.14em]"
-        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#7A8290" }}
       >
         {label}
       </p>

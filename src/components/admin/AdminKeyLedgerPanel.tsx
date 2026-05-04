@@ -11,9 +11,9 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { getKeyInventoryWithLastEvent, getKeyHistory, type KeyInventoryRow } from "@/app/actions/keyLedger";
 import { toCsv, downloadCsv, dateStampedName } from "@/lib/csv";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 const STATUS_STYLES: Record<string, { bg: string; fg: string }> = {
   InStock:  { bg: "rgba(22,163,74,0.10)",  fg: "#15803d" },
@@ -132,7 +132,7 @@ export default function AdminKeyLedgerPanel() {
           No keys match the current filter.
         </div>
       ) : (
-        <div className="rounded-md bg-white overflow-hidden" style={{ border: "1px solid #E5DACA" }}>
+        <div className="rounded-md bg-white overflow-hidden" style={{ border: "1px solid #ECEEF1" }}>
           <div className="overflow-x-auto">
             <table className="w-full text-[12px]">
               <thead>
@@ -221,7 +221,7 @@ function KeyHistoryDrawer({ keyId, onClose }: { keyId: string; onClose: () => vo
     >
       <div
         className="w-full max-w-xl rounded-md bg-white max-h-[85vh] overflow-hidden flex flex-col"
-        style={{ border: "1px solid #E5DACA", boxShadow: "0 12px 36px rgba(26,23,20,0.18)" }}
+        style={{ border: "1px solid #ECEEF1", boxShadow: "0 12px 36px rgba(26,23,20,0.18)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 py-4 border-b flex items-center justify-between gap-3" style={{ borderColor: "#e8e5e0" }}>

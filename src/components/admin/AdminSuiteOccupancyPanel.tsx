@@ -13,9 +13,9 @@ import {
   type SuiteOccupancyResult,
 } from "@/app/actions/suiteOccupancy";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 type Filter = "all" | "active" | "dormant" | "vacant";
 
@@ -121,7 +121,7 @@ export default function AdminSuiteOccupancyPanel() {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-2 text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
-        <Legend swatch="#16a34a" label="Active (mail in last 30d)" />
+        <Legend swatch="#22C55E" label="Active (mail in last 30d)" />
         <Legend swatch="#a16207" label="Dormant (occupied · no recent mail)" />
         <Legend swatch="#e8e5e0" label="Vacant" />
       </div>
@@ -202,8 +202,8 @@ function cellStyle(c: SuiteCell): React.CSSProperties {
 
 function Tile({ label, value, accent }: { label: string; value: number | string; accent: string }) {
   return (
-    <div className="rounded-md bg-white p-3" style={{ border: "1px solid #E5DACA" }}>
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#998877" }}>{label}</p>
+    <div className="rounded-md bg-white p-3" style={{ border: "1px solid #ECEEF1" }}>
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#7A8290" }}>{label}</p>
       <p className="text-2xl font-bold tabular-nums" style={{ color: accent, fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}>{value}</p>
     </div>
   );

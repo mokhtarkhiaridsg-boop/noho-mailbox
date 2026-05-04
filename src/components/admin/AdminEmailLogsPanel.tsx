@@ -16,15 +16,15 @@ type Row = {
   sentAt: string | Date | null;
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
 
 // Per-status styling (ring color + label + fill).
 function statusVisuals(status: string) {
   if (status === "sent")
-    return { color: "#16A34A", label: "Sent", bg: "rgba(22,163,74,0.12)", glow: true };
+    return { color: "#22C55E", label: "Sent", bg: "rgba(22,163,74,0.12)", glow: true };
   if (status === "failed")
     return { color: "#dc2626", label: "Failed", bg: "rgba(220,38,38,0.12)", glow: true };
   if (status === "bounced")
@@ -67,7 +67,7 @@ function kindVisuals(kind: string): {
   if (k.includes("receipt") || k.includes("renewal"))
     return {
       label: "Receipt",
-      accent: "#16A34A",
+      accent: "#22C55E",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
           <path d="M5 3 L5 21 L8 19 L11 21 L14 19 L17 21 L19 19 L19 3 Z" />
@@ -110,7 +110,7 @@ function kindVisuals(kind: string): {
   if (k.includes("payment") || k.includes("invoice") || k.includes("square"))
     return {
       label: "Payment",
-      accent: "#16A34A",
+      accent: "#22C55E",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
           <rect x="3" y="6" width="18" height="12" rx="2" />
@@ -121,7 +121,7 @@ function kindVisuals(kind: string): {
     };
   return {
     label: kind || "other",
-    accent: "#5C4540",
+    accent: "#3B4252",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
         <path d="M5 4 L19 4 L19 20 L5 20 Z" />
@@ -281,7 +281,7 @@ export function AdminEmailLogsPanel() {
           className="rounded-md bg-white px-5 py-12 text-center text-sm"
           style={{
             color: "rgba(45,16,15,0.4)",
-            border: "1px solid #E5DACA",
+            border: "1px solid #ECEEF1",
           }}
         >
           Loading email log…
@@ -291,7 +291,7 @@ export function AdminEmailLogsPanel() {
           className="rounded-md bg-white px-5 py-12 text-center text-sm"
           style={{
             color: "rgba(45,16,15,0.4)",
-            border: "1px solid #E5DACA",
+            border: "1px solid #ECEEF1",
           }}
         >
           No emails match this filter.
@@ -320,7 +320,7 @@ export function AdminEmailLogsPanel() {
                   <div
                     aria-hidden="true"
                     className="absolute left-2 top-2 bottom-2 w-px"
-                    style={{ background: "#E5DACA" }}
+                    style={{ background: "#ECEEF1" }}
                   />
                   <ul className="space-y-2">
                     {items.map((r) => {
@@ -331,10 +331,10 @@ export function AdminEmailLogsPanel() {
                           key={r.id}
                           className="relative rounded-md bg-white p-3 transition-colors"
                           style={{
-                            border: "1px solid #E5DACA",
+                            border: "1px solid #ECEEF1",
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.background = "#F4EEE3";
+                            e.currentTarget.style.background = "#F4F5F7";
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.background = "#FFFFFF";
@@ -435,7 +435,7 @@ export function AdminEmailLogsPanel() {
                                   className="ml-auto text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md transition"
                                   style={{
                                     background: copied === r.id ? "rgba(22,163,74,0.10)" : "rgba(51,116,133,0.10)",
-                                    color: copied === r.id ? "#16A34A" : NOHO_BLUE_DEEP,
+                                    color: copied === r.id ? "#22C55E" : NOHO_BLUE_DEEP,
                                   }}
                                   title="Copy reset/activation link from email body"
                                 >
@@ -473,19 +473,19 @@ function KpiTile({
 }) {
   const isAccent = accent && !danger;
   const isDanger = danger;
-  const bg = isAccent ? NOHO_INK : isDanger ? "#B91C1C" : "#FFFFFF";
+  const bg = isAccent ? NOHO_INK : isDanger ? "#EF4444" : "#FFFFFF";
   return (
     <div
       className="rounded-md p-4 transition-colors"
       style={{
         background: bg,
-        border: `1px solid ${isAccent ? NOHO_INK : isDanger ? "#B91C1C" : "#E5DACA"}`,
+        border: `1px solid ${isAccent ? NOHO_INK : isDanger ? "#EF4444" : "#ECEEF1"}`,
       }}
     >
       <p
         className="text-[10px] font-bold uppercase tracking-[0.14em]"
         style={{
-          color: isAccent || isDanger ? "rgba(247,230,194,0.6)" : "#998877",
+          color: isAccent || isDanger ? "rgba(247,230,194,0.6)" : "#7A8290",
         }}
       >
         {label}
@@ -493,7 +493,7 @@ function KpiTile({
       <p
         className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
-          color: isAccent || isDanger ? "#F7E6C2" : NOHO_INK,
+          color: isAccent || isDanger ? "#EBF2FF" : NOHO_INK,
           fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
           fontVariantNumeric: "tabular-nums",
         }}
@@ -507,7 +507,7 @@ function KpiTile({
             color:
               isAccent || isDanger
                 ? "rgba(247,230,194,0.55)"
-                : "#998877",
+                : "#7A8290",
           }}
         >
           {sub}

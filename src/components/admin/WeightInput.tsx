@@ -99,14 +99,14 @@ export function WeightInput({
           disabled={disabled}
           inputMode="decimal"
           className="flex-1 rounded-xl px-3 py-2.5 text-sm focus:outline-none disabled:opacity-50"
-          style={{ background: "#FFF9F3", border: `1px solid ${error ? "#fca5a5" : "#E8DDD0"}`, color: "#2D100F" }}
+          style={{ background: "#FFF9F3", border: `1px solid ${error ? "#fca5a5" : "#E8DDD0"}`, color: "#1A1D23" }}
         />
         <button
           type="button"
           onClick={toggleUnit}
           disabled={disabled}
           className="px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50"
-          style={{ background: "#337485", color: "#fff" }}
+          style={{ background: "#1976FF", color: "#fff" }}
           title="Toggle default input unit"
         >
           {unit}
@@ -114,14 +114,14 @@ export function WeightInput({
       </div>
       <div className="flex items-center justify-between mt-1 min-h-[16px]">
         {error ? (
-          <p className="text-[10px] font-semibold" style={{ color: "#b91c1c" }}>{error}</p>
+          <p className="text-[10px] font-semibold" style={{ color: "#EF4444" }}>{error}</p>
         ) : (
-          <span className="text-[10px]" style={{ color: "#7A6050" }}>
+          <span className="text-[10px]" style={{ color: "#7A8290" }}>
             Enter as oz, lb, or &ldquo;lb&nbsp;oz&rdquo; — auto-converts
           </span>
         )}
         {ozPreview && (
-          <span className="text-[10px] font-bold" style={{ color: "#16a34a" }}>{ozPreview}</span>
+          <span className="text-[10px] font-bold" style={{ color: "#22C55E" }}>{ozPreview}</span>
         )}
       </div>
     </div>

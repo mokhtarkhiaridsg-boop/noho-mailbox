@@ -15,9 +15,9 @@ import {
   type AffiliateRollup,
 } from "@/app/actions/affiliateEarnings";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 function fmtCents(c: number): string {
   return `$${(c / 100).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -85,7 +85,7 @@ export default function AdminAffiliateEarningsPanel() {
           </p>
           <div className="flex items-center gap-3 text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
             <span className="inline-flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: NOHO_BLUE }} /> Closed</span>
-            <span className="inline-flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "#16a34a" }} /> Paid</span>
+            <span className="inline-flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "#22C55E" }} /> Paid</span>
           </div>
         </div>
         <BarChart series={data?.monthly ?? []} />
@@ -165,7 +165,7 @@ export default function AdminAffiliateEarningsPanel() {
                   <p className="text-[13px] font-black tabular-nums shrink-0" style={{ color: "#92400e" }}>{fmtCentsDecimal(row.commissionCents)}</p>
                   <button type="button" onClick={() => payoutNow(row.id)} disabled={pending}
                     className="px-2.5 py-1.5 rounded-lg text-[10.5px] font-black text-white disabled:opacity-50 shrink-0"
-                    style={{ background: "linear-gradient(135deg,#16A34A,#15803d)" }}>
+                    style={{ background: "linear-gradient(135deg,#22C55E,#15803d)" }}>
                     Mark paid
                   </button>
                 </li>
@@ -180,8 +180,8 @@ export default function AdminAffiliateEarningsPanel() {
 
 function Tile({ label, value, accent, sub }: { label: string; value: number | string; accent: string; sub?: string }) {
   return (
-    <div className="rounded-md bg-white p-3" style={{ border: "1px solid #E5DACA" }}>
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#998877" }}>{label}</p>
+    <div className="rounded-md bg-white p-3" style={{ border: "1px solid #ECEEF1" }}>
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#7A8290" }}>{label}</p>
       <p className="text-2xl font-bold tabular-nums" style={{ color: accent, fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}>{value}</p>
       {sub && <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>{sub}</p>}
     </div>
@@ -251,7 +251,7 @@ function BarChart({ series }: { series: { monthLabel: string; closedCents: numbe
                   y={innerH - paidH}
                   width={barW}
                   height={paidH}
-                  fill="#16a34a"
+                  fill="#22C55E"
                   rx={2}
                 >
                   <title>Paid in {s.monthLabel}: ${(s.paidCents / 100).toFixed(2)}</title>

@@ -33,13 +33,13 @@ type Props = {
   tenants: TenantRow[];
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
-const NOHO_RED = "#E70013";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_GREEN = "#16A34A";
+const NOHO_RED = "#FF3B30";
+const NOHO_CREAM = "#EBF2FF";
+const NOHO_GREEN = "#22C55E";
 
 const STATUS_META: Record<
   string,
@@ -61,7 +61,7 @@ const STATUS_META: Record<
   },
   paused: {
     label: "Paused",
-    color: "#7A6050",
+    color: "#7A8290",
     tint: "rgba(122,96,80,0.10)",
     sub: "On hold",
     emoji: "⏸",
@@ -109,7 +109,7 @@ function huesFor(seed: string): { from: string; to: string } {
     [NOHO_BLUE, NOHO_BLUE_DEEP],
     [NOHO_INK, "#1F0807"],
     ["#7C3AED", "#5B21B6"],
-    ["#B07030", "#8B5A24"],
+    ["#F59E0B", "#8B5A24"],
     [NOHO_GREEN, "#166534"],
     [NOHO_RED, "#991b1b"],
   ];
@@ -439,9 +439,9 @@ function TenantCard({
           <div
             className="w-10 h-10 rounded-md shrink-0 flex items-center justify-center font-bold text-[12px]"
             style={{
-              background: "#F4EEE3",
-              color: "#1A1614",
-              border: "1px solid #E5DACA",
+              background: "#F4F5F7",
+              color: "#1A1D23",
+              border: "1px solid #ECEEF1",
             }}
           >
             {initials(t.name)}
@@ -712,7 +712,7 @@ function NotesEditor({
         style={{
           background: dirty ? NOHO_INK : `${NOHO_INK}11`,
           color: dirty ? "#FFFFFF" : `${NOHO_INK}66`,
-          border: `1px solid ${dirty ? NOHO_INK : "#E5DACA"}`,
+          border: `1px solid ${dirty ? NOHO_INK : "#ECEEF1"}`,
         }}
       >
         {dirty ? "Save notes" : "✓ Saved"}

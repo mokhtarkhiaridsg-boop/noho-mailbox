@@ -13,9 +13,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { omniSearch, type OmniHit } from "@/app/actions/adminOmni";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 type StaticAction = {
   kind: "nav";
@@ -147,7 +147,7 @@ export function AdminCommandPalette({ open, onClose }: { open: boolean; onClose:
     >
       <div
         className="w-full max-w-2xl rounded-md overflow-hidden"
-        style={{ background: "white", border: "1px solid #E5DACA", boxShadow: "0 16px 48px rgba(26,23,20,0.20)" }}
+        style={{ background: "white", border: "1px solid #ECEEF1", boxShadow: "0 16px 48px rgba(26,23,20,0.20)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b" style={{ borderColor: "#e8e5e0" }}>

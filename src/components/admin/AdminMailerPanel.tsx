@@ -35,9 +35,9 @@ import {
 } from "@/app/actions/mailerInbox";
 import type { NoticeTemplate } from "@/lib/notice-templates";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const PANE_BORDER = "#e8e5e0";
 
 type FolderKey = "inbox" | "sent" | "archived" | "templates";

@@ -10,10 +10,10 @@
 import { useRef, useState, useTransition } from "react";
 import { previewOnboardCsv, commitOnboardCsv, type OnboardRow } from "@/app/actions/bulkOnboard";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_RED = "#E70013";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
+const NOHO_RED = "#FF3B30";
 
 const SAMPLE_CSV = `name,email,phone,suite,plan,notes,kyc
 Mariem Saidi,mariem@example.com,(818) 555-1234,042,Basic,Walk-in signup,Pending
@@ -66,7 +66,7 @@ export default function AdminCsvOnboardPanel() {
       </div>
 
       {/* Step 1: input */}
-      <div className="rounded-md bg-white p-4 space-y-3" style={{ border: "1px solid #E5DACA" }}>
+      <div className="rounded-md bg-white p-4 space-y-3" style={{ border: "1px solid #ECEEF1" }}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
             1 · Paste or upload CSV
@@ -106,7 +106,7 @@ export default function AdminCsvOnboardPanel() {
 
       {/* Step 2: preview */}
       {preview && (
-        <div className="rounded-md bg-white p-4 space-y-3" style={{ border: "1px solid #E5DACA" }}>
+        <div className="rounded-md bg-white p-4 space-y-3" style={{ border: "1px solid #ECEEF1" }}>
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
               2 · Preview · {preview.rows.length} row{preview.rows.length === 1 ? "" : "s"}

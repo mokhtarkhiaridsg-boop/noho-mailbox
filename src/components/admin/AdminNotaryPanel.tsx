@@ -20,18 +20,18 @@ type Props = {
 };
 
 const T = {
-  bg: "#FAF7F2",
+  bg: "#F4F5F7",
   surface: "#FFFFFF",
-  surfaceAlt: "#F4EEE3",
-  border: "#E5DACA",
-  ink: "#1A1614",
-  inkSoft: "#5C4540",
-  inkFaint: "#998877",
-  accent: "#2D100F",
-  blue: "#337485",
-  success: "#16A34A",
-  danger: "#B91C1C",
-  warning: "#B07030",
+  surfaceAlt: "#F4F5F7",
+  border: "#ECEEF1",
+  ink: "#1A1D23",
+  inkSoft: "#3B4252",
+  inkFaint: "#7A8290",
+  accent: "#1A1D23",
+  blue: "#1976FF",
+  success: "#22C55E",
+  danger: "#EF4444",
+  warning: "#F59E0B",
 };
 const MONO = "ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace";
 const TAB_NUM: React.CSSProperties = {

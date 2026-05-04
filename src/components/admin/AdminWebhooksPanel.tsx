@@ -20,9 +20,9 @@ import {
 } from "@/app/actions/webhooks";
 import { ALL_WEBHOOK_EVENTS, type WebhookEvent } from "@/lib/webhooks";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 type EditingState =
   | { mode: "new" }
@@ -89,7 +89,7 @@ export default function AdminWebhooksPanel() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-3">
         {/* List */}
-        <div className="rounded-md bg-white" style={{ border: "1px solid #E5DACA" }}>
+        <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
           <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid #e8e5e0" }}>
             <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
               Endpoints ({rows?.length ?? 0})
@@ -171,7 +171,7 @@ export default function AdminWebhooksPanel() {
         </div>
 
         {/* Editor */}
-        <div className="rounded-md bg-white p-4" style={{ border: "1px solid #E5DACA" }}>
+        <div className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}>
           {!editing ? (
             <div className="text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
               Pick a webhook to edit, or click <strong>+ New webhook</strong>.
@@ -225,7 +225,7 @@ function StatusDot({ active, lastStatus }: { active: boolean; lastStatus: string
   const ok = lastStatus === "ok";
   return (
     <span className="text-[10px] font-bold flex items-center gap-1">
-      <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: ok ? "#16a34a" : "#e70013", boxShadow: `0 0 4px ${ok ? "#16a34a" : "#e70013"}` }} />
+      <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: ok ? "#22C55E" : "#e70013", boxShadow: `0 0 4px ${ok ? "#22C55E" : "#e70013"}` }} />
       <span style={{ color: ok ? "#15803d" : "#991b1b" }}>{ok ? "delivering" : lastStatus}</span>
     </span>
   );
@@ -395,7 +395,7 @@ function DeliveriesDrawer({ endpointId, endpoint, onClose }: {
   }, [endpointId]);
 
   return (
-    <div className="rounded-md bg-white p-4" style={{ border: "1px solid #E5DACA" }}>
+    <div className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}>
       <div className="flex items-center justify-between gap-2 mb-2">
         <div>
           <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>

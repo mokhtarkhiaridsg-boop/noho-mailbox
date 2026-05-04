@@ -10,11 +10,11 @@ type Props = {
   customers: Customer[];
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_RED = "#E70013";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
+const NOHO_CREAM = "#EBF2FF";
+const NOHO_RED = "#FF3B30";
 const NOHO_AMBER = "#F5A623";
 
 function monthKey(d: Date): string {
@@ -95,7 +95,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
     return total;
   }, [customers]);
 
-  const SOURCE_COLORS = [NOHO_BLUE, NOHO_INK, NOHO_AMBER, "#7C3AED", NOHO_RED, "#16A34A"];
+  const SOURCE_COLORS = [NOHO_BLUE, NOHO_INK, NOHO_AMBER, "#7C3AED", NOHO_RED, "#22C55E"];
 
   return (
     <div className="space-y-6">
@@ -140,7 +140,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
       {/* ─── 12-month bar chart ─────────────────────────────────────── */}
       <div
         className="rounded-md bg-white p-4"
-        style={{ border: "1px solid #E5DACA" }}
+        style={{ border: "1px solid #ECEEF1" }}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-black text-sm uppercase tracking-wide" style={{ color: NOHO_INK }}>
@@ -183,7 +183,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div
           className="rounded-md bg-white p-4"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
           <h3 className="font-black text-sm uppercase tracking-wide mb-4" style={{ color: NOHO_INK }}>
             Payment sources
@@ -221,7 +221,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
 
         <div
           className="rounded-md bg-white p-4"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
           <h3 className="font-black text-sm uppercase tracking-wide mb-4" style={{ color: NOHO_INK }}>
             Top customers
@@ -244,9 +244,9 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
                     <span
                       className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0"
                       style={{
-                        background: i === 0 ? NOHO_AMBER : "#F4EEE3",
+                        background: i === 0 ? NOHO_AMBER : "#F4F5F7",
                         color: i === 0 ? "white" : "rgba(45,16,15,0.7)",
-                        border: `1px solid ${i === 0 ? NOHO_AMBER : "#E5DACA"}`,
+                        border: `1px solid ${i === 0 ? NOHO_AMBER : "#ECEEF1"}`,
                       }}
                     >
                       {i + 1}
@@ -257,7 +257,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
                       </p>
                       <div
                         className="h-1 rounded-full mt-1 overflow-hidden"
-                        style={{ background: "#E5DACA" }}
+                        style={{ background: "#ECEEF1" }}
                       >
                         <div
                           className="h-full rounded-full"
@@ -282,7 +282,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
       {/* ─── Recent payments ────────────────────────────────────────── */}
       <div
         className="rounded-md overflow-hidden bg-white"
-        style={{ border: "1px solid #E5DACA" }}
+        style={{ border: "1px solid #ECEEF1" }}
       >
         <div
           className="px-5 py-4 flex items-center justify-between"
@@ -310,8 +310,8 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
                     aria-hidden="true"
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{
-                      background: p.status === "COMPLETED" ? "#16A34A" : p.status === "PENDING" ? NOHO_AMBER : "rgba(45,16,15,0.3)",
-                      boxShadow: p.status === "COMPLETED" ? "0 0 6px #16A34A" : undefined,
+                      background: p.status === "COMPLETED" ? "#22C55E" : p.status === "PENDING" ? NOHO_AMBER : "rgba(45,16,15,0.3)",
+                      boxShadow: p.status === "COMPLETED" ? "0 0 6px #22C55E" : undefined,
                     }}
                   />
                   <div className="min-w-0">
@@ -356,19 +356,19 @@ function KpiTile({
       className="rounded-md p-4 transition-colors"
       style={{
         background: accent ? NOHO_INK : "#FFFFFF",
-        border: `1px solid ${accent ? NOHO_INK : "#E5DACA"}`,
+        border: `1px solid ${accent ? NOHO_INK : "#ECEEF1"}`,
       }}
     >
       <p
         className="text-[10px] font-bold uppercase tracking-[0.14em]"
-        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#7A8290" }}
       >
         {label}
       </p>
       <p
         className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
-          color: accent ? "#F7E6C2" : NOHO_INK,
+          color: accent ? "#EBF2FF" : NOHO_INK,
           fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
           fontVariantNumeric: "tabular-nums",
         }}
@@ -381,7 +381,7 @@ function KpiTile({
             viewBox="0 0 12 12"
             className="w-2.5 h-2.5"
             fill="none"
-            stroke={accent ? NOHO_CREAM : delta >= 0 ? "#16A34A" : NOHO_RED}
+            stroke={accent ? NOHO_CREAM : delta >= 0 ? "#22C55E" : NOHO_RED}
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -392,7 +392,7 @@ function KpiTile({
           </svg>
           <p
             className="text-[10px] font-black"
-            style={{ color: accent ? "rgba(255,255,255,0.7)" : delta >= 0 ? "#16A34A" : NOHO_RED }}
+            style={{ color: accent ? "rgba(255,255,255,0.7)" : delta >= 0 ? "#22C55E" : NOHO_RED }}
           >
             {delta >= 0 ? "+" : ""}{delta}% vs last month
           </p>

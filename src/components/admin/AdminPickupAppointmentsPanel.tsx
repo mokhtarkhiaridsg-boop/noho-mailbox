@@ -18,9 +18,9 @@ import {
   type AdminPickupRow,
 } from "@/app/actions/pickupScheduling";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 type Status = "all" | "Scheduled" | "Checked-In" | "Completed" | "No-Show" | "Cancelled";
 
@@ -90,7 +90,7 @@ export default function AdminPickupAppointmentsPanel() {
       </div>
 
       {/* Queue */}
-      <div className="rounded-md bg-white" style={{ border: "1px solid #E5DACA" }}>
+      <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
         {!data ? (
           <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading queue…</p>
         ) : filteredRows.length === 0 ? (
@@ -145,8 +145,8 @@ export default function AdminPickupAppointmentsPanel() {
 
 function StatTile({ label, value, accent }: { label: string; value: number; accent: string }) {
   return (
-    <div className="rounded-md bg-white p-3" style={{ border: "1px solid #E5DACA" }}>
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#998877" }}>{label}</p>
+    <div className="rounded-md bg-white p-3" style={{ border: "1px solid #ECEEF1" }}>
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#7A8290" }}>{label}</p>
       <p className="text-2xl font-bold tabular-nums" style={{ color: accent, fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}>{value}</p>
     </div>
   );
@@ -154,7 +154,7 @@ function StatTile({ label, value, accent }: { label: string; value: number; acce
 
 function StatusChip({ status }: { status: string }) {
   const map: Record<string, { bg: string; fg: string }> = {
-    "Scheduled":  { bg: "rgba(51,116,133,0.10)", fg: "#23596A" },
+    "Scheduled":  { bg: "rgba(51,116,133,0.10)", fg: "#0F5BD9" },
     "Checked-In": { bg: "rgba(245,166,35,0.14)", fg: "#92400e" },
     "Completed":  { bg: "rgba(22,163,74,0.14)",  fg: "#15803d" },
     "No-Show":    { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" },
@@ -171,7 +171,7 @@ function StatusChip({ status }: { status: string }) {
 function ActionBtn({ label, tone, onClick, disabled }: { label: string; tone: "blue" | "green" | "danger" | "muted"; onClick: () => void; disabled?: boolean }) {
   const styles: Record<string, { bg: string; fg: string; border: string }> = {
     blue:   { bg: "white", fg: NOHO_BLUE_DEEP, border: NOHO_BLUE },
-    green:  { bg: "linear-gradient(135deg,#16A34A,#15803d)", fg: "white", border: "#15803d" },
+    green:  { bg: "linear-gradient(135deg,#22C55E,#15803d)", fg: "white", border: "#15803d" },
     danger: { bg: "white", fg: "#991b1b", border: "rgba(231,0,19,0.40)" },
     muted:  { bg: "white", fg: "rgba(45,16,15,0.55)", border: "#e8e5e0" },
   };

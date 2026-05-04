@@ -25,18 +25,18 @@ type CancelRow = {
   };
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
-const NOHO_RED = "#E70013";
+const NOHO_RED = "#FF3B30";
 
 // Cancellation lifecycle: Pending → Approved (30-day grace) → Completed.
 // Denied is a terminal off-ramp.
 const LIFECYCLE: Array<{ id: string; label: string; sub: string; color: string }> = [
   { id: "Pending", label: "Pending", sub: "Awaiting review", color: NOHO_AMBER },
   { id: "Approved", label: "In grace", sub: "30-day window", color: NOHO_BLUE },
-  { id: "Completed", label: "Completed", sub: "Mailbox closed", color: "#16A34A" },
+  { id: "Completed", label: "Completed", sub: "Mailbox closed", color: "#22C55E" },
 ];
 
 function initials(name: string): string {
@@ -50,8 +50,8 @@ function StatusPill({ status }: { status: string }) {
   const map: Record<string, { bg: string; color: string; dot: string }> = {
     Pending: { bg: "rgba(245,166,35,0.12)", color: "#92400e", dot: NOHO_AMBER },
     Approved: { bg: "rgba(51,116,133,0.10)", color: NOHO_BLUE_DEEP, dot: NOHO_BLUE },
-    Completed: { bg: "rgba(22,163,74,0.10)", color: "#15803d", dot: "#16A34A" },
-    Denied: { bg: "rgba(220,38,38,0.10)", color: "#b91c1c", dot: "#dc2626" },
+    Completed: { bg: "rgba(22,163,74,0.10)", color: "#15803d", dot: "#22C55E" },
+    Denied: { bg: "rgba(220,38,38,0.10)", color: "#EF4444", dot: "#dc2626" },
   };
   const c = map[status] ?? { bg: "rgba(0,0,0,0.06)", color: "#555", dot: "#777" };
   return (
@@ -111,7 +111,7 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
       className="rounded-md overflow-hidden transition-colors"
       style={{
         background: "white",
-        border: "1px solid #E5DACA",
+        border: "1px solid #ECEEF1",
       }}
     >
       <button
@@ -122,9 +122,9 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
         <div
           className="w-10 h-10 shrink-0 rounded-md flex items-center justify-center font-bold text-[12px] relative"
           style={{
-            background: "#F4EEE3",
+            background: "#F4F5F7",
             color: NOHO_INK,
-            border: "1px solid #E5DACA",
+            border: "1px solid #ECEEF1",
           }}
         >
           {initials(row.user.name)}
@@ -191,7 +191,7 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
                 />
               </div>
               {grace.daysLeft <= 3 && (
-                <p className="text-[10px] font-black mt-1" style={{ color: "#b91c1c" }}>
+                <p className="text-[10px] font-black mt-1" style={{ color: "#EF4444" }}>
                   ⚠ Grace ends soon — complete cancellation when ready
                 </p>
               )}
@@ -266,7 +266,7 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
                   doAction(() => denyCancellation(row.id, notes ?? undefined), "Denied");
                 }}
                 className="text-xs font-black px-3 py-1.5 rounded-xl border disabled:opacity-40"
-                style={{ borderColor: "rgba(220,38,38,0.4)", color: "#b91c1c" }}
+                style={{ borderColor: "rgba(220,38,38,0.4)", color: "#EF4444" }}
               >
                 Deny
               </button>
@@ -282,7 +282,7 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
                   doAction(() => completeCancellation(row.id), "Cancellation completed");
                 }}
                 className="text-xs font-black px-3 py-1.5 rounded-xl border disabled:opacity-40"
-                style={{ borderColor: "rgba(220,38,38,0.6)", color: "#b91c1c" }}
+                style={{ borderColor: "rgba(220,38,38,0.6)", color: "#EF4444" }}
               >
                 Complete cancellation
               </button>
@@ -292,7 +292,7 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
           {msg && (
             <p
               className="text-xs font-bold"
-              style={{ color: msg.startsWith("✓") ? "#16a34a" : "#dc2626" }}
+              style={{ color: msg.startsWith("✓") ? "#22C55E" : "#dc2626" }}
             >
               {msg}
             </p>
@@ -362,7 +362,7 @@ export function AdminCancellationsPanel() {
           style={{
             background: "#FFFFFF",
             color: NOHO_BLUE,
-            border: "1px solid #E5DACA",
+            border: "1px solid #ECEEF1",
           }}
         >
           Refresh
@@ -380,7 +380,7 @@ export function AdminCancellationsPanel() {
       {/* ─── Lifecycle stepper ──────────────────────────────────────── */}
       <div
         className="rounded-md p-4 bg-white"
-        style={{ border: "1px solid #E5DACA" }}
+        style={{ border: "1px solid #ECEEF1" }}
       >
         <h3 className="text-[10px] font-black uppercase tracking-[0.18em] mb-4" style={{ color: "rgba(45,16,15,0.5)" }}>
           Lifecycle
@@ -469,7 +469,7 @@ export function AdminCancellationsPanel() {
       {rows !== null && filtered.length === 0 && (
         <div
           className="rounded-md bg-white p-8 text-center"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
           <p className="text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
             No {filter !== "All" ? filter.toLowerCase() : ""} cancellation requests
@@ -521,19 +521,19 @@ function KpiTile({
       className="rounded-md p-4 transition-colors"
       style={{
         background: accent ? NOHO_INK : "#FFFFFF",
-        border: `1px solid ${accent ? NOHO_INK : "#E5DACA"}`,
+        border: `1px solid ${accent ? NOHO_INK : "#ECEEF1"}`,
       }}
     >
       <p
         className="text-[10px] font-bold uppercase tracking-[0.14em]"
-        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#7A8290" }}
       >
         {label}
       </p>
       <p
         className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
-          color: accent ? "#F7E6C2" : NOHO_INK,
+          color: accent ? "#EBF2FF" : NOHO_INK,
           fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
           fontVariantNumeric: "tabular-nums",
         }}
@@ -544,7 +544,7 @@ function KpiTile({
         <p
           className="text-[10px] font-medium mt-1"
           style={{
-            color: accent ? "rgba(247,230,194,0.55)" : "#998877",
+            color: accent ? "rgba(247,230,194,0.55)" : "#7A8290",
           }}
         >
           {sub}

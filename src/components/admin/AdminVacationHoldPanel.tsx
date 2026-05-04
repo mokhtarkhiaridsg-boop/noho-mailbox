@@ -18,9 +18,9 @@ import {
   runVacationHoldAutoResume,
 } from "@/app/actions/mailPreferences";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 type HoldRow = Awaited<ReturnType<typeof listActiveVacationHolds>>[number];
 
@@ -107,7 +107,7 @@ export default function AdminVacationHoldPanel() {
           className="rounded-md border border-dashed p-5 flex items-center gap-3"
           style={{ borderColor: "rgba(22,163,74,0.40)", background: "rgba(22,163,74,0.04)" }}
         >
-          <span className="inline-block w-8 h-8 rounded-full flex items-center justify-center text-base font-black text-white shrink-0" style={{ background: "#16A34A" }}>✓</span>
+          <span className="inline-block w-8 h-8 rounded-full flex items-center justify-center text-base font-black text-white shrink-0" style={{ background: "#22C55E" }}>✓</span>
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "#15803d" }}>
               No active holds
@@ -131,7 +131,7 @@ export default function AdminVacationHoldPanel() {
               <li
                 key={h.id}
                 className="rounded-md bg-white p-4 flex items-center gap-3 flex-wrap"
-                style={{ border: "1px solid #E5DACA" }}
+                style={{ border: "1px solid #ECEEF1" }}
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-black truncate flex items-center gap-2 flex-wrap" style={{ color: NOHO_INK }}>

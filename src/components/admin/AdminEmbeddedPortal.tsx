@@ -17,13 +17,13 @@ type Props = {
   quickSteps?: string[];
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
-const NOHO_RED = "#E70013";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_GREEN = "#16A34A";
+const NOHO_RED = "#FF3B30";
+const NOHO_CREAM = "#EBF2FF";
+const NOHO_GREEN = "#22C55E";
 
 // Per-carrier brand kit — colors come from each carrier's livery so the embed
 // chrome instantly cues which portal admin is on. Stays inside NOHO design
@@ -261,7 +261,7 @@ export function AdminEmbeddedPortal({ title, subtitle, url, quickSteps }: Props)
         {steps.length > 0 && (
           <div
             className="rounded-md p-4 bg-white lg:col-span-2"
-            style={{ border: "1px solid #E5DACA" }}
+            style={{ border: "1px solid #ECEEF1" }}
           >
             <div className="flex items-center gap-2 mb-3">
               <div
@@ -307,7 +307,7 @@ export function AdminEmbeddedPortal({ title, subtitle, url, quickSteps }: Props)
         {links.length > 0 && (
           <div
             className="rounded-md p-4 bg-white"
-            style={{ border: "1px solid #E5DACA" }}
+            style={{ border: "1px solid #ECEEF1" }}
           >
             <div className="flex items-center gap-2 mb-3">
               <div
@@ -333,7 +333,7 @@ export function AdminEmbeddedPortal({ title, subtitle, url, quickSteps }: Props)
                     href={l.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block rounded-lg p-2 transition-all hover:bg-[#F7E6C2]/40 group"
+                    className="block rounded-lg p-2 transition-all hover:bg-[#EBF2FF]/40 group"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
@@ -370,7 +370,7 @@ export function AdminEmbeddedPortal({ title, subtitle, url, quickSteps }: Props)
         <div
           className="rounded-md bg-white overflow-hidden relative"
           style={{
-            border: "1px solid #E5DACA",
+            border: "1px solid #ECEEF1",
             height: "calc(100vh - 380px)",
             minHeight: 480,
           }}

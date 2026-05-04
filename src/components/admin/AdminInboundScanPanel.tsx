@@ -38,10 +38,10 @@ import { findGuestPickupByToken, markGuestAuthUsed } from "@/app/actions/guestPi
 import { parseWeightInput } from "@/lib/units";
 import { getRecipientSuggestions, type RecipientSuggestion } from "@/app/actions/recipientSuggestions";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
-const NOHO_CREAM = "#F7E6C2";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
+const NOHO_CREAM = "#EBF2FF";
 
 // iter-78: Lightbox overlay for package photos. Admin clicks any photo
 // thumbnail (pickup match card, recent scans row, dropoff row, customer
@@ -85,7 +85,7 @@ function PhotoLightbox({ src, onClose }: { src: string; onClose: () => void }) {
         onClick={onClose}
         aria-label="Close"
         className="absolute top-5 right-5 px-3 py-2 rounded-lg text-sm font-bold"
-        style={{ background: "rgba(255,255,255,0.92)", color: "#2D100F" }}
+        style={{ background: "rgba(255,255,255,0.92)", color: "#1A1D23" }}
       >
         Close · Esc
       </button>
@@ -897,7 +897,7 @@ export function AdminInboundScanPanel() {
 
       {/* Tracking input + scan button */}
       <div
-        className="rounded-md bg-white p-4" style={{ border: "1px solid #E5DACA" }}
+        className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}
       >
         <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
           Tracking number
@@ -967,7 +967,7 @@ export function AdminInboundScanPanel() {
               }
             }}
             placeholder="Scan tracking #, customer's QR, or type a name — Enter submit · Esc clear"
-            className="flex-1 min-w-0 rounded-xl border px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+            className="flex-1 min-w-0 rounded-xl border px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
             style={{ borderColor: "#e8e5e0", color: NOHO_INK, background: "white" }}
             autoFocus
           />
@@ -1090,7 +1090,7 @@ export function AdminInboundScanPanel() {
       {/* Customer picker */}
       <div
         className="rounded-md bg-white p-4 relative"
-        style={{ border: "1px solid #E5DACA" }}
+        style={{ border: "1px solid #ECEEF1" }}
       >
         <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
           <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
@@ -1105,7 +1105,7 @@ export function AdminInboundScanPanel() {
               type="checkbox"
               checked={keepCustomer}
               onChange={(e) => setKeepCustomer(e.target.checked)}
-              className="w-3.5 h-3.5 accent-[#337485]"
+              className="w-3.5 h-3.5 accent-[#1976FF]"
             />
             Stay on this customer
             {keepCustomer && (
@@ -1120,20 +1120,20 @@ export function AdminInboundScanPanel() {
           value={customerQuery}
           onChange={(e) => { setCustomerQuery(e.target.value); setPickedCustomer(null); }}
           placeholder="e.g. 042 or Sarah Johnson"
-          className="mt-2 w-full rounded-xl border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
-          style={{ borderColor: pickedCustomer ? "#16a34a" : "#e8e5e0", color: NOHO_INK, background: "white" }}
+          className="mt-2 w-full rounded-xl border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
+          style={{ borderColor: pickedCustomer ? "#22C55E" : "#e8e5e0", color: NOHO_INK, background: "white" }}
         />
         {customerMatches.length > 0 && !pickedCustomer && (
           <div
             className="absolute left-4 right-4 mt-1 rounded-md bg-white z-20 max-h-64 overflow-auto"
-            style={{ border: "1px solid #E5DACA", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
+            style={{ border: "1px solid #ECEEF1", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
           >
             {customerMatches.map((c) => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => pick(c)}
-                className="w-full text-left px-3 py-2 text-xs hover:bg-[#337485]/10 flex items-center justify-between"
+                className="w-full text-left px-3 py-2 text-xs hover:bg-[#1976FF]/10 flex items-center justify-between"
               >
                 <span>
                   <strong style={{ color: NOHO_INK }}>{c.name ?? "(no name)"}</strong>
@@ -1164,8 +1164,8 @@ export function AdminInboundScanPanel() {
                     title={`${s.count} past package${s.count === 1 ? "" : "s"} · last ${new Date(s.lastUsedIso).toLocaleDateString()}`}
                     className="px-2 py-0.5 rounded-full text-[10.5px] font-bold transition-colors"
                     style={{
-                      background: recipientName === s.name ? "#337485" : "rgba(51,116,133,0.10)",
-                      color: recipientName === s.name ? "white" : "#23596A",
+                      background: recipientName === s.name ? "#1976FF" : "rgba(51,116,133,0.10)",
+                      color: recipientName === s.name ? "white" : "#0F5BD9",
                       border: "1px solid rgba(51,116,133,0.20)",
                     }}>
                     {s.name}
@@ -1179,7 +1179,7 @@ export function AdminInboundScanPanel() {
               value={recipientName}
               onChange={(e) => setRecipientName(e.target.value)}
               placeholder={`Defaults to ${pickedCustomer.name ?? "customer name"}`}
-              className="mt-1 w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+              className="mt-1 w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
               style={{ borderColor: "#e8e5e0", color: NOHO_INK, background: "white" }}
             />
           </div>
@@ -1190,7 +1190,7 @@ export function AdminInboundScanPanel() {
           customer's mail-arrived email + dashboard show real data. */}
       {pickedCustomer && (
         <div
-          className="rounded-md bg-white p-4" style={{ border: "1px solid #E5DACA" }}
+          className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}
         >
           {/* Photo row */}
           <div className="flex items-start gap-3 mb-3 pb-3 border-b" style={{ borderColor: "#e8e5e0" }}>
@@ -1246,7 +1246,7 @@ export function AdminInboundScanPanel() {
               value={weightInput}
               onChange={(e) => setWeightInput(e.target.value)}
               placeholder="2 lb 6 oz · 36 oz · 2.5 lb"
-              className="mt-1 w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+              className="mt-1 w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
               style={{ borderColor: "#e8e5e0", color: NOHO_INK, background: "white" }}
             />
             {weightInput && (() => {
@@ -1268,7 +1268,7 @@ export function AdminInboundScanPanel() {
               value={dimensions}
               onChange={(e) => setDimensions(e.target.value)}
               placeholder="12x9x4 in"
-              className="mt-1 w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
+              className="mt-1 w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
               style={{ borderColor: "#e8e5e0", color: NOHO_INK, background: "white" }}
             />
             {dimensions && looksOversize(dimensions) ? (
@@ -1432,11 +1432,11 @@ function DropoffForm({
   onClear: () => void;
 }) {
   const labelStyle = "text-[10px] font-black uppercase tracking-[0.16em]";
-  const inputCls = "mt-1 w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]/30";
+  const inputCls = "mt-1 w-full rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30";
   const inputStyle = { borderColor: "#e8e5e0", color: NOHO_INK, background: "white" } as const;
   return (
     <div
-      className="rounded-md bg-white p-4 space-y-3" style={{ border: "1px solid #E5DACA" }}
+      className="rounded-md bg-white p-4 space-y-3" style={{ border: "1px solid #ECEEF1" }}
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
@@ -1686,7 +1686,7 @@ function CustomerPickupCard({
     <div
       className="rounded-md p-4"
       style={{
-        border: "1px solid #16A34A",
+        border: "1px solid #22C55E",
         background: "rgba(22,163,74,0.04)",
       }}
     >
@@ -1756,9 +1756,9 @@ function CustomerPickupCard({
                 title="Hand this package to the customer in person and mark it picked up"
                 className="shrink-0 px-2.5 py-1.5 rounded-lg text-[11px] font-black border disabled:opacity-50"
                 style={{
-                  borderColor: "#16A34A",
+                  borderColor: "#22C55E",
                   color: "white",
-                  background: pending ? "#15803d" : "#16A34A",
+                  background: pending ? "#15803d" : "#22C55E",
                 }}
               >
                 Picked up ✓
@@ -1836,7 +1836,7 @@ function PickupMatchPanel({
   if (looking) {
     return (
       <div
-        className="rounded-md bg-white p-4 text-center text-[12px] font-bold" style={{ border: "1px solid #E5DACA" }}
+        className="rounded-md bg-white p-4 text-center text-[12px] font-bold" style={{ border: "1px solid #ECEEF1" }}
       >
         Looking up "{tracking}"…
       </div>
@@ -1950,7 +1950,7 @@ function PickupMatchPanel({
     <div
       className="rounded-md p-4"
       style={{
-        border: "1px solid #16A34A",
+        border: "1px solid #22C55E",
         background: "rgba(22,163,74,0.04)",
       }}
     >
@@ -1963,7 +1963,7 @@ function PickupMatchPanel({
             title="Click to enlarge"
             onClick={() => openLightbox(match.exteriorImageUrl!)}
             className="shrink-0 w-20 h-20 rounded-xl object-cover border cursor-zoom-in"
-            style={{ borderColor: "#16A34A" }}
+            style={{ borderColor: "#22C55E" }}
           />
         ) : (
           <span
@@ -2013,7 +2013,7 @@ function PickupMatchPanel({
           onClick={onConfirm}
           disabled={pending}
           className="flex-1 h-10 rounded-md text-white text-sm font-bold uppercase tracking-[0.08em] disabled:opacity-40 transition-colors"
-          style={{ background: "#16A34A", border: "1px solid #15803d" }}
+          style={{ background: "#22C55E", border: "1px solid #15803d" }}
         >
           {pending ? "Confirming…" : "Confirm picked up ✓"}
         </button>
@@ -2163,8 +2163,8 @@ function RecentDropoffsList({
                 title={`Mark all ${awaitingByCarrier[c]} awaiting ${c} dropoff${awaitingByCarrier[c] === 1 ? "" : "s"} as picked up by carrier`}
                 className="px-2.5 py-1.5 rounded-lg text-[11px] font-black border disabled:opacity-50"
                 style={{
-                  background: pendingCarrier === c ? "#15803d" : "#16A34A",
-                  borderColor: "#16A34A",
+                  background: pendingCarrier === c ? "#15803d" : "#22C55E",
+                  borderColor: "#22C55E",
                   color: "white",
                 }}
               >
@@ -2314,9 +2314,9 @@ function RecentDropoffRow({ row: r, onChanged }: { row: RecentDropoff; onChanged
               title="Mark this dropoff as collected by the carrier sweep"
               className="px-2.5 py-1.5 rounded-lg text-[11px] font-black border disabled:opacity-50"
               style={{
-                borderColor: "#16A34A",
+                borderColor: "#22C55E",
                 color: "white",
-                background: pending ? "#15803d" : "#16A34A",
+                background: pending ? "#15803d" : "#22C55E",
               }}
             >
               {pending ? "…" : "Carrier picked up ✓"}
@@ -2363,7 +2363,7 @@ function AwaitingShelfList({
         className="rounded-2xl border-2 border-dashed p-4 flex items-center gap-3"
         style={{ borderColor: "rgba(22,163,74,0.30)", background: "rgba(22,163,74,0.04)" }}
       >
-        <span className="inline-block w-8 h-8 rounded-full flex items-center justify-center text-base font-black text-white shrink-0" style={{ background: "#16A34A" }}>✓</span>
+        <span className="inline-block w-8 h-8 rounded-full flex items-center justify-center text-base font-black text-white shrink-0" style={{ background: "#22C55E" }}>✓</span>
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "#15803d" }}>
             Shelf is clear
@@ -2382,7 +2382,7 @@ function AwaitingShelfList({
     : Math.max(
         ...shelf.rows.map((r) => Math.floor((Date.now() - Date.parse(r.createdAtIso)) / (24 * 60 * 60 * 1000))),
       );
-  const dotColor = oldestAgeDays >= 7 ? "#dc2626" : oldestAgeDays >= 4 ? "#F5A623" : "#16A34A";
+  const dotColor = oldestAgeDays >= 7 ? "#dc2626" : oldestAgeDays >= 4 ? "#F5A623" : "#22C55E";
   return (
     <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
       <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "#e8e5e0" }}>
@@ -2633,9 +2633,9 @@ function RecentScanRow({ row: r, onChanged }: { row: RecentScan; onChanged: () =
               title="Mark this package as handed to the customer in person"
               className="px-2.5 py-1.5 rounded-lg text-[11px] font-black border disabled:opacity-50 transition-colors"
               style={{
-                borderColor: "#16A34A",
+                borderColor: "#22C55E",
                 color: "white",
-                background: pending ? "#15803d" : "#16A34A",
+                background: pending ? "#15803d" : "#22C55E",
               }}
             >
               {pending ? "…" : "Picked up ✓"}
@@ -2803,7 +2803,7 @@ function ReassignCustomerModal({
     >
       <div
         className="rounded-md bg-white w-full max-w-md p-5"
-        style={{ border: "1px solid #E5DACA", boxShadow: "0 12px 36px rgba(26,23,20,0.18)" }}
+        style={{ border: "1px solid #ECEEF1", boxShadow: "0 12px 36px rgba(26,23,20,0.18)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
@@ -2837,14 +2837,14 @@ function ReassignCustomerModal({
             value={query}
             onChange={(e) => { setQuery(e.target.value); setPicked(null); setError(null); }}
             placeholder="e.g. 042 or Sarah Johnson"
-            className="mt-2 w-full rounded-xl border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]/30"
-            style={{ borderColor: picked ? "#16a34a" : "#e8e5e0", color: NOHO_INK, background: "white" }}
+            className="mt-2 w-full rounded-xl border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
+            style={{ borderColor: picked ? "#22C55E" : "#e8e5e0", color: NOHO_INK, background: "white" }}
             autoFocus
           />
           {matches.length > 0 && !picked && (
             <div
               className="absolute left-0 right-0 mt-1 rounded-md bg-white z-10 max-h-64 overflow-auto"
-              style={{ border: "1px solid #E5DACA", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
+              style={{ border: "1px solid #ECEEF1", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
             >
               {matches.map((c) => (
                 <button
@@ -2855,7 +2855,7 @@ function ReassignCustomerModal({
                     setQuery(`Suite #${c.suiteNumber ?? "—"} · ${c.name ?? c.email}`);
                     setMatches([]);
                   }}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-[#337485]/10 flex items-center justify-between"
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-[#1976FF]/10 flex items-center justify-between"
                 >
                   <span>
                     <strong style={{ color: NOHO_INK }}>{c.name ?? "(no name)"}</strong>
@@ -3013,7 +3013,7 @@ function ScanStatusPill({ status }: { status: string }) {
   // Map MailItem status into a brand-tinted micro-pill for the recent-scans
   // list. Same color language as the live-tracking pill (Labels list iter-3).
   const map: Record<string, { bg: string; fg: string; label: string }> = {
-    "Received":         { bg: "rgba(51,116,133,0.12)",  fg: "#23596A", label: "Received" },
+    "Received":         { bg: "rgba(51,116,133,0.12)",  fg: "#0F5BD9", label: "Received" },
     "Scanned":          { bg: "rgba(124,58,237,0.12)",  fg: "#5B21B6", label: "Scanned" },
     "Awaiting Pickup":  { bg: "rgba(245,166,35,0.14)",  fg: "#92400e", label: "Awaiting" },
     "Held":             { bg: "rgba(245,166,35,0.14)",  fg: "#92400e", label: "Held" },

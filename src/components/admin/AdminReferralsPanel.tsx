@@ -11,13 +11,13 @@ import { getReferralLeaderboard } from "@/app/actions/referral";
 
 type Aggregate = Awaited<ReturnType<typeof getReferralLeaderboard>>;
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 function StatTile({ label, value, sub, ink }: { label: string; value: string; sub?: string; ink?: string }) {
   return (
-    <div className="rounded-md p-3" style={{ border: "1px solid #E5DACA", background: "white" }}>
+    <div className="rounded-md p-3" style={{ border: "1px solid #ECEEF1", background: "white" }}>
       <p className="text-[9.5px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(45,16,15,0.55)" }}>{label}</p>
       <p className="text-2xl font-black mt-1 tabular-nums leading-none" style={{ color: ink ?? NOHO_INK }}>{value}</p>
       {sub && <p className="text-[10.5px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>{sub}</p>}
@@ -54,7 +54,7 @@ export default function AdminReferralsPanel() {
           </div>
 
           {/* Top referrers */}
-          <div className="rounded-md bg-white" style={{ border: "1px solid #E5DACA" }}>
+          <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
             <div className="px-4 py-3 border-b" style={{ borderColor: "#e8e5e0" }}>
               <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
                 Top referrers
@@ -100,7 +100,7 @@ export default function AdminReferralsPanel() {
           </div>
 
           {/* Recent conversions */}
-          <div className="rounded-md bg-white" style={{ border: "1px solid #E5DACA" }}>
+          <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
             <div className="px-4 py-3 border-b" style={{ borderColor: "#e8e5e0" }}>
               <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
                 Recent conversions

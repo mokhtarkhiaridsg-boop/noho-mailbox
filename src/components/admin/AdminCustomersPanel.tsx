@@ -22,23 +22,24 @@ type Props = {
   openCustomer: (c: Customer) => void;
 };
 
-// Brand tokens — mirror Overview / Mailbox Center palette.
+// iPad-OS tokens — keep names stable (file uses 50+ refs to T.*) but
+// re-point hex values from cream/brown to white/gray + iOS-blue.
 const T = {
-  bg: "#FAF7F2",
+  bg: "#F4F5F7",
   surface: "#FFFFFF",
-  surfaceAlt: "#F4EEE3",
-  border: "#E5DACA",
-  ink: "#2D100F",
-  inkSoft: "#5C4540",
-  inkFaint: "#7A6050",
-  cream: "#F7E6C2",
-  blue: "#337485",
-  blueDeep: "#23596A",
-  red: "#E70013",
-  amber: "#F5A623",
-  success: "#16A34A",
-  danger: "#B91C1C",
-  warning: "#B07030",
+  surfaceAlt: "#F4F5F7",
+  border: "#ECEEF1",
+  ink: "#1A1D23",
+  inkSoft: "#3B4252",
+  inkFaint: "#7A8290",
+  cream: "#EBF2FF",
+  blue: "#1976FF",
+  blueDeep: "#0F5BD9",
+  red: "#FF3B30",
+  amber: "#F59E0B",
+  success: "#22C55E",
+  danger: "#EF4444",
+  warning: "#F59E0B",
 };
 const MONO = "ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace";
 const TAB_NUM: React.CSSProperties = {
@@ -213,10 +214,10 @@ export function AdminCustomersPanel({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full gap-3">
       {/* ─── Hero metric strip ─── 5-up animated counters that double as
           shortcuts to common segments. */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+      <div className="shrink-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
         <HeroTile label="Total" value={counts.total} tone="ink" onClick={() => setSegment("all")} active={segment === "all"} />
         <HeroTile label="Active" value={counts.active} tone="success" onClick={() => setSegment("active")} active={segment === "active"} />
         <HeroTile label="At-risk" value={counts.atrisk} tone="red" onClick={() => setSegment("atrisk")} active={segment === "atrisk"} pulse={counts.atrisk > 0} />
@@ -226,7 +227,7 @@ export function AdminCustomersPanel({
 
       {/* ─── Toolbar — search · filter chips · view toggle · add ─── */}
       <div
-        className="rounded-xl"
+        className="shrink-0 rounded-xl"
         style={{ background: T.surface, border: `1px solid ${T.border}` }}
       >
         {/* Top row: search + chips + add */}
@@ -345,6 +346,9 @@ export function AdminCustomersPanel({
         </div>
       </div>
 
+      {/* ─── Scrollable list area ─── flex-1 fills remaining viewport
+          height; only this region scrolls so the page chrome stays put. */}
+      <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 pb-2">
       {/* ─── Empty state ───────────────────────────────────────────── */}
       {filtered.length === 0 && (
         <div
@@ -589,6 +593,7 @@ export function AdminCustomersPanel({
           </table>
         </div>
       )}
+      </div>
     </div>
   );
 }

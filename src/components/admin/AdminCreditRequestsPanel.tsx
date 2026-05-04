@@ -25,13 +25,13 @@ type Props = {
   requests: CreditRequestRow[];
 };
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
-const NOHO_RED = "#E70013";
-const NOHO_CREAM = "#F7E6C2";
-const NOHO_GREEN = "#16A34A";
+const NOHO_RED = "#FF3B30";
+const NOHO_CREAM = "#EBF2FF";
+const NOHO_GREEN = "#22C55E";
 
 function dollars(cents: number) {
   return `$${(cents / 100).toLocaleString(undefined, {
@@ -51,7 +51,7 @@ function initials(name: string): string {
 // of the formal admin chrome.
 function huesFor(_seed: string): { from: string; to: string } {
   void _seed;
-  return { from: "#F4EEE3", to: "#F4EEE3" };
+  return { from: "#F4F5F7", to: "#F4F5F7" };
 }
 
 function relTime(iso: string): string {
@@ -429,9 +429,9 @@ function RequestCard({
           <div
             className="w-10 h-10 rounded-md shrink-0 flex items-center justify-center font-bold text-[12px]"
             style={{
-              background: "#F4EEE3",
+              background: "#F4F5F7",
               color: NOHO_INK,
-              border: "1px solid #E5DACA",
+              border: "1px solid #ECEEF1",
             }}
           >
             {initials(r.userName)}

@@ -10,9 +10,9 @@ import {
 } from "@/app/actions/square";
 import type { SquareStatus } from "./types";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
 
 type Props = {
@@ -58,7 +58,7 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
             "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
           boxShadow:
             "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-          color: "#F7E6C2",
+          color: "#EBF2FF",
         }}
       >
         {/* Decorative dot pattern */}
@@ -97,11 +97,11 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
                 <span className="relative flex h-2 w-2">
                   <span
                     className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                    style={{ background: isConnected ? "#16a34a" : "#fff" }}
+                    style={{ background: isConnected ? "#22C55E" : "#fff" }}
                   />
                   <span
                     className="relative inline-flex rounded-full h-2 w-2"
-                    style={{ background: isConnected ? "#16a34a" : "#fff" }}
+                    style={{ background: isConnected ? "#22C55E" : "#fff" }}
                   />
                 </span>
                 <p
@@ -187,7 +187,7 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
       {/* ─── Sync action grid — 3 specific + 1 sync-all ─────────────── */}
       <div
         className="rounded-md bg-white p-4"
-        style={{ border: "1px solid #E5DACA" }}
+        style={{ border: "1px solid #ECEEF1" }}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: NOHO_INK }}>
@@ -221,7 +221,7 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
             label="Payments"
             sub="Sales · refunds · ledger"
             disabled={isPending || !isConnected}
-            accent="#16A34A"
+            accent="#22C55E"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
                 <rect x="3" y="6" width="18" height="12" rx="2" />
@@ -240,7 +240,7 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
             label="Catalog"
             sub="Items · prices"
             disabled={isPending || !isConnected}
-            accent="#B07030"
+            accent="#F59E0B"
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
                 <path d="M5 7 L19 7 L18 21 L6 21 Z" />
@@ -291,8 +291,8 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
                     aria-hidden="true"
                     className="w-2 h-2 rounded-full"
                     style={{
-                      background: r.success ? "#16A34A" : "#dc2626",
-                      boxShadow: `0 0 8px ${r.success ? "#16A34A" : "#dc2626"}`,
+                      background: r.success ? "#22C55E" : "#dc2626",
+                      boxShadow: `0 0 8px ${r.success ? "#22C55E" : "#dc2626"}`,
                     }}
                   />
                   <span className="font-bold capitalize" style={{ color: NOHO_INK }}>
@@ -301,7 +301,7 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
                 </div>
                 <span
                   className="text-[12px] font-bold"
-                  style={{ color: r.success ? "#15803d" : "#b91c1c" }}
+                  style={{ color: r.success ? "#15803d" : "#EF4444" }}
                 >
                   {r.success ? `${r.itemsSynced} items synced` : `Failed: ${r.error}`}
                 </span>
@@ -314,7 +314,7 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
       {/* ─── Sync history timeline ─────────────────────────────────── */}
       <div
         className="rounded-md bg-white overflow-hidden"
-        style={{ border: "1px solid #E5DACA" }}
+        style={{ border: "1px solid #ECEEF1" }}
       >
         <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(232,229,224,0.5)" }}>
           <h3 className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: NOHO_INK }}>
@@ -343,16 +343,16 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
               const isOk = log.status === "completed";
               const isFail = log.status === "failed";
               const isPend = !isOk && !isFail;
-              const color = isOk ? "#16A34A" : isFail ? "#dc2626" : NOHO_AMBER;
+              const color = isOk ? "#22C55E" : isFail ? "#dc2626" : NOHO_AMBER;
               return (
                 <li
                   key={log.id}
                   className="relative rounded-md bg-white p-3 transition-colors"
                   style={{
-                    border: "1px solid #E5DACA",
+                    border: "1px solid #ECEEF1",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "#F4EEE3";
+                    e.currentTarget.style.background = "#F4F5F7";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.background = "#FFFFFF";
@@ -384,7 +384,7 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
                             : isFail
                             ? "rgba(220,38,38,0.10)"
                             : "rgba(245,166,35,0.10)",
-                          color: isOk ? "#15803d" : isFail ? "#b91c1c" : "#92400e",
+                          color: isOk ? "#15803d" : isFail ? "#EF4444" : "#92400e",
                         }}
                       >
                         {isOk ? "Completed" : isFail ? "Failed" : (isPend ? "Running" : log.status)}
@@ -429,19 +429,19 @@ function KpiTile({
       className="rounded-md p-4 transition-colors"
       style={{
         background: accent ? NOHO_INK : "#FFFFFF",
-        border: `1px solid ${accent ? NOHO_INK : "#E5DACA"}`,
+        border: `1px solid ${accent ? NOHO_INK : "#ECEEF1"}`,
       }}
     >
       <p
         className="text-[10px] font-bold uppercase tracking-[0.14em]"
-        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#998877" }}
+        style={{ color: accent ? "rgba(247,230,194,0.6)" : "#7A8290" }}
       >
         {label}
       </p>
       <p
         className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
         style={{
-          color: accent ? "#F7E6C2" : NOHO_INK,
+          color: accent ? "#EBF2FF" : NOHO_INK,
           fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
           fontVariantNumeric: "tabular-nums",
         }}
@@ -484,7 +484,7 @@ function SyncCard({
       className="rounded-md p-4 text-left transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       style={{
         background: primary ? NOHO_INK : "#FFFFFF",
-        border: `1px solid ${primary ? NOHO_INK : "#E5DACA"}`,
+        border: `1px solid ${primary ? NOHO_INK : "#ECEEF1"}`,
       }}
     >
       <div className="flex items-center gap-2.5">

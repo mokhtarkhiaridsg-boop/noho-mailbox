@@ -14,9 +14,9 @@ import {
   type AdminExpiryRow,
 } from "@/app/actions/idExpiry";
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 
 export default function AdminIdExpiringPanel() {
   const [rows, setRows] = useState<AdminExpiryRow[] | null>(null);
@@ -62,7 +62,7 @@ export default function AdminIdExpiringPanel() {
         <Tile label="≤ 90 days" value={ninetyD} accent={NOHO_BLUE_DEEP} />
       </div>
 
-      <div className="rounded-md bg-white" style={{ border: "1px solid #E5DACA" }}>
+      <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
         {!rows ? (
           <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading expirations…</p>
         ) : rows.length === 0 ? (
@@ -97,7 +97,7 @@ export default function AdminIdExpiringPanel() {
                 <div className="flex items-center gap-1">
                   <button type="button" onClick={() => setRenewing({ row: r })}
                     className="px-2.5 py-1.5 rounded-lg text-[10.5px] font-black border"
-                    style={{ background: "linear-gradient(135deg,#16A34A,#15803d)", color: "white", borderColor: "#15803d" }}>
+                    style={{ background: "linear-gradient(135deg,#22C55E,#15803d)", color: "white", borderColor: "#15803d" }}>
                     Mark renewed
                   </button>
                   <button type="button" onClick={() => resend(r)} disabled={pending}
@@ -125,8 +125,8 @@ export default function AdminIdExpiringPanel() {
 
 function Tile({ label, value, accent }: { label: string; value: number; accent: string }) {
   return (
-    <div className="rounded-md bg-white p-3" style={{ border: "1px solid #E5DACA" }}>
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#998877" }}>{label}</p>
+    <div className="rounded-md bg-white p-3" style={{ border: "1px solid #ECEEF1" }}>
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#7A8290" }}>{label}</p>
       <p className="text-2xl font-bold tabular-nums" style={{ color: accent, fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}>{value}</p>
     </div>
   );
@@ -136,7 +136,7 @@ function StageChip({ stage, daysLeft }: { stage: AdminExpiryRow["stage"]; daysLe
   const c = stage === "expired"  ? { bg: "rgba(231,0,19,0.18)",  fg: "#991b1b", label: `Expired ${Math.abs(daysLeft)}d` }
           : stage === "7d"       ? { bg: "rgba(245,166,35,0.22)", fg: "#92400e", label: `${daysLeft}d left` }
           : stage === "30d"      ? { bg: "rgba(245,166,35,0.16)", fg: "#92400e", label: `${daysLeft}d left` }
-          :                         { bg: "rgba(51,116,133,0.14)", fg: "#23596A", label: `${daysLeft}d left` };
+          :                         { bg: "rgba(51,116,133,0.14)", fg: "#0F5BD9", label: `${daysLeft}d left` };
   return (
     <span className="text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: c.bg, color: c.fg }}>
       {c.label}
@@ -223,7 +223,7 @@ function RenewModal({ row, onClose, onSaved }: {
         <div className="mt-4 flex items-center gap-2">
           <button type="button" onClick={save} disabled={pending}
             className="flex-1 py-2.5 rounded-lg text-white font-black disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg,#16A34A,#15803d)" }}>
+            style={{ background: "linear-gradient(135deg,#22C55E,#15803d)" }}>
             {pending ? "Saving…" : "Save renewal"}
           </button>
           <button type="button" onClick={onClose}

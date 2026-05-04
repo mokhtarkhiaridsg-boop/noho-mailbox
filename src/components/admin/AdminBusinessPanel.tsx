@@ -25,12 +25,12 @@ type BC = {
 
 const STAGES = ["Intake", "In Progress", "Review", "Completed", "Paused"] as const;
 
-const NOHO_BLUE = "#337485";
-const NOHO_BLUE_DEEP = "#23596A";
-const NOHO_INK = "#2D100F";
+const NOHO_BLUE = "#1976FF";
+const NOHO_BLUE_DEEP = "#0F5BD9";
+const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
-const NOHO_RED = "#E70013";
-const NOHO_CREAM = "#F7E6C2";
+const NOHO_RED = "#FF3B30";
+const NOHO_CREAM = "#EBF2FF";
 
 const STAGE_META: Record<
   (typeof STAGES)[number],
@@ -59,7 +59,7 @@ const STAGE_META: Record<
   },
   Completed: {
     label: "Completed",
-    color: "#16A34A",
+    color: "#22C55E",
     tint: "rgba(22,163,74,0.10)",
     sub: "Delivered",
     emoji: "✅",
@@ -94,8 +94,8 @@ function huesFor(seed: string): { from: string; to: string } {
     [NOHO_BLUE, NOHO_BLUE_DEEP],
     [NOHO_INK, "#1F0807"],
     ["#7C3AED", "#5B21B6"],
-    ["#B07030", "#8B5A24"],
-    ["#16A34A", "#166534"],
+    ["#F59E0B", "#8B5A24"],
+    ["#22C55E", "#166534"],
     [NOHO_RED, "#991b1b"],
   ];
   const [from, to] = PAIRS[h % PAIRS.length];
@@ -305,7 +305,7 @@ export function AdminBusinessPanel({ setShowNewClientModal }: Props) {
           accent={NOHO_BLUE}
           pulse={stats.active > 0}
         />
-        <KpiTile label="Completed" value={stats.completed} accent="#16A34A" />
+        <KpiTile label="Completed" value={stats.completed} accent="#22C55E" />
         <KpiTile label="Collected" value={dollars(stats.totalPaid)} accent={NOHO_AMBER} />
         <KpiTile
           label="Outstanding"
@@ -478,7 +478,7 @@ export function AdminBusinessPanel({ setShowNewClientModal }: Props) {
       ) : (
         <div
           className="rounded-md bg-white overflow-hidden"
-          style={{ border: "1px solid #E5DACA" }}
+          style={{ border: "1px solid #ECEEF1" }}
         >
           {clients.map((c, i) => {
             const isLast = i === clients.length - 1;
@@ -518,16 +518,16 @@ function ClientCard({
     <div
       className="rounded-md bg-white p-2.5 transition-colors"
       style={{
-        border: "1px solid #E5DACA",
+        border: "1px solid #ECEEF1",
       }}
     >
       <div className="flex items-start gap-2">
         <div
           className="w-9 h-9 rounded-md shrink-0 flex items-center justify-center font-bold text-[11px]"
           style={{
-            background: "#F4EEE3",
-            color: "#1A1614",
-            border: "1px solid #E5DACA",
+            background: "#F4F5F7",
+            color: "#1A1D23",
+            border: "1px solid #ECEEF1",
           }}
         >
           {initials(c.name)}
@@ -579,7 +579,7 @@ function ClientCard({
         </span>
         <span
           className="font-black"
-          style={{ color: paidPct >= 100 ? "#16A34A" : paidPct > 0 ? NOHO_AMBER : NOHO_RED }}
+          style={{ color: paidPct >= 100 ? "#22C55E" : paidPct > 0 ? NOHO_AMBER : NOHO_RED }}
         >
           {Math.round(paidPct)}%
         </span>
@@ -657,9 +657,9 @@ function ClientRow({
           <div
             className="w-9 h-9 rounded-md shrink-0 flex items-center justify-center font-bold text-[11px]"
             style={{
-              background: "#F4EEE3",
+              background: "#F4F5F7",
               color: NOHO_INK,
-              border: "1px solid #E5DACA",
+              border: "1px solid #ECEEF1",
             }}
           >
             {initials(c.name)}
@@ -747,8 +747,8 @@ function ClientRow({
         <span
           className="text-[10px] font-black px-1.5 py-0.5 rounded-md tabular-nums"
           style={{
-            background: paidPct >= 100 ? "#16A34A22" : paidPct > 0 ? `${NOHO_AMBER}22` : `${NOHO_RED}11`,
-            color: paidPct >= 100 ? "#16A34A" : paidPct > 0 ? "#92400E" : NOHO_RED,
+            background: paidPct >= 100 ? "#22C55E22" : paidPct > 0 ? `${NOHO_AMBER}22` : `${NOHO_RED}11`,
+            color: paidPct >= 100 ? "#22C55E" : paidPct > 0 ? "#92400E" : NOHO_RED,
           }}
         >
           {Math.round(paidPct)}%

@@ -70,19 +70,19 @@ export function AdminPricingEditor() {
     <div
       className="rounded-md bg-white space-y-5 p-5"
       style={{
-        border: "1px solid #E5DACA",
+        border: "1px solid #ECEEF1",
       }}
     >
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div>
           <h3
             className="font-black text-base"
-            style={{ color: "#2D100F", fontFamily: "var(--font-baloo), sans-serif" }}
+            style={{ color: "#1A1D23", fontFamily: "var(--font-baloo), sans-serif" }}
           >
             Pricing Page Editor
           </h3>
           <p className="text-xs mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
-            Live-edit every section of <code style={{ color: "#337485" }}>/pricing</code>: plans, comparison table, fee schedule, policies.
+            Live-edit every section of <code style={{ color: "#1976FF" }}>/pricing</code>: plans, comparison table, fee schedule, policies.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -101,8 +101,8 @@ export function AdminPricingEditor() {
             href="/pricing"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-2 rounded-xl text-xs font-bold border-2 hover:bg-[#337485]/10 transition-colors"
-            style={{ borderColor: "#337485", color: "#337485" }}
+            className="px-3 py-2 rounded-xl text-xs font-bold border-2 hover:bg-[#1976FF]/10 transition-colors"
+            style={{ borderColor: "#1976FF", color: "#1976FF" }}
           >
             Preview /pricing
           </a>
@@ -110,7 +110,7 @@ export function AdminPricingEditor() {
             onClick={save}
             disabled={isPending}
             className="px-4 py-2 rounded-xl text-xs font-black text-white disabled:opacity-50"
-            style={{ background: "#337485" }}
+            style={{ background: "#1976FF" }}
           >
             {isPending ? "Saving…" : "Save"}
           </button>
@@ -125,8 +125,8 @@ export function AdminPricingEditor() {
             onClick={() => setTab(t.id)}
             className="px-3.5 py-1.5 rounded-full text-xs font-black transition-colors"
             style={{
-              background: tab === t.id ? "#2D100F" : "rgba(45,16,15,0.06)",
-              color: tab === t.id ? "#F7E6C2" : "#2D100F",
+              background: tab === t.id ? "#1A1D23" : "rgba(45,16,15,0.06)",
+              color: tab === t.id ? "#EBF2FF" : "#1A1D23",
             }}
           >
             {t.label}
@@ -188,7 +188,7 @@ export function AdminPricingEditor() {
 }
 
 const inputCls =
-  "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#337485]/30 focus:border-[#337485] bg-white";
+  "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30 focus:border-[#1976FF] bg-white";
 
 function Field({
   label,
@@ -226,8 +226,8 @@ function MoveButtons({
       <button
         type="button"
         onClick={onUp}
-        className="w-7 h-7 rounded-md text-[12px] font-bold hover:bg-[#337485]/10"
-        style={{ color: "#337485" }}
+        className="w-7 h-7 rounded-md text-[12px] font-bold hover:bg-[#1976FF]/10"
+        style={{ color: "#1976FF" }}
         aria-label="Move up"
       >
         ↑
@@ -235,8 +235,8 @@ function MoveButtons({
       <button
         type="button"
         onClick={onDown}
-        className="w-7 h-7 rounded-md text-[12px] font-bold hover:bg-[#337485]/10"
-        style={{ color: "#337485" }}
+        className="w-7 h-7 rounded-md text-[12px] font-bold hover:bg-[#1976FF]/10"
+        style={{ color: "#1976FF" }}
         aria-label="Move down"
       >
         ↓
@@ -297,8 +297,8 @@ function PlansEditor({
         </p>
         <button
           onClick={add}
-          className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#337485]/10"
-          style={{ borderColor: "#337485", color: "#337485" }}
+          className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#1976FF]/10"
+          style={{ borderColor: "#1976FF", color: "#1976FF" }}
         >
           + Add plan
         </button>
@@ -336,7 +336,7 @@ function PlansEditor({
             </Field>
           </div>
 
-          <label className="inline-flex items-center gap-2 text-xs font-bold cursor-pointer" style={{ color: "#2D100F" }}>
+          <label className="inline-flex items-center gap-2 text-xs font-bold cursor-pointer" style={{ color: "#1A1D23" }}>
             <input type="checkbox" checked={!!p.popular} onChange={(e) => set(i, { popular: e.target.checked })} />
             Mark as Most Popular (highlighted card)
           </label>
@@ -412,8 +412,8 @@ function ComparisonEditor({
           onClick={() => onSet(true)}
           className="w-7 h-7 rounded-md text-[12px] font-black"
           style={{
-            background: val === true ? "#16a34a" : "rgba(45,16,15,0.06)",
-            color: val === true ? "white" : "#2D100F",
+            background: val === true ? "#22C55E" : "rgba(45,16,15,0.06)",
+            color: val === true ? "white" : "#1A1D23",
           }}
           aria-label="Included"
         >
@@ -424,8 +424,8 @@ function ComparisonEditor({
           onClick={() => onSet(false)}
           className="w-7 h-7 rounded-md text-[12px] font-bold"
           style={{
-            background: val === false ? "#2D100F" : "rgba(45,16,15,0.06)",
-            color: val === false ? "#F7E6C2" : "#2D100F",
+            background: val === false ? "#1A1D23" : "rgba(45,16,15,0.06)",
+            color: val === false ? "#EBF2FF" : "#1A1D23",
           }}
           aria-label="Not included"
         >
@@ -455,8 +455,8 @@ function ComparisonEditor({
         </p>
         <button
           onClick={add}
-          className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#337485]/10"
-          style={{ borderColor: "#337485", color: "#337485" }}
+          className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#1976FF]/10"
+          style={{ borderColor: "#1976FF", color: "#1976FF" }}
         >
           + Add row
         </button>
@@ -520,8 +520,8 @@ function FeesEditor({
         </p>
         <button
           onClick={add}
-          className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#337485]/10"
-          style={{ borderColor: "#337485", color: "#337485" }}
+          className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#1976FF]/10"
+          style={{ borderColor: "#1976FF", color: "#1976FF" }}
         >
           + Add fee
         </button>
@@ -573,8 +573,8 @@ function PoliciesEditor({
         </p>
         <button
           onClick={add}
-          className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#337485]/10"
-          style={{ borderColor: "#337485", color: "#337485" }}
+          className="px-3 py-1.5 rounded-lg text-[11px] font-black border-2 hover:bg-[#1976FF]/10"
+          style={{ borderColor: "#1976FF", color: "#1976FF" }}
         >
           + Add policy
         </button>
