@@ -241,14 +241,29 @@ export default function AdminCashRegister() {
           color: T.inkSoft,
         }}
       >
-        <div className="flex items-baseline gap-3">
+        <div className="flex items-baseline gap-3 flex-wrap">
           <span
-            className="text-xl font-bold"
-            style={{ color: T.ink, letterSpacing: "-0.01em" }}
+            className="text-2xl font-bold"
+            style={{
+              color: T.ink,
+              letterSpacing: "-0.01em",
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+            }}
           >
             Cash Register
           </span>
-          <span className="text-[12px]" style={{ color: T.inkFaint, ...TAB_NUM }}>
+          <span
+            className="text-[15px] hidden sm:inline"
+            style={{
+              color: T.accent,
+              fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+              transform: "translateY(-1px)",
+              display: "inline-block",
+            }}
+          >
+            ring it up
+          </span>
+          <span className="text-[12px] ml-1" style={{ color: T.inkFaint, ...TAB_NUM }}>
             {now ? now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "—"}
           </span>
         </div>
@@ -281,45 +296,28 @@ export default function AdminCashRegister() {
         <div
           className="flex-1 min-h-0 flex flex-col p-5 sm:p-6"
         >
-          {/* Search */}
+          {/* Segmented category control — iPad-OS style. Replaces the
+              earlier row of all-caps pills which read as "loud" against
+              the calm catalog. Single visual anchor, less noise. */}
           <div
-            className="flex items-center gap-2 px-3 h-10 rounded-lg mb-3"
-            style={{ background: T.surface, border: `1px solid ${T.border}` }}
+            className="flex p-1 rounded-xl mb-3 self-start"
+            style={{ background: T.surfaceAlt }}
           >
-            <svg viewBox="0 0 16 16" className="w-4 h-4 shrink-0" fill="none" stroke={T.inkFaint} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="7" cy="7" r="5" />
-              <path d="M11 11 L14 14" />
-            </svg>
-            <input
-              ref={searchRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search items, sku, or hint…"
-              className="flex-1 bg-transparent text-sm focus:outline-none"
-              style={{ color: T.ink }}
-            />
-            <kbd
-              className="hidden sm:inline-flex items-center px-1.5 h-5 rounded text-[10px] font-mono"
-              style={{ background: T.surfaceAlt, color: T.inkFaint, border: `1px solid ${T.border}` }}
-            >
-              /
-            </kbd>
-          </div>
-
-          {/* Category tabs */}
-          <div className="flex gap-1 mb-4 overflow-x-auto scrollbar-none -mx-1 px-1 pb-1">
             {categories.map((c) => {
               const active = tab === c;
               return (
                 <button
                   key={c}
                   onClick={() => setTab(c)}
-                  className="shrink-0 px-3 h-8 rounded-md text-[11px] font-black uppercase tracking-[0.08em] transition-colors"
-                  style={
-                    active
-                      ? { background: T.ink, color: "#FFFFFF" }
-                      : { background: "transparent", color: T.inkSoft, border: `1px solid ${T.border}` }
-                  }
+                  className="px-3.5 h-8 rounded-lg text-[12px] transition-all"
+                  style={{
+                    background: active ? T.surface : "transparent",
+                    color: active ? T.ink : T.inkFaint,
+                    fontWeight: active ? 600 : 500,
+                    boxShadow: active
+                      ? "0 1px 2px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.04)"
+                      : "none",
+                  }}
                 >
                   {c}
                 </button>
@@ -327,9 +325,41 @@ export default function AdminCashRegister() {
             })}
           </div>
 
-          {/* Launchpad-style item grid — fills the remaining viewport
-              with internal scroll if catalog overflows. Each tile is a
-              colored square, label below, price beneath, soft hover lift. */}
+          {/* Quiet search row — only the icon visible by default; expands
+              on focus. Less chrome, less anxiety for an employee scanning
+              the catalog at a glance. */}
+          <div className="relative mb-3">
+            <svg
+              viewBox="0 0 16 16"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+              fill="none"
+              stroke={T.inkFaint}
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="7" cy="7" r="5" />
+              <path d="M11 11 L14 14" />
+            </svg>
+            <input
+              ref={searchRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search…"
+              className="w-full h-9 pl-9 pr-3 rounded-lg text-sm focus:outline-none"
+              style={{
+                background: T.surfaceAlt,
+                border: "1px solid transparent",
+                color: T.ink,
+              }}
+              onFocus={(e) => { e.currentTarget.style.background = T.surface; e.currentTarget.style.border = `1px solid ${T.border}`; }}
+              onBlur={(e) => { e.currentTarget.style.background = T.surfaceAlt; e.currentTarget.style.border = "1px solid transparent"; }}
+            />
+          </div>
+
+          {/* Apple-list catalog — calm rows instead of colored tiles.
+              Two-column on desktop so cashier sees ~16 items at a glance
+              without the rainbow-tile anxiety. Tap a row to add. */}
           <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 pb-1">
           {visibleCatalog.length === 0 ? (
             <div
@@ -342,51 +372,38 @@ export default function AdminCashRegister() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 xl:grid-cols-6 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
               {visibleCatalog.map((c) => {
-                // Map each category to a soft pastel hue so the grid
-                // reads at a glance like the Overview launchpad.
-                const tint = categoryTint(c.category);
                 return (
                   <button
                     key={c.sku}
                     onClick={() => addItem(c)}
-                    className="aspect-square rounded-2xl p-3 flex flex-col justify-between text-left transition-all"
+                    className="group flex items-center gap-3 px-3 h-12 rounded-lg text-left transition-colors"
                     style={{
-                      background: tint.bg,
-                      border: "1px solid transparent",
+                      background: T.surface,
+                      border: `1px solid ${T.border}`,
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "scale(1.03)";
-                      e.currentTarget.style.boxShadow =
-                        "0 6px 18px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "scale(1)";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = T.surfaceAlt; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = T.surface; }}
                   >
+                    {/* Tiny brand-blue category dot — calm visual anchor */}
                     <span
-                      className="inline-flex items-center justify-center rounded-xl shrink-0 self-start"
-                      style={{
-                        width: 36,
-                        height: 36,
-                        background: tint.icon,
-                        color: "#FFFFFF",
-                        fontSize: 14,
-                        fontWeight: 700,
-                      }}
+                      aria-hidden
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ background: T.accent }}
+                    />
+                    <span
+                      className="text-[13px] flex-1 truncate"
+                      style={{ color: T.ink, fontWeight: 500 }}
                     >
-                      {c.category.slice(0, 1).toUpperCase()}
+                      {c.name}
                     </span>
-                    <div>
-                      <p className="text-[12px] font-semibold leading-tight line-clamp-2" style={{ color: T.ink }}>
-                        {c.name}
-                      </p>
-                      <p className="text-[14px] font-semibold mt-1" style={{ ...TAB_NUM, color: T.ink }}>
-                        {fmt(c.priceCents)}
-                      </p>
-                    </div>
+                    <span
+                      className="text-[13px] tabular-nums shrink-0"
+                      style={{ ...TAB_NUM, color: T.ink, fontWeight: 600 }}
+                    >
+                      {fmt(c.priceCents)}
+                    </span>
                   </button>
                 );
               })}
@@ -405,15 +422,17 @@ export default function AdminCashRegister() {
                     { sku: "custom:" + Date.now(), name, unitPriceCents: cents, quantity: 1, category: "Custom" },
                   ]);
                 }}
-                className="aspect-square rounded-2xl p-3 flex flex-col items-center justify-center transition-colors"
+                className="flex items-center gap-3 px-3 h-12 rounded-lg text-left transition-colors"
                 style={{
                   background: "transparent",
                   color: T.inkFaint,
                   border: `1px dashed ${T.borderStrong}`,
                 }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = T.surfaceAlt; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               >
-                <span className="text-2xl mb-1">+</span>
-                <span className="text-[11px] font-semibold">Custom</span>
+                <span className="text-base shrink-0" style={{ color: T.accent }}>+</span>
+                <span className="text-[13px] font-medium">Custom item</span>
               </button>
             </div>
           )}

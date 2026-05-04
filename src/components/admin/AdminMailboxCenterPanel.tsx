@@ -25,6 +25,14 @@ import { DEFAULT_PRICING, type PricingPlan, type PricingConfig } from "@/lib/pri
 import { AdminWalkInSignupWizard } from "./AdminWalkInSignupWizard";
 import { runDueAutoRenewals, setAutoRenewal } from "@/app/actions/billing";
 import { SubToolButton } from "./SubToolButton";
+import {
+  IconCompliance,
+  IconClipboard,
+  IconCustomers,
+  IconBox,
+  IconHold,
+  IconReport,
+} from "./AdminIcons";
 
 export type MailboxRenewalRow = {
   id: string;
@@ -958,15 +966,33 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
 
   return (
     <div className="flex flex-col h-full gap-3">
-      {/* ─── iPad-OS title row ───── single calm line. Sub-tool buttons
-          live on their own row below so the title isn't squeezed. */}
-      <div className="shrink-0 flex items-baseline gap-3">
-        <h2 className="text-xl font-bold" style={{ color: "#1A1D23", letterSpacing: "-0.01em" }}>
+      {/* ─── Branded title row — Baloo 2 for the heading (warm postal
+          feel) + Pacifico script accent. Apple-clean layout, NOHO brand. */}
+      <div className="shrink-0 flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
           Mailbox Center
         </h2>
-        <p className="text-[12px] hidden sm:block" style={{ color: "#7A8290" }}>
-          Renew suites · attach customers · run today's payments
-        </p>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          neighborhood ops
+        </span>
+        <span className="hidden sm:inline text-[12px] ml-1" style={{ color: "#7A8290" }}>
+          · renew · attach · pay · review
+        </span>
       </div>
 
       {/* ─── Sub-tool jump buttons row ─── */}
@@ -974,88 +1000,44 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
         <div className="shrink-0">
           <div className="flex flex-wrap gap-2">
             <SubToolButton
-              icon={(
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="5" width="18" height="14" rx="2" />
-                  <path d="M7 9 H11 M7 13 H10 M14 9 H17 M14 13 H17" />
-                </svg>
-              )}
+              icon={<IconCompliance className="w-3.5 h-3.5" />}
               label="ID Expirations"
               count={idExpiring.total}
               danger={idExpiring.expired > 0}
               onClick={() => setTab("idexpiring")}
             />
             <SubToolButton
-              icon={(
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2 H6 a2 2 0 0 0 -2 2 v16 a2 2 0 0 0 2 2 h12 a2 2 0 0 0 2 -2 V8 z" />
-                  <path d="M14 2 v6 h6" />
-                  <path d="M9 13 H15 M9 17 H13" />
-                </svg>
-              )}
+              icon={<IconReport className="w-3.5 h-3.5" />}
               label="CMRA Report"
               onClick={() => setTab("cmrareport")}
             />
             <SubToolButton
-              icon={(
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15 v4 a2 2 0 0 1 -2 2 H5 a2 2 0 0 1 -2 -2 v-4" />
-                  <path d="M7 10 L12 15 L17 10" />
-                  <path d="M12 15 V3" />
-                </svg>
-              )}
+              icon={<IconCustomers className="w-3.5 h-3.5" />}
               label="Bulk Onboard"
               onClick={() => setTab("csvonboard")}
             />
             <SubToolButton
-              icon={(
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <path d="M9 3 V21 M15 3 V21 M3 9 H21 M3 15 H21" />
-                </svg>
-              )}
+              icon={<IconBox className="w-3.5 h-3.5" />}
               label="Occupancy"
               onClick={() => setTab("occupancy")}
             />
             <SubToolButton
-              icon={(
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 5 a7 7 0 0 1 7 7 v5 a2 2 0 0 1 -2 2 H7 a2 2 0 0 1 -2 -2 v-5 a7 7 0 0 1 7 -7 z" />
-                  <path d="M9 21 l6 0" />
-                </svg>
-              )}
+              icon={<IconHold className="w-3.5 h-3.5" />}
               label="Mail Hold"
               onClick={() => setTab("mailhold")}
             />
             <SubToolButton
-              icon={(
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M2 9 L12 3 L22 9 V20 a1 1 0 0 1 -1 1 H3 a1 1 0 0 1 -1 -1 z" />
-                  <path d="M9 21 V13 H15 V21" />
-                </svg>
-              )}
+              icon={<IconHold className="w-3.5 h-3.5" />}
               label="Vacation"
               onClick={() => setTab("vacationholds")}
             />
             <SubToolButton
-              icon={(
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 5 a2 2 0 0 1 2 -2 h11 l5 5 v11 a2 2 0 0 1 -2 2 H5 a2 2 0 0 1 -2 -2 z" />
-                  <path d="M16 3 V8 H21" />
-                  <path d="M7 13 H13 M7 17 H11" />
-                </svg>
-              )}
+              icon={<IconClipboard className="w-3.5 h-3.5" />}
               label="Sticky Notes"
               onClick={() => setTab("stickynotes")}
             />
             <SubToolButton
-              icon={(
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 7 L9 7 L9 17 L5 17 z" />
-                  <path d="M15 7 L19 7 L19 17 L15 17 z" />
-                  <path d="M9 12 L15 12" />
-                </svg>
-              )}
+              icon={<IconBox className="w-3.5 h-3.5" />}
               label="Suite Transfers"
               onClick={() => setTab("suitetransfers")}
             />
