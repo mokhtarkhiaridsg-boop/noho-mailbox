@@ -121,6 +121,9 @@ model User {
   mailerThreads           MailerThread[]
   suiteTransferRequests   SuiteTransferRequest[] @relation("TransferRequestedBy")
   suiteTransfersDecided   SuiteTransferRequest[] @relation("TransferDecidedBy")
+  // Inverse of AgentConversation.owner. Required for Prisma relation
+  // validation; AgentConversation defaults to onDelete: Cascade.
+  agentConversations      AgentConversation[]
 }
 
 model SharedMailboxAccess {
