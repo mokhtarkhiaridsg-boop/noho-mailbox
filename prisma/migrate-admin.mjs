@@ -437,3 +437,34 @@ for (const sql of phase8) {
   }
 }
 console.log("Phase 8 migration done.");
+
+// Phase 9 — Password reset tokens (model PasswordResetToken in
+// schema.prisma was added without a migration). Without this table the
+// `/reset-password?token=…` flow throws "Cannot find table" which the
+// Next.js error boundary surfaces to the user as "Something went wrong".
+const phase9 = [
+  `CREATE TABLE IF NOT EXISTS PasswordResetToken (
+     id TEXT PRIMARY KEY,
+     userId TEXT NOT NULL,
+     token TEXT NOT NULL UNIQUE,
+     expiresAt DATETIME NOT NULL,
+     usedAt DATETIME,
+     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+   )`,
+  `CREATE INDEX IF NOT EXISTS PasswordResetToken_userId_idx ON PasswordResetToken(userId)`,
+  `CREATE INDEX IF NOT EXISTS PasswordResetToken_token_idx ON PasswordResetToken(token)`,
+];
+
+for (const sql of phase9) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 9 migration done.");

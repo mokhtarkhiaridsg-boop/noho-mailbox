@@ -1,24 +1,23 @@
 "use client";
 
-// iter-118 — Apple-Mail-style admin mailer.
-//
-// Three-pane layout that fills the available viewport (no page scroll;
-// each pane scrolls independently):
-//
-//   ┌─────────────┬─────────────────┬─────────────────────────────────┐
-//   │  Folders    │  Thread list    │  Reading pane + reply composer  │
-//   │  · Inbox    │  · sender       │  ┌───────────────────────────┐  │
-//   │  · Sent     │  · subject      │  │ original message thread   │  │
-//   │  · Archive  │  · preview      │  └───────────────────────────┘  │
-//   │  · Templates│                 │  ┌───────────────────────────┐  │
-//   │             │                 │  │ reply composer            │  │
-//   │             │                 │  └───────────────────────────┘  │
-//   └─────────────┴─────────────────┴─────────────────────────────────┘
-//
-// Templates "folder" swaps the right pane to a notice picker — admin
-// chooses a template, plugs in a recipient email, and sends.
+/**
+ * Admin Mailer — Gmail-clone (iter 11).
+ *
+ * 3-pane layout: folders rail | thread list | reading pane. Compose
+ * window floats bottom-right. Search box in the top bar filters threads
+ * client-side. Reading pane shows the full thread + a reply composer
+ * pinned to the bottom. Stars persist in localStorage (no server table
+ * yet — we can promote to DB if you want history-preserved stars).
+ */
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import {
   listInboxThreads,
   listSentThreads,
@@ -27,579 +26,717 @@ import {
   markThreadRead,
   archiveThread,
   replyToThread,
-  listNoticeTemplates,
   sendNoticeTemplate,
   getMailerFolderCounts,
   type ThreadRow,
   type ThreadMessage,
 } from "@/app/actions/mailerInbox";
-import type { NoticeTemplate } from "@/lib/notice-templates";
 
-const NOHO_BLUE = "#1976FF";
-const NOHO_BLUE_DEEP = "#0F5BD9";
-const NOHO_INK = "#1A1D23";
-const PANE_BORDER = "#e8e5e0";
-
-type FolderKey = "inbox" | "sent" | "archived" | "templates";
-
-const FOLDER_META: Record<FolderKey, { label: string; emoji: string }> = {
-  inbox:     { label: "Inbox",     emoji: "📥" },
-  sent:      { label: "Sent",      emoji: "📤" },
-  archived:  { label: "Archived",  emoji: "🗄" },
-  templates: { label: "Notices",   emoji: "📝" },
+// ─── Brand tokens (mirror the rest of the admin shell) ────────────────
+const T = {
+  bg: "#FAFAF8",
+  surface: "#FFFFFF",
+  surfaceAlt: "#F4EEE3",
+  border: "#E5DACA",
+  borderStrong: "#CFC2AC",
+  hairline: "rgba(45,16,15,0.10)",
+  ink: "#2D100F",
+  inkSoft: "#5C4540",
+  inkFaint: "#7A6050",
+  cream: "#F7E6C2",
+  blue: "#337485",
+  blueDeep: "#23596A",
+  red: "#E70013",
+  amber: "#F5A623",
+  success: "#16A34A",
 };
+const STAR_KEY = "noho-mailer-stars-v1";
+
+type Folder = "inbox" | "starred" | "sent" | "archive";
+
+function readStars(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = window.localStorage.getItem(STAR_KEY);
+    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+function writeStars(s: Set<string>) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STAR_KEY, JSON.stringify(Array.from(s)));
+  } catch { /* private browsing */ }
+}
+
+function fmtRelative(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  const sameDay =
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate();
+  if (sameDay) return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const sameYear = d.getFullYear() === now.getFullYear();
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", ...(sameYear ? {} : { year: "numeric" }) });
+}
+
+function initials(name: string | null, email: string): string {
+  const src = (name?.trim() || email.split("@")[0]).trim();
+  const parts = src.split(/[\s._-]+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function avatarTint(email: string): { bg: string; fg: string } {
+  let hash = 0;
+  for (let i = 0; i < email.length; i++) hash = (hash * 31 + email.charCodeAt(i)) | 0;
+  const hue = Math.abs(hash) % 360;
+  return { bg: `hsl(${hue}, 70%, 92%)`, fg: `hsl(${hue}, 60%, 28%)` };
+}
 
 export default function AdminMailerPanel() {
-  const [folder, setFolder] = useState<FolderKey>("inbox");
-  const [threads, setThreads] = useState<ThreadRow[] | null>(null);
-  const [selectedThread, setSelectedThread] = useState<ThreadRow | null>(null);
-  const [messages, setMessages] = useState<ThreadMessage[] | null>(null);
-  const [counts, setCounts] = useState<{ inboxUnread: number; inboxTotal: number; sentTotal: number; archivedTotal: number }>({ inboxUnread: 0, inboxTotal: 0, sentTotal: 0, archivedTotal: 0 });
+  const [folder, setFolder] = useState<Folder>("inbox");
+  const [threads, setThreads] = useState<ThreadRow[]>([]);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const [activeMessages, setActiveMessages] = useState<ThreadMessage[]>([]);
+  const [counts, setCounts] = useState<{ inboxUnread: number; inboxTotal: number; sentTotal: number; archivedTotal: number } | null>(null);
+  const [search, setSearch] = useState("");
+  const [stars, setStars] = useState<Set<string>>(() => new Set());
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeMin, setComposeMin] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [replyPending, setReplyPending] = useState(false);
+  const [replyMsg, setReplyMsg] = useState<string | null>(null);
 
-  function loadFolder(f: FolderKey) {
-    setSelectedThread(null);
-    setMessages(null);
-    if (f === "templates") { setThreads([]); return; }
-    setThreads(null);
+  useEffect(() => { setStars(readStars()); }, []);
+
+  const refreshCounts = useCallback(async () => {
+    try {
+      const c = await getMailerFolderCounts();
+      setCounts(c);
+    } catch { /* fail-silent */ }
+  }, []);
+
+  const loadFolder = useCallback(async (f: Folder) => {
+    let rows: ThreadRow[] = [];
+    if (f === "inbox") rows = await listInboxThreads();
+    else if (f === "sent") rows = await listSentThreads();
+    else if (f === "archive") rows = await listArchivedThreads();
+    else if (f === "starred") {
+      const all = [...await listInboxThreads(), ...await listSentThreads()];
+      const seen = new Set<string>();
+      rows = all.filter((r) => { if (seen.has(r.id)) return false; seen.add(r.id); return stars.has(r.id); });
+    }
+    setThreads(rows);
+  }, [stars]);
+
+  useEffect(() => {
     startTransition(async () => {
-      const fn = f === "inbox" ? listInboxThreads : f === "sent" ? listSentThreads : listArchivedThreads;
-      const rows = await fn();
-      setThreads(rows);
+      await Promise.all([loadFolder(folder), refreshCounts()]);
     });
-  }
+    // eslint-disable-next-line
+  }, [folder]);
 
-  function refreshCounts() {
-    void getMailerFolderCounts().then(setCounts).catch(() => undefined);
-  }
-
-  useEffect(() => { loadFolder(folder); }, [folder]);
-  useEffect(() => { refreshCounts(); }, []);
-
-  function selectThread(t: ThreadRow) {
-    setSelectedThread(t);
-    setMessages(null);
-    startTransition(async () => {
-      const msgs = await getThreadMessages(t.id);
-      setMessages(msgs);
-      if (t.unreadCount > 0) {
-        await markThreadRead(t.id);
-        refreshCounts();
-        // Update local list so the badge clears without a refetch.
-        setThreads((prev) => prev?.map((x) => x.id === t.id ? { ...x, unreadCount: 0 } : x) ?? null);
+  useEffect(() => {
+    if (!activeThreadId) { setActiveMessages([]); return; }
+    setLoadingMessages(true);
+    let cancelled = false;
+    (async () => {
+      try {
+        const m = await getThreadMessages(activeThreadId);
+        if (!cancelled) setActiveMessages(m);
+        const t = threads.find((x) => x.id === activeThreadId);
+        if (t && t.unreadCount > 0) {
+          await markThreadRead(activeThreadId);
+          await refreshCounts();
+        }
+      } catch { /* fail-silent */ } finally {
+        if (!cancelled) setLoadingMessages(false);
       }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line
+  }, [activeThreadId]);
+
+  const filteredThreads = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return threads;
+    return threads.filter((t) => {
+      const hay = `${t.customerName ?? ""} ${t.customerEmail} ${t.subject} ${t.preview}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [threads, search]);
+
+  function toggleStar(id: string) {
+    setStars((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      writeStars(next);
+      return next;
     });
   }
 
-  function archive(t: ThreadRow) {
-    startTransition(async () => {
-      await archiveThread(t.id);
-      setThreads((prev) => (prev ?? []).filter((x) => x.id !== t.id));
-      if (selectedThread?.id === t.id) { setSelectedThread(null); setMessages(null); }
-      refreshCounts();
-    });
+  async function handleArchive(id: string) {
+    await archiveThread(id);
+    if (activeThreadId === id) setActiveThreadId(null);
+    await Promise.all([loadFolder(folder), refreshCounts()]);
   }
+
+  async function handleSendReply() {
+    if (!activeThreadId || !replyText.trim()) return;
+    setReplyPending(true);
+    setReplyMsg(null);
+    try {
+      const res = await replyToThread({
+        threadId: activeThreadId,
+        bodyHtml: replyText.trim().replace(/\n/g, "<br/>"),
+      });
+      if ("error" in res && res.error) {
+        setReplyMsg(`Error: ${res.error}`);
+      } else {
+        setReplyText("");
+        setReplyMsg("Sent.");
+        const m = await getThreadMessages(activeThreadId);
+        setActiveMessages(m);
+        await refreshCounts();
+        setTimeout(() => setReplyMsg(null), 2500);
+      }
+    } finally {
+      setReplyPending(false);
+    }
+  }
+
+  const activeThread = activeThreadId ? threads.find((t) => t.id === activeThreadId) ?? null : null;
 
   return (
-    <div className="space-y-3">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${NOHO_BLUE}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: NOHO_BLUE, boxShadow: `0 0 6px ${NOHO_BLUE}` }} />
-          Comms · Mailbox
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Mailer</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
-          Read replies, send notices from a template library, blast announcements. Folders left, threads middle, message + composer right.
-        </p>
-      </div>
-
-      {/* The 3-pane shell. Fixed total height so panes scroll internally
-          and the page itself stays put — no body scroll. Tweak the
-          subtraction if your admin chrome above gets taller. */}
-      <div
-        className="grid rounded-2xl overflow-hidden"
-        style={{
-          gridTemplateColumns: "200px 320px 1fr",
-          height: "calc(100vh - 240px)",
-          minHeight: 480,
-          border: `1px solid ${PANE_BORDER}`,
-          background: "white",
-        }}
+    <div
+      className="flex rounded-2xl overflow-hidden"
+      style={{
+        background: T.surface,
+        border: `1px solid ${T.border}`,
+        height: "calc(100vh - 44px - 44px - 32px)",
+        minHeight: 560,
+      }}
+    >
+      {/* ─── Left rail: Compose + folders ─── */}
+      <aside
+        className="hidden md:flex flex-col w-56 shrink-0"
+        style={{ borderRight: `1px solid ${T.border}`, background: T.surface }}
       >
-        {/* ─── Pane 1: Folders ──────────────────────────────────────── */}
-        <aside className="overflow-y-auto" style={{ background: "#fafaf7", borderRight: `1px solid ${PANE_BORDER}` }}>
-          <div className="px-3 py-3" style={{ borderBottom: `1px solid ${PANE_BORDER}` }}>
-            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
-              Mailboxes
-            </p>
+        <div className="p-3">
+          <button
+            type="button"
+            onClick={() => { setComposeOpen(true); setComposeMin(false); }}
+            className="inline-flex items-center gap-2 h-11 px-4 w-full rounded-2xl text-[12px] font-black uppercase tracking-[0.08em] transition-all hover:-translate-y-0.5"
+            style={{
+              background: T.cream,
+              color: T.ink,
+              border: `1px solid ${T.borderStrong}`,
+              boxShadow: "0 4px 14px rgba(45,16,15,0.10), 0 1px 0 rgba(255,255,255,0.7) inset",
+            }}
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <path d="M3 21l3-1 13-13-2-2L4 18l-1 3z" />
+              <path d="M14 7l3 3" />
+            </svg>
+            Compose
+          </button>
+        </div>
+        <nav className="flex-1 px-2 pb-3 space-y-0.5 overflow-y-auto">
+          <FolderItem
+            label="Inbox"
+            active={folder === "inbox"}
+            badge={counts?.inboxUnread ?? null}
+            onClick={() => { setFolder("inbox"); setActiveThreadId(null); }}
+            icon={(
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 13 V20 H21 V13 L17 13 L15 16 L9 16 L7 13 Z" />
+                <path d="M3 13 L7 4 H17 L21 13" />
+              </svg>
+            )}
+          />
+          <FolderItem
+            label="Starred"
+            active={folder === "starred"}
+            badge={stars.size > 0 ? stars.size : null}
+            onClick={() => { setFolder("starred"); setActiveThreadId(null); }}
+            icon={(
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3 L14.5 9 L21 9.6 L16 14 L17.6 21 L12 17.5 L6.4 21 L8 14 L3 9.6 L9.5 9 Z" />
+              </svg>
+            )}
+          />
+          <FolderItem
+            label="Sent"
+            active={folder === "sent"}
+            badge={counts?.sentTotal ?? null}
+            onClick={() => { setFolder("sent"); setActiveThreadId(null); }}
+            icon={(
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 2 L11 13" />
+                <path d="M22 2 L15 22 L11 13 L2 9 Z" />
+              </svg>
+            )}
+          />
+          <FolderItem
+            label="Archive"
+            active={folder === "archive"}
+            badge={counts?.archivedTotal ?? null}
+            onClick={() => { setFolder("archive"); setActiveThreadId(null); }}
+            icon={(
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="4" rx="1" />
+                <path d="M5 8 V20 H19 V8 M10 12 H14" />
+              </svg>
+            )}
+          />
+        </nav>
+        <div className="px-3 py-2 text-[10px] font-bold tracking-[0.10em] uppercase" style={{ color: T.inkFaint, borderTop: `1px solid ${T.border}` }}>
+          {counts ? `${counts.inboxTotal} threads · ${counts.inboxUnread} unread` : "Loading…"}
+        </div>
+      </aside>
+
+      {/* ─── Middle: search + list ─── */}
+      <section className="flex flex-col w-full md:w-[360px] shrink-0" style={{ borderRight: `1px solid ${T.border}` }}>
+        <div className="p-3" style={{ borderBottom: `1px solid ${T.border}`, background: T.surface }}>
+          <div
+            className="flex items-center gap-2 rounded-xl px-3 h-10"
+            style={{ background: T.surfaceAlt, border: `1px solid ${T.border}` }}
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="none" stroke={T.inkFaint} strokeWidth="2" strokeLinecap="round">
+              <circle cx="11" cy="11" r="6" />
+              <path d="m17 17 4 4" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search mail"
+              className="flex-1 bg-transparent text-sm focus:outline-none"
+              style={{ color: T.ink }}
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="text-[11px] font-bold" style={{ color: T.inkFaint }} aria-label="Clear">
+                ✕
+              </button>
+            )}
           </div>
-          <ul className="py-1.5">
-            {(Object.keys(FOLDER_META) as FolderKey[]).map((k) => {
-              const meta = FOLDER_META[k];
-              const active = folder === k;
-              const count =
-                k === "inbox"     ? counts.inboxTotal
-                : k === "sent"     ? counts.sentTotal
-                : k === "archived" ? counts.archivedTotal
-                :                    null;
-              const badge =
-                k === "inbox" && counts.inboxUnread > 0 ? counts.inboxUnread : null;
+        </div>
+        <div className="flex-1 overflow-y-auto" style={{ background: T.surfaceAlt }}>
+          {pending && filteredThreads.length === 0 && (
+            <div className="px-4 py-12 text-center text-[12px]" style={{ color: T.inkFaint }}>
+              Loading…
+            </div>
+          )}
+          {!pending && filteredThreads.length === 0 && (
+            <div className="px-4 py-12 text-center" style={{ color: T.inkFaint }}>
+              <svg viewBox="0 0 64 64" className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="8" y="14" width="48" height="36" rx="3" />
+                <path d="M8 18 L32 36 L56 18" />
+              </svg>
+              <p className="text-[13px] font-bold" style={{ color: T.ink }}>
+                {folder === "inbox" ? "Inbox zero" : folder === "starred" ? "No starred threads" : folder === "sent" ? "Nothing sent yet" : "Archive empty"}
+              </p>
+              <p className="text-[11px] mt-1">
+                {search ? `No matches for "${search}"` : "Mail will land here as customers reply."}
+              </p>
+            </div>
+          )}
+          <ul className="space-y-px">
+            {filteredThreads.map((t) => {
+              const isActive = activeThreadId === t.id;
+              const isStarred = stars.has(t.id);
+              const tint = avatarTint(t.customerEmail);
+              const unread = t.unreadCount > 0;
               return (
-                <li key={k}>
+                <li key={t.id}>
                   <button
                     type="button"
-                    onClick={() => setFolder(k)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors"
+                    onClick={() => setActiveThreadId(t.id)}
+                    className="group w-full flex items-start gap-3 px-3 py-3 text-left transition-colors"
                     style={{
-                      background: active ? "rgba(51,116,133,0.10)" : "transparent",
-                      color: active ? NOHO_BLUE_DEEP : NOHO_INK,
+                      background: isActive ? T.cream : unread ? T.surface : T.surfaceAlt,
+                      borderLeft: `3px solid ${isActive ? T.blue : "transparent"}`,
                     }}
+                    onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = "rgba(247,230,194,0.55)"; }}
+                    onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = unread ? T.surface : T.surfaceAlt; }}
                   >
-                    <span className="text-base">{meta.emoji}</span>
-                    <span className="flex-1 text-[13px] font-bold">{meta.label}</span>
-                    {badge != null && (
-                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full" style={{ background: NOHO_BLUE, color: "white" }}>
-                        {badge}
-                      </span>
-                    )}
-                    {badge == null && count != null && (
-                      <span className="text-[10.5px] tabular-nums" style={{ color: "rgba(45,16,15,0.45)" }}>
-                        {count}
-                      </span>
-                    )}
+                    <span
+                      className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-[11px] font-black"
+                      style={{ background: tint.bg, color: tint.fg }}
+                    >
+                      {initials(t.customerName, t.customerEmail)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2">
+                        <p
+                          className="text-[13px] truncate"
+                          style={{ color: T.ink, fontWeight: unread ? 800 : 500 }}
+                        >
+                          {t.customerName ?? t.customerEmail.split("@")[0]}
+                          {t.customerSuite && (
+                            <span className="ml-1.5 text-[10px] font-bold" style={{ color: T.inkFaint }}>
+                              · #{t.customerSuite}
+                            </span>
+                          )}
+                        </p>
+                        <span
+                          className="ml-auto shrink-0 text-[10px] tabular-nums"
+                          style={{ color: T.inkFaint, fontWeight: unread ? 800 : 500 }}
+                        >
+                          {fmtRelative(t.lastMessageAt)}
+                        </span>
+                      </div>
+                      <p
+                        className="text-[12px] truncate mt-0.5"
+                        style={{ color: T.ink, fontWeight: unread ? 700 : 500 }}
+                      >
+                        {t.subject || "(no subject)"}
+                      </p>
+                      <p className="text-[11px] truncate mt-0.5" style={{ color: T.inkFaint }}>
+                        {t.preview || "—"}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); toggleStar(t.id); }}
+                      className="shrink-0 self-start mt-1.5 p-1 rounded transition-opacity"
+                      style={{ opacity: isStarred ? 1 : 0 }}
+                      aria-label={isStarred ? "Unstar" : "Star"}
+                    >
+                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill={isStarred ? T.amber : "none"} stroke={isStarred ? T.amber : T.inkFaint} strokeWidth="1.8" strokeLinejoin="round">
+                        <path d="M12 3 L14.5 9 L21 9.6 L16 14 L17.6 21 L12 17.5 L6.4 21 L8 14 L3 9.6 L9.5 9 Z" />
+                      </svg>
+                    </button>
                   </button>
                 </li>
               );
             })}
           </ul>
-          <div className="px-3 py-2 mt-2" style={{ borderTop: `1px solid ${PANE_BORDER}` }}>
-            <p className="text-[9.5px]" style={{ color: "rgba(45,16,15,0.45)" }}>
-              Inbox fills as customers reply. Configure your provider's inbound webhook to POST <code className="font-mono">/api/email/inbound</code>.
-            </p>
-          </div>
-        </aside>
+        </div>
+      </section>
 
-        {/* ─── Pane 2: Thread list (or empty for Templates) ─────────── */}
-        <section className="overflow-y-auto" style={{ borderRight: `1px solid ${PANE_BORDER}`, background: "white" }}>
-          {folder === "templates" ? (
-            <NoticePickerPane
-              onSent={() => { refreshCounts(); }}
-            />
-          ) : threads === null ? (
-            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
-          ) : threads.length === 0 ? (
-            <div className="px-4 py-8 text-center">
-              <p className="text-[28px]">{folder === "inbox" ? "📭" : folder === "sent" ? "✉️" : "🗄"}</p>
-              <p className="text-[12.5px] font-black mt-2" style={{ color: NOHO_INK }}>
-                {folder === "inbox" ? "Inbox empty" : folder === "sent" ? "Nothing sent yet" : "No archive"}
-              </p>
-              <p className="text-[11px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>
-                {folder === "inbox" ? "Customer replies will land here." : folder === "sent" ? "Sent notices + replies show up here." : "Archived threads show up here."}
-              </p>
+      {/* ─── Right: reading pane ─── */}
+      <section className="hidden md:flex flex-col flex-1 min-w-0">
+        {!activeThread && (
+          <div className="flex-1 flex items-center justify-center px-6 py-12 text-center" style={{ color: T.inkFaint }}>
+            <div>
+              <svg viewBox="0 0 64 64" className="w-16 h-16 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="8" y="14" width="48" height="36" rx="3" />
+                <path d="M8 18 L32 36 L56 18" />
+              </svg>
+              <p className="text-[14px] font-bold" style={{ color: T.ink }}>Pick a thread to read</p>
+              <p className="text-[12px] mt-1">{filteredThreads.length} thread{filteredThreads.length === 1 ? "" : "s"} in {folder}</p>
             </div>
-          ) : (
-            <ul>
-              {threads.map((t, i) => {
-                const active = selectedThread?.id === t.id;
-                return (
-                  <li key={t.id}>
-                    <button
-                      type="button"
-                      onClick={() => selectThread(t)}
-                      className="w-full text-left px-3 py-2.5 flex flex-col gap-0.5 transition-colors"
-                      style={{
-                        background: active ? "rgba(51,116,133,0.06)" : "white",
-                        borderTop: i === 0 ? "none" : `1px solid ${PANE_BORDER}`,
-                        borderLeft: active ? `3px solid ${NOHO_BLUE}` : "3px solid transparent",
-                      }}
-                    >
-                      <div className="flex items-center justify-between gap-1.5">
-                        <span className="text-[12.5px] font-black truncate flex-1" style={{ color: NOHO_INK }}>
-                          {t.direction === "in" ? "📨 " : "↗ "}
-                          {t.customerName ?? t.customerEmail}
-                          {t.customerSuite && (
-                            <span className="ml-1 text-[10px] font-mono" style={{ color: NOHO_BLUE_DEEP }}>
-                              #{t.customerSuite}
-                            </span>
-                          )}
-                        </span>
-                        <span className="text-[10px] tabular-nums shrink-0" style={{ color: "rgba(45,16,15,0.55)" }}>
-                          {formatRel(t.lastMessageAt)}
-                        </span>
-                      </div>
-                      <p className="text-[11.5px] font-bold truncate" style={{ color: t.unreadCount > 0 ? NOHO_INK : "rgba(45,16,15,0.70)" }}>
-                        {t.subject}
-                      </p>
-                      <p className="text-[10.5px] truncate" style={{ color: "rgba(45,16,15,0.55)" }}>
-                        {t.preview}
-                      </p>
-                      {t.unreadCount > 0 && (
-                        <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded mt-1 self-start"
-                          style={{ background: NOHO_BLUE, color: "white" }}>
-                          {t.unreadCount} unread
-                        </span>
-                      )}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </section>
-
-        {/* ─── Pane 3: Reading + Composer ─────────────────────────── */}
-        <section className="flex flex-col overflow-hidden" style={{ background: "white" }}>
-          {folder === "templates" ? (
-            <TemplatePreviewPane onSent={() => { refreshCounts(); }} />
-          ) : !selectedThread ? (
-            <div className="flex-1 flex items-center justify-center p-8 text-center">
-              <div>
-                <p className="text-[40px]">📬</p>
-                <p className="text-[13px] font-black mt-2" style={{ color: NOHO_INK }}>Select a thread</p>
-                <p className="text-[11px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>
-                  Pick a conversation from the list to read it.
+          </div>
+        )}
+        {activeThread && (
+          <>
+            <header
+              className="flex items-start gap-3 p-4"
+              style={{ borderBottom: `1px solid ${T.border}` }}
+            >
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-extrabold tracking-tight truncate" style={{ color: T.ink }}>
+                  {activeThread.subject || "(no subject)"}
+                </h2>
+                <p className="text-[12px] mt-0.5" style={{ color: T.inkFaint }}>
+                  {activeThread.customerName ?? activeThread.customerEmail}
+                  {activeThread.customerSuite && ` · Suite #${activeThread.customerSuite}`}
+                  {" · "}{activeMessages.length} message{activeMessages.length === 1 ? "" : "s"}
                 </p>
               </div>
-            </div>
-          ) : (
-            <ReadingPane
-              thread={selectedThread}
-              messages={messages}
-              onArchive={() => archive(selectedThread)}
-              onReplied={() => {
-                // Reload the messages + the list (sent count + lastMessage update).
-                startTransition(async () => {
-                  const msgs = await getThreadMessages(selectedThread.id);
-                  setMessages(msgs);
-                  loadFolder(folder);
-                  refreshCounts();
-                });
-              }}
-            />
-          )}
-        </section>
-      </div>
-    </div>
-  );
-}
-
-// ─── Reading pane ───────────────────────────────────────────────────────
-function ReadingPane({ thread, messages, onArchive, onReplied }: {
-  thread: ThreadRow;
-  messages: ThreadMessage[] | null;
-  onArchive: () => void;
-  onReplied: () => void;
-}) {
-  return (
-    <>
-      {/* Header */}
-      <header className="px-5 py-3 flex items-center justify-between gap-3" style={{ borderBottom: `1px solid ${PANE_BORDER}`, background: "#fafaf7" }}>
-        <div className="min-w-0">
-          <p className="text-[14px] font-black truncate" style={{ color: NOHO_INK }}>
-            {thread.subject}
-          </p>
-          <p className="text-[11px] truncate" style={{ color: "rgba(45,16,15,0.55)" }}>
-            {thread.customerName ? `${thread.customerName} · ${thread.customerEmail}` : thread.customerEmail}
-            {thread.customerSuite && ` · suite #${thread.customerSuite}`}
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <a href={`mailto:${thread.customerEmail}`}
-            className="px-2.5 py-1.5 rounded-md text-[10.5px] font-bold border"
-            style={{ borderColor: PANE_BORDER, color: NOHO_INK, background: "white" }}>
-            ↗ Open in mail app
-          </a>
-          {!thread.archived && (
-            <button type="button" onClick={onArchive}
-              className="px-2.5 py-1.5 rounded-md text-[10.5px] font-bold border"
-              style={{ borderColor: PANE_BORDER, color: NOHO_INK, background: "white" }}>
-              🗄 Archive
-            </button>
-          )}
-        </div>
-      </header>
-
-      {/* Messages — scrolls */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-        {!messages ? (
-          <p className="text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading messages…</p>
-        ) : messages.length === 0 ? (
-          <p className="text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>No messages in this thread.</p>
-        ) : messages.map((m) => (
-          <article key={m.id} className="rounded-xl p-3" style={{
-            background: m.direction === "in" ? "rgba(51,116,133,0.05)" : "rgba(22,163,74,0.05)",
-            border: `1px solid ${PANE_BORDER}`,
-          }}>
-            <header className="flex items-center justify-between gap-2 mb-1.5">
-              <p className="text-[10.5px] font-black uppercase tracking-wider" style={{ color: m.direction === "in" ? NOHO_BLUE_DEEP : "#15803d" }}>
-                {m.direction === "in" ? "📨 Customer" : "↗ NOHO"} · {new Date(m.sentAtIso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-                {m.templateId && <span className="ml-2 text-[9px] font-mono opacity-70">tpl:{m.templateId}</span>}
-              </p>
+              <button
+                type="button"
+                onClick={() => toggleStar(activeThread.id)}
+                className="p-2 rounded-md transition-colors"
+                style={{ color: stars.has(activeThread.id) ? T.amber : T.inkFaint }}
+                title={stars.has(activeThread.id) ? "Unstar" : "Star"}
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill={stars.has(activeThread.id) ? T.amber : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+                  <path d="M12 3 L14.5 9 L21 9.6 L16 14 L17.6 21 L12 17.5 L6.4 21 L8 14 L3 9.6 L9.5 9 Z" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleArchive(activeThread.id)}
+                className="p-2 rounded-md transition-colors"
+                style={{ color: T.inkFaint }}
+                title="Archive thread"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="4" rx="1" />
+                  <path d="M5 8 V20 H19 V8 M10 12 H14" />
+                </svg>
+              </button>
             </header>
-            <div className="text-[12.5px]" style={{ color: NOHO_INK, lineHeight: 1.55 }}
-              dangerouslySetInnerHTML={{ __html: m.bodyHtml }} />
-          </article>
-        ))}
-      </div>
 
-      {/* Reply composer */}
-      <ReplyComposer threadId={thread.id} subject={thread.subject} onReplied={onReplied} />
-    </>
-  );
-}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background: T.bg }}>
+              {loadingMessages && activeMessages.length === 0 && (
+                <div className="text-center py-12" style={{ color: T.inkFaint }}>Loading thread…</div>
+              )}
+              {activeMessages.map((m) => (
+                <article
+                  key={m.id}
+                  className="rounded-xl p-4"
+                  style={{
+                    background: m.direction === "out" ? "rgba(51,116,133,0.06)" : T.surface,
+                    border: `1px solid ${m.direction === "out" ? "rgba(51,116,133,0.2)" : T.border}`,
+                  }}
+                >
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span
+                      className="w-7 h-7 rounded-full shrink-0 inline-flex items-center justify-center text-[10px] font-black"
+                      style={{
+                        background: m.direction === "out" ? T.blue : avatarTint(m.fromEmail).bg,
+                        color: m.direction === "out" ? "#fff" : avatarTint(m.fromEmail).fg,
+                      }}
+                    >
+                      {m.direction === "out" ? "NM" : initials(null, m.fromEmail)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-bold truncate" style={{ color: T.ink }}>
+                        {m.direction === "out" ? "NOHO Mailbox" : m.fromEmail}
+                      </p>
+                      <p className="text-[10px]" style={{ color: T.inkFaint }}>
+                        to {m.toEmail} · {fmtRelative(m.sentAtIso)}
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    className="text-[13px] leading-relaxed"
+                    style={{ color: T.ink, wordBreak: "break-word" }}
+                    dangerouslySetInnerHTML={{ __html: m.bodyHtml || (m.bodyText ?? "").replace(/\n/g, "<br/>") }}
+                  />
+                </article>
+              ))}
+            </div>
 
-function ReplyComposer({ threadId, subject, onReplied }: {
-  threadId: string;
-  subject: string;
-  onReplied: () => void;
-}) {
-  const [body, setBody] = useState("");
-  const [pending, startTransition] = useTransition();
-  const [err, setErr] = useState<string | null>(null);
-
-  function send() {
-    setErr(null);
-    if (!body.trim()) { setErr("Write a reply"); return; }
-    startTransition(async () => {
-      const html = body.split(/\n\n+/).map((p) => `<p>${escapeHtml(p)}</p>`).join("\n");
-      const res = await replyToThread({ threadId, bodyHtml: html, subject });
-      if (res.error) { setErr(res.error); return; }
-      setBody("");
-      onReplied();
-    });
-  }
-
-  return (
-    <footer className="border-t p-3" style={{ borderColor: PANE_BORDER, background: "#fafaf7" }}>
-      {err && (
-        <p className="rounded-md px-2.5 py-1.5 mb-2 text-[11px] font-bold" style={{ background: "rgba(231,0,19,0.10)", color: "#991b1b" }}>
-          {err}
-        </p>
-      )}
-      <textarea
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        rows={3}
-        placeholder="Write a reply… (plain text OK; double-newline = paragraph)"
-        className="w-full rounded-md border px-3 py-2 text-[12.5px] resize-none"
-        style={{ borderColor: PANE_BORDER, background: "white", color: NOHO_INK }}
-      />
-      <div className="flex items-center justify-between mt-2">
-        <p className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
-          Sends as <strong>NOHO Mailbox</strong>. Customer can reply to this email.
-        </p>
-        <button type="button" onClick={send} disabled={pending || !body.trim()}
-          className="px-4 py-1.5 rounded-md text-white text-[12px] font-black disabled:opacity-50"
-          style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}>
-          {pending ? "Sending…" : "↗ Send reply"}
-        </button>
-      </div>
-    </footer>
-  );
-}
-
-// ─── Notices: picker + preview ──────────────────────────────────────────
-function NoticePickerPane({ onSent: _onSent }: { onSent: () => void }) {
-  const [templates, setTemplates] = useState<NoticeTemplate[] | null>(null);
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
-
-  useEffect(() => {
-    void listNoticeTemplates().then((t) => {
-      setTemplates(t);
-      if (t.length > 0 && !selectedSlug) setSelectedSlug(t[0].slug);
-    }).catch(() => setTemplates([]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const grouped = useMemo(() => {
-    if (!templates) return {} as Record<string, NoticeTemplate[]>;
-    return templates.reduce<Record<string, NoticeTemplate[]>>((acc, t) => {
-      (acc[t.category] ??= []).push(t);
-      return acc;
-    }, {});
-  }, [templates]);
-
-  return (
-    <div onClick={() => undefined}>
-      <div className="px-4 py-3" style={{ borderBottom: `1px solid ${PANE_BORDER}` }}>
-        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
-          Notice templates ({templates?.length ?? 0})
-        </p>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
-          Pick → preview → send to one customer. For audience blasts use Bulk Mailer.
-        </p>
-      </div>
-      {!templates ? (
-        <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
-      ) : (
-        <ul>
-          {Object.entries(grouped).map(([cat, list]) => (
-            <li key={cat}>
-              <p className="px-3 pt-3 pb-1 text-[9.5px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.45)" }}>
-                {cat}
-              </p>
-              {list.map((t) => {
-                const active = selectedSlug === t.slug;
-                return (
+            <div className="p-3" style={{ borderTop: `1px solid ${T.border}`, background: T.surface }}>
+              <div className="flex flex-col gap-2">
+                <textarea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder={`Reply to ${activeThread.customerName ?? activeThread.customerEmail}…`}
+                  rows={3}
+                  className="w-full rounded-xl px-3 py-2.5 text-[13px] focus:outline-none focus:ring-2 resize-none"
+                  style={{ background: T.bg, border: `1px solid ${T.border}`, color: T.ink }}
+                />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px]" style={{ color: T.inkFaint }}>
+                    {replyMsg ?? `Re: ${activeThread.subject || "(no subject)"}`}
+                  </span>
                   <button
-                    key={t.slug}
                     type="button"
-                    onClick={() => {
-                      setSelectedSlug(t.slug);
-                      // Broadcast via custom event so the right pane re-reads.
-                      window.dispatchEvent(new CustomEvent("noho:select-template", { detail: t.slug }));
-                    }}
-                    className="w-full text-left px-3 py-2 flex flex-col"
-                    style={{
-                      background: active ? "rgba(51,116,133,0.06)" : "transparent",
-                      borderLeft: active ? `3px solid ${NOHO_BLUE}` : "3px solid transparent",
-                    }}>
-                    <p className="text-[12.5px] font-black" style={{ color: NOHO_INK }}>{t.label}</p>
-                    <p className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>{t.description}</p>
+                    onClick={handleSendReply}
+                    disabled={replyPending || !replyText.trim()}
+                    className="inline-flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] font-black uppercase tracking-[0.08em] transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+                    style={{ background: T.blue, color: "#fff", boxShadow: "0 4px 14px rgba(51,116,133,0.30)" }}
+                  >
+                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 2 L11 13" />
+                      <path d="M22 2 L15 22 L11 13 L2 9 Z" />
+                    </svg>
+                    {replyPending ? "Sending…" : "Send"}
                   </button>
-                );
-              })}
-            </li>
-          ))}
-        </ul>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </section>
+
+      {composeOpen && (
+        <ComposeFloater
+          minimized={composeMin}
+          onMinimize={() => setComposeMin((v) => !v)}
+          onClose={() => { setComposeOpen(false); setComposeMin(false); }}
+          onSent={async () => {
+            await Promise.all([loadFolder(folder), refreshCounts()]);
+          }}
+        />
       )}
     </div>
   );
 }
 
-function TemplatePreviewPane({ onSent }: { onSent: () => void }) {
-  const [templates, setTemplates] = useState<NoticeTemplate[] | null>(null);
-  const [slug, setSlug] = useState<string | null>(null);
-  const [toEmail, setToEmail] = useState("");
+function FolderItem({
+  label,
+  icon,
+  active,
+  badge,
+  onClick,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  active: boolean;
+  badge: number | null;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full flex items-center gap-2.5 h-9 px-3 rounded-r-full rounded-l-md text-[13px] font-bold transition-colors"
+      style={{
+        background: active ? "rgba(51,116,133,0.12)" : "transparent",
+        color: active ? T.blueDeep : "#2D100F",
+      }}
+      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "rgba(45,16,15,0.05)"; }}
+      onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent"; }}
+    >
+      <span className="shrink-0 w-5 h-5 inline-flex items-center justify-center" style={{ color: active ? T.blue : "#7A6050" }}>
+        {icon}
+      </span>
+      <span className="flex-1 text-left truncate">{label}</span>
+      {badge !== null && badge > 0 && (
+        <span
+          className="text-[10px] font-black tabular-nums"
+          style={{ color: active ? T.blue : "#7A6050" }}
+        >
+          {badge > 999 ? "999+" : badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function ComposeFloater({
+  minimized,
+  onMinimize,
+  onClose,
+  onSent,
+}: {
+  minimized: boolean;
+  onMinimize: () => void;
+  onClose: () => void;
+  onSent: () => void | Promise<void>;
+}) {
+  const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [pending, startTransition] = useTransition();
+  const [pending, setPending] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    void listNoticeTemplates().then((t) => {
-      setTemplates(t);
-      if (t.length > 0) {
-        setSlug((cur) => cur ?? t[0].slug);
-      }
-    }).catch(() => setTemplates([]));
-  }, []);
+    if (!minimized) requestAnimationFrame(() => inputRef.current?.focus());
+  }, [minimized]);
 
-  // Listen for picker selection so the panes stay in sync.
-  useEffect(() => {
-    function onPick(e: Event) {
-      const ce = e as CustomEvent<string>;
-      if (typeof ce.detail === "string") setSlug(ce.detail);
-    }
-    window.addEventListener("noho:select-template", onPick);
-    return () => window.removeEventListener("noho:select-template", onPick);
-  }, []);
-
-  // Pre-fill subject + body whenever the slug flips.
-  const current = useMemo(() => templates?.find((t) => t.slug === slug) ?? null, [templates, slug]);
-  useEffect(() => {
-    if (!current) return;
-    setSubject(current.subject);
-    setBody(current.bodyHtml);
-  }, [current]);
-
-  function send() {
+  async function handleSend() {
     setMsg(null);
-    if (!current) return;
-    startTransition(async () => {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to.trim())) {
+      setMsg("Enter a valid email.");
+      return;
+    }
+    if (!subject.trim()) { setMsg("Subject required."); return; }
+    if (!body.trim())    { setMsg("Body required."); return; }
+    setPending(true);
+    try {
       const res = await sendNoticeTemplate({
-        templateSlug: current.slug,
-        toEmail,
-        subjectOverride: subject !== current.subject ? subject : undefined,
-        bodyOverrideHtml: body !== current.bodyHtml ? body : undefined,
+        templateSlug: "general",
+        toEmail: to.trim(),
+        subjectOverride: subject.trim(),
+        bodyOverrideHtml: body.trim().replace(/\n/g, "<br/>"),
       });
-      if (res.error) { setMsg(res.error); return; }
-      setMsg(`✓ Sent to ${toEmail} · thread saved to Sent`);
-      setToEmail("");
-      onSent();
-    });
-  }
-
-  if (!current) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-8 text-center">
-        <div>
-          <p className="text-[40px]">📝</p>
-          <p className="text-[13px] font-black mt-2" style={{ color: NOHO_INK }}>Pick a notice</p>
-          <p className="text-[11px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>Choose from the list to preview + send.</p>
-        </div>
-      </div>
-    );
+      if ("error" in res && res.error) {
+        setMsg(`Error: ${res.error}`);
+      } else {
+        setMsg("Sent.");
+        setTimeout(async () => {
+          setMsg(null);
+          await onSent();
+          onClose();
+        }, 700);
+      }
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
-    <>
-      <header className="px-5 py-3" style={{ borderBottom: `1px solid ${PANE_BORDER}`, background: "#fafaf7" }}>
-        <p className="text-[10.5px] font-black uppercase tracking-wider" style={{ color: NOHO_BLUE_DEEP }}>
-          {current.category} · template
-        </p>
-        <p className="text-[14px] font-black" style={{ color: NOHO_INK }}>{current.label}</p>
-      </header>
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-        {msg && (
-          <p className="rounded-md px-2.5 py-1.5 text-[11.5px] font-bold" style={{
-            background: msg.startsWith("✓") ? "rgba(22,163,74,0.10)" : "rgba(231,0,19,0.10)",
-            color: msg.startsWith("✓") ? "#15803d" : "#991b1b",
-          }}>{msg}</p>
-        )}
-        <div>
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>To</label>
-          <input type="email" value={toEmail} onChange={(e) => setToEmail(e.target.value)} placeholder="customer@example.com"
-            className="mt-1 w-full rounded-md border px-3 py-2 text-[13px]"
-            style={{ borderColor: PANE_BORDER, background: "white", color: NOHO_INK }} />
-        </div>
-        <div>
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Subject</label>
-          <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)}
-            className="mt-1 w-full rounded-md border px-3 py-2 text-[13px]"
-            style={{ borderColor: PANE_BORDER, background: "white", color: NOHO_INK }} />
-        </div>
-        <div>
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
-            Body (HTML · variables: {`{{firstName}} {{suiteNumber}} {{planDueDate}}`})
-          </label>
-          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={10}
-            className="mt-1 w-full rounded-md border px-3 py-2 text-[12px] font-mono resize-y"
-            style={{ borderColor: PANE_BORDER, background: "white", color: NOHO_INK }} />
-        </div>
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-wider mb-1" style={{ color: "rgba(45,16,15,0.55)" }}>Preview</p>
-          <div className="rounded-md border p-3 text-[12.5px]" style={{ borderColor: PANE_BORDER, background: "white", color: NOHO_INK, lineHeight: 1.55 }}
-            dangerouslySetInnerHTML={{ __html: body }} />
-        </div>
-      </div>
-      <footer className="border-t p-3 flex items-center justify-between" style={{ borderColor: PANE_BORDER, background: "#fafaf7" }}>
-        <p className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
-          Variables render against the recipient's record automatically.
-        </p>
-        <button type="button" onClick={send} disabled={pending || !toEmail.trim()}
-          className="px-4 py-1.5 rounded-md text-white text-[12px] font-black disabled:opacity-50"
-          style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}>
-          {pending ? "Sending…" : "↗ Send notice"}
+    <div
+      className="fixed right-6 bottom-3 z-50 rounded-t-2xl overflow-hidden"
+      style={{
+        width: minimized ? 320 : 480,
+        background: T.surface,
+        border: `1px solid ${T.borderStrong}`,
+        boxShadow: "0 20px 60px rgba(45,16,15,0.30), 0 1px 0 rgba(255,255,255,0.7) inset",
+      }}
+      role="dialog"
+      aria-label="Compose new message"
+    >
+      <header
+        className="flex items-center gap-2 px-4 h-10 cursor-pointer select-none"
+        style={{ background: T.ink, color: T.cream }}
+        onClick={onMinimize}
+      >
+        <span className="text-[12px] font-black uppercase tracking-[0.10em] flex-1 truncate">
+          {subject.trim() || "New message"}
+        </span>
+        <button type="button" onClick={(e) => { e.stopPropagation(); onMinimize(); }} className="p-1 hover:opacity-80" aria-label={minimized ? "Expand" : "Minimize"}>
+          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+            <path d={minimized ? "M6 14 L12 8 L18 14" : "M6 10 L12 16 L18 10"} />
+          </svg>
         </button>
-      </footer>
-    </>
+        <button type="button" onClick={(e) => { e.stopPropagation(); onClose(); }} className="p-1 hover:opacity-80" aria-label="Close">
+          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+            <path d="M6 6 L18 18 M6 18 L18 6" />
+          </svg>
+        </button>
+      </header>
+      {!minimized && (
+        <div className="p-3 space-y-2">
+          <input
+            ref={inputRef}
+            type="email"
+            placeholder="To"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            className="w-full h-9 px-3 rounded-md text-sm focus:outline-none"
+            style={{ background: T.bg, border: `1px solid ${T.border}`, color: T.ink }}
+          />
+          <input
+            type="text"
+            placeholder="Subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="w-full h-9 px-3 rounded-md text-sm focus:outline-none"
+            style={{ background: T.bg, border: `1px solid ${T.border}`, color: T.ink }}
+          />
+          <textarea
+            placeholder="Write your message…"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={8}
+            className="w-full px-3 py-2 rounded-md text-sm focus:outline-none resize-none"
+            style={{ background: T.bg, border: `1px solid ${T.border}`, color: T.ink }}
+          />
+          <div className="flex items-center justify-between">
+            <span className="text-[10px]" style={{ color: msg?.startsWith("Error") ? T.red : T.inkFaint }}>
+              {msg ?? "Sends from nohomailbox@gmail.com"}
+            </span>
+            <button
+              type="button"
+              onClick={handleSend}
+              disabled={pending}
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] font-black uppercase tracking-[0.08em] transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+              style={{ background: T.blue, color: "#fff", boxShadow: "0 4px 14px rgba(51,116,133,0.30)" }}
+            >
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 2 L11 13" />
+                <path d="M22 2 L15 22 L11 13 L2 9 Z" />
+              </svg>
+              {pending ? "Sending…" : "Send"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function formatRel(iso: string): string {
-  const d = new Date(iso);
-  const ms = Date.now() - d.getTime();
-  const m = Math.floor(ms / 60_000);
-  if (m < 1) return "now";
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  const days = Math.floor(h / 24);
-  if (days < 7) return `${days}d`;
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }

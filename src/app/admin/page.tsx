@@ -16,6 +16,17 @@ export const maxDuration = 60;
 export default async function AdminPage() {
   const admin = await verifyAdmin();
 
+  // Owner label — emails listed in OWNER_EMAILS env get the "Owner"
+  // role label in the admin chrome. Functionally identical to ADMIN
+  // (same dashboard, same permissions); the label is purely cosmetic
+  // so the bureau owner sees their title rather than "Admin".
+  const ownerEmails = (process.env.OWNER_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  const isOwner = !!admin.email && ownerEmails.includes(admin.email.toLowerCase());
+  const roleLabel = isOwner ? "Owner" : "Admin";
+
   const today = new Date();
   const todayStr = today.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
@@ -941,6 +952,7 @@ export default async function AdminPage() {
       churnAnnualizedPct={churnPct}
       forwardingByState={forwardingByState}
       adminId={admin.id ?? ""}
+      roleLabel={roleLabel}
     />
   );
 }

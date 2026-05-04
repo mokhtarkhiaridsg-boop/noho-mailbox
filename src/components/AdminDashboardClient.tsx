@@ -189,6 +189,8 @@ function MailOsCommandBar(props: {
   onOpenPalette: () => void;
   sidebarHidden: boolean;
   onToggleSidebar: () => void;
+  /** "Owner" or "Admin" — shown as a small badge before the profile menu. */
+  roleLabel: string;
 }) {
   void props.signupCount;
   void props.creditCount;
@@ -288,6 +290,19 @@ function MailOsCommandBar(props: {
         <IconExternal className="w-3.5 h-3.5" />
         Member view
       </Link>
+      {/* Role badge — small pill before the profile avatar so the bureau
+          owner always sees their title (Owner) and a regular admin sees
+          theirs (Admin). Cosmetic only; permissions are identical. */}
+      <span
+        className="hidden md:inline-flex items-center h-7 px-2.5 rounded-full text-[10px] font-bold uppercase tracking-[0.10em]"
+        style={{
+          background: props.roleLabel === "Owner" ? "rgba(25,118,255,0.10)" : "#F4F5F7",
+          color: props.roleLabel === "Owner" ? "#1976FF" : "#7A8290",
+        }}
+        title={props.roleLabel === "Owner" ? "Bureau owner" : "Admin"}
+      >
+        {props.roleLabel}
+      </span>
       <ProfileDropdown />
     </header>
   );
@@ -788,6 +803,9 @@ type Props = {
   churnAnnualizedPct?: number;
   forwardingByState?: Record<string, number>;
   adminId?: string;
+  /** Role label shown in the top-bar profile area. "Owner" for emails
+   *  in OWNER_EMAILS, otherwise "Admin". Defaults to "Admin". */
+  roleLabel?: string;
 };
 
 function ProfileDropdown() {
@@ -1016,7 +1034,7 @@ function DropdownLink({
   );
 }
 
-export default function AdminDashboardClient({ customers, recentMail, notaryQueue, deliveryOrders, shopOrders, stats, squareStatus, recentPayments, complianceQueue = [], mailRequests = [], keyRequests = [], messageThreads = [], contactSubmissions = [], partners = [], tenants = [], siteSettings = {}, shippoConfigured = false, recentShippoLabels = [], creditRequests = [], labelOrders = [], mailboxRenewals = [], customerNotes = [], mailboxKeys = [], walkInToday, mrrCents = 0, dormantCount = 0, planDistribution, tillWeek, churn30dCount = 0, churnAnnualizedPct = 0, forwardingByState, adminId = "" }: Props) {
+export default function AdminDashboardClient({ customers, recentMail, notaryQueue, deliveryOrders, shopOrders, stats, squareStatus, recentPayments, complianceQueue = [], mailRequests = [], keyRequests = [], messageThreads = [], contactSubmissions = [], partners = [], tenants = [], siteSettings = {}, shippoConfigured = false, recentShippoLabels = [], creditRequests = [], labelOrders = [], mailboxRenewals = [], customerNotes = [], mailboxKeys = [], walkInToday, mrrCents = 0, dormantCount = 0, planDistribution, tillWeek, churn30dCount = 0, churnAnnualizedPct = 0, forwardingByState, adminId = "", roleLabel = "Admin" }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -1429,6 +1447,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
         onOpenPalette={() => setPaletteOpen(true)}
         sidebarHidden={sidebarHidden}
         onToggleSidebar={() => setSidebarHidden((v) => !v)}
+        roleLabel={roleLabel}
       />
 
       {/* ⌘K command palette — opens from the bar pill or ⌘K / ⌘P. */}

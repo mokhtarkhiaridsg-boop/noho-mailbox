@@ -286,13 +286,13 @@ export default function AdminCashRegister() {
         </div>
       </div>
 
-      {/* ─── Main body — full-width Launchpad-style item grid.
-          The previous left/right split (catalog + cart pane) cut the
-          screen in two and forced cart items to scroll inside their
-          column. New layout: items take the full width as a calm grid;
-          the cart lives in a sticky dock at the bottom. */}
-      <div className="flex-1 flex flex-col min-h-0">
-        {/* Catalog — single full-width column. */}
+      {/* ─── Main body — industry-standard POS split.
+          LEFT (catalog): search + categories + 2-col list.
+          RIGHT (cart pane): customer · line items · totals · Charge.
+          Cart is ALWAYS visible — cashier never has to open a drawer
+          to confirm what's about to be charged. */}
+      <div className="flex-1 flex min-h-0">
+        {/* Catalog — left ~62%. */}
         <div
           className="flex-1 min-h-0 flex flex-col p-5 sm:p-6"
         >
@@ -452,136 +452,297 @@ export default function AdminCashRegister() {
           </button>
         </div>
 
-      </div>
-
-      {/* Bottom Cart Dock — Apple-Pay-style. Customer chip · cart pill ·
-          discount + tax · Charge button. Click cart pill to expand drawer. */}
-      <div
-        className="shrink-0 px-5 sm:px-6 py-3 flex items-center gap-3"
-        style={{
-          borderTop: `1px solid ${T.border}`,
-          background: T.surfaceAlt,
-        }}
-      >
-        {customerId ? (
-          <button
-            onClick={() => {
-              setCustomerId(null);
-              setCustomerLabel("");
-            }}
-            className="inline-flex items-center gap-2 h-9 px-3 rounded-full shrink-0 transition-colors"
-            style={{
-              background: T.accentSoft,
-              color: T.accent,
-              fontSize: 12,
-              fontWeight: 600,
-              maxWidth: 200,
-            }}
-            title="Click to remove"
-          >
-            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="8" cy="6" r="3" />
-              <path d="M2 14 C2 11 5 9 8 9 C11 9 14 11 14 14" />
-            </svg>
-            <span className="truncate">{customerLabel}</span>
-          </button>
-        ) : (
-          <button
-            onClick={() => setShowCustomerSearch(true)}
-            className="inline-flex items-center gap-2 h-9 px-3 rounded-full shrink-0 transition-colors"
-            style={{
-              background: T.surface,
-              color: T.inkSoft,
-              border: `1px solid ${T.border}`,
-              fontSize: 12,
-              fontWeight: 500,
-            }}
-          >
-            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="8" cy="6" r="3" />
-              <path d="M2 14 C2 11 5 9 8 9 C11 9 14 11 14 14" />
-            </svg>
-            Attach customer
-          </button>
-        )}
-
-        <button
-          onClick={() => cart.length > 0 && setShowCart(true)}
-          className="flex-1 min-w-0 h-9 px-4 rounded-full inline-flex items-center justify-between gap-3 transition-colors"
+        {/* ─── Right cart pane — always visible. Customer chip top,
+            line items middle (scrolls inside its own pane), totals
+            below, big Charge button at the bottom. */}
+        <aside
+          className="hidden lg:flex flex-col w-[380px] shrink-0"
           style={{
-            background: T.surface,
-            border: `1px solid ${T.border}`,
-            color: cart.length === 0 ? T.inkFaint : T.ink,
-            cursor: cart.length === 0 ? "default" : "pointer",
+            background: T.surfaceAlt,
+            borderLeft: `1px solid ${T.border}`,
           }}
         >
-          <span style={{ fontSize: 12, fontWeight: 500 }}>
-            {cart.length === 0
-              ? "Tap items to add"
-              : `${cartCount} item${cartCount === 1 ? "" : "s"} · review →`}
-          </span>
+          {/* Customer chip / attach */}
+          <div
+            className="shrink-0 px-5 py-4"
+            style={{ borderBottom: `1px solid ${T.border}` }}
+          >
+            {customerId ? (
+              <button
+                onClick={() => { setCustomerId(null); setCustomerLabel(""); }}
+                className="w-full inline-flex items-center justify-between gap-2 h-10 px-3.5 rounded-xl transition-colors"
+                style={{ background: T.accentSoft, color: T.accent, fontSize: 13, fontWeight: 600 }}
+                title="Click to remove"
+              >
+                <span className="inline-flex items-center gap-2 min-w-0">
+                  <svg viewBox="0 0 16 16" className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="8" cy="6" r="3" />
+                    <path d="M2 14 C2 11 5 9 8 9 C11 9 14 11 14 14" />
+                  </svg>
+                  <span className="truncate">{customerLabel}</span>
+                </span>
+                <span style={{ fontSize: 11, color: T.accentDeep }}>change</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowCustomerSearch(true)}
+                className="w-full inline-flex items-center justify-center gap-2 h-10 rounded-xl transition-colors"
+                style={{ background: T.surface, color: T.inkSoft, border: `1px dashed ${T.borderStrong}`, fontSize: 13, fontWeight: 500 }}
+              >
+                <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="8" cy="6" r="3" />
+                  <path d="M2 14 C2 11 5 9 8 9 C11 9 14 11 14 14" />
+                </svg>
+                Attach customer
+              </button>
+            )}
+          </div>
+
+          {/* Line items list — scrolls inside the pane */}
+          <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2">
+            {cart.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center px-6 py-8">
+                <span
+                  className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-3"
+                  style={{ background: T.surface, color: T.inkFaint }}
+                >
+                  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 8 H19 L17 18 a2 2 0 0 1 -2 2 H9 a2 2 0 0 1 -2 -2 z" />
+                    <path d="M9 8 V5 a3 3 0 0 1 6 0 V8" />
+                  </svg>
+                </span>
+                <p className="text-[13px] font-semibold" style={{ color: T.ink }}>
+                  Cart is empty
+                </p>
+                <p className="text-[11px] mt-1 max-w-[220px]" style={{ color: T.inkFaint }}>
+                  Tap items in the catalog to add them here.
+                </p>
+              </div>
+            ) : (
+              <ul>
+                {cart.map((l) => (
+                  <li
+                    key={l.sku}
+                    className="flex items-center gap-2 py-2.5 px-2 rounded-lg"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold truncate" style={{ color: T.ink }}>
+                        {l.name}
+                      </p>
+                      <p className="text-[11px]" style={{ ...TAB_NUM, color: T.inkFaint }}>
+                        {fmt(l.unitPriceCents)} ea
+                      </p>
+                    </div>
+                    <div
+                      className="inline-flex items-center rounded-full overflow-hidden shrink-0"
+                      style={{ background: T.surface, border: `1px solid ${T.border}` }}
+                    >
+                      <button
+                        onClick={() => setQty(l.sku, l.quantity - 1)}
+                        className="w-7 h-7 text-[14px]"
+                        style={{ color: T.ink, fontWeight: 600 }}
+                        aria-label="decrease quantity"
+                      >−</button>
+                      <span
+                        className="w-7 text-center text-[12px]"
+                        style={{ ...TAB_NUM, color: T.ink, fontWeight: 600 }}
+                      >
+                        {l.quantity}
+                      </span>
+                      <button
+                        onClick={() => setQty(l.sku, l.quantity + 1)}
+                        className="w-7 h-7 text-[14px]"
+                        style={{ color: T.ink, fontWeight: 600 }}
+                        aria-label="increase quantity"
+                      >+</button>
+                    </div>
+                    <span
+                      className="text-[13px] w-16 text-right shrink-0"
+                      style={{ ...TAB_NUM, color: T.ink, fontWeight: 600 }}
+                    >
+                      {fmt(l.quantity * l.unitPriceCents)}
+                    </span>
+                    <button
+                      onClick={() => removeLine(l.sku)}
+                      className="w-6 h-6 rounded-full text-[11px] shrink-0"
+                      style={{ color: T.inkFaint }}
+                      title="Remove"
+                    >✕</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Totals + discount/tax + Charge */}
           {cart.length > 0 && (
+            <div
+              className="shrink-0 px-5 py-4 space-y-3"
+              style={{ borderTop: `1px solid ${T.border}`, background: T.surface }}
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  value={discountInput}
+                  onChange={(e) => setDiscountInput(e.target.value)}
+                  placeholder="Discount"
+                  className="flex-1 h-9 px-3 rounded-lg focus:outline-none text-center"
+                  style={{
+                    background: T.surfaceAlt,
+                    border: "1px solid transparent",
+                    color: T.ink,
+                    fontSize: 12,
+                    ...TAB_NUM,
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.background = "#FFFFFF"; e.currentTarget.style.border = `1px solid ${T.border}`; }}
+                  onBlur={(e) => { e.currentTarget.style.background = T.surfaceAlt; e.currentTarget.style.border = "1px solid transparent"; }}
+                />
+                <select
+                  value={String(taxRate)}
+                  onChange={(e) => setTaxRate(parseFloat(e.target.value))}
+                  className="flex-1 h-9 px-3 rounded-lg focus:outline-none"
+                  style={{
+                    background: T.surfaceAlt,
+                    border: "1px solid transparent",
+                    color: T.ink,
+                    fontSize: 12,
+                  }}
+                >
+                  <option value="0">No tax</option>
+                  <option value="0.0925">9.25%</option>
+                  <option value="0.095">9.50% LA</option>
+                  <option value="0.0975">9.75%</option>
+                  <option value="0.105">10.50%</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <Row label="Subtotal" value={fmt(cartMath.subtotal)} mute />
+                {cartMath.discount > 0 && (
+                  <Row label="Discount" value={`−${fmt(cartMath.discount)}`} mute negative />
+                )}
+                {cartMath.tax > 0 && <Row label="Tax" value={fmt(cartMath.tax)} mute />}
+                <div
+                  className="flex items-center justify-between pt-2 mt-1"
+                  style={{ borderTop: `1px solid ${T.border}` }}
+                >
+                  <span className="text-[13px]" style={{ color: T.ink, fontWeight: 600 }}>
+                    Total
+                  </span>
+                  <span
+                    className="text-[20px]"
+                    style={{
+                      ...TAB_NUM,
+                      color: T.ink,
+                      fontWeight: 700,
+                      fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+                    }}
+                  >
+                    {fmt(cartMath.total)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={clearCart}
+                  className="h-10 px-3.5 rounded-xl text-[12px] transition-colors"
+                  style={{ background: T.surfaceAlt, color: T.inkSoft, fontWeight: 500 }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#E8EBEF"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = T.surfaceAlt; }}
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={() => {
+                    if (cart.length === 0) return;
+                    const meta: InvoiceMeta = {
+                      ...emptyMeta(),
+                      taxRate,
+                      invoiceDiscountCents: cartMath.discount,
+                      lines: cart.map((l) => ({
+                        id: "ln_" + l.sku,
+                        description: l.name,
+                        qty: l.quantity,
+                        unitPriceCents: l.unitPriceCents,
+                      })),
+                    };
+                    setInvoicePrefill(meta);
+                    setInvoiceBuilderOpen(true);
+                  }}
+                  className="flex-1 h-10 rounded-xl text-[12px] transition-colors"
+                  style={{ background: T.surface, color: T.ink, border: `1px solid ${T.border}`, fontWeight: 500 }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = T.surfaceAlt; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = T.surface; }}
+                >
+                  Send invoice
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowPay(true)}
+                disabled={pending}
+                className="w-full h-12 rounded-xl text-[15px] font-semibold transition-colors"
+                style={{
+                  background: T.accent,
+                  color: "#FFFFFF",
+                  border: `1px solid ${T.accent}`,
+                  opacity: pending ? 0.7 : 1,
+                  ...TAB_NUM,
+                }}
+                onMouseEnter={(e) => { if (!pending) e.currentTarget.style.background = T.accentDeep; }}
+                onMouseLeave={(e) => { if (!pending) e.currentTarget.style.background = T.accent; }}
+              >
+                {pending ? "Charging…" : `Charge · ${fmt(cartMath.total)}`}
+              </button>
+            </div>
+          )}
+        </aside>
+      </div>
+
+      {/* Mobile cart bar — shows on screens narrower than lg. The cart
+          pane is hidden under lg breakpoint to avoid squishing the
+          catalog; this strip surfaces the same Charge action with a
+          drawer for review. */}
+      {cart.length > 0 && (
+        <div
+          className="lg:hidden shrink-0 px-4 py-3 flex items-center gap-3"
+          style={{ borderTop: `1px solid ${T.border}`, background: T.surfaceAlt }}
+        >
+          <button
+            onClick={() => setShowCart(true)}
+            className="flex-1 h-10 px-4 rounded-full inline-flex items-center justify-between gap-3"
+            style={{
+              background: T.surface,
+              border: `1px solid ${T.border}`,
+              color: T.ink,
+            }}
+          >
+            <span style={{ fontSize: 12, fontWeight: 500 }}>
+              {cartCount} item{cartCount === 1 ? "" : "s"} · review →
+            </span>
             <span style={{ ...TAB_NUM, fontSize: 13, fontWeight: 600 }}>
               {fmt(cartMath.subtotal)}
             </span>
-          )}
-        </button>
+          </button>
+          <button
+            onClick={() => setShowPay(true)}
+            disabled={pending}
+            className="shrink-0 h-10 px-5 rounded-full"
+            style={{
+              background: T.accent,
+              color: "#FFFFFF",
+              fontSize: 13,
+              fontWeight: 600,
+              ...TAB_NUM,
+            }}
+          >
+            {pending ? "…" : `Charge · ${fmt(cartMath.total)}`}
+          </button>
+        </div>
+      )}
 
-        {cart.length > 0 && (
-          <div className="hidden md:flex items-center gap-1.5 shrink-0">
-            <input
-              value={discountInput}
-              onChange={(e) => setDiscountInput(e.target.value)}
-              placeholder="Disc"
-              className="w-20 h-9 px-3 rounded-full focus:outline-none text-center"
-              style={{
-                background: T.surface,
-                border: `1px solid ${T.border}`,
-                color: T.ink,
-                fontSize: 12,
-                ...TAB_NUM,
-              }}
-            />
-            <select
-              value={String(taxRate)}
-              onChange={(e) => setTaxRate(parseFloat(e.target.value))}
-              className="h-9 px-3 rounded-full focus:outline-none"
-              style={{
-                background: T.surface,
-                border: `1px solid ${T.border}`,
-                color: T.ink,
-                fontSize: 12,
-              }}
-            >
-              <option value="0">No tax</option>
-              <option value="0.0925">9.25%</option>
-              <option value="0.095">9.50% LA</option>
-              <option value="0.0975">9.75%</option>
-              <option value="0.105">10.50%</option>
-            </select>
-          </div>
-        )}
-
-        <button
-          onClick={() => setShowPay(true)}
-          disabled={cart.length === 0 || pending}
-          className="shrink-0 h-11 px-5 rounded-full transition-colors"
-          style={{
-            background: cart.length === 0 ? T.surface : T.accent,
-            color: cart.length === 0 ? T.inkFaint : "#FFFFFF",
-            border: `1px solid ${cart.length === 0 ? T.border : T.accent}`,
-            cursor: cart.length === 0 ? "default" : "pointer",
-            opacity: pending ? 0.7 : 1,
-            fontSize: 13,
-            fontWeight: 600,
-            minWidth: 160,
-            ...TAB_NUM,
-          }}
-        >
-          {pending ? "Charging…" : `Charge · ${fmt(cartMath.total)}`}
-        </button>
-      </div>
-
+      {/* Mobile cart drawer — only opens via the mobile bar. Desktop
+          users see the cart in the always-visible right pane instead. */}
       {showCart && cart.length > 0 && (
         <Modal onClose={() => setShowCart(false)} title="Cart">
           <ul className="max-h-[50vh] overflow-y-auto -mx-1 px-1">
@@ -599,45 +760,15 @@ export default function AdminCashRegister() {
                     {fmt(l.unitPriceCents)} ea
                   </p>
                 </div>
-                <div
-                  className="inline-flex items-center rounded-full overflow-hidden"
-                  style={{ background: T.surfaceAlt }}
-                >
-                  <button
-                    onClick={() => setQty(l.sku, l.quantity - 1)}
-                    className="w-8 h-8 text-[14px]"
-                    style={{ color: T.ink, fontWeight: 600 }}
-                  >
-                    −
-                  </button>
-                  <span
-                    className="w-8 text-center text-[13px]"
-                    style={{ ...TAB_NUM, color: T.ink, fontWeight: 600 }}
-                  >
-                    {l.quantity}
-                  </span>
-                  <button
-                    onClick={() => setQty(l.sku, l.quantity + 1)}
-                    className="w-8 h-8 text-[14px]"
-                    style={{ color: T.ink, fontWeight: 600 }}
-                  >
-                    +
-                  </button>
+                <div className="inline-flex items-center rounded-full overflow-hidden" style={{ background: T.surfaceAlt }}>
+                  <button onClick={() => setQty(l.sku, l.quantity - 1)} className="w-8 h-8 text-[14px]" style={{ color: T.ink, fontWeight: 600 }}>−</button>
+                  <span className="w-8 text-center text-[13px]" style={{ ...TAB_NUM, color: T.ink, fontWeight: 600 }}>{l.quantity}</span>
+                  <button onClick={() => setQty(l.sku, l.quantity + 1)} className="w-8 h-8 text-[14px]" style={{ color: T.ink, fontWeight: 600 }}>+</button>
                 </div>
-                <span
-                  className="text-[13px] w-20 text-right"
-                  style={{ ...TAB_NUM, color: T.ink, fontWeight: 600 }}
-                >
+                <span className="text-[13px] w-20 text-right" style={{ ...TAB_NUM, color: T.ink, fontWeight: 600 }}>
                   {fmt(l.quantity * l.unitPriceCents)}
                 </span>
-                <button
-                  onClick={() => removeLine(l.sku)}
-                  className="w-7 h-7 rounded-full text-[12px]"
-                  style={{ color: T.inkFaint }}
-                  title="Remove"
-                >
-                  ✕
-                </button>
+                <button onClick={() => removeLine(l.sku)} className="w-7 h-7 rounded-full text-[12px]" style={{ color: T.inkFaint }} title="Remove">✕</button>
               </li>
             ))}
           </ul>
@@ -648,13 +779,8 @@ export default function AdminCashRegister() {
               <Row label="Discount" value={`−${fmt(cartMath.discount)}`} mute negative />
             )}
             {cartMath.tax > 0 && <Row label="Tax" value={fmt(cartMath.tax)} mute />}
-            <div
-              className="flex items-center justify-between mt-2 pt-2"
-              style={{ borderTop: `1px solid ${T.border}` }}
-            >
-              <span className="text-[14px]" style={{ color: T.ink, fontWeight: 600 }}>
-                Total
-              </span>
+            <div className="flex items-center justify-between mt-2 pt-2" style={{ borderTop: `1px solid ${T.border}` }}>
+              <span className="text-[14px]" style={{ color: T.ink, fontWeight: 600 }}>Total</span>
               <span className="text-[22px]" style={{ ...TAB_NUM, color: T.ink, fontWeight: 700 }}>
                 {fmt(cartMath.total)}
               </span>
@@ -662,41 +788,9 @@ export default function AdminCashRegister() {
           </div>
 
           <div className="mt-4 flex gap-2">
+            <button onClick={clearCart} className="h-10 px-4 rounded-full text-[12px]" style={{ background: T.surfaceAlt, color: T.inkSoft, fontWeight: 500 }}>Clear</button>
             <button
-              onClick={clearCart}
-              className="h-10 px-4 rounded-full text-[12px]"
-              style={{ background: T.surfaceAlt, color: T.inkSoft, fontWeight: 500 }}
-            >
-              Clear
-            </button>
-            <button
-              onClick={() => {
-                if (cart.length === 0) return;
-                const meta: InvoiceMeta = {
-                  ...emptyMeta(),
-                  taxRate,
-                  invoiceDiscountCents: cartMath.discount,
-                  lines: cart.map((l) => ({
-                    id: "ln_" + l.sku,
-                    description: l.name,
-                    qty: l.quantity,
-                    unitPriceCents: l.unitPriceCents,
-                  })),
-                };
-                setInvoicePrefill(meta);
-                setInvoiceBuilderOpen(true);
-                setShowCart(false);
-              }}
-              className="flex-1 h-10 rounded-full text-[12px]"
-              style={{ background: T.surface, color: T.ink, border: `1px solid ${T.border}`, fontWeight: 500 }}
-            >
-              Send as invoice
-            </button>
-            <button
-              onClick={() => {
-                setShowCart(false);
-                setShowPay(true);
-              }}
+              onClick={() => { setShowCart(false); setShowPay(true); }}
               className="flex-1 h-10 rounded-full text-[13px]"
               style={{ background: T.accent, color: "#FFFFFF", fontWeight: 600 }}
             >
