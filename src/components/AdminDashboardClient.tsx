@@ -79,18 +79,15 @@ const navGroups: NavGroup[] = [
   {
     label: "Operations",
     items: [
+      // Trimmed from 15 → 8. Mail Hold / Vacation Holds / Sticky Notes /
+      // Occupancy Map / Suite Transfers fold into Mail & Packages or
+      // Mailbox Center as sub-tool buttons. Key Ledger folds into Keys.
+      // Pickup Queue folds into QR Pickup.
       { id: "mail",            label: "Mail & Packages", Icon: IconMail },
       { id: "requests",        label: "Mail Requests",   Icon: IconClipboard },
-      { id: "mailhold",        label: "Mail Hold",       Icon: IconHold },
-      { id: "vacationholds",   label: "Vacation Holds",  Icon: IconHold },
       { id: "keys",            label: "Keys",            Icon: IconKey },
-      { id: "keyledger",       label: "Key Ledger",      Icon: IconKey },
       { id: "deliveries",      label: "Deliveries",      Icon: IconTruck },
       { id: "qrpickup",        label: "QR Pickup",       Icon: IconQR },
-      { id: "pickupqueue",     label: "Pickup Queue",    Icon: IconCalendar },
-      { id: "occupancy",       label: "Occupancy Map",   Icon: IconBox },
-      { id: "stickynotes",     label: "Sticky Notes",    Icon: IconClipboard },
-      { id: "suitetransfers",  label: "Suite Transfers", Icon: IconBox },
       { id: "notary",          label: "Notary",          Icon: IconNotary },
       { id: "shippingcenter",  label: "Shipping",        Icon: IconShipping },
       { id: "shop",            label: "Shop",            Icon: IconShop },
@@ -99,30 +96,23 @@ const navGroups: NavGroup[] = [
   {
     label: "Money & Comms",
     items: [
+      // Trimmed from 14 → 6. Cancellations / Disputes / Quarterly fold
+      // into Billing. Daily Digest / Referrals / Affiliates fold into
+      // Insights. Bulk Mailer + Email Logs fold into Messages.
       { id: "billing",        label: "Billing",       Icon: IconReceipt },
       { id: "revenue",        label: "Revenue",       Icon: IconReport },
-      { id: "cancellations",  label: "Cancellations", Icon: IconCancel },
       { id: "square",         label: "Square",        Icon: IconSquare },
-      { id: "quarterly",      label: "Quarterly",     Icon: IconCalendar },
       { id: "messages",       label: "Messages",      Icon: IconChat },
-      { id: "emails",         label: "Email Logs",    Icon: IconEmail },
-      { id: "mailer",         label: "Bulk Mailer",   Icon: IconEmail },
       { id: "insights",       label: "Insights",      Icon: IconReport },
-      { id: "kpidigest",      label: "Daily Digest",  Icon: IconReport },
-      { id: "disputes",       label: "Disputes",      Icon: IconReceipt },
       { id: "bookkeeping",    label: "Bookkeeping",   Icon: IconReport },
-      { id: "referrals",      label: "Referrals",     Icon: IconReport },
-      { id: "affiliates",     label: "Affiliates",    Icon: IconReport },
     ],
   },
   {
     label: "System",
     items: [
+      // Trimmed from 6 → 2. Partners / Tenants / Operating Hours /
+      // Webhooks fold into Settings as sub-tool buttons.
       { id: "business",  label: "Business Solutions", Icon: IconBuilding },
-      { id: "partners",  label: "Partners",           Icon: IconReport },
-      { id: "tenants",   label: "Tenants",            Icon: IconBuilding },
-      { id: "operatinghours", label: "Operating Hours", Icon: IconCalendar },
-      { id: "webhooks",  label: "Webhooks",           Icon: IconReport },
       { id: "settings",  label: "Settings",           Icon: IconSettings },
     ],
   },
@@ -130,11 +120,36 @@ const navGroups: NavGroup[] = [
 
 // Hidden nav items — reachable via URL or panel buttons but not shown
 // in the sidebar. Kept here so getNavItem() can resolve labels/icons for
-// the live breadcrumb when those tabs are active.
+// the live breadcrumb when those tabs are active. Goal: shrink visible
+// sidebar from 30+ items down to ~14 by folding rarely-used sub-tools
+// into their parent panels (Apple HIG: ≤2 levels of hierarchy).
 const hiddenNav: NavItem[] = [
-  { id: "idexpiring", label: "ID Expirations", Icon: IconCompliance },
-  { id: "cmrareport", label: "CMRA Report",    Icon: IconCompliance },
-  { id: "csvonboard", label: "Bulk Onboard",   Icon: IconCustomers },
+  // Customers fold-ins
+  { id: "idexpiring",      label: "ID Expirations",  Icon: IconCompliance },
+  { id: "cmrareport",      label: "CMRA Report",     Icon: IconCompliance },
+  { id: "csvonboard",      label: "Bulk Onboard",    Icon: IconCustomers },
+  // Operations fold-ins
+  { id: "mailhold",        label: "Mail Hold",       Icon: IconHold },
+  { id: "vacationholds",   label: "Vacation Holds",  Icon: IconHold },
+  { id: "keyledger",       label: "Key Ledger",      Icon: IconKey },
+  { id: "pickupqueue",     label: "Pickup Queue",    Icon: IconCalendar },
+  { id: "occupancy",       label: "Occupancy Map",   Icon: IconBox },
+  { id: "stickynotes",     label: "Sticky Notes",    Icon: IconClipboard },
+  { id: "suitetransfers",  label: "Suite Transfers", Icon: IconBox },
+  // Money & Comms fold-ins
+  { id: "cancellations",   label: "Cancellations",   Icon: IconCancel },
+  { id: "quarterly",       label: "Quarterly",       Icon: IconCalendar },
+  { id: "emails",          label: "Email Logs",      Icon: IconEmail },
+  { id: "mailer",          label: "Bulk Mailer",     Icon: IconEmail },
+  { id: "kpidigest",       label: "Daily Digest",    Icon: IconReport },
+  { id: "disputes",        label: "Disputes",        Icon: IconReceipt },
+  { id: "referrals",       label: "Referrals",       Icon: IconReport },
+  { id: "affiliates",      label: "Affiliates",      Icon: IconReport },
+  // System fold-ins
+  { id: "partners",        label: "Partners",        Icon: IconReport },
+  { id: "tenants",         label: "Tenants",         Icon: IconBuilding },
+  { id: "operatinghours",  label: "Operating Hours", Icon: IconCalendar },
+  { id: "webhooks",        label: "Webhooks",        Icon: IconReport },
 ];
 
 // Flat list for mobile pills + label lookup. Includes hidden items so
@@ -172,6 +187,8 @@ function MailOsCommandBar(props: {
   keyRequestCount: number;
   currentTabLabel: string;
   onOpenPalette: () => void;
+  sidebarHidden: boolean;
+  onToggleSidebar: () => void;
 }) {
   void props.signupCount;
   void props.creditCount;
@@ -189,12 +206,44 @@ function MailOsCommandBar(props: {
       role="banner"
       aria-label="Admin command bar"
     >
+      {/* Sidebar toggle — Apple HIG: let people hide the sidebar to
+          reduce distraction or reclaim space. Visible only on lg+ where
+          the sidebar lives; mobile uses the pill nav so toggle is N/A. */}
+      <button
+        type="button"
+        onClick={props.onToggleSidebar}
+        className="hidden lg:inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition-colors"
+        style={{ background: "transparent", color: "#3B4252" }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F7"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+        aria-label={props.sidebarHidden ? "Show sidebar" : "Hide sidebar"}
+        title={props.sidebarHidden ? "Show sidebar (⌘.)" : "Hide sidebar (⌘.)"}
+      >
+        <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M9 4 V20" />
+          {!props.sidebarHidden && <path d="M5.5 8 H7 M5.5 12 H7 M5.5 16 H7" />}
+        </svg>
+      </button>
+
       {/* Left: logo + live breadcrumb. The Admin Console pill + redundant
           breadcrumb from the old 64px header are gone — the breadcrumb
           here updates live with the current tab. */}
       <Link href="/" className="flex items-center gap-2 group shrink-0" aria-label="Home">
         <Logo className="h-7 w-auto transition-transform duration-200 group-hover:scale-[1.04]" />
       </Link>
+
+      {/* Live breadcrumb — when sidebar is hidden, this is the only
+          orientation cue the operator has. Always shown. */}
+      <span
+        className="hidden md:inline-flex items-center gap-2 ml-1 text-[13px]"
+        style={{ color: "#3B4252" }}
+      >
+        <svg viewBox="0 0 24 24" className="w-3 h-3 opacity-50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M9 6 L15 12 L9 18" />
+        </svg>
+        <span style={{ fontWeight: 500 }}>{props.currentTabLabel}</span>
+      </span>
 
       <span className="flex-1" />
 
@@ -504,6 +553,7 @@ import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
 import { EditCustomerModal } from "@/components/admin/EditCustomerModal";
 import { NewApptModal } from "@/components/admin/NewApptModal";
 import { NewClientModal } from "@/components/admin/NewClientModal";
+import { SubToolButton } from "@/components/admin/SubToolButton";
 
 type Customer = {
   id: string;
@@ -887,6 +937,45 @@ function ProfileDropdown() {
   );
 }
 
+// PanelWithTools — wraps any admin panel with a row of sub-tool jump
+// buttons at the top. Apple HIG: keep nav ≤2 levels; sub-tools belong
+// with their parent panel, not at top level. The wrapper itself is a
+// flex column so the wrapped panel scrolls inside its own pane.
+function PanelWithTools({
+  tools,
+  setTab,
+  children,
+}: {
+  tools: Array<{ label: string; id: string; count?: number; danger?: boolean }>;
+  setTab: (id: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col h-full gap-3">
+      <div className="shrink-0 flex flex-wrap gap-2">
+        {tools.map((t) => (
+          <SubToolButton
+            key={t.id}
+            icon={
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12 H19" />
+                <path d="M13 6 L19 12 L13 18" />
+              </svg>
+            }
+            label={t.label}
+            count={t.count}
+            danger={t.danger}
+            onClick={() => setTab(t.id)}
+          />
+        ))}
+      </div>
+      <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 pb-2">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function DropdownSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="py-1">
@@ -938,8 +1027,9 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   // internally (`mailboxcenter`) so old bookmarks / external links resolve.
   // Hidden tab IDs — reachable via URL or via sub-tool buttons inside
   // other panels (e.g. Mailbox Center → ID Expirations) but NOT shown in
-  // the sidebar to keep the nav clean.
-  const HIDDEN_TAB_IDS = ["idexpiring", "cmrareport", "csvonboard"] as const;
+  // the sidebar to keep the nav clean. Mirrors the hiddenNav array
+  // declared at module scope (kept in sync by hand — small enough list).
+  const HIDDEN_TAB_IDS = hiddenNav.map((n) => n.id);
   const ALL_TAB_IDS = [
     ...navGroups.flatMap((g) => g.items.map((i) => i.id)),
     ...HIDDEN_TAB_IDS,
@@ -956,6 +1046,24 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   // Which sidebar group is expanded — accordion-style, single open at a time.
   // Defaults to the group containing the active tab so users see siblings.
   const [expandedGroup, setExpandedGroup] = useState<string>(() => groupLabelForTab(normalizeTabSlug(searchParams.get("tab"))));
+
+  // Sidebar visibility — Apple HIG: "Consider letting people hide the
+  // sidebar. People sometimes want to hide the sidebar to create more
+  // room for content details or to reduce distraction." Persisted in
+  // localStorage so the choice survives reloads. Always defaults to
+  // visible to keep the sidebar discoverable.
+  const [sidebarHidden, setSidebarHidden] = useState(false);
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("noho-admin-sidebar-hidden");
+      if (stored === "true") setSidebarHidden(true);
+    } catch { /* localStorage unavailable */ }
+  }, []);
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("noho-admin-sidebar-hidden", sidebarHidden ? "true" : "false");
+    } catch { /* localStorage unavailable */ }
+  }, [sidebarHidden]);
 
   // When the URL changes (back/forward/external link), pull the tab back in.
   useEffect(() => {
@@ -1235,6 +1343,11 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
         e.preventDefault();
         setPaletteOpen(true);
       }
+      // ⌘. / Ctrl+. → toggle sidebar (mirrors macOS Mail / Notes / Finder).
+      if (cmd && e.key === ".") {
+        e.preventDefault();
+        setSidebarHidden((v) => !v);
+      }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -1309,6 +1422,8 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
         keyRequestCount={keyRequests.length}
         currentTabLabel={currentTab?.label ?? "Overview"}
         onOpenPalette={() => setPaletteOpen(true)}
+        sidebarHidden={sidebarHidden}
+        onToggleSidebar={() => setSidebarHidden((v) => !v)}
       />
 
       {/* ⌘K command palette — opens from the bar pill or ⌘K / ⌘P. */}
@@ -1332,7 +1447,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             the rest. Group headers carry a sum of badge counts across
             their children so urgent things bubble even when collapsed. */}
         <aside
-          className="hidden lg:flex flex-col shrink-0 sticky top-14 self-start"
+          className={`${sidebarHidden ? "hidden" : "hidden lg:flex"} flex-col shrink-0 sticky top-14 self-start`}
           style={{
             height: "calc(100vh - 56px)",
             width: 232,
@@ -1566,9 +1681,6 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {tab === "requests" && (
             <AdminRequestsPanel mailRequests={mailRequests} />
           )}
-          {tab === "keys" && (
-            <AdminKeysPanel keyRequests={keyRequests} />
-          )}
           {tab === "mail" && (
             <AdminMailPanel
               recentMail={filteredMail}
@@ -1601,22 +1713,67 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             />
           )}
           {tab === "messages" && (
-            <AdminChatPanel meId={adminId} customers={customers} />
+            <PanelWithTools
+              tools={[
+                { label: "Email Logs",  id: "emails" },
+                { label: "Bulk Mailer", id: "mailer" },
+              ]}
+              setTab={setTab}
+            >
+              <AdminChatPanel meId={adminId} customers={customers} />
+            </PanelWithTools>
           )}
           {tab === "emails" && <AdminEmailLogsPanel />}
           {tab === "mailer" && <AdminMailerPanel />}
-          {tab === "billing" && <AdminBillingPanel />}
+          {tab === "billing" && (
+            <PanelWithTools
+              tools={[
+                { label: "Cancellations", id: "cancellations" },
+                { label: "Disputes",      id: "disputes"     },
+                { label: "Quarterly",     id: "quarterly"    },
+              ]}
+              setTab={setTab}
+            >
+              <AdminBillingPanel />
+            </PanelWithTools>
+          )}
           {tab === "cancellations" && <AdminCancellationsPanel />}
           {tab === "partners" && <AdminPartnersPanel partners={partners} />}
           {tab === "tenants" && <AdminTenantsPanel tenants={tenants} />}
           {tab === "mailhold" && <AdminMailHoldPanel />}
           {tab === "vacationholds" && <AdminVacationHoldPanel />}
           {tab === "operatinghours" && <AdminOperatingHoursPanel />}
-          {tab === "insights" && <AdminInsightsPanel />}
+          {tab === "insights" && (
+            <PanelWithTools
+              tools={[
+                { label: "Daily Digest", id: "kpidigest"  },
+                { label: "Referrals",    id: "referrals"  },
+                { label: "Affiliates",   id: "affiliates" },
+              ]}
+              setTab={setTab}
+            >
+              <AdminInsightsPanel />
+            </PanelWithTools>
+          )}
+          {tab === "keys" && (
+            <PanelWithTools
+              tools={[{ label: "Key Ledger", id: "keyledger" }]}
+              setTab={setTab}
+            >
+              <AdminKeysPanel keyRequests={keyRequests} />
+            </PanelWithTools>
+          )}
           {tab === "keyledger" && <AdminKeyLedgerPanel />}
           {tab === "referrals" && <AdminReferralsPanel />}
           {tab === "csvonboard" && <AdminCsvOnboardPanel />}
-          {tab === "qrpickup" && <AdminQRPickupPanel />}
+          {tab === "qrpickup" && (
+            <PanelWithTools
+              tools={[{ label: "Pickup Queue", id: "pickupqueue" }]}
+              setTab={setTab}
+            >
+              <AdminQRPickupPanel />
+            </PanelWithTools>
+          )}
           {tab === "pickupqueue" && <AdminPickupAppointmentsPanel />}
           {tab === "occupancy" && <AdminSuiteOccupancyPanel />}
           {tab === "stickynotes" && <AdminPinnedNotesPanel />}
@@ -1671,7 +1828,33 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             />
           )}
           {tab === "settings" && (
-            <div className="space-y-4">
+            <div className="flex flex-col h-full gap-3">
+              {/* Settings sub-tools — fold the 4 system sub-pages here so
+                  they live one click away inside Settings, not as
+                  separate sidebar entries. */}
+              <div className="shrink-0 flex flex-wrap gap-2">
+                <SubToolButton
+                  icon={<svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L15 14"/></svg>}
+                  label="Operating Hours"
+                  onClick={() => setTab("operatinghours")}
+                />
+                <SubToolButton
+                  icon={<svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M3 12 H10 M14 12 H21"/><circle cx="12" cy="12" r="2"/></svg>}
+                  label="Webhooks"
+                  onClick={() => setTab("webhooks")}
+                />
+                <SubToolButton
+                  icon={<svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M3 21 V8 H10 V21 M14 21 V3 H21 V21"/></svg>}
+                  label="Tenants"
+                  onClick={() => setTab("tenants")}
+                />
+                <SubToolButton
+                  icon={<svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M3 20 a6 6 0 0 1 12 0 M11 20 a6 6 0 0 1 10 0"/></svg>}
+                  label="Partners"
+                  onClick={() => setTab("partners")}
+                />
+              </div>
+              <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 pb-2 space-y-4">
               {/* Settings header — Command Tower variant matching the rest
                   of the polished admin chrome. */}
               <div
@@ -1916,8 +2099,9 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                 </button>
               </div>
             </div>
-          )}
             </div>
+          )}
+          </div>
           </div>
           </div>
         </div>

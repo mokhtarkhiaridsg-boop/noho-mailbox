@@ -24,6 +24,7 @@ import {
 import { DEFAULT_PRICING, type PricingPlan, type PricingConfig } from "@/lib/pricing-config";
 import { AdminWalkInSignupWizard } from "./AdminWalkInSignupWizard";
 import { runDueAutoRenewals, setAutoRenewal } from "@/app/actions/billing";
+import { SubToolButton } from "./SubToolButton";
 
 export type MailboxRenewalRow = {
   id: string;
@@ -1005,6 +1006,58 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
               )}
               label="Bulk Onboard"
               onClick={() => setTab("csvonboard")}
+            />
+            <SubToolButton
+              icon={(
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M9 3 V21 M15 3 V21 M3 9 H21 M3 15 H21" />
+                </svg>
+              )}
+              label="Occupancy"
+              onClick={() => setTab("occupancy")}
+            />
+            <SubToolButton
+              icon={(
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5 a7 7 0 0 1 7 7 v5 a2 2 0 0 1 -2 2 H7 a2 2 0 0 1 -2 -2 v-5 a7 7 0 0 1 7 -7 z" />
+                  <path d="M9 21 l6 0" />
+                </svg>
+              )}
+              label="Mail Hold"
+              onClick={() => setTab("mailhold")}
+            />
+            <SubToolButton
+              icon={(
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 9 L12 3 L22 9 V20 a1 1 0 0 1 -1 1 H3 a1 1 0 0 1 -1 -1 z" />
+                  <path d="M9 21 V13 H15 V21" />
+                </svg>
+              )}
+              label="Vacation"
+              onClick={() => setTab("vacationholds")}
+            />
+            <SubToolButton
+              icon={(
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 5 a2 2 0 0 1 2 -2 h11 l5 5 v11 a2 2 0 0 1 -2 2 H5 a2 2 0 0 1 -2 -2 z" />
+                  <path d="M16 3 V8 H21" />
+                  <path d="M7 13 H13 M7 17 H11" />
+                </svg>
+              )}
+              label="Sticky Notes"
+              onClick={() => setTab("stickynotes")}
+            />
+            <SubToolButton
+              icon={(
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 7 L9 7 L9 17 L5 17 z" />
+                  <path d="M15 7 L19 7 L19 17 L15 17 z" />
+                  <path d="M9 12 L15 12" />
+                </svg>
+              )}
+              label="Suite Transfers"
+              onClick={() => setTab("suitetransfers")}
             />
           </div>
         )}
@@ -2589,53 +2642,6 @@ function TillCard({
         </div>
       </div>
     </div>
-  );
-}
-
-// SubToolButton — iPad-OS-style pill that jumps to a sibling admin tab.
-// Rendered at the top of Mailbox Center for ID Expirations / CMRA Report
-// / Bulk Onboard so those workflows feel like sub-tools, not separate
-// destinations.
-function SubToolButton({
-  icon,
-  label,
-  count,
-  danger,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  count?: number;
-  danger?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full text-[12px] font-medium transition-colors"
-      style={{
-        background: "#FFFFFF",
-        color: "#3B4252",
-        border: "1px solid #ECEEF1",
-      }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = "#F4F5F7"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; }}
-    >
-      <span style={{ color: "#1976FF" }}>{icon}</span>
-      <span>{label}</span>
-      {typeof count === "number" && count > 0 && (
-        <span
-          className="text-[10px] font-semibold px-1.5 min-w-[16px] h-4 rounded-full inline-flex items-center justify-center"
-          style={{
-            background: danger ? "#FF3B30" : "#1976FF",
-            color: "#FFFFFF",
-          }}
-        >
-          {count}
-        </span>
-      )}
-    </button>
   );
 }
 
