@@ -1146,6 +1146,11 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
     (id: string) => {
       setTabState(id);
       setViewCustomer(null);
+      // Auto-expand the sidebar group containing this tab so siblings
+      // are immediately visible. Hidden-tab IDs return their visible
+      // parent label via groupLabelForTab — we leave the group as-is
+      // since hidden tabs don't appear in the sidebar anyway.
+      setExpandedGroup(groupLabelForTab(id));
       const params = new URLSearchParams(searchParams.toString());
       params.set("tab", id);
       router.replace(`?${params.toString()}`, { scroll: false });

@@ -958,21 +958,21 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
 
   return (
     <div className="flex flex-col h-full gap-3">
-      {/* ─── iPad-OS title row + sub-tool jump buttons ─────────────
-          Replaced the dark "command tower" hero (radial gradient + floor
-          grid + NPC scene) with a clean header row. The 3 jump buttons
-          fold ID Expirations / CMRA Report / Bulk Onboard into this hub. */}
-      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-bold" style={{ color: "#1A1D23", letterSpacing: "-0.01em" }}>
-            Mailbox Center
-          </h2>
-          <p className="text-[12px]" style={{ color: "#7A8290" }}>
-            Renew suites · attach customers · run today's payments.
-          </p>
-        </div>
-        {setTab && (
-          <div className="flex flex-wrap gap-2 shrink-0">
+      {/* ─── iPad-OS title row ───── single calm line. Sub-tool buttons
+          live on their own row below so the title isn't squeezed. */}
+      <div className="shrink-0 flex items-baseline gap-3">
+        <h2 className="text-xl font-bold" style={{ color: "#1A1D23", letterSpacing: "-0.01em" }}>
+          Mailbox Center
+        </h2>
+        <p className="text-[12px] hidden sm:block" style={{ color: "#7A8290" }}>
+          Renew suites · attach customers · run today's payments
+        </p>
+      </div>
+
+      {/* ─── Sub-tool jump buttons row ─── */}
+      {setTab && (
+        <div className="shrink-0">
+          <div className="flex flex-wrap gap-2">
             <SubToolButton
               icon={(
                 <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
@@ -1060,8 +1060,8 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
               onClick={() => setTab("suitetransfers")}
             />
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ─── KPI strip ─── */}
       <div className="shrink-0 flex flex-wrap gap-2.5">
