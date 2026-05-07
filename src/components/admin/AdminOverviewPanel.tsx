@@ -90,7 +90,7 @@ const TILES: Tile[] = [
   { id: "signups",       label: "Signups",         Icon: AiSparkle,      tint: "#FFFAE8", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "signups" },
   { id: "credits",       label: "Credits",         Icon: AiBolt,         tint: "#FFF4D6", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "credits" },
   { id: "customers",     label: "Customers",       Icon: AiHeart,        tint: "#FDE8E9", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "mailboxcenter", label: "Mailbox Center",  Icon: AiMailbox,      tint: "#F7E6C2", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "mailboxcenter", label: "Mailbox",         Icon: AiMailbox,      tint: "#F7E6C2", iconBg: "transparent", iconColor: "#2D100F" },
   { id: "compliance",    label: "Compliance",      Icon: AiShield,       tint: "#E6F0FF", iconBg: "transparent", iconColor: "#2D100F" },
 
   // Row 2 — Postal operations.
@@ -231,10 +231,10 @@ export function AdminOverviewPanel({
                 style={{ color: tile.iconColor }}
               />
               <span
-                className="text-[13px] sm:text-[14px] truncate w-full"
+                className="text-[12px] sm:text-[13px] truncate w-full"
                 style={{
                   color: "#2D100F",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
                   letterSpacing: "-0.005em",
                 }}
