@@ -20,36 +20,28 @@
  */
 
 import type { Stats, MailItem, NotaryItem } from "./types";
+// Full-color NOHO brand illustrations from AnimatedIcons — these are the
+// actual marketing-site icons (cream body, brown ink stroke, red flag,
+// blue heart, blue truck wheels, blue pin, red wax seal, red tape strip,
+// blue shield check). Used at ~56-64px so the brand reads at a glance.
 import {
-  IconSignup,
-  IconCredit,
-  IconKey,
-  IconShipping,
-  IconShop,
-  IconReceipt,
-  IconReport,
-  IconCancel,
-  IconSquare,
-  IconCalendar,
-  IconChat,
-  IconEmail,
-  IconBuilding,
-  IconSettings,
-} from "./AdminIcons";
-// Branded NOHO motifs — mailbox + flag, envelope + heart, community heart,
-// truck, box, shield, stamp. Used for the high-visibility tiles so the
-// Launchpad reads as NOHO rather than generic Apple line-art.
+  AiMailbox,
+  AiTruck,
+  AiShield,
+  AiEnvelope,
+  AiBolt,
+  AiPin,
+  AiHeart,
+  AiBox,
+  AiClock,
+  AiSparkle,
+} from "@/components/AnimatedIcons";
+// Brand line-art glyphs for non-postal tiles (Cash Register, QR, etc.) —
+// drawn with NOHO brown ink stroke so they sit alongside the AnimatedIcons.
 import {
-  BiMailbox,
-  BiEnvelope,
-  BiCommunity,
-  BiTruck,
-  BiBox,
-  BiShield,
-  BiStamp,
-  BiPin,
   BiQR,
   BiRegister,
+  BiStamp,
 } from "./BrandTileIcons";
 
 type Props = {
@@ -81,45 +73,49 @@ const T = {
 type Tile = {
   id: string;
   label: string;
-  Icon: (p: { className?: string }) => React.ReactElement;
+  Icon: (p: { className?: string; style?: React.CSSProperties }) => React.ReactElement;
   tint: string;
   iconBg: string;
   iconColor: string;
   badgeKey?: "signups" | "credits" | "requests" | "keys" | "awaiting" | "notary";
 };
 
+// Tile palette uses cream/sky/blush backgrounds drawn from the marketing
+// site so each tile feels like a NOHO neighborhood sticker rather than a
+// generic iOS chip. The icon is the FULL-COLOR brand illustration; no
+// uniform colored bg square hiding behind it.
 const TILES: Tile[] = [
-  // Row 1 — TODAY ops. NOHO blue accent dominant.
-  { id: "register",      label: "Cash Register",   Icon: BiRegister,     tint: "#EBF6FF", iconBg: "#337485", iconColor: "#FFFFFF" },
-  { id: "signups",       label: "Signups",         Icon: IconSignup,     tint: "#FFF4EB", iconBg: "#FF8A1F", iconColor: "#FFFFFF", badgeKey: "signups" },
-  { id: "credits",       label: "Credits",         Icon: IconCredit,     tint: "#EAFBEF", iconBg: "#22C55E", iconColor: "#FFFFFF", badgeKey: "credits" },
-  { id: "customers",     label: "Customers",       Icon: BiCommunity,    tint: "#F0EBFF", iconBg: "#7C4DFF", iconColor: "#FFFFFF" },
-  { id: "mailboxcenter", label: "Mailbox Center",  Icon: BiMailbox,      tint: "#FFF1F0", iconBg: "#EF4444", iconColor: "#FFFFFF" },
-  { id: "compliance",    label: "Compliance",      Icon: BiShield,       tint: "#FFFAEB", iconBg: "#F5A623", iconColor: "#FFFFFF" },
+  // Row 1 — TODAY ops.
+  { id: "register",      label: "Cash Register",   Icon: BiRegister,     tint: "#FFF1E2", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "signups",       label: "Signups",         Icon: AiSparkle,      tint: "#FFFAE8", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "signups" },
+  { id: "credits",       label: "Credits",         Icon: AiBolt,         tint: "#FFF4D6", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "credits" },
+  { id: "customers",     label: "Customers",       Icon: AiHeart,        tint: "#FDE8E9", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "mailboxcenter", label: "Mailbox Center",  Icon: AiMailbox,      tint: "#F7E6C2", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "compliance",    label: "Compliance",      Icon: AiShield,       tint: "#E6F0FF", iconBg: "transparent", iconColor: "#2D100F" },
 
-  // Row 2 — Operations: postal/mailbox motifs.
-  { id: "mail",          label: "Mail & Pkgs",     Icon: BiEnvelope,     tint: "#EBF2FF", iconBg: "#337485", iconColor: "#FFFFFF" },
-  { id: "requests",      label: "Mail Requests",   Icon: BiEnvelope,     tint: "#FFF4EB", iconBg: "#FF8A1F", iconColor: "#FFFFFF", badgeKey: "requests" },
-  { id: "mailhold",      label: "Mail Hold",       Icon: BiPin,          tint: "#FAF6FF", iconBg: "#9F7AEA", iconColor: "#FFFFFF" },
-  { id: "keys",          label: "Keys",            Icon: IconKey,        tint: "#FFFAEB", iconBg: "#F59E0B", iconColor: "#FFFFFF", badgeKey: "keys" },
-  { id: "deliveries",    label: "Deliveries",      Icon: BiTruck,        tint: "#EAF7FF", iconBg: "#0EA5E9", iconColor: "#FFFFFF" },
-  { id: "qrpickup",      label: "QR Pickup",       Icon: BiQR,           tint: "#F0F4FF", iconBg: "#5B6CFF", iconColor: "#FFFFFF" },
+  // Row 2 — Postal operations.
+  { id: "mail",          label: "Mail & Pkgs",     Icon: AiEnvelope,     tint: "#F4EEE3", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "requests",      label: "Mail Requests",   Icon: AiEnvelope,     tint: "#FFF3D6", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "requests" },
+  { id: "mailhold",      label: "Mail Hold",       Icon: AiPin,          tint: "#E6EFFA", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "keys",          label: "Keys",            Icon: AiSparkle,      tint: "#FFF0D5", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "keys" },
+  { id: "deliveries",    label: "Deliveries",      Icon: AiTruck,        tint: "#E1EFF7", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "qrpickup",      label: "QR Pickup",       Icon: BiQR,           tint: "#EFE7F7", iconBg: "transparent", iconColor: "#2D100F" },
 
   // Row 3 — Money & services.
-  { id: "notary",        label: "Notary",          Icon: BiStamp,        tint: "#FFF7F0", iconBg: "#D97706", iconColor: "#FFFFFF" },
-  { id: "shippingcenter",label: "Shipping",        Icon: BiBox,          tint: "#EAFAF4", iconBg: "#0F9F6E", iconColor: "#FFFFFF" },
-  { id: "shop",          label: "Shop",            Icon: IconShop,       tint: "#FFEFEF", iconBg: "#E11D48", iconColor: "#FFFFFF" },
-  { id: "billing",       label: "Billing",         Icon: IconReceipt,    tint: "#EBF6FF", iconBg: "#337485", iconColor: "#FFFFFF" },
-  { id: "revenue",       label: "Revenue",         Icon: IconReport,     tint: "#EAFBEF", iconBg: "#16A34A", iconColor: "#FFFFFF" },
-  { id: "cancellations", label: "Cancellations",   Icon: IconCancel,     tint: "#FFF1F0", iconBg: "#DC2626", iconColor: "#FFFFFF" },
+  { id: "notary",        label: "Notary",          Icon: BiStamp,        tint: "#FFE9D9", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "shippingcenter",label: "Shipping",        Icon: AiBox,          tint: "#E0F2EA", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "shop",          label: "Shop",            Icon: AiHeart,        tint: "#FDDDD6", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "billing",       label: "Billing",         Icon: AiClock,        tint: "#E6F0FF", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "revenue",       label: "Revenue",         Icon: AiBolt,         tint: "#E0F2EA", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "cancellations", label: "Cancellations",   Icon: AiShield,       tint: "#FCE5E5", iconBg: "transparent", iconColor: "#2D100F" },
 
   // Row 4 — System & comms.
-  { id: "square",        label: "Square",          Icon: IconSquare,     tint: "#F4F4F4", iconBg: "#1A1D23", iconColor: "#FFFFFF" },
-  { id: "quarterly",     label: "Quarterly",       Icon: IconCalendar,   tint: "#FFFAEB", iconBg: "#CA8A04", iconColor: "#FFFFFF" },
-  { id: "messages",      label: "Messages",        Icon: IconChat,       tint: "#EBF2FF", iconBg: "#337485", iconColor: "#FFFFFF" },
-  { id: "emails",        label: "Email Logs",      Icon: IconEmail,      tint: "#FAF6FF", iconBg: "#7C4DFF", iconColor: "#FFFFFF" },
-  { id: "tenants",       label: "Tenants",         Icon: IconBuilding,   tint: "#F4F4F4", iconBg: "#3B4252", iconColor: "#FFFFFF" },
-  { id: "settings",      label: "Settings",        Icon: IconSettings,   tint: "#F4F5F7", iconBg: "#7A8290", iconColor: "#FFFFFF" },
+  { id: "square",        label: "Square",          Icon: AiBox,          tint: "#F0EFE9", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "quarterly",     label: "Quarterly",       Icon: AiClock,        tint: "#FFF4D6", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "messages",      label: "Messages",        Icon: AiEnvelope,     tint: "#E6F0FF", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "emails",        label: "Email Logs",      Icon: AiEnvelope,     tint: "#EFE7F7", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "tenants",       label: "Tenants",         Icon: AiShield,       tint: "#EFE9DF", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "settings",      label: "Settings",        Icon: AiSparkle,      tint: "#F0EFEC", iconBg: "transparent", iconColor: "#2D100F" },
 ];
 
 export function AdminOverviewPanel({
@@ -228,21 +224,20 @@ export function AdminOverviewPanel({
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
+              {/* Full-color NOHO brand illustration — no colored chip
+                  hiding behind it. Sized large so the brand reads. */}
+              <tile.Icon
+                className="w-14 h-14 sm:w-16 sm:h-16 shrink-0"
+                style={{ color: tile.iconColor }}
+              />
               <span
-                className="inline-flex items-center justify-center rounded-xl shrink-0"
+                className="text-[13px] sm:text-[14px] truncate w-full"
                 style={{
-                  width: 44,
-                  height: 44,
-                  background: tile.iconBg,
-                  color: tile.iconColor,
-                  boxShadow: `0 4px 12px ${tile.iconBg}33`,
+                  color: "#2D100F",
+                  fontWeight: 700,
+                  fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+                  letterSpacing: "-0.005em",
                 }}
-              >
-                <tile.Icon className="w-[22px] h-[22px]" />
-              </span>
-              <span
-                className="text-[13px] truncate w-full"
-                style={{ color: T.ink, fontWeight: 600 }}
               >
                 {tile.label}
               </span>

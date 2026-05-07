@@ -88,6 +88,7 @@ const navGroups: NavGroup[] = [
       { id: "keys",            label: "Keys",            Icon: IconKey },
       { id: "deliveries",      label: "Deliveries",      Icon: IconTruck },
       { id: "qrpickup",        label: "QR Pickup",       Icon: IconQR },
+      { id: "labelprinter",    label: "Label Printer",   Icon: IconReceipt },
       { id: "notary",          label: "Notary",          Icon: IconNotary },
       { id: "shippingcenter",  label: "Shipping",        Icon: IconShipping },
       { id: "shop",            label: "Shop",            Icon: IconShop },
@@ -562,6 +563,7 @@ import AdminSuiteOccupancyPanel from "@/components/admin/AdminSuiteOccupancyPane
 import AdminPinnedNotesPanel from "@/components/admin/AdminPinnedNotesPanel";
 import AdminAffiliateEarningsPanel from "@/components/admin/AdminAffiliateEarningsPanel";
 import AdminSuiteTransfersPanel from "@/components/admin/AdminSuiteTransfersPanel";
+import AdminLabelPrinterPanel from "@/components/admin/AdminLabelPrinterPanel";
 import { AdminQRPickupPanel } from "@/components/admin/AdminQRPickupPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
@@ -1802,6 +1804,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {tab === "occupancy" && <AdminSuiteOccupancyPanel />}
           {tab === "stickynotes" && <AdminPinnedNotesPanel />}
           {tab === "suitetransfers" && <AdminSuiteTransfersPanel />}
+          {tab === "labelprinter" && <AdminLabelPrinterPanel />}
           {tab === "affiliates" && <AdminAffiliateEarningsPanel />}
           {tab === "idexpiring" && <AdminIdExpiringPanel />}
           {tab === "webhooks" && <AdminWebhooksPanel />}

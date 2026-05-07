@@ -26,6 +26,20 @@ if (typeof window === "undefined" && process.env.NODE_ENV === "production" && !F
 const REPLY_TO = "nohomailbox@gmail.com";
 const BASE_URL = process.env.AUTH_URL ?? "https://nohomailbox.org";
 
+// ─── Universal verification BCC (iter 11) ──────────────────────────────
+// Every outbound email is BCC'd to the operator addresses below so we
+// have a real-world audit trail of what's actually leaving the system.
+// Override per-message with `args.skipBcc: true` when sending a fully
+// confidential message (rare; e.g. password reset). Override globally
+// via EMAIL_VERIFICATION_BCC env var (comma-separated).
+const VERIFICATION_BCC: string[] = (
+  process.env.EMAIL_VERIFICATION_BCC?.trim() ||
+  "mokhtar.khiari.dsg@gmail.com,jnscanlon15@gmail.com"
+)
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
 // ─── Send + log wrapper ───────────────────────────────────────────────────────
 // Every email goes through this — it records to EmailLog so members can see
 // their email history and admins can audit delivery failures. NEVER throws —
@@ -37,6 +51,8 @@ type SendArgs = {
   replyTo?: string;
   kind: string;        // "password_reset" | "mail_arrived" | "receipt" | ...
   userId?: string | null;
+  /** Skip the universal verification BCC (rare — only for sensitive content like password resets). */
+  skipBcc?: boolean;
 };
 
 export async function sendEmail(args: SendArgs): Promise<{ logId: string; status: string }> {
@@ -66,12 +82,20 @@ export async function sendEmail(args: SendArgs): Promise<{ logId: string; status
   }
 
   try {
+    // Build BCC list — exclude the primary `to` address so we don't
+    // double-deliver to ourselves when the operator is also the recipient.
+    const toLower = args.to.trim().toLowerCase();
+    const bccList = args.skipBcc
+      ? undefined
+      : VERIFICATION_BCC.filter((e) => e !== toLower);
+
     const result = await resend.emails.send({
       from: FROM,
       replyTo: args.replyTo ?? REPLY_TO,
       to: args.to,
       subject: args.subject,
       html: args.html,
+      ...(bccList && bccList.length > 0 ? { bcc: bccList } : {}),
     });
 
     const providerId = (result as { data?: { id?: string } })?.data?.id ?? null;
