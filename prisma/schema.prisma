@@ -493,6 +493,25 @@ model WebhookDelivery {
   @@index([deadLettered, sentAt])
 }
 
+// iter-143 — Suite cleaning / maintenance log.
+// Records every cleaning, inspection, repair, lock-change, or other
+// maintenance event per physical suite. Suites are referenced by their
+// suite-number string (the same string on User.suiteNumber). When a
+// suite is reassigned to a new customer, history is preserved under
+// the same suite number.
+model SuiteMaintenanceLog {
+  id              String   @id @default(cuid())
+  suiteNumber     String                        // matches User.suiteNumber
+  kind            String                        // "cleaned" | "inspected" | "repaired" | "lock_changed" | "other"
+  notes           String?
+  performedById   String?                       // admin user id (nullable so legacy rows don't bind to one admin)
+  performedAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  @@index([suiteNumber, performedAt])
+  @@index([kind, performedAt])
+}
+
 // iter-142 — Storage tier auto-graduation alerts.
 // One row per (mailItemId × threshold) once the heads-up email has been
 // sent. Threshold values: "14d", "30d", "60d". The cron sweeps daily;

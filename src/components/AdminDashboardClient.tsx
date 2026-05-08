@@ -156,6 +156,7 @@ const hiddenNav: NavItem[] = [
   { id: "deferredemails",  label: "Deferred Emails", Icon: IconEmail },
   { id: "backuphealth",    label: "Backup Health",   Icon: IconCompliance },
   { id: "mailerautoreply", label: "Auto-replies",    Icon: IconEmail },
+  { id: "suitemaint",      label: "Suite Maintenance", Icon: IconBox },
 ];
 
 // Flat list for mobile pills + label lookup. Includes hidden items so
@@ -574,6 +575,7 @@ import AdminBulkForwardPanel from "@/components/admin/AdminBulkForwardPanel";
 import AdminDeferredEmailsPanel from "@/components/admin/AdminDeferredEmailsPanel";
 import AdminBackupHealthPanel from "@/components/admin/AdminBackupHealthPanel";
 import AdminMailerAutoReplyPanel from "@/components/admin/AdminMailerAutoReplyPanel";
+import AdminSuiteMaintenancePanel from "@/components/admin/AdminSuiteMaintenancePanel";
 import { AdminQRPickupPanel } from "@/components/admin/AdminQRPickupPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
@@ -1602,8 +1604,8 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             polygon decorations in corners. Single big focal card per
             tab, lots of whitespace, no nested cards. */}
         <div
-          className="flex-1 min-w-0 px-6 sm:px-8 py-6 sm:py-8 relative overflow-hidden"
-          style={{ height: "calc(100vh - 56px)", background: "#F4F5F7", color: "#3B4252" }}
+          className="flex-1 min-w-0 px-6 sm:px-8 py-6 sm:py-8 relative"
+          style={{ minHeight: "calc(100vh - 56px)", background: "#F4F5F7", color: "#3B4252" }}
         >
           {/* Decorative pastel polygons — purely visual, position absolute
               behind everything. Subtle, soft, iPad-OS feel. */}
@@ -1641,9 +1643,9 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             }}
           />
 
-          <div className="relative h-full" style={{ zIndex: 1 }}>
-          <div className="mx-auto max-w-[1400px] h-full">
-            <div className="px-1 sm:px-2 py-1 sm:py-2 h-full overflow-hidden">
+          <div className="relative" style={{ zIndex: 1 }}>
+          <div className="mx-auto max-w-[1400px]">
+            <div className="px-1 sm:px-2 py-1 sm:py-2">
           {/* Mobile pill nav — clean iPad-OS white/blue */}
           <div className="lg:hidden mb-3">
             <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
@@ -1821,6 +1823,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {tab === "deferredemails" && <AdminDeferredEmailsPanel />}
           {tab === "backuphealth" && <AdminBackupHealthPanel />}
           {tab === "mailerautoreply" && <AdminMailerAutoReplyPanel />}
+          {tab === "suitemaint" && <AdminSuiteMaintenancePanel />}
           {tab === "affiliates" && <AdminAffiliateEarningsPanel />}
           {tab === "idexpiring" && <AdminIdExpiringPanel />}
           {tab === "webhooks" && <AdminWebhooksPanel />}

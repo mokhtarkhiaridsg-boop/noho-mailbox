@@ -156,14 +156,12 @@ export function AdminOverviewPanel({
   };
 
   // ─── Layout ─────────────────────────────────────────────────────────
-  // Two rows: a thin status strip + a 6×4 launchpad grid that fills
-  // the rest of the visible area. The container is `h-[calc(100vh-...)]`
-  // so it never scrolls — tiles auto-size from the available space.
+  // Status strip on top + Launchpad grid below. Grid tiles are
+  // aspect-square so labels always have room (the prior height clamp
+  // squeezed labels to 0 on shorter viewports). Page scrolls naturally
+  // if the grid runs taller than the viewport.
   return (
-    <div
-      className="flex flex-col"
-      style={{ height: "calc(100vh - 56px - 64px)", minHeight: 480 }}
-    >
+    <div className="flex flex-col gap-5">
       {/* Status strip — greeting + tiny live numbers, fits in 56px */}
       <div className="flex items-center justify-between mb-5">
         <div>
@@ -206,14 +204,14 @@ export function AdminOverviewPanel({
         </div>
       </div>
 
-      {/* Launchpad grid — 6 cols × 4 rows desktop, 3 cols × 8 rows tablet,
-          2 cols × 12 rows mobile. `auto-rows-fr` distributes the leftover
-          vertical space evenly so every tile is square-ish in any view. */}
+      {/* Launchpad grid — 6 cols desktop, fewer on smaller. Tiles are
+          aspect-square so the icon (top) + label (bottom) always have
+          room. No height clamp on the parent — page scrolls if content
+          exceeds the viewport. */}
       <div
-        className="grid gap-3 sm:gap-4 flex-1 min-h-0"
+        className="grid gap-3 sm:gap-4"
         style={{
-          gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
-          gridAutoRows: "1fr",
+          gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
         }}
       >
         {TILES.map((tile) => {
@@ -222,11 +220,10 @@ export function AdminOverviewPanel({
             <button
               key={tile.id}
               onClick={() => setTab(tile.id)}
-              className="relative rounded-2xl p-4 text-left transition-all flex flex-col items-start justify-between"
+              className="relative rounded-2xl p-3 text-center transition-all flex flex-col items-center justify-center gap-2 aspect-square"
               style={{
                 background: tile.tint,
-                border: "1px solid transparent",
-                minHeight: 0,
+                border: "1px solid rgba(45,16,15,0.06)",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "scale(1.03)";
@@ -238,19 +235,21 @@ export function AdminOverviewPanel({
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              {/* Full-color NOHO brand illustration — no colored chip
-                  hiding behind it. Sized large so the brand reads. */}
+              {/* Brand illustration on top (~55% of tile height). */}
               <tile.Icon
-                className="w-14 h-14 sm:w-16 sm:h-16 shrink-0"
+                className="w-12 h-12 sm:w-14 sm:h-14 shrink-0"
                 style={{ color: tile.iconColor }}
               />
+              {/* Label always visible — single line, ellipsis if needed,
+                  but tile width (140px+) holds every label we have. */}
               <span
-                className="text-[12px] sm:text-[13px] truncate w-full"
+                className="text-[12px] sm:text-[13px] leading-tight w-full px-1 line-clamp-2"
                 style={{
                   color: "#2D100F",
                   fontWeight: 600,
                   fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
                   letterSpacing: "-0.005em",
+                  wordBreak: "break-word",
                 }}
               >
                 {tile.label}
