@@ -294,6 +294,9 @@ export default async function AdminPage() {
 
   const squareStatus = {
     configured: isSquareConfigured(),
+    environment: (process.env.SQUARE_ENVIRONMENT?.trim().toLowerCase() === "production"
+      ? "production"
+      : "sandbox") as "production" | "sandbox",
     linkedCustomers,
     totalPayments,
     catalogItems: catalogItemCount,

@@ -222,6 +222,7 @@ model MailItem {
 
   user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   requests MailRequest[]
+  storageAlerts StorageThresholdAlert[]
 
   // Hot-path indexes — dashboard reads /admin reads scan by these constantly.
   @@index([userId, status])
@@ -366,12 +367,41 @@ model MailerMessage {
   unread      Boolean  @default(true)
   templateId  String?                      // when admin sent from a notice template
   bulkBatchId String?                      // when part of a bulk notice (groups outbound rows)
+  // iter-141: when set, this outbound row was sent by a MailerAutoReplyRule.
+  // Lets the panel render an auto-reply badge + lets the engine skip
+  // re-triggering on its own outbound messages.
+  autoReplyRuleId String?
   sentAt      DateTime @default(now())
 
   thread MailerThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
   @@index([threadId, sentAt])
   @@index([bulkBatchId])
+}
+
+// iter-141 — Mailer auto-reply rules (Tier 8 #53).
+// Admin defines keyword triggers (case-insensitive contains). When an
+// inbound email matches an active rule, the rule's reply template
+// auto-fires once per thread per cooldown window. The cooldown prevents
+// reply-loops with mis-configured external systems. Templates support
+// `{customerName}`, `{originalSubject}`, `{firstLine}` placeholders.
+model MailerAutoReplyRule {
+  id              String   @id @default(cuid())
+  label           String                   // admin's label for the rule (e.g. "After-hours auto-reply")
+  matchOn         String   @default("any") // "any" | "subject" | "body"
+  keywords        String                   // JSON array of strings, case-insensitive contains
+  replySubject    String                   // template
+  replyBodyHtml   String                   // template (allowed simple HTML)
+  active          Boolean  @default(true)
+  cooldownHours   Int      @default(24)    // skip if this rule already fired for the same customer within this window
+  businessHours   String   @default("any") // "any" | "open" | "closed"
+  sendCount       Int      @default(0)     // number of times the rule has actually fired
+  lastFiredAt     DateTime?
+  createdBy       String?                  // admin user id
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([active])
 }
 
 // iter-105 — Storage-fee dispute workflow.
@@ -461,6 +491,25 @@ model WebhookDelivery {
   @@index([endpointId, sentAt])
   @@index([nextRetryAt])
   @@index([deadLettered, sentAt])
+}
+
+// iter-142 — Storage tier auto-graduation alerts.
+// One row per (mailItemId × threshold) once the heads-up email has been
+// sent. Threshold values: "14d", "30d", "60d". The cron sweeps daily;
+// existing rows mean we don't re-send. Cleared automatically on pickup
+// (cascade from MailItem.delete) — picked-up packages don't keep alert
+// rows around.
+model StorageThresholdAlert {
+  id         String   @id @default(cuid())
+  mailItemId String
+  threshold  String   // "14d" | "30d" | "60d"
+  feeAtAlertCents Int                     // snapshot of accumulated fee at alert time
+  sentAt     DateTime @default(now())
+
+  mailItem MailItem @relation(fields: [mailItemId], references: [id], onDelete: Cascade)
+
+  @@unique([mailItemId, threshold])
+  @@index([sentAt])
 }
 
 // iter-102 — ID-document expiry alerts.

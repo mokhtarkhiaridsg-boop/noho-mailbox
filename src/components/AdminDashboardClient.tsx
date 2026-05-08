@@ -155,6 +155,7 @@ const hiddenNav: NavItem[] = [
   { id: "webhooks",        label: "Webhooks",        Icon: IconReport },
   { id: "deferredemails",  label: "Deferred Emails", Icon: IconEmail },
   { id: "backuphealth",    label: "Backup Health",   Icon: IconCompliance },
+  { id: "mailerautoreply", label: "Auto-replies",    Icon: IconEmail },
 ];
 
 // Flat list for mobile pills + label lookup. Includes hidden items so
@@ -572,6 +573,7 @@ import AdminPickupVelocityPanel from "@/components/admin/AdminPickupVelocityPane
 import AdminBulkForwardPanel from "@/components/admin/AdminBulkForwardPanel";
 import AdminDeferredEmailsPanel from "@/components/admin/AdminDeferredEmailsPanel";
 import AdminBackupHealthPanel from "@/components/admin/AdminBackupHealthPanel";
+import AdminMailerAutoReplyPanel from "@/components/admin/AdminMailerAutoReplyPanel";
 import { AdminQRPickupPanel } from "@/components/admin/AdminQRPickupPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
@@ -727,6 +729,7 @@ type SyncLogEntry = {
 
 type SquareStatus = {
   configured: boolean;
+  environment: "production" | "sandbox";
   linkedCustomers: number;
   totalPayments: number;
   catalogItems: number;
@@ -1817,6 +1820,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {tab === "bulkforward" && <AdminBulkForwardPanel />}
           {tab === "deferredemails" && <AdminDeferredEmailsPanel />}
           {tab === "backuphealth" && <AdminBackupHealthPanel />}
+          {tab === "mailerautoreply" && <AdminMailerAutoReplyPanel />}
           {tab === "affiliates" && <AdminAffiliateEarningsPanel />}
           {tab === "idexpiring" && <AdminIdExpiringPanel />}
           {tab === "webhooks" && <AdminWebhooksPanel />}

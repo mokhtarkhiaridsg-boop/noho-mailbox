@@ -157,6 +157,7 @@ export type SyncLogEntry = {
 
 export type SquareStatus = {
   configured: boolean;
+  environment: "production" | "sandbox";
   linkedCustomers: number;
   totalPayments: number;
   catalogItems: number;

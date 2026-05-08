@@ -169,40 +169,68 @@ export async function findLabelByTracking(input: { tracking: string }): Promise<
   };
 }
 
-// iter-136 — Tracking-status fetcher. Tries Shippo first (works for
-// every account-attached carrier we've configured). When Shippo isn't
-// configured or returns nothing, we fall back to carrier-detect-only —
-// the panel still gets a carrier label, just no live status feed.
+// iter-136 / iter-145 — Tracking-status fetcher. Tries Shippo first
+// using the detected carrier slug. If detection said "Other" but the
+// tracking pattern is otherwise valid, we race ALL four major carrier
+// slugs in parallel and return the first one that comes back with real
+// data — so a tracking number we don't recognize still gets resolved
+// online instead of failing silently.
 async function fetchOnlineTracking(
   carrier: string,
   trackingNumber: string,
 ): Promise<OnlineTracking> {
   const fetchedAtIso = new Date().toISOString();
-  // Shippo's tracking endpoint expects lowercase carrier slugs. Map ours.
-  const slug = shippoCarrierSlug(carrier);
-  if (slug && isShippoConfigured()) {
-    try {
-      const live = await getTrackingStatus(slug, trackingNumber);
-      if (live) {
-        return {
-          carrier,
-          status: live.status,
-          substatus: live.substatus,
-          location: live.location,
-          etaIso: live.eta,
-          history: live.trackingHistory.slice(0, 8).map((h) => ({
-            dateIso: h.date,
-            status: h.status,
-            location: h.location,
-          })),
-          source: "shippo",
-          fetchedAtIso,
-        };
-      }
-    } catch {
-      // Silent fall-through — never block the panel on a Shippo error.
-    }
+  if (!isShippoConfigured()) {
+    return {
+      carrier, status: null, substatus: null, location: null, etaIso: null,
+      history: [], source: "none", fetchedAtIso,
+    };
   }
+
+  const detectedSlug = shippoCarrierSlug(carrier);
+
+  // Build the list of slugs to try. Detected slug first; if no match,
+  // race all four major carriers so an unknown pattern still resolves.
+  const slugsToTry: Array<{ slug: string; label: string }> = detectedSlug
+    ? [{ slug: detectedSlug, label: carrier }]
+    : [
+        { slug: "usps",        label: "USPS" },
+        { slug: "ups",         label: "UPS" },
+        { slug: "fedex",       label: "FedEx" },
+        { slug: "dhl_express", label: "DHL" },
+      ];
+
+  // Race — first carrier that returns non-null wins. Others are ignored.
+  // A response with status=UNKNOWN AND empty history means Shippo didn't
+  // recognize it on that carrier — treat as miss so a different one can win.
+  const winner = await Promise.any(
+    slugsToTry.map(async ({ slug: s, label }) => {
+      const live = await getTrackingStatus(s, trackingNumber);
+      if (!live) throw new Error("miss");
+      if (live.status === "UNKNOWN" && live.trackingHistory.length === 0) {
+        throw new Error("unknown");
+      }
+      return { live, label };
+    }),
+  ).catch(() => null);
+
+  if (winner) {
+    return {
+      carrier: winner.label,
+      status: winner.live.status,
+      substatus: winner.live.substatus,
+      location: winner.live.location,
+      etaIso: winner.live.eta,
+      history: winner.live.trackingHistory.slice(0, 8).map((h) => ({
+        dateIso: h.date,
+        status: h.status,
+        location: h.location,
+      })),
+      source: "shippo",
+      fetchedAtIso,
+    };
+  }
+
   return {
     carrier,
     status: null,
@@ -210,7 +238,7 @@ async function fetchOnlineTracking(
     location: null,
     etaIso: null,
     history: [],
-    source: slug ? "carrier-detect" : "none",
+    source: detectedSlug ? "carrier-detect" : "none",
     fetchedAtIso,
   };
 }

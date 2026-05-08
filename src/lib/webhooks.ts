@@ -29,6 +29,7 @@ export type WebhookEvent =
   | "appointment.booked"
   | "id.expiring"
   | "storage.dispute_filed"
+  | "storage.threshold_alert"
   | "billing.auto_renewed"
   | "wallet.auto_top_up_fired"
   | "holiday.notice_sent"
@@ -44,6 +45,7 @@ export const ALL_WEBHOOK_EVENTS: { key: WebhookEvent; label: string; example: st
   { key: "appointment.booked",   label: "Pickup appointment booked", example: "🗓 Karim booked pickup Tue 2:30pm (suite #043)" },
   { key: "id.expiring",          label: "Customer ID expiring",   example: "⚠️ Karim's DL expires in 7 days" },
   { key: "storage.dispute_filed", label: "Storage-fee dispute filed", example: "⚖️ Mariem disputed a $5.00 storage fee" },
+  { key: "storage.threshold_alert", label: "Package crossed storage threshold", example: "📦 Karim · suite #042 · package on shelf 30 days · $156.00 (30d)" },
   { key: "billing.auto_renewed", label: "Auto-renewal completed", example: "🔁 Auto-renewed Karim · $175 · Business 1mo" },
   { key: "wallet.auto_top_up_fired", label: "Wallet auto top-up triggered", example: "💳 Auto top-up fired for Mariem · $25 request" },
   { key: "holiday.notice_sent",  label: "Holiday closure notice sent",   example: "📣 Holiday notice sent · Memorial Day · 84/86 recipients" },

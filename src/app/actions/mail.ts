@@ -1172,7 +1172,14 @@ async function applyStorageFeeOnPickup(args: {
   const billableDays = daysOnShelf - STORAGE_FREE_DAYS;
   if (billableDays <= 0) return { skipped: true };
 
-  const totalCents = billableDays * STORAGE_RATE_CENTS;
+  // iter-142 — Tiered storage fee math. Replaces the flat
+  // `billableDays × $6.50` calculation: graduated rates kick in at
+  // days 14, 30, 60 so long-shelved packages cost more — matches the
+  // tier-graduation alerts the customer received.
+  const { tieredStorageFeeCents } = await import("@/app/actions/storageTierSweep");
+  const totalCents = await tieredStorageFeeCents(daysOnShelf);
+  void STORAGE_RATE_CENTS; // legacy constant retained for telemetry comments
+  if (totalCents <= 0) return { skipped: true };
 
   // Read wallet balance INSIDE the transaction to avoid a race with
   // any concurrent debit — Prisma's $transaction gives us serialization.

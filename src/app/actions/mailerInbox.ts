@@ -310,6 +310,20 @@ export async function ingestInboundEmail(input: {
     detail: { from, subject, threadId: thread.id },
   }).catch(() => undefined);
 
+  // iter-141 — Auto-reply rule matcher. Fire-and-forget so a misconfigured
+  // rule never blocks the inbound ingest path. Each rule that matches
+  // sends its template through sendEmail + persists as outbound MailerMessage
+  // + audit-logs `mailer.auto_reply_fired`. Cooldown enforced per rule per
+  // customer.
+  void (async () => {
+    try {
+      const { matchInboundAgainstRules } = await import("@/app/actions/mailerAutoReply");
+      await matchInboundAgainstRules({ messageId: msg.id });
+    } catch (e) {
+      console.error("[mailer.ingest] auto-reply matcher failed:", e);
+    }
+  })();
+
   return { ok: true, threadId: thread.id, messageId: msg.id };
 }
 

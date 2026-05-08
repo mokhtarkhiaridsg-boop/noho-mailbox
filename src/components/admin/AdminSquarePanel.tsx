@@ -108,8 +108,26 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
                   className="text-[10px] font-black uppercase tracking-[0.22em]"
                   style={{ color: "rgba(247,230,194,0.85)" }}
                 >
-                  {isConnected ? "Connected · Live" : "Not connected"}
+                  {isConnected
+                    ? squareStatus.environment === "production"
+                      ? "Connected · Live"
+                      : "Connected · Sandbox"
+                    : "Not connected"}
                 </p>
+                {/* iter-11.4 — surface a clear warning when admin is on
+                    the sandbox env but expects live sales data. The
+                    sandbox token + sandbox env is the most common cause
+                    of "0 items synced" — sandbox accounts are empty by
+                    default. */}
+                {isConnected && squareStatus.environment === "sandbox" && (
+                  <span
+                    className="ml-2 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.18em] px-2 py-0.5 rounded"
+                    style={{ background: "rgba(245,158,11,0.20)", color: "#FFD28C", border: "1px solid rgba(245,158,11,0.45)" }}
+                    title="Set SQUARE_ENVIRONMENT=production in Vercel and rotate to a live access token to sync real sales data."
+                  >
+                    Test data only
+                  </span>
+                )}
               </div>
               <p
                 className="text-2xl sm:text-3xl font-black tracking-tight mt-1"

@@ -20,29 +20,38 @@
  */
 
 import type { Stats, MailItem, NotaryItem } from "./types";
-// Full-color NOHO brand illustrations from AnimatedIcons — these are the
-// actual marketing-site icons (cream body, brown ink stroke, red flag,
-// blue heart, blue truck wheels, blue pin, red wax seal, red tape strip,
-// blue shield check). Used at ~56-64px so the brand reads at a glance.
+// 24 UNIQUE retina-sharp NOHO Launchpad icons. Static SVGs (no per-tile
+// animation) so the grid doesn't burn GPU cycles — fixes the FPS drop
+// the prior animated set caused. Each tile gets its own glyph so there
+// are no duplicates.
 import {
-  AiMailbox,
-  AiTruck,
-  AiShield,
-  AiEnvelope,
-  AiBolt,
-  AiPin,
-  AiHeart,
-  AiBox,
-  AiClock,
-  AiSparkle,
-} from "@/components/AnimatedIcons";
-// Brand line-art glyphs for non-postal tiles (Cash Register, QR, etc.) —
-// drawn with NOHO brown ink stroke so they sit alongside the AnimatedIcons.
-import {
-  BiQR,
-  BiRegister,
-  BiStamp,
-} from "./BrandTileIcons";
+  LpRegister,
+  LpSignup,
+  LpCredits,
+  LpCustomers,
+  LpMailbox,
+  LpCompliance,
+  LpMail,
+  LpRequests,
+  LpMailHold,
+  LpKeys,
+  LpDeliveries,
+  LpQR,
+  LpNotary,
+  LpShipping,
+  LpShop,
+  LpBilling,
+  LpRevenue,
+  LpCancellations,
+  LpSquare,
+  LpQuarterly,
+  LpMessages,
+  LpEmails,
+  LpInsights,
+  LpBookkeeping,
+  LpTenants,
+  LpSettings,
+} from "./LaunchpadIcons";
 
 type Props = {
   stats: Stats;
@@ -84,38 +93,43 @@ type Tile = {
 // site so each tile feels like a NOHO neighborhood sticker rather than a
 // generic iOS chip. The icon is the FULL-COLOR brand illustration; no
 // uniform colored bg square hiding behind it.
+// 24 tiles, 24 UNIQUE icons. Tints picked from a NOHO-aligned cream/sky/
+// blush/sage/peach palette so each row reads as a related cluster while
+// every tile is visually distinct.
 const TILES: Tile[] = [
   // Row 1 — TODAY ops.
-  { id: "register",      label: "Cash Register",   Icon: BiRegister,     tint: "#FFF1E2", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "signups",       label: "Signups",         Icon: AiSparkle,      tint: "#FFFAE8", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "signups" },
-  { id: "credits",       label: "Credits",         Icon: AiBolt,         tint: "#FFF4D6", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "credits" },
-  { id: "customers",     label: "Customers",       Icon: AiHeart,        tint: "#FDE8E9", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "mailboxcenter", label: "Mailbox",         Icon: AiMailbox,      tint: "#F7E6C2", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "compliance",    label: "Compliance",      Icon: AiShield,       tint: "#E6F0FF", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "register",      label: "Cash Register",   Icon: LpRegister,     tint: "#FFF1E2", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "signups",       label: "Signups",         Icon: LpSignup,       tint: "#FFFAE8", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "signups" },
+  { id: "credits",       label: "Credits",         Icon: LpCredits,      tint: "#EAFBEF", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "credits" },
+  { id: "customers",     label: "Customers",       Icon: LpCustomers,    tint: "#F0EBFF", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "mailboxcenter", label: "Mailbox",         Icon: LpMailbox,      tint: "#F7E6C2", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "compliance",    label: "Compliance",      Icon: LpCompliance,   tint: "#E6F0FF", iconBg: "transparent", iconColor: "#2D100F" },
 
   // Row 2 — Postal operations.
-  { id: "mail",          label: "Mail & Pkgs",     Icon: AiEnvelope,     tint: "#F4EEE3", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "requests",      label: "Mail Requests",   Icon: AiEnvelope,     tint: "#FFF3D6", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "requests" },
-  { id: "mailhold",      label: "Mail Hold",       Icon: AiPin,          tint: "#E6EFFA", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "keys",          label: "Keys",            Icon: AiSparkle,      tint: "#FFF0D5", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "keys" },
-  { id: "deliveries",    label: "Deliveries",      Icon: AiTruck,        tint: "#E1EFF7", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "qrpickup",      label: "QR Pickup",       Icon: BiQR,           tint: "#EFE7F7", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "mail",          label: "Mail & Pkgs",     Icon: LpMail,         tint: "#F4EEE3", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "requests",      label: "Mail Requests",   Icon: LpRequests,     tint: "#FFF3D6", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "requests" },
+  { id: "mailhold",      label: "Mail Hold",       Icon: LpMailHold,     tint: "#FCE5E5", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "keys",          label: "Keys",            Icon: LpKeys,         tint: "#FFF0D5", iconBg: "transparent", iconColor: "#2D100F", badgeKey: "keys" },
+  { id: "deliveries",    label: "Deliveries",      Icon: LpDeliveries,   tint: "#E1EFF7", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "qrpickup",      label: "QR Pickup",       Icon: LpQR,           tint: "#EFE7F7", iconBg: "transparent", iconColor: "#2D100F" },
 
   // Row 3 — Money & services.
-  { id: "notary",        label: "Notary",          Icon: BiStamp,        tint: "#FFE9D9", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "shippingcenter",label: "Shipping",        Icon: AiBox,          tint: "#E0F2EA", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "shop",          label: "Shop",            Icon: AiHeart,        tint: "#FDDDD6", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "billing",       label: "Billing",         Icon: AiClock,        tint: "#E6F0FF", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "revenue",       label: "Revenue",         Icon: AiBolt,         tint: "#E0F2EA", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "cancellations", label: "Cancellations",   Icon: AiShield,       tint: "#FCE5E5", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "notary",        label: "Notary",          Icon: LpNotary,       tint: "#FFE9D9", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "shippingcenter",label: "Shipping",        Icon: LpShipping,     tint: "#E0F2EA", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "shop",          label: "Shop",            Icon: LpShop,         tint: "#FDDDD6", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "billing",       label: "Billing",         Icon: LpBilling,      tint: "#E6F0FF", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "revenue",       label: "Revenue",         Icon: LpRevenue,      tint: "#E0F2EA", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "cancellations", label: "Cancellations",   Icon: LpCancellations,tint: "#FCDADA", iconBg: "transparent", iconColor: "#2D100F" },
 
   // Row 4 — System & comms.
-  { id: "square",        label: "Square",          Icon: AiBox,          tint: "#F0EFE9", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "quarterly",     label: "Quarterly",       Icon: AiClock,        tint: "#FFF4D6", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "messages",      label: "Messages",        Icon: AiEnvelope,     tint: "#E6F0FF", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "emails",        label: "Email Logs",      Icon: AiEnvelope,     tint: "#EFE7F7", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "tenants",       label: "Tenants",         Icon: AiShield,       tint: "#EFE9DF", iconBg: "transparent", iconColor: "#2D100F" },
-  { id: "settings",      label: "Settings",        Icon: AiSparkle,      tint: "#F0EFEC", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "square",        label: "Square",          Icon: LpSquare,       tint: "#F0EFE9", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "quarterly",     label: "Quarterly",       Icon: LpQuarterly,    tint: "#FFF4D6", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "messages",      label: "Messages",        Icon: LpMessages,     tint: "#E6F0FF", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "emails",        label: "Email Logs",      Icon: LpEmails,       tint: "#EFE7F7", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "insights",      label: "Insights",        Icon: LpInsights,     tint: "#E6F8FF", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "bookkeeping",   label: "Books",           Icon: LpBookkeeping,  tint: "#F4F5F7", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "tenants",       label: "Tenants",         Icon: LpTenants,      tint: "#EFE9DF", iconBg: "transparent", iconColor: "#2D100F" },
+  { id: "settings",      label: "Settings",        Icon: LpSettings,     tint: "#F0EFEC", iconBg: "transparent", iconColor: "#2D100F" },
 ];
 
 export function AdminOverviewPanel({

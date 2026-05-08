@@ -215,6 +215,15 @@ export async function getSquareStatus() {
   await verifyAdmin();
 
   const configured = isSquareConfigured();
+  // iter-11.4 — Surface the environment to the panel. The biggest source
+  // of "Square sync isn't working" reports turned out to be a token /
+  // environment mismatch: sandbox token + sandbox env returns 0 rows
+  // even though it looks "connected" because requests succeed (against
+  // an empty sandbox account). Showing the env in the UI makes this
+  // mistake obvious instead of silent.
+  const environment = (process.env.SQUARE_ENVIRONMENT?.trim().toLowerCase() === "production"
+    ? "production"
+    : "sandbox") as "production" | "sandbox";
 
   const [recentLogs, linkedCustomers, totalPayments, catalogItems, totalRevenue] =
     await Promise.all([
@@ -233,6 +242,7 @@ export async function getSquareStatus() {
 
   return {
     configured,
+    environment,
     linkedCustomers,
     totalPayments,
     catalogItems,
