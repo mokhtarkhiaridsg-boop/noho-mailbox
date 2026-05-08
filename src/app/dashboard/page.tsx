@@ -79,6 +79,7 @@ export default async function DashboardPage() {
           insuranceFeeCents: true,
           feeChargedCents: true,    // iter-105: storage-fee dispute CTA
           aiAnalysisJson: true,     // iter-108: parsed into aiWarnings + aiNotes
+          extraPhotosJson: true,    // iter-135: parsed into extraPhotos array
         },
       }),
       prisma.forwardingAddress.findMany({
@@ -292,14 +293,30 @@ export default async function DashboardPage() {
               }
             } catch { /* ignore */ }
           }
+          // iter-135: parse extraPhotosJson → flat extraPhotos array.
+          // Same defensive pattern as aiAnalysisJson — silently skip on
+          // any parse error so a single bad row doesn't break the page.
+          let extraPhotos: Array<{ id: string; url: string; label?: string }> = [];
+          if (m.extraPhotosJson) {
+            try {
+              const parsed = JSON.parse(m.extraPhotosJson) as unknown;
+              if (Array.isArray(parsed)) {
+                extraPhotos = parsed
+                  .filter((p): p is { id: string; url: string; label?: string } =>
+                    !!p && typeof p === "object" && typeof (p as { url?: unknown }).url === "string" && typeof (p as { id?: unknown }).id === "string")
+                  .map((p) => ({ id: p.id, url: p.url, label: typeof p.label === "string" ? p.label : undefined }));
+              }
+            } catch { /* ignore */ }
+          }
           // Strip the raw JSON from the client payload — we only ship the
           // parsed shape.
-          const { aiAnalysisJson: _drop, ...rest } = m;
+          const { aiAnalysisJson: _drop, extraPhotosJson: _drop2, ...rest } = m;
           return {
             ...rest,
             createdAt: m.createdAt.toISOString(),
             aiWarnings,
             aiNotes,
+            extraPhotos,
             trackingStatus: s ? {
               statusKey: s.lastStatusKey,
               statusLabel: s.lastStatusLabel,

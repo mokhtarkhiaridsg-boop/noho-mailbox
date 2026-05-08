@@ -10,7 +10,13 @@
 import { prisma } from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
-import { ALL_WEBHOOK_EVENTS, fireWebhooks, type WebhookEvent } from "@/lib/webhooks";
+import {
+  ALL_WEBHOOK_EVENTS,
+  fireWebhooks,
+  retryDelivery,
+  MAX_ATTEMPTS,
+  type WebhookEvent,
+} from "@/lib/webhooks";
 
 export type WebhookRow = {
   id: string;
@@ -232,4 +238,152 @@ export async function listWebhookDeliveries(input: { endpointId: string; limit?:
     sentAt: r.sentAt.toISOString(),
     payloadPreview: r.payload.slice(0, 240),
   }));
+}
+
+// ─── iter-134 — Retry & dead-letter queue admin surface ──────────────
+
+export type WebhookProblemRow = {
+  id: string;
+  endpointId: string;
+  endpointLabel: string;
+  endpointActive: boolean;
+  event: string;
+  attempt: number;
+  maxAttempts: number;
+  httpStatus: number | null;
+  error: string | null;
+  sentAt: string;       // ISO — original first-attempt time
+  lastTriedAt: string | null;
+  nextRetryAt: string | null;
+  deadLettered: boolean;
+  payloadPreview: string;
+};
+
+// Returns ALL currently-problematic deliveries — both pending retries
+// and dead-lettered ones. Drives the new "Failed deliveries" admin
+// section. Capped at 200 rows; pending retries first (sorted by next
+// retry time), then dead-letters (newest first).
+export async function listWebhookProblems(): Promise<{
+  pendingRetries: WebhookProblemRow[];
+  deadLetters: WebhookProblemRow[];
+  totals: { pending: number; deadLettered: number };
+}> {
+  await verifyAdmin();
+
+  const [pending, dl, totals] = await Promise.all([
+    prisma.webhookDelivery.findMany({
+      where: { deadLettered: false, status: "failed" },
+      include: { endpoint: { select: { label: true, active: true } } },
+      orderBy: [{ nextRetryAt: "asc" }, { sentAt: "asc" }],
+      take: 100,
+    }),
+    prisma.webhookDelivery.findMany({
+      where: { deadLettered: true },
+      include: { endpoint: { select: { label: true, active: true } } },
+      orderBy: { sentAt: "desc" },
+      take: 100,
+    }),
+    Promise.all([
+      prisma.webhookDelivery.count({ where: { deadLettered: false, status: "failed" } }),
+      prisma.webhookDelivery.count({ where: { deadLettered: true } }),
+    ]),
+  ]);
+
+  const toRow = (r: typeof pending[number]): WebhookProblemRow => ({
+    id: r.id,
+    endpointId: r.endpointId,
+    endpointLabel: r.endpoint.label,
+    endpointActive: r.endpoint.active,
+    event: r.event,
+    attempt: r.attempt,
+    maxAttempts: MAX_ATTEMPTS,
+    httpStatus: r.httpStatus,
+    error: r.error,
+    sentAt: r.sentAt.toISOString(),
+    lastTriedAt: r.lastTriedAt ? r.lastTriedAt.toISOString() : null,
+    nextRetryAt: r.nextRetryAt ? r.nextRetryAt.toISOString() : null,
+    deadLettered: r.deadLettered,
+    payloadPreview: r.payload.slice(0, 240),
+  });
+
+  return {
+    pendingRetries: pending.map(toRow),
+    deadLetters: dl.map(toRow),
+    totals: { pending: totals[0], deadLettered: totals[1] },
+  };
+}
+
+// Admin clicks "Replay" on a failed/dead-lettered row. Resets attempt
+// count to 0 (so the upcoming retry counts as attempt 1 again) and
+// clears the dead-lettered flag, then immediately fires it. Audit-logged
+// so we know who replayed what.
+export async function replayWebhookDelivery(deliveryId: string): Promise<{
+  error?: string;
+  status?: "ok" | "failed" | "dead_lettered" | "skipped";
+  attempt?: number;
+}> {
+  const actor = await verifyAdmin();
+  const row = await prisma.webhookDelivery.findUnique({
+    where: { id: deliveryId },
+    select: { id: true, endpointId: true, deadLettered: true, event: true, attempt: true },
+  });
+  if (!row) return { error: "Delivery not found" };
+
+  // Reset retry state so retryDelivery() runs from a fresh attempt 0
+  // (it always increments, so the post-attempt count lands at 1).
+  await prisma.webhookDelivery.update({
+    where: { id: deliveryId },
+    data: { attempt: 0, deadLettered: false, nextRetryAt: null, error: null, status: "failed" },
+  });
+  const result = await retryDelivery(deliveryId);
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: actor.id,
+      actorRole: actor.role,
+      action: "webhook.replayed",
+      entityType: "WebhookDelivery",
+      entityId: deliveryId,
+      metadata: JSON.stringify({
+        event: row.event,
+        endpointId: row.endpointId,
+        previousAttempt: row.attempt,
+        wasDeadLettered: row.deadLettered,
+        result: result.status,
+      }),
+    },
+  });
+
+  revalidatePath("/admin");
+  return { status: result.status, attempt: result.attempt };
+}
+
+// Admin discards a permanently dead-lettered row from the queue.
+// Useful for clearing test webhooks or noise from a misconfigured
+// endpoint that's since been deleted.
+export async function discardDeadLetter(deliveryId: string): Promise<{ error?: string; success?: boolean }> {
+  const actor = await verifyAdmin();
+  const row = await prisma.webhookDelivery.findUnique({
+    where: { id: deliveryId },
+    select: { id: true, endpointId: true, event: true, deadLettered: true },
+  });
+  if (!row) return { error: "Delivery not found" };
+  if (!row.deadLettered) return { error: "Only dead-lettered deliveries can be discarded" };
+
+  await prisma.$transaction([
+    prisma.webhookDelivery.delete({ where: { id: deliveryId } }),
+    prisma.auditLog.create({
+      data: {
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "webhook.deadletter_discarded",
+        entityType: "WebhookDelivery",
+        entityId: deliveryId,
+        metadata: JSON.stringify({ event: row.event, endpointId: row.endpointId }),
+      },
+    }),
+  ]);
+
+  revalidatePath("/admin");
+  return { success: true };
 }

@@ -287,6 +287,26 @@ export default async function InvoicePrintPage({
                           </td>
                         </tr>
                       )}
+                      {/* iter-138 — Adjustments rendered between subtotal/tax
+                          and the final total. Voided entries are skipped.
+                          Each row shows the customer-facing description and
+                          the signed amount (discount/waiver = green, surcharge
+                          = amber). */}
+                      {(meta.adjustments ?? [])
+                        .filter((a) => !a.voidedAt)
+                        .map((a) => {
+                          const isCredit = a.signedCents <= 0;
+                          return (
+                            <tr key={a.id}>
+                              <td style={{ padding: "4px 12px", fontSize: 13, color: isCredit ? "#15803d" : "#92400e", textAlign: "right", fontWeight: 700 }}>
+                                {a.description}
+                              </td>
+                              <td style={{ padding: "4px 0", fontSize: 13, color: isCredit ? "#15803d" : "#92400e", textAlign: "right", fontWeight: 700 }}>
+                                {isCredit ? "−" : "+"}{fmt(Math.abs(a.signedCents))}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       <tr>
                         <td
                           style={{

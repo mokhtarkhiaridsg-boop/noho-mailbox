@@ -202,6 +202,21 @@ model MailItem {
   // attributes (fragile, hazmat, leaking, etc.) + raw model output. Null
   // until the post-intake analysis completes (or never set if no API key).
   aiAnalysisJson     String?
+  // iter-135: Multi-photo intake gallery. JSON array of
+  // `{ id: string, url: string, label?: string, addedAt: string }`. Null
+  // when only the primary `exteriorImageUrl` exists. The primary stays
+  // separate so AI analysis + thumbnail-list reads keep working as-is;
+  // these are the SUPPLEMENTAL angles (back, label close-up, contents,
+  // damage). Customer + admin both see the full set as one strip.
+  extraPhotosJson    String?
+  // iter-137: Pickup signature capture. SVG path-data string (no markup
+  // wrapper — the renderer adds the <svg>/<path> at display time so we
+  // can reuse for receipts/PDFs/audit pages). Captured when admin marks
+  // Picked Up; null until then. Paired with pickupSignerName (typed
+  // legal name) and pickupSignedAt (timestamp) for chain-of-custody.
+  pickupSignatureSvg String?
+  pickupSignerName   String?
+  pickupSignedAt     DateTime?
 
   createdAt    DateTime @default(now())
 
@@ -259,6 +274,31 @@ model PickupAppointment {
 
   @@index([scheduledAt, status])
   @@index([userId, scheduledAt])
+}
+
+// iter-130 — Holiday-aware email scheduler.
+// When a sender (storage-fee warning, plan-renewal reminder, ID expiry,
+// vacation-hold confirm, etc.) wants to fire while the bureau is closed
+// (per iter-90 operating-hours holidays), it enqueues here instead of
+// sending immediately. The hourly drain cron sends them on the next
+// business day. Status moves Pending → Sent / Failed / Cancelled.
+model DeferredEmail {
+  id            String    @id @default(cuid())
+  kind          String                       // matches EmailLog.kind
+  recipientEmail String
+  recipientUserId String?                    // optional User.id
+  subject       String
+  bodyHtml      String                       // rendered + ready to send as-is
+  deferUntilIso DateTime                     // earliest send time (next biz day open)
+  status        String    @default("Pending") // "Pending" | "Sent" | "Failed" | "Cancelled"
+  reason        String                       // why deferred — e.g. "Closed for Memorial Day"
+  attemptCount  Int       @default(0)
+  lastError     String?
+  enqueuedAt    DateTime  @default(now())
+  sentAt        DateTime?
+
+  @@index([status, deferUntilIso])
+  @@index([recipientUserId])
 }
 
 // iter-122 — Member self-service suite transfer.
@@ -404,9 +444,23 @@ model WebhookDelivery {
   durationMs Int?
   sentAt     DateTime @default(now())
 
+  // iter-134 — Retry & dead-letter queue.
+  // attempt counts attempts that have already executed (1 = first try).
+  // nextRetryAt is non-null while a retry is queued; null after success
+  // or once dead-lettered. deadLettered flips true after MAX_ATTEMPTS so
+  // the cron stops touching it but admin can still see + replay it.
+  // lastTriedAt tracks the most recent attempt (sentAt is the FIRST try
+  // for stable ordering; we don't want retries to jump rows around).
+  attempt       Int      @default(1)
+  nextRetryAt   DateTime?
+  deadLettered  Boolean  @default(false)
+  lastTriedAt   DateTime?
+
   endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
 
   @@index([endpointId, sentAt])
+  @@index([nextRetryAt])
+  @@index([deadLettered, sentAt])
 }
 
 // iter-102 — ID-document expiry alerts.

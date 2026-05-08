@@ -473,6 +473,11 @@ export async function sendMailPickedUpEmail(data: {
   trackingNumber?: string | null;
   pickedUpAt: Date;
   feedbackToken?: string;
+  // iter-137 — Captured signature SVG + signer name. When present, an
+  // inline preview block renders below the receipt details so the
+  // customer sees the signature on file.
+  signatureSvg?: string | null;
+  signerName?: string | null;
 }) {
   const firstName = data.name.split(" ")[0] || "there";
   const dateLabel = data.pickedUpAt.toLocaleString("en-US", {
@@ -491,6 +496,14 @@ export async function sendMailPickedUpEmail(data: {
       ${data.carrier ? `<p style="margin:0 0 6px;font-size:13px;color:#334155;"><strong>Carrier:</strong> ${data.carrier}</p>` : ""}
       ${data.trackingNumber ? `<p style="margin:0;font-size:13px;color:#334155;"><strong>Tracking #:</strong> <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">${data.trackingNumber}</span></p>` : ""}
     </div>
+    ${data.signatureSvg && data.signerName ? `
+    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;margin:16px 0;">
+      <p style="margin:0 0 8px;font-size:11px;color:#7a8290;font-weight:800;text-transform:uppercase;letter-spacing:0.16em;">Signed for at counter</p>
+      <div style="background:#fafafa;border:1px solid #eef0f3;border-radius:6px;padding:6px;margin-bottom:8px;">
+        ${data.signatureSvg}
+      </div>
+      <p style="margin:0;font-size:12px;color:#334155;"><strong>${data.signerName}</strong></p>
+    </div>` : ""}
     ${p("If this wasn't you, reply to this email or call us right away.")}
     ${data.feedbackToken ? `
     <div style="margin:20px 0;padding:14px 18px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;text-align:center;">

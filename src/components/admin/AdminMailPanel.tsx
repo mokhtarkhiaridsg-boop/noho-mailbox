@@ -19,6 +19,8 @@
 import { useEffect, useState } from "react";
 import { StatusBadge } from "./StatusBadge";
 import type { MailItem, Customer } from "./types";
+import AdminMailItemPhotosModal from "./AdminMailItemPhotosModal";
+import PickupSignatureModal from "./PickupSignatureModal";
 
 type LogMailForm = {
   suite: string;
@@ -213,11 +215,15 @@ function MailItemCard({
   isPending,
   onAction,
   onScanUpload,
+  onOpenPhotos,
+  onOpenSignature,
 }: {
   m: MailItem;
   isPending: boolean;
   onAction: (id: string, s: string) => void;
   onScanUpload: (id: string, f: File) => void;
+  onOpenPhotos: (id: string, fromLabel: string) => void;
+  onOpenSignature: (id: string, fromLabel: string, customerName: string) => void;
 }) {
   return (
     <div
@@ -317,6 +323,28 @@ function MailItemCard({
               }}
             />
           </label>
+          {/* iter-135 — Multi-photo gallery editor. Always visible per
+              row so admin can attach extras (back, label, contents,
+              damage) without scrolling into the customer drawer. */}
+          <ActionIcon
+            onClick={() => onOpenPhotos(m.id, m.from)}
+            disabled={isPending}
+            title="Manage photos"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <circle cx="9" cy="11" r="2" />
+              <path d="M21 17 L15 11 L7 19" />
+            </svg>
+          </ActionIcon>
           <ActionIcon
             onClick={() => onAction(m.id, "Scanned")}
             disabled={isPending}
@@ -335,10 +363,33 @@ function MailItemCard({
               <path d="M3 12 L21 12" />
             </svg>
           </ActionIcon>
+          {/* iter-137 — Pickup signature capture. Opens the signature
+              pad modal; on save the modal also flips status to Picked
+              Up via onCaptured → onAction("Picked Up"). For non-pickup
+              flows admin can still skip the signature and use the
+              checkmark. */}
+          <ActionIcon
+            onClick={() => onOpenSignature(m.id, m.from, m.customerName)}
+            disabled={isPending}
+            title="Capture pickup signature"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 18 C 6 12, 9 16, 12 12 S 18 6, 21 12" />
+              <path d="M3 21 H 21" />
+            </svg>
+          </ActionIcon>
           <ActionIcon
             onClick={() => onAction(m.id, "Picked Up")}
             disabled={isPending}
-            title="Mark Picked Up"
+            title="Mark Picked Up (no signature)"
             tone="success"
           >
             <svg
@@ -372,6 +423,12 @@ export function AdminMailPanel({
 }: Props) {
   void _customers;
   const [view, setView] = useState<"board" | "list">("board");
+  // iter-135 — multi-photo gallery modal target. Cleared when admin
+  // closes the modal. Opened by clicking the camera icon on any row.
+  const [photosFor, setPhotosFor] = useState<{ id: string; from: string } | null>(null);
+  // iter-137 — pickup signature modal target. The customer's name is
+  // pre-filled into the signer-name field so admin only confirms.
+  const [signatureFor, setSignatureFor] = useState<{ id: string; from: string; customerName: string } | null>(null);
 
   const buckets: Record<Bucket, MailItem[]> = {
     action: [],
@@ -618,6 +675,10 @@ export function AdminMailPanel({
                         isPending={isPending}
                         onAction={handleMailAction}
                         onScanUpload={handleScanUpload}
+                        onOpenPhotos={(id, fromLabel) => setPhotosFor({ id, from: fromLabel })}
+                        onOpenSignature={(id, fromLabel, customerName) =>
+                          setSignatureFor({ id, from: fromLabel, customerName })
+                        }
                       />
                     ))
                   )}
@@ -862,6 +923,31 @@ export function AdminMailPanel({
             ))}
           </div>
         </>
+      )}
+
+      {/* iter-135 — Multi-photo gallery editor. Single instance, opened
+          from any row's camera icon via setPhotosFor. */}
+      {photosFor && (
+        <AdminMailItemPhotosModal
+          mailItemId={photosFor.id}
+          packageFrom={photosFor.from}
+          onClose={() => setPhotosFor(null)}
+        />
+      )}
+
+      {/* iter-137 — Pickup signature pad. After save, also fires the
+          status flip via handleMailAction so the existing receipt
+          email + SMS + webhook + storage-fee billing pipeline runs
+          unchanged. The signature is captured BEFORE the status flip
+          so the receipt has it. */}
+      {signatureFor && (
+        <PickupSignatureModal
+          mailItemId={signatureFor.id}
+          packageFrom={signatureFor.from}
+          defaultSignerName={signatureFor.customerName}
+          onCaptured={() => handleMailAction(signatureFor.id, "Picked Up")}
+          onClose={() => setSignatureFor(null)}
+        />
       )}
     </div>
   );

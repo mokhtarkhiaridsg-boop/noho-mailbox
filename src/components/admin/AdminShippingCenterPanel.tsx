@@ -193,103 +193,142 @@ export function AdminShippingCenterPanel({
   }, [helpOpen]);
 
   return (
-    // ─── UNIFIED 3D COCKPIT ──────────────────────────────────────────────
-    // Per user feedback: "ideally everything is in that 3d container not
-    // under it it's less confusing." The hero scene + health card +
-    // subview workspace all live INSIDE one continuous dark gradient
-    // frame so it reads as a single cinematic console rather than three
-    // disjoint cards stacked vertically.
-    <div
-      className="relative rounded-3xl overflow-hidden"
-      style={{
-        background: "radial-gradient(ellipse at top, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
-        boxShadow: "0 30px 80px rgba(10,18,24,0.45), inset 0 1px 0 rgba(255,255,255,0.04)",
-      }}
-    >
-      {/* Floor grid (perspective) */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none opacity-[0.10]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(147,196,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(147,196,255,0.5) 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
-          maskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
-          transform: "perspective(800px) rotateX(58deg) translateY(20%) scale(1.4)",
-          transformOrigin: "center bottom",
-        }}
-      />
-      {/* Glow orbs */}
-      <div aria-hidden="true" className="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-15 blur-3xl pointer-events-none" style={{ background: NOHO_BLUE }} />
-      <div aria-hidden="true" className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full opacity-12 blur-3xl pointer-events-none" style={{ background: NOHO_RED }} />
-
-      <div className="relative z-10 p-5 sm:p-7 space-y-5">
-        {/* ─── HERO HEADER + FleetScene ─── */}
-        <ShippingCenterHero
-          activeSubview={subview}
-          onPick={setSubview}
-          todayCount={heroStats.count}
-          todayRevenueCents={heroStats.revenueCents}
-          todayMarginCents={heroStats.marginCents}
-          openOrderCount={openOrderCount}
-          stuckOrderCount={stuckOrderCount}
-          carrierTodayCounts={heroStats.byCarrier}
-          embedded
-        />
-
-        {/* Health checklist — translucent so it reads as part of the cockpit. */}
-        {health && (
-          <HealthCard
-            items={health}
-            open={healthOpen}
-            onToggle={() => setHealthOpen((v) => !v)}
-            onJump={jumpFromHealth}
-            translucent
-          />
-        )}
-
-        {/* Subview content — cream/white inner card so the workspace is
-            legible against the dark cockpit, but the card sits INSIDE the
-            same outer dark frame so visually the whole thing is one
-            connected surface. */}
-        <div
-          className="rounded-2xl bg-white p-5 sm:p-6"
+    // ─── iPad-OS Shipping Center ─────────────────────────────────────────
+    // The previous "3D cockpit" hero filled the viewport with a dark
+    // gradient + perspective floor grid + FleetScene SVG, leaving the
+    // actual subview content card BELOW the fold. Clicking Quick Ship
+    // (or any carrier) appeared to do nothing because the panel that
+    // swapped underneath was off-screen.
+    //
+    // New layout: clean Baloo + Pacifico title row, a row of 6 sub-tool
+    // buttons (one per subview) with a clear active state, and the
+    // active subview's content rendered IMMEDIATELY below. One click =
+    // one visible swap.
+    <div className="flex flex-col gap-3">
+      {/* Branded title row */}
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
           style={{
-            boxShadow: "0 8px 28px rgba(0,0,0,0.30), 0 1px 0 rgba(255,255,255,0.6) inset",
-            border: "1px solid rgba(147,196,255,0.10)",
+            color: NOHO_INK,
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
           }}
         >
-          {subview === "quickship" && (
-            <AdminShippoPanel isConfigured={shippoConfigured} recentLabels={recentShippoLabels} />
-          )}
-          {subview === "prepaid" && (
-            <AdminLabelOrdersPanel orders={labelOrders} />
-          )}
-          {subview === "scan" && (
-            <AdminInboundScanPanel />
-          )}
-          {subview === "ups" && (
-            <AdminEmbeddedPortal
-              title="UPS Access Point"
-              subtitle="REAP retail portal — sign in to scan, hold, and process UPS Access Point packages."
-              url="https://ap.ups.com/REAP/retail.htm"
-            />
-          )}
-          {subview === "stamps" && (
-            <AdminEmbeddedPortal
-              title="Stamps.com"
-              subtitle="Print postage, manage shipments, and reconcile your Stamps.com account."
-              url="https://login.stamps.com/u/login"
-            />
-          )}
-          {subview === "dhl" && (
-            <AdminEmbeddedPortal
-              title="DHL Express"
-              subtitle="Schedule pickups, track shipments, and manage your DHL Express account."
-              url="https://mydhl.express.dhl/us/en/schedule-pickup.html"
-            />
-          )}
-        </div>
+          Shipping
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: NOHO_BLUE,
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          labels &amp; rates
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {heroStats.count} today · {openOrderCount} open · {stuckOrderCount} stuck
+        </span>
+      </div>
+
+      {/* Sub-tool button row — six options, clear active state. Tapping
+          one swaps the panel below. No more invisible state changes. */}
+      <div className="flex flex-wrap gap-2">
+        {SUBVIEWS.map((s) => {
+          const active = subview === s.id;
+          const carrierCount = heroStats.byCarrier.get(s.id) ?? 0;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setSubview(s.id)}
+              className="inline-flex items-center gap-2 h-9 px-3.5 rounded-full text-[12px] transition-colors whitespace-nowrap"
+              style={{
+                background: active ? NOHO_CREAM : "#FFFFFF",
+                color: active ? NOHO_BLUE : "#3B4252",
+                border: active ? `1px solid ${NOHO_BLUE}` : "1px solid #ECEEF1",
+                fontWeight: active ? 600 : 500,
+              }}
+              onMouseEnter={(e) => {
+                if (!active) e.currentTarget.style.background = "#F4F5F7";
+              }}
+              onMouseLeave={(e) => {
+                if (!active) e.currentTarget.style.background = "#FFFFFF";
+              }}
+              title={s.hint}
+            >
+              <span style={{ color: active ? NOHO_BLUE : "#7A8290" }}>
+                <s.Icon className="w-3.5 h-3.5" />
+              </span>
+              {s.label}
+              {carrierCount > 0 && (
+                <span
+                  className="text-[10px] font-semibold px-1.5 min-w-[16px] h-4 rounded-full inline-flex items-center justify-center"
+                  style={{
+                    background: active ? NOHO_BLUE : "#7A8290",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  {carrierCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Health checklist — kept but rendered as a light card on the
+          page surface (no longer translucent over a dark bg). */}
+      {health && (
+        <HealthCard
+          items={health}
+          open={healthOpen}
+          onToggle={() => setHealthOpen((v) => !v)}
+          onJump={jumpFromHealth}
+        />
+      )}
+
+      {/* Active subview content — immediately under the buttons so a
+          click is visibly a swap. */}
+      <div
+        className="rounded-2xl bg-white p-5 sm:p-6"
+        style={{
+          border: "1px solid #ECEEF1",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)",
+        }}
+      >
+        {subview === "quickship" && (
+          <AdminShippoPanel isConfigured={shippoConfigured} recentLabels={recentShippoLabels} />
+        )}
+        {subview === "prepaid" && (
+          <AdminLabelOrdersPanel orders={labelOrders} />
+        )}
+        {subview === "scan" && (
+          <AdminInboundScanPanel />
+        )}
+        {subview === "ups" && (
+          <AdminEmbeddedPortal
+            title="UPS Access Point"
+            subtitle="REAP retail portal — sign in to scan, hold, and process UPS Access Point packages."
+            url="https://ap.ups.com/REAP/retail.htm"
+          />
+        )}
+        {subview === "stamps" && (
+          <AdminEmbeddedPortal
+            title="Stamps.com"
+            subtitle="Print postage, manage shipments, and reconcile your Stamps.com account."
+            url="https://login.stamps.com/u/login"
+          />
+        )}
+        {subview === "dhl" && (
+          <AdminEmbeddedPortal
+            title="DHL Express"
+            subtitle="Schedule pickups, track shipments, and manage your DHL Express account."
+            url="https://mydhl.express.dhl/us/en/schedule-pickup.html"
+          />
+        )}
       </div>
 
       {/* Floating "?" hint chip — bottom-right, gives admin a discoverable

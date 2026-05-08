@@ -7,7 +7,9 @@ import { sendEmail } from "@/lib/email";
 import {
   computeInvoiceTotals,
   generateInvoiceNumber,
+  newAdjustment,
   type InvoiceMeta,
+  type InvoiceAdjustmentKind,
 } from "@/lib/invoice-builder";
 
 const BASE_URL = process.env.AUTH_URL ?? "https://nohomailbox.org";
@@ -181,6 +183,200 @@ export async function voidInvoice(invoiceId: string): Promise<{ success: true } 
   });
   revalidatePath("/admin");
   return { success: true };
+}
+
+// ─── iter-138 — Post-issuance adjustments ────────────────────────────
+//
+// Apply a discount, waiver, or surcharge to a Sent or Draft invoice.
+// Paid invoices are blocked (admin should issue a refund instead).
+// Voided invoices are blocked (no point adjusting).
+//
+// The adjustment is appended to meta.adjustments[]; totals recompute
+// from the full meta. Audit-logged with the actor + reason so we have
+// a permanent paper trail of who waived what and why.
+export async function addInvoiceAdjustment(input: {
+  invoiceId: string;
+  kind: InvoiceAdjustmentKind;
+  /** Positive cents value; we apply the sign per `kind`. */
+  amountCents: number;
+  /** Customer-facing description (printed on the receipt + email). */
+  description: string;
+  /** Internal reason note (admin-only audit context). */
+  reason: string;
+}): Promise<{
+  success: true;
+  total: number;
+  adjustmentsCents: number;
+} | { error: string }> {
+  const actor = await verifyAdmin();
+  const id = input.invoiceId.trim();
+
+  if (!Number.isFinite(input.amountCents) || input.amountCents <= 0) {
+    return { error: "Amount must be a positive value (the sign is applied automatically)" };
+  }
+  if (input.amountCents > 1_000_00 * 100) {
+    return { error: "Amount over $100,000 — confirm with a manager and split into smaller adjustments" };
+  }
+  const description = input.description.trim();
+  const reason = input.reason.trim();
+  if (description.length < 2) return { error: "Customer-visible description required (≥2 chars)" };
+  if (reason.length < 2) return { error: "Internal reason required (≥2 chars) — this is the audit trail" };
+
+  const inv = await prisma.invoice.findUnique({ where: { id } });
+  if (!inv) return { error: "Invoice not found" };
+  if (inv.status === "Paid") {
+    return { error: "Invoice already paid — issue a refund instead of adjusting." };
+  }
+  if (inv.status === "Void") return { error: "Invoice is voided — adjustments not permitted." };
+
+  const meta: InvoiceMeta = inv.meta ? JSON.parse(inv.meta) : { lines: [] };
+  const adj = newAdjustment(
+    input.kind,
+    input.amountCents,
+    description,
+    reason,
+    actor.id ?? "unknown",
+    actor.name ?? undefined,
+  );
+  const nextMeta: InvoiceMeta = {
+    ...meta,
+    adjustments: [...(meta.adjustments ?? []), adj],
+  };
+  const totals = computeInvoiceTotals(nextMeta);
+
+  await prisma.$transaction([
+    prisma.invoice.update({
+      where: { id },
+      data: {
+        meta: JSON.stringify(nextMeta),
+        totalCents: totals.total,
+        // taxCents + amountCents reflect the PRE-adjustment numbers so
+        // bookkeeping reports keep their integrity. The adjustment delta
+        // lives in meta.adjustments and is reflected in totalCents only.
+      },
+    }),
+    prisma.auditLog.create({
+      data: {
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "invoice.adjustment_added",
+        entityType: "Invoice",
+        entityId: id,
+        metadata: JSON.stringify({
+          kind: input.kind,
+          signedCents: adj.signedCents,
+          description,
+          reason,
+          previousTotal: inv.totalCents,
+          newTotal: totals.total,
+        }),
+      },
+    }),
+  ]);
+
+  revalidatePath("/admin");
+  return { success: true, total: totals.total, adjustmentsCents: totals.adjustmentsCents };
+}
+
+// iter-138 — Void a previously-applied adjustment. We mark voidedAt
+// in-place rather than deleting so the audit trail stays intact.
+export async function voidInvoiceAdjustment(input: {
+  invoiceId: string;
+  adjustmentId: string;
+  reason: string;
+}): Promise<{ success: true; total: number } | { error: string }> {
+  const actor = await verifyAdmin();
+  const reason = input.reason.trim();
+  if (reason.length < 2) return { error: "Void reason required (≥2 chars)" };
+
+  const inv = await prisma.invoice.findUnique({ where: { id: input.invoiceId } });
+  if (!inv) return { error: "Invoice not found" };
+  if (inv.status === "Paid") {
+    return { error: "Invoice already paid — adjust via a refund instead." };
+  }
+
+  const meta: InvoiceMeta = inv.meta ? JSON.parse(inv.meta) : { lines: [] };
+  const list = meta.adjustments ?? [];
+  const idx = list.findIndex((a) => a.id === input.adjustmentId);
+  if (idx < 0) return { error: "Adjustment not found" };
+  if (list[idx]!.voidedAt) return { error: "Adjustment already voided" };
+
+  const updated = [...list];
+  updated[idx] = {
+    ...updated[idx]!,
+    voidedAt: new Date().toISOString(),
+    voidedByActorId: actor.id ?? "unknown",
+    voidedReason: reason,
+  };
+  const nextMeta: InvoiceMeta = { ...meta, adjustments: updated };
+  const totals = computeInvoiceTotals(nextMeta);
+
+  await prisma.$transaction([
+    prisma.invoice.update({
+      where: { id: input.invoiceId },
+      data: { meta: JSON.stringify(nextMeta), totalCents: totals.total },
+    }),
+    prisma.auditLog.create({
+      data: {
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "invoice.adjustment_voided",
+        entityType: "Invoice",
+        entityId: input.invoiceId,
+        metadata: JSON.stringify({
+          adjustmentId: input.adjustmentId,
+          previousSignedCents: list[idx]!.signedCents,
+          previousDescription: list[idx]!.description,
+          voidReason: reason,
+          newTotal: totals.total,
+        }),
+      },
+    }),
+  ]);
+
+  revalidatePath("/admin");
+  return { success: true, total: totals.total };
+}
+
+// iter-138 — Read accessor used by the admin adjustment modal + the
+// customer dashboard invoice view.
+export async function listInvoiceAdjustments(invoiceId: string): Promise<{
+  adjustments: Array<{
+    id: string;
+    kind: InvoiceAdjustmentKind;
+    signedCents: number;
+    description: string;
+    reason: string;
+    byActorName: string | null;
+    atIso: string;
+    voidedAt: string | null;
+    voidedReason: string | null;
+  }>;
+  totalBeforeAdjustments: number;
+  total: number;
+  adjustmentsCents: number;
+} | { error: string }> {
+  await verifyAdmin();
+  const inv = await prisma.invoice.findUnique({ where: { id: invoiceId } });
+  if (!inv) return { error: "Invoice not found" };
+  const meta: InvoiceMeta = inv.meta ? JSON.parse(inv.meta) : { lines: [] };
+  const totals = computeInvoiceTotals(meta);
+  return {
+    adjustments: (meta.adjustments ?? []).map((a) => ({
+      id: a.id,
+      kind: a.kind,
+      signedCents: a.signedCents,
+      description: a.description,
+      reason: a.reason,
+      byActorName: a.byActorName ?? null,
+      atIso: a.atIso,
+      voidedAt: a.voidedAt ?? null,
+      voidedReason: a.voidedReason ?? null,
+    })),
+    totalBeforeAdjustments: totals.totalBeforeAdjustments,
+    total: totals.total,
+    adjustmentsCents: totals.adjustmentsCents,
+  };
 }
 
 // ─── List recent custom invoices for the admin builder UI ───────────────

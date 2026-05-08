@@ -89,6 +89,8 @@ const navGroups: NavGroup[] = [
       { id: "deliveries",      label: "Deliveries",      Icon: IconTruck },
       { id: "qrpickup",        label: "QR Pickup",       Icon: IconQR },
       { id: "labelprinter",    label: "Label Printer",   Icon: IconReceipt },
+      { id: "pickupvelocity",  label: "Pickup Velocity", Icon: IconCalendar },
+      { id: "bulkforward",     label: "Bulk Forward",    Icon: IconShipping },
       { id: "notary",          label: "Notary",          Icon: IconNotary },
       { id: "shippingcenter",  label: "Shipping",        Icon: IconShipping },
       { id: "shop",            label: "Shop",            Icon: IconShop },
@@ -151,6 +153,8 @@ const hiddenNav: NavItem[] = [
   { id: "tenants",         label: "Tenants",         Icon: IconBuilding },
   { id: "operatinghours",  label: "Operating Hours", Icon: IconCalendar },
   { id: "webhooks",        label: "Webhooks",        Icon: IconReport },
+  { id: "deferredemails",  label: "Deferred Emails", Icon: IconEmail },
+  { id: "backuphealth",    label: "Backup Health",   Icon: IconCompliance },
 ];
 
 // Flat list for mobile pills + label lookup. Includes hidden items so
@@ -564,6 +568,10 @@ import AdminPinnedNotesPanel from "@/components/admin/AdminPinnedNotesPanel";
 import AdminAffiliateEarningsPanel from "@/components/admin/AdminAffiliateEarningsPanel";
 import AdminSuiteTransfersPanel from "@/components/admin/AdminSuiteTransfersPanel";
 import AdminLabelPrinterPanel from "@/components/admin/AdminLabelPrinterPanel";
+import AdminPickupVelocityPanel from "@/components/admin/AdminPickupVelocityPanel";
+import AdminBulkForwardPanel from "@/components/admin/AdminBulkForwardPanel";
+import AdminDeferredEmailsPanel from "@/components/admin/AdminDeferredEmailsPanel";
+import AdminBackupHealthPanel from "@/components/admin/AdminBackupHealthPanel";
 import { AdminQRPickupPanel } from "@/components/admin/AdminQRPickupPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
@@ -1805,6 +1813,10 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {tab === "stickynotes" && <AdminPinnedNotesPanel />}
           {tab === "suitetransfers" && <AdminSuiteTransfersPanel />}
           {tab === "labelprinter" && <AdminLabelPrinterPanel />}
+          {tab === "pickupvelocity" && <AdminPickupVelocityPanel />}
+          {tab === "bulkforward" && <AdminBulkForwardPanel />}
+          {tab === "deferredemails" && <AdminDeferredEmailsPanel />}
+          {tab === "backuphealth" && <AdminBackupHealthPanel />}
           {tab === "affiliates" && <AdminAffiliateEarningsPanel />}
           {tab === "idexpiring" && <AdminIdExpiringPanel />}
           {tab === "webhooks" && <AdminWebhooksPanel />}
@@ -1879,6 +1891,11 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                   icon={<svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M3 20 a6 6 0 0 1 12 0 M11 20 a6 6 0 0 1 10 0"/></svg>}
                   label="Partners"
                   onClick={() => setTab("partners")}
+                />
+                <SubToolButton
+                  icon={<svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6 V12 a8 3 0 0 0 16 0 V6 M4 12 V18 a8 3 0 0 0 16 0 V12"/></svg>}
+                  label="Backup Health"
+                  onClick={() => setTab("backuphealth")}
                 />
               </div>
               <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 pb-2 space-y-4">

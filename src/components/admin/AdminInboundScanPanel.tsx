@@ -37,6 +37,7 @@ import { findCustomerByPickupToken } from "@/app/actions/qrPickup";
 import { findGuestPickupByToken, markGuestAuthUsed } from "@/app/actions/guestPickup";
 import { parseWeightInput } from "@/lib/units";
 import { getRecipientSuggestions, type RecipientSuggestion } from "@/app/actions/recipientSuggestions";
+import { routeRecipientName, type SmartRouteResult, type SmartRouteCandidate } from "@/app/actions/smartRouting";
 
 const NOHO_BLUE = "#1976FF";
 const NOHO_BLUE_DEEP = "#0F5BD9";
@@ -244,6 +245,10 @@ export function AdminInboundScanPanel() {
   const [customerMatches, setCustomerMatches] = useState<CustomerMatch[]>([]);
   const [pickedCustomer, setPickedCustomer] = useState<CustomerMatch | null>(null);
   const [recipientName, setRecipientName] = useState("");
+  // iter-139 — Smart routing. Populated when admin types a multi-word
+  // recipient name; the top candidate becomes a one-click pick chip.
+  const [smartRoute, setSmartRoute] = useState<SmartRouteResult | null>(null);
+  const [smartLooking, setSmartLooking] = useState(false);
   // iter-119: per-customer recipient suggestions, refreshed when picker flips.
   const [recipientSuggestions, setRecipientSuggestions] = useState<RecipientSuggestion[]>([]);
   const [weightInput, setWeightInput] = useState("");      // free-form: "2 lb 6 oz" / "36 oz" / "36"
@@ -408,6 +413,43 @@ export function AdminInboundScanPanel() {
     }, 200);
     return () => clearTimeout(handle);
   }, [customerQuery]);
+
+  // iter-139 — Smart routing trigger. Fires when admin types a recipient
+  // name (≥2 words). Falls back to the existing customer search when the
+  // input looks like a suite # or short query. Debounced 350ms so we don't
+  // hammer the DB on every keystroke; cancellable via stale-response guard.
+  useEffect(() => {
+    const q = customerQuery.trim();
+    if (pickedCustomer) { setSmartRoute(null); return; }
+    // Only run smart routing when the query has 2+ tokens AND no digits
+    // (digit prefix → suite search, no smart match needed).
+    const looksLikeName = q.split(/\s+/).filter(Boolean).length >= 2 && !/\d/.test(q);
+    if (!looksLikeName) { setSmartRoute(null); return; }
+    setSmartLooking(true);
+    const handle = setTimeout(() => {
+      void routeRecipientName({ recipient: q })
+        .then((res) => { setSmartRoute(res); setSmartLooking(false); })
+        .catch(() => { setSmartRoute(null); setSmartLooking(false); });
+    }, 350);
+    return () => clearTimeout(handle);
+  }, [customerQuery, pickedCustomer]);
+
+  function pickFromSmartRoute(c: SmartRouteCandidate) {
+    pick({
+      id: c.userId,
+      name: c.customerName,
+      email: c.email,
+      suiteNumber: c.suiteNumber,
+      plan: c.plan,
+    });
+    // Pre-fill the recipient name with the typed envelope text so the
+    // package row shows what was on the label, not just the customer's
+    // canonical name. Admin can still edit it after.
+    if (customerQuery && customerQuery !== c.customerName) {
+      setRecipientName(customerQuery.trim());
+    }
+    setSmartRoute(null);
+  }
 
   // iter-119: refetch recipient suggestions when picked customer changes.
   useEffect(() => {
@@ -1123,6 +1165,71 @@ export function AdminInboundScanPanel() {
           className="mt-2 w-full rounded-xl border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1976FF]/30"
           style={{ borderColor: pickedCustomer ? "#22C55E" : "#e8e5e0", color: NOHO_INK, background: "white" }}
         />
+
+        {/* iter-139 — Smart-routing banner. Shown when admin types a
+            multi-word recipient name. Top match becomes a one-click
+            pick chip; lower-confidence matches fall through to the
+            standard customer-search list below. */}
+        {!pickedCustomer && smartRoute && smartRoute.candidates.length > 0 && (
+          <div
+            className="mt-2 rounded-xl border px-3 py-2 flex items-start gap-2 flex-wrap"
+            style={{
+              background: smartRoute.autoPick ? "rgba(22,163,74,0.06)" : "rgba(245,158,11,0.06)",
+              borderColor: smartRoute.autoPick ? "rgba(22,163,74,0.30)" : "rgba(245,158,11,0.30)",
+            }}
+          >
+            <span className="text-[10px] font-black uppercase tracking-[0.16em] shrink-0 mt-0.5" style={{ color: smartRoute.autoPick ? "#15803d" : "#92400e" }}>
+              ✨ Smart match
+            </span>
+            <div className="flex-1 min-w-0 flex flex-wrap gap-1.5">
+              {smartRoute.candidates.map((c, i) => (
+                <button
+                  key={c.userId}
+                  type="button"
+                  onClick={() => pickFromSmartRoute(c)}
+                  title={c.reasons.join(" · ")}
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10.5px] font-bold transition-colors"
+                  style={{
+                    background: i === 0 && smartRoute.autoPick ? "#16A34A" : "white",
+                    color: i === 0 && smartRoute.autoPick ? "white" : NOHO_INK,
+                    border: `1px solid ${
+                      i === 0 && smartRoute.autoPick ? "#16A34A"
+                      : c.confidence === "high" ? "rgba(22,163,74,0.40)"
+                      : c.confidence === "med"  ? "rgba(245,158,11,0.40)"
+                      : "rgba(45,16,15,0.20)"
+                    }`,
+                  }}
+                >
+                  {c.customerName}
+                  <span className="opacity-70">·</span>
+                  <span style={{ color: i === 0 && smartRoute.autoPick ? "rgba(255,255,255,0.85)" : NOHO_BLUE_DEEP, fontFamily: "ui-monospace, monospace" }}>
+                    #{c.suiteNumber ?? "—"}
+                  </span>
+                  <span
+                    className="text-[9px] font-black px-1 rounded"
+                    style={{
+                      background: i === 0 && smartRoute.autoPick ? "rgba(255,255,255,0.20)" : "rgba(45,16,15,0.06)",
+                      color: i === 0 && smartRoute.autoPick ? "white" : "rgba(45,16,15,0.55)",
+                    }}
+                  >
+                    {c.score}%
+                  </span>
+                </button>
+              ))}
+            </div>
+            {smartRoute.autoPick && (
+              <span className="text-[10px] font-bold w-full sm:w-auto sm:ml-auto self-center" style={{ color: "#15803d" }}>
+                ↑ confident — click to confirm
+              </span>
+            )}
+          </div>
+        )}
+        {!pickedCustomer && smartLooking && customerQuery.trim().split(/\s+/).length >= 2 && (
+          <div className="mt-2 text-[10.5px] font-semibold" style={{ color: "rgba(45,16,15,0.55)" }}>
+            ✨ Smart-matching “{customerQuery.trim()}”…
+          </div>
+        )}
+
         {customerMatches.length > 0 && !pickedCustomer && (
           <div
             className="absolute left-4 right-4 mt-1 rounded-md bg-white z-20 max-h-64 overflow-auto"

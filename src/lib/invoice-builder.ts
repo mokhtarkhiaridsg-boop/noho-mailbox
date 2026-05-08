@@ -26,6 +26,41 @@ export type InvoiceLine = {
   squareCatalogId?: string;
 };
 
+// iter-138 — Post-issuance adjustments (Tier 8 #50).
+// Once an invoice has been generated/sent, admin can add adjustments
+// without rebuilding the line-items: discounts (negative), waivers
+// (negative full charge), and surcharges (positive). Each adjustment
+// carries a customer-visible description AND an internal reason note;
+// both are persisted forever (we never edit-in-place — only add/void).
+// A voided adjustment stays in the array marked `voidedAt` so the
+// audit trail is complete.
+export type InvoiceAdjustmentKind = "discount" | "waiver" | "surcharge";
+
+export type InvoiceAdjustment = {
+  /** Stable id for React keys + void targeting. */
+  id: string;
+  /** Discount/waiver/surcharge — UI labels each differently. */
+  kind: InvoiceAdjustmentKind;
+  /** Signed cents applied to the existing total. NEGATIVE for discount/
+   *  waiver (reduces the customer's bill); POSITIVE for surcharge. The
+   *  invoice.totalCents column is recomputed when we mutate this list. */
+  signedCents: number;
+  /** What the customer sees on the receipt and emails. */
+  description: string;
+  /** Internal note — why we adjusted. Surfaces in the admin audit drawer
+   *  but not on the customer-facing receipt. */
+  reason: string;
+  /** Who applied it — captured at write time. */
+  byActorId: string;
+  byActorName?: string;
+  /** ISO timestamp the adjustment was added. */
+  atIso: string;
+  /** ISO timestamp when admin voided it (kept in array for audit trail). */
+  voidedAt?: string;
+  voidedByActorId?: string;
+  voidedReason?: string;
+};
+
 export type InvoiceMeta = {
   /** Recipient — overrides the linked User's email if set. */
   recipientName?: string;
@@ -46,6 +81,9 @@ export type InvoiceMeta = {
   paidRef?: string;
   /** Lines as they were captured at draft time (rendered in print + email). */
   lines: InvoiceLine[];
+  /** iter-138 — Post-issuance adjustments. Always cumulative; voided
+   *  entries stay in the array with `voidedAt` set. */
+  adjustments?: InvoiceAdjustment[];
 };
 
 // ─── Math helpers ─────────────────────────────────────────────────────
@@ -65,6 +103,11 @@ export function computeInvoiceTotals(meta: InvoiceMeta): {
   taxableBase: number;
   discount: number;
   tax: number;
+  /** iter-138 — Sum of non-voided adjustments (signed). */
+  adjustmentsCents: number;
+  /** Total BEFORE adjustments — useful when rendering the original
+   *  invoice amount alongside the adjusted total. */
+  totalBeforeAdjustments: number;
   total: number;
 } {
   let subtotalVisible = 0;
@@ -90,14 +133,46 @@ export function computeInvoiceTotals(meta: InvoiceMeta): {
       : 0;
   const rate = meta.taxRate ?? 0;
   const tax = Math.max(0, Math.round(taxableAfterDiscount * rate));
-  const total = subtotalVisible - discount + tax;
+  const totalBeforeAdjustments = subtotalVisible - discount + tax;
+  // iter-138 — Sum non-voided adjustments. Final total can never go
+  // below 0 (a $5 invoice with a $10 waiver settles at $0, not -$5).
+  const adjustmentsCents = (meta.adjustments ?? [])
+    .filter((a) => !a.voidedAt)
+    .reduce((sum, a) => sum + (Number.isFinite(a.signedCents) ? a.signedCents : 0), 0);
+  const total = Math.max(0, totalBeforeAdjustments + adjustmentsCents);
   return {
     subtotalVisible,
     subtotalHidden,
     taxableBase: taxableAfterDiscount,
     discount,
     tax,
+    adjustmentsCents,
+    totalBeforeAdjustments,
     total,
+  };
+}
+
+// iter-138 — Helper for the adjustment editor.
+export function newAdjustment(
+  kind: InvoiceAdjustmentKind,
+  amountCents: number,
+  description: string,
+  reason: string,
+  byActorId: string,
+  byActorName?: string,
+): InvoiceAdjustment {
+  // Discount/waiver are stored as NEGATIVE signedCents; surcharge POSITIVE.
+  // The UI presents amount as a positive $ value the admin types.
+  const sign = kind === "surcharge" ? 1 : -1;
+  return {
+    id: "adj_" + Math.random().toString(36).slice(2, 10),
+    kind,
+    signedCents: sign * Math.abs(Math.round(amountCents)),
+    description: description.trim().slice(0, 200),
+    reason: reason.trim().slice(0, 500),
+    byActorId,
+    byActorName,
+    atIso: new Date().toISOString(),
   };
 }
 

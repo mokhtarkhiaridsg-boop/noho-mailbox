@@ -1377,6 +1377,14 @@ export async function updateMailStatus(mailItemId: string, newStatus: string) {
 
       if (prefs.email && owner.email) {
         try {
+          // iter-137 — Pull the captured signature off the row so the
+          // receipt email shows it. Re-fetch to get the freshest values
+          // since `recordPickupSignature` writes happen just before
+          // `updateMailStatus("Picked Up")` from the admin pickup flow.
+          const sigRow = await prisma.mailItem.findUnique({
+            where: { id: mailItemId },
+            select: { pickupSignatureSvg: true, pickupSignerName: true },
+          });
           await sendMailPickedUpEmail({
             email: owner.email,
             name: owner.name ?? "",
@@ -1385,6 +1393,8 @@ export async function updateMailStatus(mailItemId: string, newStatus: string) {
             trackingNumber: item.trackingNumber,
             pickedUpAt: new Date(),
             feedbackToken,
+            signatureSvg: sigRow?.pickupSignatureSvg ?? null,
+            signerName: sigRow?.pickupSignerName ?? null,
           });
         } catch (e) { console.error("[updateMailStatus] sendMailPickedUpEmail failed:", e); }
       }

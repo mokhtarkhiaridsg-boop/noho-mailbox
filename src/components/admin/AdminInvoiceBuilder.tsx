@@ -27,6 +27,7 @@ import {
   voidInvoice,
 } from "@/app/actions/invoice-builder";
 import { searchPOSCustomers } from "@/app/actions/pos";
+import InvoiceAdjustmentsModal from "./InvoiceAdjustmentsModal";
 
 const T = {
   bg: "#FAF7F2",
@@ -82,6 +83,9 @@ export default function AdminInvoiceBuilder({
   const [savedNumber, setSavedNumber] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  // iter-138 — open the adjustments modal for a saved invoice. Local
+  // state because the modal handles its own data fetching.
+  const [showAdjustments, setShowAdjustments] = useState(false);
 
   const totals = useMemo(() => computeInvoiceTotals(meta), [meta]);
   const lineCount = meta.lines.length;
@@ -538,6 +542,27 @@ export default function AdminInvoiceBuilder({
             </button>
             {savedId && (
               <button
+                onClick={() => setShowAdjustments(true)}
+                disabled={pending}
+                className="h-9 px-3 rounded-md text-[11px] font-bold uppercase tracking-[0.06em] disabled:opacity-50"
+                style={{
+                  background: "transparent",
+                  color: T.blue,
+                  border: `1px solid rgba(51,116,133,0.30)`,
+                }}
+                title="Apply discount, waiver, or surcharge with reason"
+              >
+                Adjust
+                {(meta.adjustments?.filter((a) => !a.voidedAt).length ?? 0) > 0 && (
+                  <span className="ml-1.5 inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 rounded-full text-[9px] font-black"
+                    style={{ background: T.blue, color: "white" }}>
+                    {meta.adjustments!.filter((a) => !a.voidedAt).length}
+                  </span>
+                )}
+              </button>
+            )}
+            {savedId && (
+              <button
                 onClick={doVoid}
                 disabled={pending}
                 className="h-9 px-3 rounded-md text-[11px] font-bold uppercase tracking-[0.06em] disabled:opacity-50"
@@ -629,6 +654,21 @@ export default function AdminInvoiceBuilder({
             </button>
           </div>
         </Modal>
+      )}
+
+      {/* iter-138 — Adjustments modal. The modal handles its own data
+          fetching via listInvoiceAdjustments; we just give it the id +
+          customer label. On close, refresh the local meta from the
+          server (next save will pick up the latest adjustments). */}
+      {showAdjustments && savedId && (
+        <InvoiceAdjustmentsModal
+          invoiceId={savedId}
+          invoiceNumber={savedNumber ?? "(unsaved)"}
+          invoiceStatus="Sent"
+          customerName={customerLabel || "Customer"}
+          onClose={() => setShowAdjustments(false)}
+          onChanged={() => setMsg({ tone: "ok", text: "Adjustment saved + audit-logged" })}
+        />
       )}
     </div>
   );

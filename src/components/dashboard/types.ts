@@ -40,6 +40,12 @@ export type MailItem = {
     etaIso: string | null;
     polledAtIso: string | null;
   } | null;
+  // iter-135: Multi-photo intake gallery. Supplemental angles attached
+  // by admin after intake (back of package, label close-up, contents,
+  // damage). Empty array when none exist. Primary `exteriorImageUrl`
+  // remains the cover photo; this is rendered as a thumb strip beside
+  // it with a click-through swiper.
+  extraPhotos?: Array<{ id: string; url: string; label?: string }>;
 };
 
 export type ForwardingAddress = { id: string; label: string; address: string };

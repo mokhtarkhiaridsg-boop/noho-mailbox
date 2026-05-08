@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BRAND, type MailItem } from "./types";
 import { IconPackage, IconForward } from "@/components/MemberIcons";
 import { requestPickup, requestForward, requestQuickPeek } from "@/app/actions/mail";
@@ -8,6 +8,21 @@ import InsuranceModal from "./InsuranceModal";
 import SharePackageButton from "./SharePackageButton";
 import StorageFeeDisputeButton from "./StorageFeeDisputeButton";
 import { EmptyState } from "./ui";
+
+// iter-135 — multi-photo intake gallery. Combines the package's primary
+// `exteriorImageUrl` with any extras admin attached after intake into a
+// single ordered list, ready for the strip + swiper lightbox.
+type GalleryPhoto = { id: string; url: string; label?: string };
+function buildGallery(pkg: MailItem): GalleryPhoto[] {
+  const out: GalleryPhoto[] = [];
+  if (pkg.exteriorImageUrl) {
+    out.push({ id: "primary", url: pkg.exteriorImageUrl, label: "Front" });
+  }
+  for (const p of pkg.extraPhotos ?? []) {
+    out.push({ id: p.id, url: p.url, label: p.label });
+  }
+  return out;
+}
 
 type Props = {
   packages: MailItem[];
@@ -122,6 +137,8 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
   // signal increments after a successful declare so the dashboard's
   // server-data revalidates (router.refresh is run by runAction).
   const [insureFor, setInsureFor] = useState<MailItem | null>(null);
+  // iter-135: Lightbox swiper state — { pkgId, index } or null.
+  const [lightbox, setLightbox] = useState<{ pkgId: string; index: number } | null>(null);
 
   return (
     <div className="space-y-3">
@@ -175,7 +192,11 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
           }
         />
       ) : (
-        packages.map((pkg) => (
+        packages.map((pkg) => {
+          // iter-135 — combined gallery: primary photo + admin extras.
+          const gallery = buildGallery(pkg);
+          const hasExtras = (pkg.extraPhotos?.length ?? 0) > 0;
+          return (
           <div
             key={pkg.id}
             className="group p-4 sm:p-6 transition-colors hover:bg-[#337485]/4"
@@ -185,16 +206,33 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
               {pkg.exteriorImageUrl ? (
                 // Real photo of the package, captured by admin at scan time.
                 // Visual confirmation for the customer that yes, this is theirs.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={pkg.exteriorImageUrl}
-                  alt={`Package from ${pkg.from}`}
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover shrink-0 transition-transform duration-300 group-hover:scale-105"
+                // iter-135: clicking opens the swiper at index 0; thumb count
+                // badge shown when admin attached extras.
+                <button
+                  type="button"
+                  onClick={() => setLightbox({ pkgId: pkg.id, index: 0 })}
+                  className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl shrink-0 transition-transform duration-300 group-hover:scale-105 overflow-hidden"
                   style={{
                     border: `1px solid ${BRAND.border}`,
                     boxShadow: "0 6px 18px rgba(51,116,133,0.20)",
                   }}
-                />
+                  aria-label={`View ${gallery.length} photo${gallery.length === 1 ? "" : "s"} of package from ${pkg.from}`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={pkg.exteriorImageUrl}
+                    alt={`Package from ${pkg.from}`}
+                    className="w-full h-full object-cover"
+                  />
+                  {hasExtras && (
+                    <span
+                      className="absolute bottom-0 right-0 text-[8.5px] font-black text-white px-1 leading-tight rounded-tl-md"
+                      style={{ background: "rgba(15,23,42,0.85)" }}
+                    >
+                      +{pkg.extraPhotos!.length}
+                    </span>
+                  )}
+                </button>
               ) : (
                 <div
                   className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
@@ -305,8 +343,33 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
                 </button>
               )}
             </div>
+            {/* iter-135 — Multi-photo gallery strip. Renders below the
+                action row when admin attached extras. Each thumb opens
+                the swiper at its own index (primary lives at index 0). */}
+            {hasExtras && (
+              <div className="mt-3 ml-[60px] sm:ml-[72px] flex items-center gap-2 overflow-x-auto pb-1">
+                <span className="text-[10px] font-black uppercase tracking-wider shrink-0" style={{ color: BRAND.inkSoft }}>
+                  Photos · {gallery.length}
+                </span>
+                {gallery.slice(1).map((g, i) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => setLightbox({ pkgId: pkg.id, index: i + 1 })}
+                    className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 transition-transform hover:scale-105"
+                    style={{ border: `1px solid ${BRAND.border}` }}
+                    aria-label={g.label ? `View ${g.label} photo` : `View photo ${i + 2} of ${gallery.length}`}
+                    title={g.label ?? `Photo ${i + 2}`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={g.url} alt={g.label ?? `Photo ${i + 2}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        ))
+        );
+        })
       )}
     </div>
 
@@ -414,6 +477,140 @@ export default function PackagesPanel({ packages, recentlyPickedUp = [], isPendi
         }}
       />
     )}
+
+    {/* iter-135 — Photo swiper lightbox. Resolves the package by id
+        from `packages`, extracts the gallery, and shows a centered
+        full-bleed photo with prev/next nav, ESC + backdrop close, and
+        the photo label rendered as an overlay caption. */}
+    {lightbox && (() => {
+      const pkg = packages.find((p) => p.id === lightbox.pkgId);
+      if (!pkg) return null;
+      const gal = buildGallery(pkg);
+      if (gal.length === 0) return null;
+      return (
+        <PhotoLightbox
+          photos={gal}
+          startIndex={Math.max(0, Math.min(gal.length - 1, lightbox.index))}
+          fromLabel={pkg.from}
+          onClose={() => setLightbox(null)}
+        />
+      );
+    })()}
+    </div>
+  );
+}
+
+// iter-135 — Self-contained photo swiper. ESC closes, ←/→ navigate,
+// backdrop click closes, label overlay caption. Locks scroll while open.
+function PhotoLightbox({ photos, startIndex, fromLabel, onClose }: {
+  photos: GalleryPhoto[];
+  startIndex: number;
+  fromLabel: string;
+  onClose: () => void;
+}) {
+  const [idx, setIdx] = useState(startIndex);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowRight") setIdx((i) => Math.min(photos.length - 1, i + 1));
+      else if (e.key === "ArrowLeft") setIdx((i) => Math.max(0, i - 1));
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [photos.length, onClose]);
+
+  const current = photos[idx];
+  if (!current) return null;
+  const hasPrev = idx > 0;
+  const hasNext = idx < photos.length - 1;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8"
+      style={{ background: "rgba(15,23,42,0.92)" }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Package photo ${idx + 1} of ${photos.length}`}
+    >
+      <div
+        className="relative max-w-5xl w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={current.url}
+          alt={current.label ?? `Photo ${idx + 1}`}
+          className="block w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+          style={{ background: "#1A1D23" }}
+        />
+
+        {/* Close (top-right) */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-2 right-2 w-9 h-9 rounded-full text-white text-lg font-black flex items-center justify-center transition-all hover:scale-110"
+          style={{ background: "rgba(15,23,42,0.7)", backdropFilter: "blur(8px)" }}
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
+        {/* Prev */}
+        {hasPrev && (
+          <button
+            type="button"
+            onClick={() => setIdx((i) => i - 1)}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full text-white text-xl font-black flex items-center justify-center transition-all hover:scale-110"
+            style={{ background: "rgba(15,23,42,0.7)", backdropFilter: "blur(8px)" }}
+            aria-label="Previous photo"
+          >
+            ‹
+          </button>
+        )}
+
+        {/* Next */}
+        {hasNext && (
+          <button
+            type="button"
+            onClick={() => setIdx((i) => i + 1)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full text-white text-xl font-black flex items-center justify-center transition-all hover:scale-110"
+            style={{ background: "rgba(15,23,42,0.7)", backdropFilter: "blur(8px)" }}
+            aria-label="Next photo"
+          >
+            ›
+          </button>
+        )}
+
+        {/* Caption + dot indicators */}
+        <div className="mt-3 flex items-center justify-between gap-3 px-1 text-white">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-black uppercase tracking-[0.16em] opacity-70">
+              From {fromLabel}
+            </p>
+            <p className="text-sm font-semibold truncate">
+              {current.label ?? `Photo ${idx + 1}`}
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {photos.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIdx(i)}
+                aria-label={`Go to photo ${i + 1}`}
+                className={`rounded-full transition-all ${i === idx ? "w-2.5 h-2.5" : "w-2 h-2 opacity-50 hover:opacity-80"}`}
+                style={{ background: i === idx ? "white" : "rgba(255,255,255,0.7)" }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

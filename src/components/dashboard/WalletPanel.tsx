@@ -163,12 +163,37 @@ export default function WalletPanel({
 
         {walletTxns.length > 0 && (
           <div className="mt-6 pt-5" style={{ borderTop: "1px solid rgba(45,29,15,0.08)" }}>
-            <p
-              className="text-[10px] font-semibold uppercase tracking-[0.18em] mb-3"
-              style={{ color: "rgba(45,29,15,0.55)" }}
-            >
-              Recent activity
-            </p>
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <p
+                className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+                style={{ color: "rgba(45,29,15,0.55)" }}
+              >
+                Recent activity
+              </p>
+              {/* iter-133 — Download printable wallet ledger statement.
+                  Opens in a new tab so the member doesn't lose their
+                  scroll position on the dashboard. The statement page
+                  itself audit-logs the view via getWalletLedger(). */}
+              <a
+                href="/dashboard/wallet/ledger"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-semibold transition-colors"
+                style={{
+                  background: "rgba(51,116,133,0.08)",
+                  color: "#23596A",
+                  border: "1px solid rgba(51,116,133,0.20)",
+                }}
+                aria-label="Download printable wallet statement"
+              >
+                <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download statement
+              </a>
+            </div>
             <ul className="space-y-1">
               {walletTxns.map((t, idx) => {
                 const isCredit = t.amountCents >= 0;

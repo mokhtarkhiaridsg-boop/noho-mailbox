@@ -16,7 +16,11 @@ import {
   toggleWebhookActive,
   testWebhook,
   listWebhookDeliveries,
+  listWebhookProblems,
+  replayWebhookDelivery,
+  discardDeadLetter,
   type WebhookRow,
+  type WebhookProblemRow,
 } from "@/app/actions/webhooks";
 import { ALL_WEBHOOK_EVENTS, type WebhookEvent } from "@/lib/webhooks";
 
@@ -197,6 +201,11 @@ export default function AdminWebhooksPanel() {
         </div>
       </div>
 
+      {/* iter-134 — Retry queue + dead-letter section. Shows everything
+          that failed and either is queued for another attempt or has
+          exhausted its retry budget. Admin can replay or discard. */}
+      <ProblemQueue />
+
       {drawerEndpointId && (
         <DeliveriesDrawer
           endpointId={drawerEndpointId}
@@ -205,6 +214,169 @@ export default function AdminWebhooksPanel() {
         />
       )}
     </div>
+  );
+}
+
+// ─── iter-134 — Failed-delivery + dead-letter section ─────────────────
+
+function ProblemQueue() {
+  const [data, setData] = useState<{
+    pendingRetries: WebhookProblemRow[];
+    deadLetters: WebhookProblemRow[];
+    totals: { pending: number; deadLettered: number };
+  } | null>(null);
+  const [pending, startTransition] = useTransition();
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  function refresh() {
+    void listWebhookProblems().then(setData).catch(() => setData({ pendingRetries: [], deadLetters: [], totals: { pending: 0, deadLettered: 0 } }));
+  }
+  useEffect(() => {
+    refresh();
+    const t = setInterval(refresh, 30_000);
+    return () => clearInterval(t);
+  }, []);
+
+  function onReplay(row: WebhookProblemRow) {
+    setBusyId(row.id);
+    startTransition(async () => {
+      const res = await replayWebhookDelivery(row.id);
+      setBusyId(null);
+      if (res.error) { alert(res.error); return; }
+      refresh();
+    });
+  }
+
+  function onDiscard(row: WebhookProblemRow) {
+    if (!confirm(`Discard this dead-lettered "${row.event}" delivery? It will not be retried.`)) return;
+    setBusyId(row.id);
+    startTransition(async () => {
+      const res = await discardDeadLetter(row.id);
+      setBusyId(null);
+      if (res.error) { alert(res.error); return; }
+      refresh();
+    });
+  }
+
+  if (!data) {
+    return (
+      <div className="rounded-2xl p-4 text-[11px]" style={{ background: "white", border: "1px solid rgba(45,16,15,0.08)", color: "rgba(45,16,15,0.55)" }}>
+        Loading retry queue…
+      </div>
+    );
+  }
+
+  const { pendingRetries, deadLetters, totals } = data;
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${NOHO_BLUE}B0` }}>
+          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: "#F5A623", boxShadow: "0 0 6px #F5A623" }} />
+          Retry queue · Dead letters
+        </p>
+        <h3 className="text-base font-black tracking-tight" style={{ color: NOHO_INK }}>
+          {totals.pending + totals.deadLettered === 0
+            ? "All caught up — no failed deliveries."
+            : `${totals.pending} pending retr${totals.pending === 1 ? "y" : "ies"} · ${totals.deadLettered} dead letter${totals.deadLettered === 1 ? "" : "s"}`}
+        </h3>
+        <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+          Failed deliveries auto-retry on exponential backoff (60s / 5m / 30m / 2h / 12h). After {pendingRetries[0]?.maxAttempts ?? 6} attempts they land in dead-letter — replay manually or discard.
+        </p>
+      </div>
+
+      {pendingRetries.length > 0 && (
+        <div className="rounded-2xl overflow-hidden" style={{ background: "white", border: "1px solid rgba(245,166,35,0.30)" }}>
+          <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em]" style={{ background: "rgba(245,166,35,0.08)", color: "#92400e", borderBottom: "1px solid rgba(245,166,35,0.20)" }}>
+            Pending retries ({totals.pending}{totals.pending > pendingRetries.length ? ` · showing ${pendingRetries.length}` : ""})
+          </div>
+          <ul>
+            {pendingRetries.map((r) => (
+              <ProblemRow key={r.id} row={r} kind="pending" onReplay={onReplay} onDiscard={onDiscard} busy={pending && busyId === r.id} />
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {deadLetters.length > 0 && (
+        <div className="rounded-2xl overflow-hidden" style={{ background: "white", border: "1px solid rgba(231,0,19,0.25)" }}>
+          <div className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em]" style={{ background: "rgba(231,0,19,0.06)", color: "#991b1b", borderBottom: "1px solid rgba(231,0,19,0.18)" }}>
+            Dead letter queue ({totals.deadLettered}{totals.deadLettered > deadLetters.length ? ` · showing ${deadLetters.length}` : ""})
+          </div>
+          <ul>
+            {deadLetters.map((r) => (
+              <ProblemRow key={r.id} row={r} kind="dead" onReplay={onReplay} onDiscard={onDiscard} busy={pending && busyId === r.id} />
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProblemRow({ row, kind, onReplay, onDiscard, busy }: {
+  row: WebhookProblemRow;
+  kind: "pending" | "dead";
+  onReplay: (r: WebhookProblemRow) => void;
+  onDiscard: (r: WebhookProblemRow) => void;
+  busy: boolean;
+}) {
+  const fmtRel = (iso: string | null) => {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    const diff = d.getTime() - Date.now();
+    const abs = Math.abs(diff);
+    const mins = Math.round(abs / 60000);
+    const hours = Math.round(abs / 3600000);
+    const days = Math.round(abs / 86400000);
+    const past = diff < 0;
+    if (mins < 1) return past ? "just now" : "in <1m";
+    if (mins < 60) return past ? `${mins}m ago` : `in ${mins}m`;
+    if (hours < 48) return past ? `${hours}h ago` : `in ${hours}h`;
+    return past ? `${days}d ago` : `in ${days}d`;
+  };
+
+  return (
+    <li className="px-4 py-2.5 flex items-start gap-3" style={{ borderBottom: "1px solid rgba(45,16,15,0.05)" }}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] font-black" style={{ color: NOHO_INK }}>{row.event}</span>
+          <span className="text-[10px]" style={{ color: "rgba(45,16,15,0.55)" }}>→ {row.endpointLabel}</span>
+          {!row.endpointActive && (
+            <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.10)", color: "rgba(45,16,15,0.55)" }}>endpoint paused</span>
+          )}
+          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.06)", color: "rgba(45,16,15,0.55)" }}>
+            attempt {row.attempt}/{row.maxAttempts}
+          </span>
+        </div>
+        <div className="text-[10.5px] mt-0.5 truncate" style={{ color: "rgba(45,16,15,0.65)" }}>
+          {row.error ?? `HTTP ${row.httpStatus ?? "—"}`} · first tried {fmtRel(row.sentAt)}
+          {kind === "pending" && row.nextRetryAt && <> · next retry {fmtRel(row.nextRetryAt)}</>}
+        </div>
+      </div>
+      <div className="shrink-0 flex items-center gap-1.5">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => onReplay(row)}
+          className="text-[10.5px] font-black px-2.5 py-1 rounded-md disabled:opacity-50"
+          style={{ background: NOHO_BLUE, color: "white" }}
+        >
+          {busy ? "…" : "Replay"}
+        </button>
+        {kind === "dead" && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => onDiscard(row)}
+            className="text-[10.5px] font-bold px-2 py-1 rounded-md disabled:opacity-50"
+            style={{ background: "rgba(45,16,15,0.05)", color: "rgba(45,16,15,0.65)" }}
+          >
+            Discard
+          </button>
+        )}
+      </div>
+    </li>
   );
 }
 

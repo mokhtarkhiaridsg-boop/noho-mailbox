@@ -1,55 +1,282 @@
 "use client";
 
-// iter-124 — Thermal label printer (Jadens-friendly 4×6).
+// iter-131 — Label printer, ONE always-editable form.
 //
-// Admin pastes/scans a tracking number → we lookup the MailItem +
-// customer record → render a brand-styled, print-ready 4×6 label and
-// trigger window.print() on demand. Print CSS sets `@page size: 4in 6in`
-// so a Jadens (or any 4×6 thermal) outputs cleanly with no margins.
+// Lookup is just an autofill enhancement — it NEVER blocks. Type a
+// tracking #, the form auto-fills from the DB if there's a match,
+// otherwise stays editable. No mode toggle, no error states, no
+// "package not found" message. Print works for any tracking #.
+//
+// Keeps: 4×6 Jadens print CSS · Code 128 barcode · NOHO branding
+// · driver-scannable bars · live preview at 85%.
 
-import { useEffect, useRef, useState, useTransition } from "react";
-import { findLabelByTracking, type LabelData } from "@/app/actions/labelPrinter";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  findLabelByTracking,
+  searchCustomersForLabel,
+  type LabelData,
+} from "@/app/actions/labelPrinter";
+import { generateCode128 } from "@/lib/barcode128";
 
 const NOHO_BLUE = "#337485";
 const NOHO_BLUE_DEEP = "#23596A";
 const NOHO_INK = "#2D100F";
 const NOHO_CREAM = "#F7E6C2";
-const NOHO_CREAM_DEEP = "#F0DBA9";
+
+const CARRIERS = ["UPS", "USPS", "FedEx", "DHL", "Amazon", "OnTrac", "Other"] as const;
+
+// Carrier autodetect from tracking-number patterns.
+function detectCarrier(t: string): string | null {
+  const s = t.replace(/[\s-]/g, "").toUpperCase();
+  if (!s) return null;
+  if (/^1Z[0-9A-Z]{16}$/.test(s)) return "UPS";
+  if (/^\d{12}$/.test(s) || /^\d{15}$/.test(s) || /^\d{20}$/.test(s)) return "FedEx";
+  if (/^(94|93|92|95|82)\d{18,20}$/.test(s) || /^[A-Z]{2}\d{9}US$/.test(s)) return "USPS";
+  if (/^\d{10}$/.test(s)) return "DHL";
+  if (/^TBA\d{12}/.test(s)) return "Amazon";
+  return null;
+}
+
+function sanitizeTrackingForBarcode(raw: string): { clean: string; hadIssues: boolean } {
+  const stripped = raw.replace(/\s+/g, "").toUpperCase();
+  let hadIssues = false;
+  let clean = "";
+  for (const ch of stripped) {
+    const code = ch.charCodeAt(0);
+    if (code >= 32 && code <= 127) clean += ch;
+    else hadIssues = true;
+  }
+  return { clean, hadIssues };
+}
+
+type FormState = {
+  trackingNumber: string;
+  carrier: string;
+  recipientName: string;
+  customerName: string;
+  customerEmail: string;
+  suiteNumber: string;
+  weightOz: string;
+  dimensions: string;
+};
+
+const BLANK: FormState = {
+  trackingNumber: "",
+  carrier: "",
+  recipientName: "",
+  customerName: "",
+  customerEmail: "",
+  suiteNumber: "",
+  weightOz: "",
+  dimensions: "",
+};
+
+type LookupStatus = "idle" | "loading" | "matched" | "manual";
+
+// iter-136 — minimal online-tracking snapshot kept in panel state so the
+// status pill + history strip stay rendered after the lookup finishes.
+type OnlineSnapshot = {
+  carrier: string;
+  status: string | null;
+  substatus: string | null;
+  location: string | null;
+  etaIso: string | null;
+  history: Array<{ dateIso: string; status: string; location: string }>;
+  source: "shippo" | "carrier-detect" | "none";
+  fetchedAtIso: string;
+  matchedDbRow: boolean;
+};
 
 export default function AdminLabelPrinterPanel() {
-  const [tracking, setTracking] = useState("");
-  const [label, setLabel] = useState<LabelData | null>(null);
-  const [pending, startTransition] = useTransition();
-  const [err, setErr] = useState<string | null>(null);
+  const [form, setForm] = useState<FormState>(BLANK);
+  const [dirty, setDirty] = useState<Set<keyof FormState>>(new Set());
+  const [lookupStatus, setLookupStatus] = useState<LookupStatus>("idle");
+  const [lookupPending, startLookup] = useTransition();
+  const [custSearchQ, setCustSearchQ] = useState("");
+  const [custResults, setCustResults] = useState<Array<{ id: string; name: string; email: string; suiteNumber: string | null }>>([]);
+  const [online, setOnline] = useState<OnlineSnapshot | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastReqId = useRef(0);
+  const matchedFadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function lookup(e?: React.FormEvent) {
-    e?.preventDefault();
-    setErr(null);
-    if (!tracking.trim()) { setErr("Enter a tracking number"); return; }
-    startTransition(async () => {
-      const res = await findLabelByTracking({ tracking });
-      if (res.error) { setErr(res.error); setLabel(null); return; }
-      setLabel(res.label ?? null);
+  // Mark a field dirty + write its new value.
+  function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setForm((f) => ({ ...f, [key]: value }));
+    setDirty((d) => {
+      const next = new Set(d); next.add(key); return next;
     });
   }
 
-  function clear() {
-    setTracking(""); setLabel(null); setErr(null); inputRef.current?.focus();
+  // Apply autofill — only writes keys NOT in dirty set so admin edits stick.
+  function applyAutofill(patch: Partial<FormState>, dirtySnapshot: Set<keyof FormState>) {
+    setForm((f) => {
+      const next: FormState = { ...f };
+      for (const [k, v] of Object.entries(patch) as [keyof FormState, string | undefined][]) {
+        if (v === undefined || v === "") continue;
+        if (dirtySnapshot.has(k)) continue;
+        next[k] = v;
+      }
+      return next;
+    });
   }
 
-  function print() {
-    if (typeof window === "undefined") return;
-    window.print();
+  // Debounced lookup-as-you-type. Skip if <6 chars; only autofill non-dirty fields.
+  useEffect(() => {
+    const tracking = form.trackingNumber.trim();
+    // Always update carrier autodetect for non-dirty carrier (lightweight, sync).
+    if (!dirty.has("carrier")) {
+      const guess = detectCarrier(tracking);
+      if (guess && form.carrier !== guess) {
+        setForm((f) => ({ ...f, carrier: guess }));
+      }
+    }
+    if (tracking.length < 6) {
+      setLookupStatus("idle");
+      setOnline(null);
+      return;
+    }
+    const reqId = ++lastReqId.current;
+    setLookupStatus("loading");
+    const timer = setTimeout(() => {
+      startLookup(async () => {
+        try {
+          // iter-136 — primary lookup is now ONLINE via the carrier API
+          // (Shippo). The DB is only consulted to overlay our intake
+          // metadata when the package is one of ours.
+          const res = await findLabelByTracking({ tracking });
+          if (reqId !== lastReqId.current) return;
+          if (res.found && res.label) {
+            applyAutofill({
+              trackingNumber: res.label.trackingNumber,
+              carrier: res.label.carrier ?? "",
+              recipientName: res.label.recipientName ?? res.label.customerName,
+              customerName: res.label.customerName,
+              customerEmail: res.label.customerEmail,
+              suiteNumber: res.label.suiteNumber ?? "",
+              weightOz: res.label.weightOz != null ? String(res.label.weightOz) : "",
+              dimensions: res.label.dimensions ?? "",
+            }, dirty);
+            // Capture the online snapshot so the status pill + history
+            // chips stay visible. matchedDbRow distinguishes "we have
+            // intake metadata" from "we only know what the carrier says".
+            if (res.label.online) {
+              setOnline({
+                carrier: res.label.online.carrier,
+                status: res.label.online.status,
+                substatus: res.label.online.substatus,
+                location: res.label.online.location,
+                etaIso: res.label.online.etaIso,
+                history: res.label.online.history,
+                source: res.label.online.source,
+                fetchedAtIso: res.label.online.fetchedAtIso,
+                matchedDbRow: res.label.source === "db+online",
+              });
+            } else {
+              setOnline(null);
+            }
+            setLookupStatus("matched");
+            if (matchedFadeTimer.current) clearTimeout(matchedFadeTimer.current);
+            matchedFadeTimer.current = setTimeout(() => setLookupStatus("manual"), 2500);
+          } else {
+            setOnline(null);
+            setLookupStatus("manual");
+          }
+        } catch {
+          if (reqId !== lastReqId.current) return;
+          setOnline(null);
+          setLookupStatus("manual");
+        }
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.trackingNumber]);
+
+  // Customer search (debounced).
+  useEffect(() => {
+    if (custSearchQ.trim().length < 2) { setCustResults([]); return; }
+    const t = setTimeout(() => {
+      void searchCustomersForLabel({ query: custSearchQ }).then(setCustResults).catch(() => setCustResults([]));
+    }, 200);
+    return () => clearTimeout(t);
+  }, [custSearchQ]);
+
+  function pickCustomer(c: { id: string; name: string; email: string; suiteNumber: string | null }) {
+    applyAutofill({
+      customerName: c.name,
+      customerEmail: c.email,
+      suiteNumber: c.suiteNumber ?? "",
+    }, dirty);
+    // Customer-search override is intentional — these become "dirty" so a
+    // later DB lookup won't clobber the admin's chosen customer.
+    setDirty((d) => {
+      const next = new Set(d);
+      next.add("customerName"); next.add("customerEmail"); next.add("suiteNumber");
+      return next;
+    });
+    setCustSearchQ(""); setCustResults([]);
   }
 
-  // Auto-focus the tracking input on mount + after print.
+  function reset() {
+    if (matchedFadeTimer.current) clearTimeout(matchedFadeTimer.current);
+    setForm(BLANK); setDirty(new Set()); setLookupStatus("idle");
+    setCustSearchQ(""); setCustResults([]); setOnline(null);
+    inputRef.current?.focus();
+  }
+
+  function print() { if (typeof window !== "undefined") window.print(); }
+
   useEffect(() => { inputRef.current?.focus(); }, []);
+  useEffect(() => () => {
+    if (matchedFadeTimer.current) clearTimeout(matchedFadeTimer.current);
+  }, []);
+
+  // Build the live LabelData for the preview + print payload.
+  // iter-141 — Recipient is no longer required to print. Carrier APIs
+  // do NOT expose label-side recipient/sender details (privacy), so a
+  // tracking-only lookup MUST still be printable. The label preview
+  // shows "(verify recipient at counter)" when both fields are blank;
+  // admin can type the name from the envelope at any time and reprint.
+  const labelData: LabelData | null = useMemo(() => {
+    const cleaned = sanitizeTrackingForBarcode(form.trackingNumber);
+    if (!cleaned.clean || cleaned.clean.length < 4) return null;
+    const recipient = form.recipientName.trim() || form.customerName.trim();
+    const weight = form.weightOz.trim() ? parseFloat(form.weightOz) : null;
+    return {
+      mailItemId: null,
+      trackingNumber: cleaned.clean,
+      carrier: form.carrier.trim() || null,
+      customerName: form.customerName.trim() || recipient || "",
+      customerEmail: form.customerEmail.trim(),
+      suiteNumber: form.suiteNumber.trim() || null,
+      recipientName: form.recipientName.trim() || null,
+      intakeDate: new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
+      intakeAtIso: new Date().toISOString(),
+      weightOz: Number.isFinite(weight) ? weight : null,
+      dimensions: form.dimensions.trim() || null,
+      exteriorImageUrl: null,
+      labelNumber: cleaned.clean.slice(-6).toUpperCase(),
+      // iter-136 — source reflects how this label is being assembled.
+      // "online" when carrier API returned data, "db+online" when we
+      // also have intake metadata, "manual" when admin typed everything.
+      source: online
+        ? online.matchedDbRow
+          ? "db+online"
+          : "online"
+        : "manual",
+      online: online,
+    };
+  }, [form, online]);
+
+  const trackingHadEncodingIssue = useMemo(() => {
+    if (!form.trackingNumber.trim()) return false;
+    return sanitizeTrackingForBarcode(form.trackingNumber).hadIssues;
+  }, [form.trackingNumber]);
+
+  const canPrint = !!labelData;
 
   return (
     <div className="space-y-4">
-      {/* Print stylesheet — applied only when window.print() runs. Kicks
-          out the chrome and forces 4×6 page geometry. */}
       <style jsx global>{`
         @media print {
           @page { size: 4in 6in; margin: 0; }
@@ -77,87 +304,176 @@ export default function AdminLabelPrinterPanel() {
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Thermal label printer</h2>
         <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
-          Paste or scan a tracking #. We'll auto-fill from the package record and render a NOHO-branded 4×6 label. Hit Print → your Jadens (or any 4×6 thermal) outputs it.
+          Type or scan any tracking #. We hit the carrier&apos;s tracking API live (USPS / UPS / FedEx / DHL) and overlay our intake data when the package is one of ours. Code 128 barcode scannable by every driver. Prints 4×6 on Jadens.
         </p>
       </div>
 
-      {/* Lookup row */}
-      <form onSubmit={lookup} className="no-print rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
-        <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
-          Tracking number
-        </label>
-        <div className="mt-1 flex items-stretch gap-2">
-          <input
-            ref={inputRef}
-            type="text"
-            value={tracking}
-            onChange={(e) => setTracking(e.target.value)}
-            placeholder="Scan or paste · e.g. 1Z999AA10123456784"
-            autoComplete="off"
-            spellCheck={false}
-            className="flex-1 rounded-xl border px-4 py-3 text-lg font-mono"
-            style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }}
-          />
-          <button type="submit" disabled={pending}
-            className="px-5 py-3 rounded-xl text-white font-black text-[13px] disabled:opacity-50"
-            style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}>
-            {pending ? "Looking up…" : "Lookup →"}
-          </button>
-          {label && (
-            <button type="button" onClick={clear}
-              className="px-3 py-3 rounded-xl text-[12px] font-bold border"
-              style={{ borderColor: "#e8e5e0", color: NOHO_INK, background: "white" }}>
-              Clear
-            </button>
+      <div className="no-print rounded-2xl bg-white border p-4 space-y-3" style={{ borderColor: "#e8e5e0" }}>
+        {/* Tracking row with status pill */}
+        <div>
+          <div className="flex items-center justify-between gap-2">
+            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+              Tracking number
+            </label>
+            <StatusPill status={lookupStatus} pending={lookupPending} />
+          </div>
+          <input ref={inputRef} type="text" value={form.trackingNumber}
+            onChange={(e) => setField("trackingNumber", e.target.value)}
+            placeholder="Scan or paste · works for ANY tracking #"
+            autoComplete="off" spellCheck={false}
+            className="mt-1 w-full rounded-xl border px-4 py-3 text-lg font-mono"
+            style={{
+              borderColor: lookupStatus === "matched" ? "#16a34a" : "#e8e5e0",
+              background: "white", color: NOHO_INK,
+              transition: "border-color 0.3s ease",
+            }} />
+          {trackingHadEncodingIssue && (
+            <p className="mt-1.5 text-[10.5px]" style={{ color: "#92400e" }}>
+              ⚠️ Some characters won't encode in Code 128B (drivers' scanners would skip them). The barcode uses only the printable ASCII chars.
+            </p>
           )}
+          {/* iter-136 — Live carrier-tracking pane. Renders when an
+              online lookup returned anything (status, location, ETA,
+              recent scan history). Source = "shippo" for live carrier
+              data, "carrier-detect" for pattern-only fallback, "none"
+              when neither apply. */}
+          {online && <OnlineTrackingPane online={online} />}
         </div>
-        {err && (
-          <p className="mt-2 rounded-md px-3 py-1.5 text-[11.5px] font-bold" style={{ background: "rgba(231,0,19,0.10)", color: "#991b1b" }}>
-            {err}
-          </p>
-        )}
-      </form>
 
-      {/* Label preview + print bar */}
-      {label && (
-        <>
-          <div className="no-print rounded-2xl bg-white border p-4 flex items-center justify-between gap-3 flex-wrap" style={{ borderColor: "#e8e5e0" }}>
-            <div className="min-w-0">
-              <p className="text-[12.5px] font-black truncate" style={{ color: NOHO_INK }}>
-                ✓ Found · {label.customerName}
-                {label.suiteNumber && (
-                  <span className="ml-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(51,116,133,0.10)", color: NOHO_BLUE_DEEP }}>
-                    Suite #{label.suiteNumber}
-                  </span>
-                )}
+        {/* Carrier chips */}
+        <Field label="Carrier">
+          <div className="flex flex-wrap gap-1">
+            {CARRIERS.map((c) => {
+              const active = form.carrier === c;
+              return (
+                <button key={c} type="button" onClick={() => setField("carrier", c)}
+                  className="px-2.5 py-1 rounded-md text-[10.5px] font-bold"
+                  style={{
+                    background: active ? NOHO_BLUE : "white",
+                    color: active ? "white" : NOHO_INK,
+                    border: `1px solid ${active ? NOHO_BLUE : "#e8e5e0"}`,
+                  }}>
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+
+        {/* Customer linker */}
+        <Field label="Link to existing customer (optional)">
+          <input value={custSearchQ} onChange={(e) => setCustSearchQ(e.target.value)}
+            placeholder="Search by name, email, or suite"
+            className="w-full rounded-md border px-3 py-2 text-sm"
+            style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
+          {custResults.length > 0 && (
+            <ul className="mt-1 rounded-md border divide-y" style={{ borderColor: "#e8e5e0" }}>
+              {custResults.map((r) => (
+                <li key={r.id}>
+                  <button type="button" onClick={() => pickCustomer(r)}
+                    className="w-full text-left px-3 py-2 hover:bg-[#fafaf7]">
+                    <p className="text-[12.5px] font-black" style={{ color: NOHO_INK }}>
+                      {r.name} {r.suiteNumber && <span className="ml-1 text-[10px] font-mono opacity-70">#{r.suiteNumber}</span>}
+                    </p>
+                    <p className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>{r.email}</p>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Field>
+
+        {/* Recipient block */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <Field label="Recipient name (line 1) *">
+            <input value={form.recipientName}
+              onChange={(e) => setField("recipientName", e.target.value)}
+              placeholder="John Doe"
+              className="w-full rounded-md border px-3 py-2 text-sm"
+              style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
+          </Field>
+          <Field label="Customer name (c/o · if different)">
+            <input value={form.customerName}
+              onChange={(e) => setField("customerName", e.target.value)}
+              placeholder="Acme LLC"
+              className="w-full rounded-md border px-3 py-2 text-sm"
+              style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
+          </Field>
+          <Field label="Suite #">
+            <input value={form.suiteNumber}
+              onChange={(e) => setField("suiteNumber", e.target.value)}
+              placeholder="042"
+              className="w-full rounded-md border px-3 py-2 text-sm font-mono"
+              style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
+          </Field>
+          <Field label="Customer email">
+            <input value={form.customerEmail}
+              onChange={(e) => setField("customerEmail", e.target.value)}
+              placeholder="customer@example.com"
+              className="w-full rounded-md border px-3 py-2 text-sm"
+              style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
+          </Field>
+          <Field label="Weight (oz)">
+            <input value={form.weightOz} type="number" min={0} step={0.1}
+              onChange={(e) => setField("weightOz", e.target.value)}
+              placeholder="32"
+              className="w-full rounded-md border px-3 py-2 text-sm font-mono"
+              style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
+          </Field>
+          <Field label="Dimensions (LxWxH)">
+            <input value={form.dimensions}
+              onChange={(e) => setField("dimensions", e.target.value)}
+              placeholder="12x8x4 in"
+              className="w-full rounded-md border px-3 py-2 text-sm font-mono"
+              style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
+          </Field>
+        </div>
+
+        {/* Action bar */}
+        <div className="flex items-center justify-between gap-2 pt-1 border-t" style={{ borderColor: "#e8e5e0" }}>
+          <button type="button" onClick={reset}
+            className="px-3 py-2 rounded-md text-[11px] font-bold border"
+            style={{ borderColor: "#e8e5e0", color: NOHO_INK, background: "white" }}>
+            Reset
+          </button>
+          <div className="flex items-center gap-2">
+            {canPrint && (
+              <p className="text-[10.5px] inline-flex items-center gap-1 font-bold"
+                style={{ color: "#15803d" }}>
+                <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 8, background: "#16a34a", boxShadow: "0 0 6px rgba(22,163,74,0.7)" }} />
+                Driver-scannable Code 128 ready
               </p>
-              <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
-                {label.carrier ?? "Pkg"} · {label.trackingNumber} · intake {label.intakeDate}
-              </p>
-            </div>
-            <button type="button" onClick={print}
-              className="px-5 py-2.5 rounded-xl text-white font-black text-[13px]"
+            )}
+            <button type="button" onClick={print} disabled={!canPrint}
+              className="px-5 py-2.5 rounded-xl text-white font-black text-[13px] disabled:opacity-50"
               style={{ background: "linear-gradient(135deg,#16A34A,#15803d)" }}>
               🖨 Print 4×6 label
             </button>
           </div>
+        </div>
+        {!canPrint && (
+          <p className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+            Type or scan a <strong>tracking number</strong> (≥4 chars) to enable printing. Recipient name is optional — the label prints with “(verify recipient at counter)” if blank.
+          </p>
+        )}
+      </div>
 
-          {/* The label itself — visible-only when printing, but we render
-              it on screen too as a preview at scale-down zoom. */}
+      {/* Live preview */}
+      {labelData && (
+        <>
           <div className="no-print">
             <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(45,16,15,0.55)" }}>
-              Preview · 4 × 6 inches @ 100%
+              Live preview · 4 × 6 inches @ 85%
             </p>
             <div style={{ overflow: "auto" }}>
               <div style={{ transform: "scale(0.85)", transformOrigin: "top left", width: "fit-content" }}>
-                <Label data={label} />
+                <ShippingLabel data={labelData} />
               </div>
             </div>
           </div>
 
-          {/* The actual print payload — full 1:1 size, hidden on screen. */}
           <div style={{ position: "absolute", left: -9999, top: 0 }}>
-            <Label data={label} className="label-print-area" />
+            <ShippingLabel data={labelData} className="label-print-area" />
           </div>
         </>
       )}
@@ -165,137 +481,331 @@ export default function AdminLabelPrinterPanel() {
   );
 }
 
-// ─── Label component ────────────────────────────────────────────────────
-// Sized at 4×6 inches. Cream background. NOHO logo top-center, then
-// addressed-to block, then a giant tracking row, then the QR + intake
-// metadata. Brand colors are inline so print stylesheets can't strip them.
-
-function Label({ data, className }: { data: LabelData; className?: string }) {
+// ─── Status pill ─────────────────────────────────────────────────────────
+function StatusPill({ status, pending }: { status: LookupStatus; pending: boolean }) {
+  if (status === "idle") return null;
+  if (status === "loading" || pending) {
+    return (
+      <span className="text-[10.5px] font-bold inline-flex items-center gap-1" style={{ color: NOHO_BLUE_DEEP }}>
+        <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: 6, background: NOHO_BLUE, animation: "noho-pulse 1s ease-in-out infinite" }} />
+        Searching online…
+        <style jsx>{`@keyframes noho-pulse { 0%,100% { opacity: 0.4 } 50% { opacity: 1 } }`}</style>
+      </span>
+    );
+  }
+  if (status === "matched") {
+    return (
+      <span className="text-[10.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+        style={{ background: NOHO_BLUE, color: "white" }}>
+        ✓ Live carrier data
+      </span>
+    );
+  }
+  // manual
   return (
-    <div
-      className={className}
-      style={{
-        width: "4in",
-        height: "6in",
-        background: NOHO_CREAM,
-        color: NOHO_INK,
-        padding: "0.18in",
-        boxSizing: "border-box",
-        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.10in",
-        border: `2px solid ${NOHO_BLUE_DEEP}`,
-        borderRadius: "0.10in",
-        boxShadow: "0 4px 18px rgba(45,16,15,0.10)",
-      }}
-    >
-      {/* Header — NOHO logo + suite chip */}
-      <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: "0.06in", borderBottom: `2px dashed ${NOHO_BLUE_DEEP}` }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/logo-trans.png" alt="NOHO Mailbox" style={{ height: "0.55in", width: "auto" }} />
-        {data.suiteNumber && (
-          <div style={{
-            background: NOHO_BLUE_DEEP, color: NOHO_CREAM,
-            fontWeight: 900, fontSize: "0.22in", letterSpacing: "0.01em",
-            padding: "0.05in 0.12in", borderRadius: "0.06in",
-            textAlign: "right",
-            fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
-          }}>
-            #{data.suiteNumber}
-          </div>
+    <span className="text-[10.5px] font-bold inline-flex items-center gap-1" style={{ color: "rgba(45,16,15,0.55)" }}>
+      ✏️ Manual entry
+    </span>
+  );
+}
+
+// iter-136 — Live online-tracking pane. Surfaces what the carrier API
+// said about the package: top-level status + location + ETA + a tight
+// 4-row scan history. When source === "carrier-detect" we only know
+// the carrier (no live status — Shippo not configured), so we render a
+// quieter "carrier auto-detected" chip instead.
+function OnlineTrackingPane({ online }: {
+  online: {
+    carrier: string;
+    status: string | null;
+    substatus: string | null;
+    location: string | null;
+    etaIso: string | null;
+    history: Array<{ dateIso: string; status: string; location: string }>;
+    source: "shippo" | "carrier-detect" | "none";
+    fetchedAtIso: string;
+    matchedDbRow: boolean;
+  };
+}) {
+  const STATUS_TONE: Record<string, { bg: string; fg: string; label: string }> = {
+    PRE_TRANSIT: { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.55)", label: "Label created" },
+    TRANSIT:     { bg: "rgba(51,116,133,0.10)", fg: "#23596A",             label: "In transit" },
+    DELIVERED:   { bg: "rgba(22,163,74,0.12)",  fg: "#15803d",             label: "Delivered" },
+    RETURNED:    { bg: "rgba(231,0,19,0.08)",   fg: "#991b1b",             label: "Returned" },
+    FAILURE:     { bg: "rgba(231,0,19,0.12)",   fg: "#991b1b",             label: "Exception" },
+    UNKNOWN:     { bg: "rgba(45,16,15,0.05)",   fg: "rgba(45,16,15,0.55)", label: "Unknown" },
+  };
+
+  if (online.source === "none") return null;
+  if (online.source === "carrier-detect") {
+    return (
+      <div className="mt-2 rounded-lg border px-3 py-2 text-[10.5px] flex items-center gap-2" style={{ borderColor: "#e8e5e0", background: "#fafaf7" }}>
+        <span className="font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: NOHO_BLUE, color: "white" }}>
+          {online.carrier}
+        </span>
+        <span style={{ color: "rgba(45,16,15,0.55)" }}>
+          Carrier auto-detected · live tracking unavailable for this carrier
+        </span>
+      </div>
+    );
+  }
+
+  const tone = STATUS_TONE[online.status ?? "UNKNOWN"] ?? STATUS_TONE.UNKNOWN!;
+  const eta = online.etaIso ? new Date(online.etaIso) : null;
+  const fetched = new Date(online.fetchedAtIso);
+
+  return (
+    <div className="mt-2 rounded-lg border" style={{ borderColor: "#e8e5e0", background: "#fafaf7", overflow: "hidden" }}>
+      {/* Top row — carrier + status + ETA + db-overlay flag */}
+      <div className="px-3 py-2 flex items-center gap-2 flex-wrap" style={{ borderBottom: online.history.length > 0 ? "1px solid #e8e5e0" : "none" }}>
+        <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: NOHO_BLUE, color: "white" }}>
+          {online.carrier}
+        </span>
+        <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: tone.bg, color: tone.fg }}>
+          {tone.label}
+        </span>
+        {online.location && (
+          <span className="text-[10.5px] font-semibold" style={{ color: "rgba(45,16,15,0.65)" }}>
+            · {online.location}
+          </span>
         )}
+        {eta && (
+          <span className="text-[10.5px] font-semibold" style={{ color: NOHO_BLUE_DEEP }}>
+            · ETA {eta.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          </span>
+        )}
+        {online.matchedDbRow && (
+          <span className="ml-auto text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(22,163,74,0.10)", color: "#15803d" }}>
+            ✓ matches our intake
+          </span>
+        )}
+      </div>
+      {/* Recent scan history — last 4 rows from the carrier */}
+      {online.history.length > 0 && (
+        <ul className="px-3 py-2 space-y-1">
+          {online.history.slice(0, 4).map((h, i) => {
+            const d = h.dateIso ? new Date(h.dateIso) : null;
+            return (
+              <li key={i} className="text-[10.5px] flex items-baseline gap-2" style={{ color: "rgba(45,16,15,0.65)" }}>
+                <span className="font-mono shrink-0" style={{ color: "rgba(45,16,15,0.45)" }}>
+                  {d ? d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—"}
+                </span>
+                <span className="flex-1 truncate font-semibold" style={{ color: NOHO_INK }}>{h.status}</span>
+                {h.location && <span className="shrink-0">{h.location}</span>}
+              </li>
+            );
+          })}
+          <li className="text-[9.5px] pt-1" style={{ color: "rgba(45,16,15,0.40)" }}>
+            Live from {online.source === "shippo" ? "Shippo" : "carrier"} · fetched {fetched.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+          </li>
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>{label}</label>
+      <div className="mt-1">{children}</div>
+    </div>
+  );
+}
+
+// ─── 7-zone formal shipping label (unchanged from iter-129) ─────────────
+function ShippingLabel({ data, className }: { data: LabelData; className?: string }) {
+  const barcodeSvg = useMemo(() => {
+    const raw = generateCode128(data.trackingNumber, {
+      height: 96, moduleWidth: 3, showText: false, margin: 18,
+      foreground: "#000", background: "transparent",
+    });
+    return raw
+      .replace(/<svg /, '<svg preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;display:block;" ')
+      .replace(/\swidth="\d+"\s/, " ")
+      .replace(/\sheight="\d+"\s/, " ");
+  }, [data.trackingNumber]);
+
+  const weightDisplay = data.weightOz == null ? null : (() => {
+    const lb = Math.floor(data.weightOz! / 16);
+    const oz = Math.round(data.weightOz! - lb * 16);
+    return lb > 0 ? `${lb} lb${oz > 0 ? ` ${oz} oz` : ""}` : `${oz} oz`;
+  })();
+
+  return (
+    <div className={className} style={{
+      width: "4in", height: "6in", background: "white", color: NOHO_INK,
+      boxSizing: "border-box",
+      fontFamily: "'Helvetica Neue', Inter, Arial, sans-serif",
+      display: "flex", flexDirection: "column",
+      border: `2px solid ${NOHO_INK}`,
+      boxShadow: "0 4px 18px rgba(45,16,15,0.10)",
+    }}>
+      <header style={{
+        height: "0.55in", background: NOHO_INK, color: NOHO_CREAM,
+        padding: "0.10in 0.15in",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        flexShrink: 0,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.10in" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo-trans.png" alt="NOHO Mailbox"
+            style={{ height: "0.40in", width: "auto", filter: "brightness(0) invert(1)" }} />
+          <span style={{ fontSize: "0.18in", fontWeight: 800, letterSpacing: "0.02in", textTransform: "uppercase", color: NOHO_CREAM }}>NOHO Mailbox</span>
+        </div>
+        <span style={{
+          background: NOHO_CREAM, color: NOHO_INK,
+          fontSize: "0.08in", fontWeight: 800, letterSpacing: "0.03in",
+          textTransform: "uppercase",
+          padding: "0.05in 0.10in", borderRadius: "0.04in", whiteSpace: "nowrap",
+        }}>Private Mailbox Service</span>
       </header>
 
-      {/* Addressed-to block */}
-      <section style={{ display: "flex", flexDirection: "column", gap: "0.02in" }}>
-        <p style={{ margin: 0, fontSize: "0.10in", fontWeight: 800, letterSpacing: "0.16em", textTransform: "uppercase", color: NOHO_BLUE_DEEP }}>
-          Addressed to
-        </p>
-        <p style={{ margin: 0, fontSize: "0.22in", fontWeight: 900, lineHeight: 1.15, letterSpacing: "-0.005em" }}>
-          {data.recipientName ?? data.customerName}
-        </p>
-        {data.recipientName && data.recipientName !== data.customerName && (
-          <p style={{ margin: 0, fontSize: "0.11in", fontWeight: 700, color: "rgba(45,16,15,0.65)" }}>
-            c/o {data.customerName}
-          </p>
-        )}
-        <p style={{ margin: "0.02in 0 0", fontSize: "0.10in", color: "rgba(45,16,15,0.55)" }}>
-          5062 Lankershim Blvd · NoHo, CA 91601
-        </p>
-      </section>
-
-      {/* Tracking — gigantic */}
       <section style={{
-        background: "white",
-        border: `1px solid ${NOHO_CREAM_DEEP}`,
-        borderRadius: "0.06in",
-        padding: "0.08in 0.10in",
-        display: "flex", flexDirection: "column", gap: "0.02in",
+        height: "0.75in", display: "grid", gridTemplateColumns: "0.55in 1fr",
+        background: "white", borderBottom: `2px solid ${NOHO_INK}`, flexShrink: 0,
       }}>
-        <p style={{ margin: 0, fontSize: "0.09in", fontWeight: 800, letterSpacing: "0.16em", textTransform: "uppercase", color: NOHO_BLUE_DEEP }}>
-          {data.carrier ?? "Carrier"} · Tracking
-        </p>
-        <p style={{
-          margin: 0, fontSize: "0.18in", fontWeight: 900, lineHeight: 1.05,
-          fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
-          letterSpacing: "0.01em", wordBreak: "break-all",
+        <div style={{ background: NOHO_CREAM, borderRight: `2px solid ${NOHO_INK}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ fontSize: "0.16in", fontWeight: 800, color: NOHO_INK, letterSpacing: "0.04in" }}>FROM</span>
+        </div>
+        <div style={{ padding: "0.08in 0.12in", display: "flex", flexDirection: "column", gap: "0.02in", justifyContent: "center" }}>
+          <p style={{ margin: 0, fontSize: "0.13in", fontWeight: 800, color: NOHO_INK }}>NOHO MAILBOX</p>
+          <p style={{ margin: 0, fontSize: "0.11in", fontWeight: 600, color: NOHO_INK }}>5062 Lankershim Blvd</p>
+          <p style={{ margin: 0, fontSize: "0.11in", fontWeight: 600, color: NOHO_INK }}>North Hollywood, CA 91601</p>
+          <p style={{ margin: 0, fontSize: "0.09in", fontWeight: 500, color: NOHO_BLUE_DEEP }}>(818) 506-7744 · nohomailbox.org</p>
+        </div>
+      </section>
+
+      <section style={{
+        height: "1.85in", background: "white",
+        borderBottom: `2px solid ${NOHO_INK}`, position: "relative", flexShrink: 0,
+      }}>
+        <div style={{
+          position: "absolute", top: 0, left: 0,
+          background: NOHO_BLUE, color: "white",
+          fontSize: "0.16in", fontWeight: 800, letterSpacing: "0.04in",
+          padding: "0.04in 0.18in 0.05in", borderBottomRightRadius: "0.04in",
+        }}>TO</div>
+        {data.suiteNumber && (
+          <div style={{
+            position: "absolute", top: "0.10in", right: "0.12in",
+            background: NOHO_INK, color: NOHO_CREAM,
+            fontSize: "0.18in", fontWeight: 900,
+            fontFamily: "ui-monospace, 'IBM Plex Mono', monospace",
+            padding: "0.06in 0.12in", borderRadius: "0.04in", letterSpacing: "0.01in",
+          }}>STE #{data.suiteNumber}</div>
+        )}
+        <div style={{
+          padding: "0.42in 0.18in 0.15in",
+          display: "flex", flexDirection: "column", gap: "0.04in",
+          height: "100%", boxSizing: "border-box",
         }}>
-          {data.trackingNumber}
-        </p>
-      </section>
-
-      {/* QR + metadata grid */}
-      <section style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "0.10in", alignItems: "center", flex: 1 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.06in", fontSize: "0.10in", lineHeight: 1.3 }}>
-          <Row label="Intake" value={data.intakeDate} />
-          <Row label="Label #" value={data.labelNumber} mono />
-          {data.weightOz != null && <Row label="Weight" value={`${data.weightOz} oz`} />}
-          {data.dimensions && <Row label="Dimensions" value={data.dimensions} />}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.04in" }}>
-          {data.qrDataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={data.qrDataUrl} alt="QR" style={{ width: "1.2in", height: "1.2in" }} />
-          ) : (
-            <div style={{ width: "1.2in", height: "1.2in", background: "white", border: `1px dashed ${NOHO_BLUE_DEEP}` }} />
-          )}
-          <p style={{ margin: 0, fontSize: "0.08in", fontWeight: 700, color: NOHO_BLUE_DEEP }}>
-            Scan to look up
+          {/* iter-141 — Recipient may be blank when admin printed
+              from a tracking-only online lookup. Fall back to a clear
+              "(verify at counter)" line so the label still prints
+              cleanly and the bureau staff knows what's missing. */}
+          <p style={{
+            margin: 0, fontSize: "0.26in", fontWeight: 900, lineHeight: 1.1,
+            color: data.recipientName || data.customerName ? NOHO_INK : "#888",
+            textTransform: "uppercase", letterSpacing: "-0.005em",
+          }}>
+            {(data.recipientName || data.customerName || "(verify recipient at counter)").toUpperCase()}
           </p>
+          {data.recipientName && data.customerName && data.recipientName !== data.customerName && (
+            <p style={{ margin: 0, fontSize: "0.10in", fontWeight: 500, color: "#666", fontStyle: "italic" }}>c/o {data.customerName}</p>
+          )}
+          {data.customerEmail && (
+            <p style={{
+              margin: "0.02in 0 0", fontSize: "0.09in", fontWeight: 500,
+              fontFamily: "ui-monospace, 'IBM Plex Mono', monospace",
+              color: NOHO_BLUE_DEEP,
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>{data.customerEmail}</p>
+          )}
+          <div style={{ marginTop: "auto", paddingTop: "0.08in", borderTop: `1.5pt solid ${NOHO_CREAM}` }}>
+            <p style={{ margin: 0, fontSize: "0.13in", fontWeight: 800, color: NOHO_INK, textTransform: "uppercase" }}>NOHO MAILBOX{data.suiteNumber ? ` — STE ${data.suiteNumber}` : ""}</p>
+            <p style={{ margin: 0, fontSize: "0.13in", fontWeight: 800, color: NOHO_INK, textTransform: "uppercase" }}>5062 LANKERSHIM BLVD</p>
+            <p style={{ margin: 0, fontSize: "0.13in", fontWeight: 800, color: NOHO_INK, textTransform: "uppercase" }}>NORTH HOLLYWOOD CA 91601</p>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{
-        marginTop: "auto", paddingTop: "0.06in",
-        borderTop: `2px dashed ${NOHO_BLUE_DEEP}`,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        fontSize: "0.09in",
+      <section style={{
+        height: "0.45in", background: NOHO_CREAM,
+        borderBottom: `2px solid ${NOHO_INK}`,
+        display: "grid", gridTemplateColumns: "1fr 1fr 1fr", flexShrink: 0,
       }}>
-        <span style={{ fontWeight: 800, color: NOHO_INK }}>nohomailbox.org</span>
-        <span style={{ color: "rgba(45,16,15,0.55)" }}>(818) 506-7744</span>
+        <Cell label="Carrier" value={(data.carrier ?? "—").toUpperCase()} mono />
+        <Cell label="Weight" value={weightDisplay ?? "—"} mono divider />
+        <Cell label="Dimensions" value={data.dimensions ?? "—"} mono divider />
+      </section>
+
+      <section style={{
+        height: "0.40in", background: "white",
+        borderBottom: `2px solid ${NOHO_INK}`,
+        display: "grid", gridTemplateColumns: "1.4fr 1fr", flexShrink: 0,
+      }}>
+        <Cell label="Intake" value={data.intakeDate} mono />
+        <Cell label="Ref / Label #" value={data.labelNumber} mono divider bigValue />
+      </section>
+
+      <section style={{
+        flex: 1, background: "white",
+        borderBottom: `2px solid ${NOHO_INK}`,
+        padding: "0.10in 0.15in 0.08in",
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", minHeight: "1.45in",
+      }}>
+        <p style={{ margin: 0, fontSize: "0.08in", fontWeight: 700, letterSpacing: "0.04in", textTransform: "uppercase", color: NOHO_INK }}>Tracking Number</p>
+        <p style={{
+          margin: "0.04in 0 0.06in", fontSize: "0.16in", fontWeight: 800,
+          fontFamily: "ui-monospace, 'IBM Plex Mono', monospace",
+          letterSpacing: "0.02in", color: NOHO_INK, textAlign: "center",
+        }}>{data.trackingNumber}</p>
+        <div
+          style={{ width: "3.7in", maxWidth: "3.7in", display: "flex", justifyContent: "center", overflow: "hidden" }}
+          dangerouslySetInnerHTML={{ __html: barcodeSvg }}
+        />
+        <p style={{
+          margin: "0.04in 0 0", fontSize: "0.10in", fontWeight: 500,
+          fontFamily: "ui-monospace, 'IBM Plex Mono', monospace",
+          color: NOHO_INK, textAlign: "center",
+        }}>{data.trackingNumber}</p>
+      </section>
+
+      <footer style={{
+        height: "0.45in", background: NOHO_INK, color: NOHO_CREAM,
+        padding: "0.06in 0.15in",
+        display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0,
+      }}>
+        <span style={{ fontSize: "0.08in", fontWeight: 600, fontFamily: "ui-monospace, 'IBM Plex Mono', monospace" }}>
+          {data.mailItemId ? `MAIL ID: ${data.mailItemId.slice(-12).toUpperCase()}` : `LABEL: ${data.labelNumber}`}
+        </span>
+        <span style={{ fontSize: "0.10in", fontWeight: 700 }}>nohomailbox.org</span>
+        <span style={{ fontSize: "0.08in", fontWeight: 800, letterSpacing: "0.04in", textTransform: "uppercase" }}>Retain Until Pickup</span>
       </footer>
     </div>
   );
 }
 
-function Row({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+function Cell({ label, value, mono = false, divider = false, bigValue = false }: {
+  label: string; value: string; mono?: boolean; divider?: boolean; bigValue?: boolean;
+}) {
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: "0.06in" }}>
-      <span style={{
-        fontSize: "0.08in", fontWeight: 800, letterSpacing: "0.16em",
-        textTransform: "uppercase", color: NOHO_BLUE_DEEP, minWidth: "0.65in",
-      }}>
-        {label}
-      </span>
-      <span style={{
-        fontSize: "0.10in", fontWeight: 700,
-        fontFamily: mono ? "ui-monospace, 'SF Mono', Menlo, monospace" : undefined,
-        color: NOHO_INK,
-      }}>
-        {value}
-      </span>
+    <div style={{
+      padding: "0.06in 0.10in",
+      display: "flex", flexDirection: "column", justifyContent: "center",
+      borderLeft: divider ? `1.5pt solid ${NOHO_INK}` : "none",
+    }}>
+      <p style={{ margin: 0, fontSize: "0.07in", fontWeight: 700, letterSpacing: "0.04in", textTransform: "uppercase", color: NOHO_BLUE_DEEP }}>{label}</p>
+      <p style={{
+        margin: "0.02in 0 0",
+        fontSize: bigValue ? "0.15in" : "0.13in",
+        fontWeight: bigValue ? 900 : 800,
+        fontFamily: mono ? "ui-monospace, 'IBM Plex Mono', monospace" : undefined,
+        color: NOHO_INK, letterSpacing: bigValue ? "0.02in" : "0.005em",
+        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+      }}>{value}</p>
     </div>
   );
 }

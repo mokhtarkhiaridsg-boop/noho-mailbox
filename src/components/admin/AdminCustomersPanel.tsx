@@ -14,6 +14,11 @@ import { useEffect, useMemo, useState } from "react";
 import { StatusBadge } from "./StatusBadge";
 import type { Customer } from "./types";
 import { AiHeart } from "@/components/AnimatedIcons";
+import { CustomerHealthBadge } from "./CustomerHealthBadge";
+import {
+  getCustomerHealthScores,
+  type CustomerHealthScore,
+} from "@/app/actions/customerHealthScore";
 
 type Props = {
   customers: Customer[];
@@ -113,9 +118,9 @@ function computeDue(planDueDate: string | null | undefined): DueState {
   return null;
 }
 
-type SortKey = "name" | "suite" | "plan" | "due";
+type SortKey = "name" | "suite" | "plan" | "due" | "health";
 type SortDir = "asc" | "desc";
-type Segment = "all" | "active" | "atrisk" | "kyc" | "business" | "personal";
+type Segment = "all" | "active" | "atrisk" | "kyc" | "business" | "personal" | "watch";
 
 export function AdminCustomersPanel({
   customers,
@@ -128,6 +133,18 @@ export function AdminCustomersPanel({
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [segment, setSegment] = useState<Segment>("all");
+  // iter-140 — customer health scores. Fetched once on mount + refreshed
+  // when the customers prop changes (parent re-renders after admin edits).
+  const [healthMap, setHealthMap] = useState<Map<string, CustomerHealthScore>>(new Map());
+  useEffect(() => {
+    let cancel = false;
+    void getCustomerHealthScores()
+      .then((scores) => { if (!cancel) setHealthMap(new Map(scores.map((s) => [s.userId, s]))); })
+      .catch(() => { if (!cancel) setHealthMap(new Map()); });
+    return () => { cancel = true; };
+    // Refresh when the customer list size changes (proxy for "data
+    // changed"). A real-time push would be nicer but this is plenty.
+  }, [customers.length]);
 
   // ─── Segment predicates ──────────────────────────────────────────
   const isAtRisk = (c: Customer) => {
@@ -165,6 +182,12 @@ export function AdminCustomersPanel({
       if (segment === "kyc" && !isKycPending(c)) return false;
       if (segment === "business" && !isBusiness(c)) return false;
       if (segment === "personal" && !isPersonal(c)) return false;
+      // iter-140 — Health "Watch" segment surfaces customers in the
+      // bottom two health buckets so admin can triage proactively.
+      if (segment === "watch") {
+        const h = healthMap.get(c.id);
+        if (!h || (h.bucket !== "Watch" && h.bucket !== "At Risk")) return false;
+      }
       // Search
       if (!q) return true;
       const phoneDigits = (c.phone ?? "").replace(/\D/g, "");
@@ -191,10 +214,16 @@ export function AdminCustomersPanel({
           return ((a.plan ?? "").localeCompare(b.plan ?? "")) * dir;
         case "due":
           return ((a.planDueDate ?? "").localeCompare(b.planDueDate ?? "")) * dir;
+        case "health": {
+          // iter-140 — Sort by score; rows without a score sink to the bottom.
+          const av = healthMap.get(a.id)?.score ?? -1;
+          const bv = healthMap.get(b.id)?.score ?? -1;
+          return (av - bv) * dir;
+        }
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customers, searchQuery, sortKey, sortDir, segment]);
+  }, [customers, searchQuery, sortKey, sortDir, segment, healthMap]);
 
   function toggleSort(k: SortKey) {
     if (sortKey === k) {
@@ -206,10 +235,20 @@ export function AdminCustomersPanel({
   }
 
   // ─── Filter chip definitions (with live counts) ────────────────
+  // iter-140 — Watch count = customers in Watch + At Risk health buckets.
+  const watchCount = useMemo(() => {
+    let n = 0;
+    for (const h of healthMap.values()) {
+      if (h.bucket === "Watch" || h.bucket === "At Risk") n++;
+    }
+    return n;
+  }, [healthMap]);
+
   const segments: Array<{ id: Segment; label: string; count: number; tone: string }> = [
     { id: "all",      label: "All",         count: counts.total,    tone: T.ink },
     { id: "active",   label: "Active",      count: counts.active,   tone: T.success },
     { id: "atrisk",   label: "At-risk",     count: counts.atrisk,   tone: T.red },
+    { id: "watch",    label: "Health watch", count: watchCount,     tone: T.amber },
     { id: "kyc",      label: "KYC pending", count: counts.kyc,      tone: T.amber },
     { id: "business", label: "Business",    count: counts.business, tone: T.blue },
   ];
@@ -507,7 +546,12 @@ export function AdminCustomersPanel({
                         <span className="mx-1.5" style={{ color: T.inkFaint }}>·</span>
                         <span style={{ color: T.ink, fontWeight: 700, ...TAB_NUM }}>{c.packageCount ?? 0}</span> pkg
                       </span>
-                      <StatusBadge status={c.status || "—"} />
+                      <div className="flex items-center gap-1.5">
+                        {/* iter-140 — health pill, hover-expandable
+                            breakdown so admin doesn't need the drawer. */}
+                        <CustomerHealthBadge score={healthMap.get(c.id) ?? null} compact />
+                        <StatusBadge status={c.status || "—"} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -531,6 +575,8 @@ export function AdminCustomersPanel({
                 <Th sortKey="plan"  current={sortKey} dir={sortDir} onClick={toggleSort}>Plan</Th>
                 <Th sortKey="due"   current={sortKey} dir={sortDir} onClick={toggleSort}>Renewal</Th>
                 <Th align="center">Mail</Th>
+                {/* iter-140 — sortable Health column */}
+                <Th sortKey="health" current={sortKey} dir={sortDir} onClick={toggleSort} align="center">Health</Th>
                 <Th align="right">Status</Th>
               </tr>
             </thead>
@@ -606,6 +652,9 @@ export function AdminCustomersPanel({
                       <span style={{ color: T.ink, fontWeight: 700 }}>{c.mailCount ?? 0}</span>
                       <span className="mx-1" style={{ color: T.inkFaint }}>/</span>
                       <span style={{ color: T.inkSoft }}>{c.packageCount ?? 0}</span>
+                    </td>
+                    <td style={{ ...cell(), textAlign: "center" }}>
+                      <CustomerHealthBadge score={healthMap.get(c.id) ?? null} />
                     </td>
                     <td style={{ ...cell(), textAlign: "right" }}>
                       <StatusBadge status={c.status || "—"} />

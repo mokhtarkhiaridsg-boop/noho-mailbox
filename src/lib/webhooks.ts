@@ -1,4 +1,5 @@
 // iter-103 — Outbound webhook bridge.
+// iter-134 — added retry & dead-letter queue.
 //
 // `fireWebhooks(event, payload)` is the single side-effect call sites use.
 // It runs fire-and-forget against every active WebhookEndpoint subscribed
@@ -6,9 +7,20 @@
 // generic), and writes a WebhookDelivery row so admins can audit what
 // went out. Errors are swallowed so the calling action's commit path
 // is never blocked by a misconfigured webhook.
+//
+// Failed deliveries auto-schedule a retry via `nextRetryAt`. The cron at
+// /api/cron/retry-webhooks drains those rows on an exponential backoff
+// schedule. After MAX_ATTEMPTS the row is dead-lettered (admin can still
+// replay it manually from the webhooks panel).
 
 import { prisma } from "@/lib/prisma";
 import { createHmac } from "node:crypto";
+
+// iter-134 — Exponential backoff schedule (in seconds from last attempt).
+// Index 0 = delay until 2nd attempt, index 1 = until 3rd, etc.
+// Final entry capped at 12h. After 5 attempts the row is dead-lettered.
+export const RETRY_DELAYS_SEC = [60, 5 * 60, 30 * 60, 2 * 60 * 60, 12 * 60 * 60] as const;
+export const MAX_ATTEMPTS = RETRY_DELAYS_SEC.length + 1; // 6 total tries
 
 export type WebhookEvent =
   | "mail.arrived"
@@ -110,8 +122,15 @@ async function deliver(
   }
 
   const durationMs = Date.now() - start;
+  const now = new Date();
+  // iter-134 — On failure, schedule retry attempt #2 at +60s. Successful
+  // deliveries leave nextRetryAt null. attempt is always 1 here (this is
+  // the FIRST try); cron uses retryDelivery() for subsequent attempts.
+  const nextRetryAt = status === "ok" ? null : new Date(now.getTime() + RETRY_DELAYS_SEC[0]! * 1000);
+
   // Best-effort log + lastFiredAt update. Trim oldest deliveries to keep
-  // storage bounded (capped at ~200 per endpoint).
+  // storage bounded (capped at ~200 per endpoint, but never trim rows
+  // still pending retry or dead-lettered — admin needs visibility).
   try {
     await prisma.$transaction([
       prisma.webhookDelivery.create({
@@ -123,18 +142,25 @@ async function deliver(
           httpStatus,
           error,
           durationMs,
+          attempt: 1,
+          nextRetryAt,
+          lastTriedAt: now,
         },
       }),
       prisma.webhookEndpoint.update({
         where: { id: ep.id },
-        data: { lastFiredAt: new Date(), lastStatus: status === "ok" ? "ok" : `failed:${httpStatus ?? "net"}` },
+        data: { lastFiredAt: now, lastStatus: status === "ok" ? "ok" : `failed:${httpStatus ?? "net"}` },
       }),
     ]);
-    // Trim — keep the 200 most recent per endpoint.
-    const count = await prisma.webhookDelivery.count({ where: { endpointId: ep.id } });
+    // Trim — keep the 200 most recent SUCCESSFUL deliveries per endpoint.
+    // Failed/pending/dead-lettered rows are preserved so admin can audit
+    // them no matter how busy the endpoint gets.
+    const count = await prisma.webhookDelivery.count({
+      where: { endpointId: ep.id, status: "ok", deadLettered: false },
+    });
     if (count > 200) {
       const oldest = await prisma.webhookDelivery.findMany({
-        where: { endpointId: ep.id },
+        where: { endpointId: ep.id, status: "ok", deadLettered: false },
         orderBy: { sentAt: "asc" },
         take: count - 200,
         select: { id: true },
@@ -146,6 +172,134 @@ async function deliver(
   } catch {
     // Logging itself failed — swallow.
   }
+}
+
+// iter-134 — Re-fire a previously-failed delivery and update the row in
+// place. Used by the retry cron. Returns the new attempt count + status.
+// If the endpoint has been deleted or paused, the row is dead-lettered
+// immediately (no point retrying against an inactive target).
+export async function retryDelivery(deliveryId: string): Promise<{
+  status: "ok" | "failed" | "dead_lettered" | "skipped";
+  attempt: number;
+  nextRetryAt: Date | null;
+  error?: string;
+}> {
+  const row = await prisma.webhookDelivery.findUnique({
+    where: { id: deliveryId },
+    include: { endpoint: { select: { id: true, url: true, format: true, secret: true, active: true } } },
+  });
+  if (!row) return { status: "skipped", attempt: 0, nextRetryAt: null, error: "Delivery not found" };
+  if (row.deadLettered) {
+    return { status: "skipped", attempt: row.attempt, nextRetryAt: null, error: "Already dead-lettered" };
+  }
+  if (!row.endpoint.active) {
+    // Endpoint paused since the original attempt — dead-letter and stop.
+    await prisma.webhookDelivery.update({
+      where: { id: deliveryId },
+      data: { deadLettered: true, nextRetryAt: null, error: "Endpoint paused" },
+    });
+    return { status: "dead_lettered", attempt: row.attempt, nextRetryAt: null, error: "Endpoint paused" };
+  }
+
+  const ep = row.endpoint;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (ep.secret) {
+    const sig = createHmac("sha256", ep.secret).update(row.payload).digest("hex");
+    headers["X-NOHO-Signature"] = `sha256=${sig}`;
+  }
+
+  const start = Date.now();
+  let status: "ok" | "failed" = "ok";
+  let httpStatus: number | null = null;
+  let error: string | null = null;
+
+  try {
+    const res = await fetch(ep.url, {
+      method: "POST",
+      headers,
+      body: row.payload,
+      signal: AbortSignal.timeout(8000),
+    });
+    httpStatus = res.status;
+    if (!res.ok) {
+      status = "failed";
+      error = `HTTP ${res.status}`;
+    }
+  } catch (e) {
+    status = "failed";
+    error = e instanceof Error ? e.message : String(e);
+  }
+
+  const durationMs = Date.now() - start;
+  const now = new Date();
+  const nextAttempt = row.attempt + 1;
+  const exhausted = nextAttempt >= MAX_ATTEMPTS;
+  // Schedule the NEXT retry only if we still have attempts left + this
+  // one failed. exhausted == true → dead-letter the row.
+  const nextRetryAt =
+    status === "ok"
+      ? null
+      : exhausted
+        ? null
+        : new Date(now.getTime() + RETRY_DELAYS_SEC[Math.min(nextAttempt - 1, RETRY_DELAYS_SEC.length - 1)]! * 1000);
+
+  await prisma.$transaction([
+    prisma.webhookDelivery.update({
+      where: { id: deliveryId },
+      data: {
+        attempt: nextAttempt,
+        status,
+        httpStatus,
+        error,
+        durationMs,
+        lastTriedAt: now,
+        nextRetryAt,
+        deadLettered: status !== "ok" && exhausted,
+      },
+    }),
+    prisma.webhookEndpoint.update({
+      where: { id: ep.id },
+      data: { lastFiredAt: now, lastStatus: status === "ok" ? "ok" : `failed:${httpStatus ?? "net"}` },
+    }),
+  ]);
+
+  if (status !== "ok" && exhausted) {
+    return { status: "dead_lettered", attempt: nextAttempt, nextRetryAt: null, error: error ?? "exhausted" };
+  }
+  return { status, attempt: nextAttempt, nextRetryAt, error: error ?? undefined };
+}
+
+// iter-134 — Drain pending retries: pulls every delivery whose
+// nextRetryAt has come due and replays it. Caller is the cron route.
+export async function drainWebhookRetries(): Promise<{
+  processed: number;
+  succeeded: number;
+  failed: number;
+  deadLettered: number;
+  skipped: number;
+}> {
+  const now = new Date();
+  const due = await prisma.webhookDelivery.findMany({
+    where: {
+      deadLettered: false,
+      status: "failed",
+      nextRetryAt: { lte: now },
+    },
+    select: { id: true },
+    take: 100, // safety cap per cron tick
+  });
+  let succeeded = 0;
+  let failed = 0;
+  let deadLettered = 0;
+  let skipped = 0;
+  for (const r of due) {
+    const result = await retryDelivery(r.id);
+    if (result.status === "ok") succeeded++;
+    else if (result.status === "dead_lettered") deadLettered++;
+    else if (result.status === "skipped") skipped++;
+    else failed++;
+  }
+  return { processed: due.length, succeeded, failed, deadLettered, skipped };
 }
 
 function formatBody(format: string, event: WebhookEvent, payload: WebhookPayload): unknown {
