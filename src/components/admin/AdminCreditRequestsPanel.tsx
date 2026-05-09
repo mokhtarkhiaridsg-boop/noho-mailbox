@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   adminMarkCreditLinkSent,
   adminMarkCreditPaid,
   adminCancelCreditRequest,
+  findPaymentMatchesForCreditRequests,
+  type CreditRequestPaymentMatch,
 } from "@/app/actions/credits";
 
 export type CreditRequestRow = {
@@ -19,6 +21,9 @@ export type CreditRequestRow = {
   squareLink: string | null;
   notes: string | null;
   createdAt: string;
+  // iter-11.8 — used by the auto-match badge to look up Square payments
+  // that landed AFTER admin texted the link.
+  linkSentAtIso?: string | null;
 };
 
 type Props = {
@@ -112,6 +117,29 @@ export function AdminCreditRequestsPanel({ requests }: Props) {
   const [filter, setFilter] = useState<
     "all" | "Pending" | "LinkSent" | "Paid" | "Cancelled"
   >("all");
+
+  // iter-11.8 — Map of requestId → matched Square payment, populated on
+  // mount + after the user runs Sync All. Surfaces a "Square payment
+  // received · $X" green badge on each row that has a matching synced
+  // payment, with one-click Mark-paid.
+  const [matches, setMatches] = useState<Map<string, CreditRequestPaymentMatch>>(new Map());
+  useEffect(() => {
+    const openIds = requests
+      .filter((r) => r.status === "Pending" || r.status === "LinkSent")
+      .map((r) => r.id);
+    if (openIds.length === 0) {
+      setMatches(new Map());
+      return;
+    }
+    let cancelled = false;
+    findPaymentMatchesForCreditRequests(openIds).then((rows) => {
+      if (cancelled) return;
+      const next = new Map<string, CreditRequestPaymentMatch>();
+      for (const m of rows) next.set(m.requestId, m);
+      setMatches(next);
+    }).catch(() => { /* fail-silent */ });
+    return () => { cancelled = true; };
+  }, [requests]);
 
   function notify(id: string, msg: string, ok = true) {
     setFeedback({ id, msg, ok });
@@ -373,6 +401,7 @@ export function AdminCreditRequestsPanel({ requests }: Props) {
               r={r}
               isPending={isPending}
               feedback={feedback}
+              match={matches.get(r.id) ?? null}
               onTextLink={() => handleTextSquareLink(r)}
               onMarkPaid={() => handleMarkPaid(r)}
               onCancel={() => handleCancel(r)}
@@ -388,6 +417,7 @@ function RequestCard({
   r,
   isPending,
   feedback,
+  match,
   onTextLink,
   onMarkPaid,
   onCancel,
@@ -395,6 +425,7 @@ function RequestCard({
   r: CreditRequestRow;
   isPending: boolean;
   feedback: { id: string; msg: string; ok: boolean } | null;
+  match: CreditRequestPaymentMatch | null;
   onTextLink: () => void;
   onMarkPaid: () => void;
   onCancel: () => void;
@@ -606,6 +637,63 @@ function RequestCard({
             >
               {r.squareLink.replace(/^https?:\/\//, "")}
             </a>
+          </div>
+        )}
+
+        {/* iter-11.8 — Square payment match badge. When the Square sync
+            has pulled in a COMPLETED payment matching this request's
+            user + amount within the post-link-sent window, show it
+            here so admin can confirm + apply the credit in one click. */}
+        {match && r.status !== "Paid" && r.status !== "Cancelled" && (
+          <div
+            className="mt-2.5 rounded-lg p-3 flex items-start gap-2.5"
+            style={{
+              background: "rgba(34,197,94,0.08)",
+              border: `1px solid ${NOHO_GREEN}55`,
+            }}
+          >
+            <span
+              className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center"
+              style={{ background: NOHO_GREEN }}
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-black uppercase tracking-[0.10em]" style={{ color: "#15803d" }}>
+                Square payment received
+              </p>
+              <p className="text-[12px] mt-0.5 font-bold" style={{ color: NOHO_INK }}>
+                {dollars(match.amountCents)} · paid {relTime(match.paidAtIso)}
+              </p>
+              <p className="text-[10px] mt-0.5 truncate" style={{ color: `${NOHO_INK}88` }}>
+                ID {match.squarePaymentId.slice(0, 14)}…
+                {match.receiptUrl && (
+                  <>
+                    {" · "}
+                    <a
+                      href={match.receiptUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline"
+                      style={{ color: NOHO_BLUE }}
+                    >
+                      view receipt ↗
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
+            <button
+              onClick={onMarkPaid}
+              disabled={isPending}
+              className="text-[10px] font-black uppercase tracking-[0.10em] px-3 h-8 rounded-md text-white transition-colors disabled:opacity-50 shrink-0"
+              style={{ background: NOHO_GREEN, border: `1px solid ${NOHO_GREEN}` }}
+              title="Confirm + credit the wallet now"
+            >
+              Apply credit
+            </button>
           </div>
         )}
 

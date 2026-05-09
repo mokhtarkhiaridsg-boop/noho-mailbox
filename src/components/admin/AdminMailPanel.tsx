@@ -489,7 +489,8 @@ export function AdminMailPanel({
   ];
 
   return (
-    <div className="flex flex-col h-full gap-3">
+    // iter-144 — natural page flow. Removed h-full + internal scroll.
+    <div className="flex flex-col gap-3">
       {/* ─── Branded title row — Baloo + Pacifico script accent ─── */}
       <div className="shrink-0 flex items-baseline gap-3 flex-wrap">
         <h2

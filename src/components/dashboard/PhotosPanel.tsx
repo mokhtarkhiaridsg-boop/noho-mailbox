@@ -52,6 +52,24 @@ export default function PhotosPanel() {
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5">
+        {/* iter-162 — Bulk ZIP download. The route GET-streams a ZIP
+            of every photo on your account; opening in a new tab lets
+            the browser handle the download dialog without disrupting
+            the dashboard scroll. */}
+        <a
+          href="/api/photos/export"
+          download
+          className="ml-auto order-last sm:order-none inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11.5px] font-black"
+          style={{
+            background: "white",
+            color: BRAND.blueDeep,
+            border: `1px solid ${BRAND.blue}50`,
+            textDecoration: "none",
+            boxShadow: "0 1px 4px rgba(51,116,133,0.10)",
+          }}
+        >
+          ⬇ Download all (.zip)
+        </a>
         {(["all", "packages", "mail"] as AlbumFilter[]).map((f) => {
           const active = filter === f;
           const label = f === "all" ? "All" : f === "packages" ? "Packages" : "Mail";

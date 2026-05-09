@@ -240,16 +240,22 @@ export function AdminOverviewPanel({
                 className="w-12 h-12 sm:w-14 sm:h-14 shrink-0"
                 style={{ color: tile.iconColor }}
               />
-              {/* Label always visible — single line, ellipsis if needed,
-                  but tile width (140px+) holds every label we have. */}
+              {/* iter-144 — Label always visible. Replaced `line-clamp-2`
+                  Tailwind class (which silently fails on tablets without
+                  the plugin) with the equivalent inline CSS via the
+                  `-webkit-line-clamp` triplet so labels always render. */}
               <span
-                className="text-[12px] sm:text-[13px] leading-tight w-full px-1 line-clamp-2"
+                className="text-[12px] sm:text-[13px] leading-tight w-full px-1"
                 style={{
                   color: "#2D100F",
                   fontWeight: 600,
                   fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
                   letterSpacing: "-0.005em",
                   wordBreak: "break-word",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
                 }}
               >
                 {tile.label}

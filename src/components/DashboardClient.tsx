@@ -54,6 +54,7 @@ import PhotosPanel from "./dashboard/PhotosPanel";
 import QRPickupPanel from "./dashboard/QRPickupPanel";
 import GuestPickupCard from "./dashboard/GuestPickupCard";
 import AnnualSummaryPanel from "./dashboard/AnnualSummaryPanel";
+import WelcomePanel from "./dashboard/WelcomePanel";
 import EmailHistoryPanel from "./dashboard/EmailHistoryPanel";
 import ServicesPanel from "./dashboard/ServicesPanel";
 import OverviewPanel from "./dashboard/OverviewPanel";
@@ -76,6 +77,7 @@ const sideNavGroups: NavGroup[] = [
     label: "Mailbox",
     items: [
       { Icon: IconHome,    label: "Overview",  id: "overview" },
+      { Icon: IconStar,    label: "Welcome",   id: "welcome" },
       { Icon: IconMail,    label: "Mail",      id: "mail" },
       { Icon: IconPackage, label: "Packages",  id: "packages" },
       { Icon: IconForward, label: "Forwarding", id: "forwarding" },
@@ -1103,6 +1105,7 @@ export default function DashboardClient({
             </div>
           )}
           {activeTab === "annual" && <AnnualSummaryPanel />}
+          {activeTab === "welcome" && <WelcomePanel />}
           {activeTab === "emails" && <EmailHistoryPanel />}
           {activeTab === "services" && (
             <ServicesPanel

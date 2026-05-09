@@ -10,12 +10,16 @@ import {
   listSuiteMaintenanceForSuite,
   logSuiteMaintenance,
   deleteSuiteMaintenance,
-  MAINT_KINDS,
-  type MaintKind,
   type MaintLogRow,
   type SuiteMaintOverviewRow,
-  type SuiteMaintStatus,
 } from "@/app/actions/suiteMaintenance";
+// iter-11.5 — Constants + non-async types moved to a non-"use server"
+// module. Server-action files can only export async fns at runtime.
+import {
+  MAINT_KINDS,
+  type MaintKind,
+  type SuiteMaintStatus,
+} from "@/lib/suite-maintenance-config";
 
 const T = {
   surface: "#FFFFFF",

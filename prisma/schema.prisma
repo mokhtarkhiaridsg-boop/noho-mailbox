@@ -114,6 +114,10 @@ model User {
   sharedAccessReceived    SharedMailboxAccess[] @relation("SharedUser")
   posSales                POSSale[]
   pickupAppointments      PickupAppointment[]
+  doorAccessCodes         DoorAccessCode[]      @relation("DoorCodeUser")
+  onboardingViews         OnboardingVideoView[] @relation("OnboardingVideoUser")
+  cotmAwards              CustomerOfMonthAward[] @relation("CotmUser")
+  renewalOffers           RenewalDiscountOffer[] @relation("RenewalOfferUser")
   idExpiryAlerts          IdExpiryAlert[]
   webhookEndpointsCreated WebhookEndpoint[] @relation("WebhookCreatedBy")
   storageFeeDisputes      StorageFeeDispute[] @relation("DisputeFiledBy")
@@ -491,6 +495,298 @@ model WebhookDelivery {
   @@index([endpointId, sentAt])
   @@index([nextRetryAt])
   @@index([deadLettered, sentAt])
+}
+
+// iter-159 — Weekly bureau newsletter (Tier 10 #69).
+// One row per ISO-week per send. weekKey is "YYYY-WNN" (e.g. "2026-W19")
+// and is unique so the cron can't double-send. recipientCount + cohort
+// counts are kept for retention analytics. Editorial is the admin's
+// optional intro paragraph layered on top of the auto-compiled recap.
+model NewsletterIssue {
+  id              String   @id @default(cuid())
+  weekKey         String   @unique
+  weekStart       DateTime
+  weekEnd         DateTime
+  subject         String
+  editorial       String?                          // admin-written intro
+  bodyHtml        String                           // rendered HTML at send time (snapshot)
+  recipientCount  Int      @default(0)
+  failedCount     Int      @default(0)
+  sentAt          DateTime @default(now())
+  sentById        String?
+
+  @@index([sentAt])
+}
+
+// iter-153 — Renewal-discount auto-offer (Tier 9 #63).
+// Cron sweep finds at-risk customers (per iter-140 health score) whose
+// renewal is in the next 30 days and sends them a one-time discount
+// code. One non-redeemed offer per user at a time; the cron checks for
+// an existing active offer before creating a new one.
+model RenewalDiscountOffer {
+  id           String    @id @default(cuid())
+  userId       String
+  code         String    @unique          // generated NOHO-DDDDDD format
+  percentOff   Int                          // 0-100
+  expiresAt    DateTime                     // hard expiration
+  sentAt       DateTime  @default(now())
+  redeemedAt   DateTime?                    // null until member redeems
+  redeemedById String?                      // resolves to userId — kept separate for audit
+  reason       String?                      // why the offer was generated (e.g. "health=Watch, dueIn=14d")
+  createdAt    DateTime  @default(now())
+
+  user User @relation("RenewalOfferUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, redeemedAt])
+  @@index([expiresAt])
+}
+
+// iter-152 — Customer-of-the-month award (Tier 9 #62).
+// Admin nominates one customer per (year, month). Composite unique
+// constraint enforces "exactly one winner per month" in the DB so a
+// race can never produce duplicates. Once awarded, the member sees a
+// badge + citation on their dashboard + gets a congrats email.
+model CustomerOfMonthAward {
+  id           String   @id @default(cuid())
+  userId       String
+  year         Int
+  month        Int                              // 1-12
+  citation     String                           // why they won (admin-written, public to that customer)
+  awardedById  String?
+  awardedAt    DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  user User @relation("CotmUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([year, month])                       // one winner per month
+  @@index([userId, awardedAt])
+}
+
+// iter-150 — Supplies inventory management (Tier 9 #60).
+// Internal-ops inventory of consumables: boxes, tape, labels, poly
+// mailers, envelopes, printer ribbons. Distinct from CatalogItem
+// (which is the Square-synced retail catalog visible to customers).
+// Stock movement is kept as a separate event log so admin can audit
+// "where did 50 small boxes go between Monday and Wednesday".
+model Supply {
+  id              String   @id @default(cuid())
+  name            String
+  category        String                              // "boxes" | "tape" | "labels" | "poly_mailers" | "envelopes" | "printer_ribbon" | "other"
+  unit            String   @default("each")           // "each" | "roll" | "box" | "case" | "ream"
+  onHand          Int      @default(0)
+  reorderAt       Int      @default(5)                // alert when onHand drops below this
+  reorderQty      Int      @default(20)               // suggested reorder quantity
+  vendor          String?
+  vendorSku       String?
+  costCents       Int?                                // per-unit cost in cents (optional)
+  notes           String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  movements       SupplyMovement[]
+  priceTiers      SupplyPriceTier[]                   // iter-164
+
+  @@index([category, isActive])
+  @@index([isActive, onHand])
+}
+
+// iter-164 — Per-supply pricing tiers (Tier 10 #74).
+// Each Supply can have N price tiers (e.g. "Retail", "Member", "Wholesale").
+// Exactly one tier per supply is marked `isDefault`; that's the price
+// that auto-fills when admin records a `sale` movement. The implicit
+// margin is `(salePriceCents - Supply.costCents) / Supply.costCents`.
+//
+// Margin reports (last N days) join SupplyMovement.kind="sale" against
+// the unitPriceCents captured at sale time so historical numbers stay
+// stable when the catalog price changes.
+model SupplyPriceTier {
+  id             String   @id @default(cuid())
+  supplyId       String
+  label          String                                // "Retail" | "Member" | "Wholesale" | custom
+  salePriceCents Int                                   // sale price for this tier (cents)
+  isDefault      Boolean  @default(false)              // exactly one default per Supply
+  position       Int      @default(0)                  // display order in the panel
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  supply         Supply @relation(fields: [supplyId], references: [id], onDelete: Cascade)
+
+  @@unique([supplyId, label])                          // can't have two "Retail" tiers on the same supply
+  @@index([supplyId, position])
+  @@index([supplyId, isDefault])
+}
+
+// One row per stock change. Delta is signed: positive for restocks +
+// returns, negative for sales + losses + intake-consumption.
+//
+// iter-164 — sale rows now also capture the unit price + tier label at
+// the time the sale was rung up. Letting the catalog price drift later
+// won't rewrite history. `unitPriceCents` is null for non-sale rows.
+model SupplyMovement {
+  id              String   @id @default(cuid())
+  supplyId        String
+  kind            String                              // "restock" | "sale" | "internal_use" | "loss" | "adjust"
+  delta           Int                                 // signed
+  notes           String?
+  performedById   String?
+  performedAt     DateTime @default(now())
+  unitPriceCents  Int?                                // iter-164 — captured per-unit price for sales
+  unitCostCents   Int?                                // iter-164 — Supply.costCents at time of sale (margin denom snapshot)
+  tierLabel       String?                             // iter-164 — which SupplyPriceTier was applied
+  customerId      String?                             // iter-164 — optional buyer (member sales)
+
+  supply Supply @relation(fields: [supplyId], references: [id], onDelete: Cascade)
+
+  @@index([supplyId, performedAt])
+  @@index([kind, performedAt])
+}
+
+// iter-148 — Customer onboarding video walkthrough (Tier 9 #58).
+// Admin-curated playlist of short videos new members watch in their
+// first week. Each video tracks per-user max-percent-watched (we
+// upsert `max(existing, new)` so seeking backward doesn't decrement).
+// `OnboardingTouch` records each automated welcome-email touch for
+// idempotency (Day 0 / Day 2 / Day 5).
+model OnboardingVideo {
+  id           String   @id @default(cuid())
+  slug         String   @unique             // url-safe key, used by recordVideoView
+  title        String
+  description  String?
+  videoUrl     String                         // hosted file (Vercel Blob, YouTube embed, Vimeo)
+  posterUrl    String?                        // optional poster image
+  durationSec  Int      @default(0)           // for progress math
+  sortIndex    Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  views OnboardingVideoView[]
+
+  @@index([isActive, sortIndex])
+}
+
+model OnboardingVideoView {
+  id              String   @id @default(cuid())
+  userId          String
+  videoId         String
+  percentWatched  Int      @default(0)        // 0-100, monotonically increasing
+  firstViewedAt   DateTime @default(now())
+  lastViewedAt    DateTime @default(now())
+  completedAt     DateTime?                    // set when percentWatched >= 95
+
+  user  User             @relation("OnboardingVideoUser", fields: [userId], references: [id], onDelete: Cascade)
+  video OnboardingVideo  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])
+  @@index([userId, completedAt])
+  @@index([videoId, completedAt])
+}
+
+// One row per (userId, touchKey) — written when the cron sends a
+// scheduled welcome touch so the next sweep doesn't re-send.
+model OnboardingTouch {
+  id        String   @id @default(cuid())
+  userId    String
+  touchKey  String   // "welcome_day0" | "videos_day2" | "checkin_day5"
+  sentAt    DateTime @default(now())
+
+  @@unique([userId, touchKey])
+  @@index([sentAt])
+}
+
+// iter-147 — Door-access keypad codes (Tier 9 #57).
+// Each customer can have one ACTIVE 4-digit pickup code at a time.
+// Rotation is scheduled (default 90 days) — admin sees a "Rotate now"
+// button on stale codes. Every keypad entry attempt is logged so we
+// have a chain-of-custody for after-hours access disputes.
+//
+// Code uniqueness: enforced ONLY among ACTIVE codes (one customer per
+// code at a time). Old codes stay in the table marked retiredAt for
+// audit but no longer constrain new code generation.
+model DoorAccessCode {
+  id           String    @id @default(cuid())
+  userId       String
+  code         String                            // 4-digit numeric, hashed at rest? — stored plain for now (ops practicality)
+  issuedAt     DateTime  @default(now())
+  rotateAt     DateTime                          // when the code becomes "stale" — admin sees Rotate Now CTA
+  retiredAt    DateTime?                         // null = active, non-null = retired (kept for audit)
+  retiredById  String?                           // admin who retired it
+  notes        String?                           // optional admin note (e.g. "issued in person to Karim")
+  createdById  String?                           // admin who created it
+
+  user         User      @relation("DoorCodeUser", fields: [userId], references: [id], onDelete: Cascade)
+  entries      DoorAccessEntry[]
+
+  // Unique among ACTIVE codes only — enforced via a partial index in
+  // SQLite (where retiredAt IS NULL). Prisma can't express partial
+  // uniques today so we enforce in JS at write time + add a regular
+  // index for fast lookup.
+  @@index([code, retiredAt])
+  @@index([userId, retiredAt])
+  @@index([rotateAt])
+}
+
+// One row per attempt at the keypad. Result: "granted" | "denied".
+// `code` stored even on denials so we can detect typos vs probes.
+model DoorAccessEntry {
+  id          String   @id @default(cuid())
+  codeId      String?                            // null when an unknown code was entered
+  userId      String?                            // resolved when the code matches
+  enteredCode String                             // what was actually typed
+  result      String                             // "granted" | "denied" | "denied_retired" | "denied_unknown"
+  attemptedAt DateTime @default(now())
+
+  code DoorAccessCode? @relation(fields: [codeId], references: [id], onDelete: SetNull)
+
+  @@index([codeId, attemptedAt])
+  @@index([result, attemptedAt])
+}
+
+// iter-145 — Equipment / scanner inventory (Tier 9 #56).
+// Tracks every physical device the bureau uses (Jadens label printers,
+// barcode scanners, cash drawers, cameras, payment terminals). Each
+// row records serial + assignedTo + location + state. The
+// EquipmentServiceLog table records every service event so admin can
+// see the full lifecycle without spreadsheets.
+model Equipment {
+  id              String   @id @default(cuid())
+  name            String                          // "Jaden D300", "Honeywell 1900GHD", etc.
+  category        String                          // "printer" | "scanner" | "computer" | "cash_drawer" | "camera" | "terminal" | "other"
+  serial          String   @unique               // serial number (printed on the device)
+  vendor          String?                         // "Jadens", "Honeywell", "Square"
+  model           String?                         // model number
+  purchasedAt     DateTime?
+  purchasePriceCents Int?
+  warrantyEndsAt  DateTime?
+  location        String   @default("Bureau")     // "Bureau" | "Storage" | "Loaner" | "Off-site"
+  assignedToUserId String?                        // admin staffer responsible
+  status          String   @default("active")    // "active" | "needs_service" | "retired" | "lost"
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  serviceLog      EquipmentServiceLog[]
+
+  @@index([category, status])
+  @@index([location])
+}
+
+// One row per service / repair / replacement / inspection.
+model EquipmentServiceLog {
+  id            String   @id @default(cuid())
+  equipmentId   String
+  kind          String                          // "service" | "repair" | "calibration" | "battery" | "firmware" | "inspection" | "other"
+  notes         String?
+  costCents     Int?
+  performedById String?                          // admin who logged the work
+  performedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  equipment     Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId, performedAt])
 }
 
 // iter-143 — Suite cleaning / maintenance log.
@@ -1010,6 +1306,10 @@ model EmailLog {
 // reason about both delivery channels uniformly. SMS uses Twilio when
 // TWILIO_* env vars are configured; otherwise we still log so admin sees
 // the attempt + the body that would've gone out.
+//
+// iter-163: `bulkBatchId` groups every SMS sent inside a single bulk
+// campaign so admin can drill from BulkSmsCampaign → its individual
+// per-recipient logs.
 model SmsLog {
   id          String    @id @default(cuid())
   userId      String?
@@ -1022,11 +1322,41 @@ model SmsLog {
   providerId  String?   // Twilio SID
   error       String?
   segments    Int?      // Twilio reports segment count for billing
+  bulkBatchId String?   // iter-163: links to BulkSmsCampaign.id for grouping
   createdAt   DateTime  @default(now())
   sentAt      DateTime?
 
   @@index([userId, createdAt])
   @@index([status, createdAt])
+  @@index([bulkBatchId])
+}
+
+// iter-163: Bulk SMS campaign roll-up record. Mirrors the `mailer.bulk_send`
+// audit-log pattern but lives as its own queryable row so admin can list
+// past campaigns, see succeeded/failed counts, and (later) re-run.
+//
+// `audienceJson` is the verbatim audience selector (kind + filter) so
+// the panel can show what filter was used. `body` is the rendered text
+// before per-recipient {{firstName}} / {{suiteNumber}} substitution.
+//
+// Per-recipient SmsLog rows carry `bulkBatchId = campaign.id` for drill
+// down. Idempotent on `id` (the panel passes a fresh cuid per send;
+// dryRun + test sends do NOT create a campaign row).
+model BulkSmsCampaign {
+  id              String    @id @default(cuid())
+  label           String    // human-readable name e.g. "Holiday hours reminder"
+  body            String    // raw template body (with {{firstName}} placeholders)
+  audienceJson    String    // JSON-stringified MailerAudience
+  recipientCount  Int       // total resolved members
+  succeededCount  Int       @default(0)
+  failedCount     Int       @default(0)
+  notSentCount    Int       @default(0)  // Twilio not configured / phone unparseable
+  estSegments     Int       @default(0)  // sum of body segments × recipients (cost preview)
+  sentById        String?
+  sentAt          DateTime  @default(now())
+
+  @@index([sentAt])
+  @@index([sentById])
 }
 
 model CancellationRequest {

@@ -420,7 +420,8 @@ export function AdminCompliancePanel({ complianceQueue }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-full gap-3">
+    // iter-144 — natural page flow. Removed h-full + internal scroll.
+    <div className="flex flex-col gap-3">
       {/* iPad-OS title row — calm, single line. The previous dark-gradient
           hero clashed with the light shell. */}
       <div className="shrink-0 flex items-baseline justify-between gap-3">
@@ -475,8 +476,8 @@ export function AdminCompliancePanel({ complianceQueue }: Props) {
         ))}
       </div>
 
-      {/* Scrollable card grid — only this region scrolls. */}
-      <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 pb-2">
+      {/* iter-144 — natural page flow. */}
+      <div className="-mx-1 px-1 pb-2">
       {filtered.length === 0 ? (
         <div
           className="rounded-md p-10 text-center"

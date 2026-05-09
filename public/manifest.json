@@ -1,16 +1,53 @@
 {
+  "id": "/",
   "name": "NOHO Mailbox",
   "short_name": "NOHO Mail",
   "description": "Your professional mailbox in North Hollywood. Mail scanning, package management, notary services, and same-day delivery.",
-  "start_url": "/",
+  "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#FAFAF8",
-  "theme_color": "#3374B5",
+  "orientation": "portrait",
+  "background_color": "#F8F2EA",
+  "theme_color": "#337485",
+  "categories": ["business", "productivity", "lifestyle"],
   "icons": [
     {
-      "src": "/favicon.ico",
+      "src": "/brand/logo-trans.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/logo-trans.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
       "sizes": "any",
-      "type": "image/x-icon"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mail",
+      "short_name": "Mail",
+      "description": "View scanned mail",
+      "url": "/dashboard?tab=mail"
+    },
+    {
+      "name": "Packages",
+      "short_name": "Pkgs",
+      "description": "Track package pickups",
+      "url": "/dashboard?tab=packages"
+    },
+    {
+      "name": "Notary",
+      "short_name": "Notary",
+      "description": "Book a notary appointment",
+      "url": "/dashboard?tab=notary"
     }
   ]
 }

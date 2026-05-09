@@ -254,7 +254,10 @@ export function AdminCustomersPanel({
   ];
 
   return (
-    <div className="flex flex-col h-full gap-3">
+    // iter-144 — page flows naturally with the outer scroll context.
+    // Removed `h-full` + the internal `flex-1 min-h-0 overflow-y-auto`
+    // wrapper that was clipping content below the fold.
+    <div className="flex flex-col gap-3">
       {/* ─── Branded title row — Baloo for the heading + Pacifico script
           accent. Same calm Apple layout, NOHO presence. */}
       <div className="shrink-0 flex items-baseline gap-3 flex-wrap">
@@ -415,9 +418,8 @@ export function AdminCustomersPanel({
         </div>
       </div>
 
-      {/* ─── Scrollable list area ─── flex-1 fills remaining viewport
-          height; only this region scrolls so the page chrome stays put. */}
-      <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 pb-2">
+      {/* iter-144 — list flows in the page's natural scroll. */}
+      <div className="-mx-1 px-1 pb-2">
       {/* ─── Empty state ───────────────────────────────────────────── */}
       {filtered.length === 0 && (
         <div

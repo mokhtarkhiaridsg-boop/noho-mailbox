@@ -90,28 +90,47 @@ export async function syncSquarePayments(): Promise<SyncResult> {
 
   const log = await createSyncLog("payments");
   try {
-    // Get last sync time to only fetch new payments
-    const lastSync = await prisma.squareSyncLog.findFirst({
-      where: { syncType: "payments", status: "completed" },
-      orderBy: { completedAt: "desc" },
-    });
+    // iter-11.7 — Use the OLDEST completed sync as the cursor, but ONLY
+    // when there's at least one already-synced payment in the DB. The
+    // previous logic latched onto whatever the last "completed" run
+    // wrote, which after a botched sandbox→production flip meant we
+    // skipped the historical pull forever. If the DB is empty we want
+    // a full backfill regardless of stale log entries.
+    // squarePaymentId is required on Payment, so any existing row counts.
+    const dbHasPayments = (await prisma.payment.count()) > 0;
+    const lastSync = dbHasPayments
+      ? await prisma.squareSyncLog.findFirst({
+          where: { syncType: "payments", status: "completed", itemsSynced: { gt: 0 } },
+          orderBy: { completedAt: "desc" },
+        })
+      : null;
     const beginTime = lastSync?.completedAt
       ? new Date(lastSync.completedAt.getTime() - 60000).toISOString() // 1 min overlap
       : undefined;
 
     const payments = await getSquarePayments(beginTime);
-    let synced = 0;
 
+    // iter-11.7 — Resolve all customer→userId links in ONE query instead
+    // of one-per-payment. With a few hundred payments the per-row
+    // findFirst was hitting the Vercel 60s function timeout and leaving
+    // SquareSyncLog rows stuck at status="running" forever.
+    const customerIds = Array.from(
+      new Set(payments.map((p) => p.customerId).filter((id): id is string => Boolean(id))),
+    );
+    const linkedUsers = customerIds.length > 0
+      ? await prisma.user.findMany({
+          where: { squareCustomerId: { in: customerIds } },
+          select: { id: true, squareCustomerId: true },
+        })
+      : [];
+    const userIdByCustomerId = new Map<string, string>();
+    for (const u of linkedUsers) {
+      if (u.squareCustomerId) userIdByCustomerId.set(u.squareCustomerId, u.id);
+    }
+
+    let synced = 0;
     for (const p of payments) {
-      // Try to link payment to a user via Square customer ID
-      let userId: string | null = null;
-      if (p.customerId) {
-        const user = await prisma.user.findFirst({
-          where: { squareCustomerId: p.customerId },
-          select: { id: true },
-        });
-        userId = user?.id ?? null;
-      }
+      const userId = p.customerId ? userIdByCustomerId.get(p.customerId) ?? null : null;
 
       // On UPDATE only: don't clobber a previously-set userId with null. An
       // admin may have manually linked a Square payment to the right user
@@ -221,9 +240,16 @@ export async function getSquareStatus() {
   // even though it looks "connected" because requests succeed (against
   // an empty sandbox account). Showing the env in the UI makes this
   // mistake obvious instead of silent.
-  const environment = (process.env.SQUARE_ENVIRONMENT?.trim().toLowerCase() === "production"
-    ? "production"
-    : "sandbox") as "production" | "sandbox";
+  // iter-11.6 — Strip literal `\n` / `\r` sequences and real whitespace
+  // from the env before comparing. Vercel-pulled env values can carry a
+  // literal "\n" inside the quoted string and silently fall through to
+  // sandbox even when the user wrote "production".
+  const rawEnv = (process.env.SQUARE_ENVIRONMENT ?? "")
+    .replace(/\\[rn]/g, "")
+    .replace(/[\r\n\t]/g, "")
+    .trim()
+    .toLowerCase();
+  const environment = (rawEnv === "production" ? "production" : "sandbox") as "production" | "sandbox";
 
   const [recentLogs, linkedCustomers, totalPayments, catalogItems, totalRevenue] =
     await Promise.all([

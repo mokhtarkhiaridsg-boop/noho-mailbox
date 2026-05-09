@@ -157,6 +157,17 @@ const hiddenNav: NavItem[] = [
   { id: "backuphealth",    label: "Backup Health",   Icon: IconCompliance },
   { id: "mailerautoreply", label: "Auto-replies",    Icon: IconEmail },
   { id: "suitemaint",      label: "Suite Maintenance", Icon: IconBox },
+  { id: "equipment",       label: "Equipment",       Icon: IconReport },
+  { id: "dooraccess",      label: "Door Access",     Icon: IconKey },
+  { id: "onboardvideo",    label: "Welcome Videos",  Icon: IconChat },
+  { id: "supplies",        label: "Supplies",        Icon: IconShop },
+  { id: "emaildeliv",      label: "Email Health",    Icon: IconEmail },
+  { id: "cotm",            label: "Customer of Month", Icon: IconReport },
+  { id: "renewaloffers",   label: "Renewal Offers",  Icon: IconCredit },
+  { id: "referralleader",  label: "Referral Leaderboard", Icon: IconReport },
+  { id: "marketingflyer",  label: "Marketing Flyer", Icon: IconReport },
+  { id: "weeklynewsletter", label: "Weekly Newsletter", Icon: IconEmail },
+  { id: "bulksms",          label: "Bulk SMS",          Icon: IconChat },
 ];
 
 // Flat list for mobile pills + label lookup. Includes hidden items so
@@ -576,6 +587,18 @@ import AdminDeferredEmailsPanel from "@/components/admin/AdminDeferredEmailsPane
 import AdminBackupHealthPanel from "@/components/admin/AdminBackupHealthPanel";
 import AdminMailerAutoReplyPanel from "@/components/admin/AdminMailerAutoReplyPanel";
 import AdminSuiteMaintenancePanel from "@/components/admin/AdminSuiteMaintenancePanel";
+import AdminEquipmentPanel from "@/components/admin/AdminEquipmentPanel";
+import AdminDoorAccessPanel from "@/components/admin/AdminDoorAccessPanel";
+import AdminOnboardingVideosPanel from "@/components/admin/AdminOnboardingVideosPanel";
+import AdminSuppliesPanel from "@/components/admin/AdminSuppliesPanel";
+import AdminEmailDeliverabilityPanel from "@/components/admin/AdminEmailDeliverabilityPanel";
+import AdminCustomerOfMonthPanel from "@/components/admin/AdminCustomerOfMonthPanel";
+import AdminRenewalOffersPanel from "@/components/admin/AdminRenewalOffersPanel";
+import AdminPrintStationPicker from "@/components/admin/AdminPrintStationPicker";
+import AdminReferralLeaderboardPanel from "@/components/admin/AdminReferralLeaderboardPanel";
+import AdminMarketingFlyerPanel from "@/components/admin/AdminMarketingFlyerPanel";
+import AdminWeeklyNewsletterPanel from "@/components/admin/AdminWeeklyNewsletterPanel";
+import AdminBulkSmsPanel from "@/components/admin/AdminBulkSmsPanel";
 import { AdminQRPickupPanel } from "@/components/admin/AdminQRPickupPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
@@ -984,7 +1007,8 @@ function PanelWithTools({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col h-full gap-3">
+    // iter-144 — natural page flow.
+    <div className="flex flex-col gap-3">
       <div className="shrink-0 flex flex-wrap gap-2">
         {tools.map((t) => (
           <SubToolButton
@@ -1002,7 +1026,8 @@ function PanelWithTools({
           />
         ))}
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 pb-2">
+      {/* iter-144 — natural page flow, no internal scroll region. */}
+      <div className="-mx-1 px-1 pb-2">
         {children}
       </div>
     </div>
@@ -1643,9 +1668,18 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             }}
           />
 
+          {/* iter-144 — Hot fix for "pages cut off" UX regression. The
+              panel wrapper now establishes (1) a flex-column context AND
+              (2) min-height = viewport minus the topbar. Panels written
+              with `flex flex-col h-full` resolve correctly; panels with
+              natural height grow past the min and the OUTER page scrolls
+              normally so admin always sees everything. */}
           <div className="relative" style={{ zIndex: 1 }}>
           <div className="mx-auto max-w-[1400px]">
-            <div className="px-1 sm:px-2 py-1 sm:py-2">
+            <div
+              className="px-1 sm:px-2 py-1 sm:py-2 flex flex-col"
+              style={{ minHeight: "calc(100vh - 100px)" }}
+            >
           {/* Mobile pill nav — clean iPad-OS white/blue */}
           <div className="lg:hidden mb-3">
             <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
@@ -1756,6 +1790,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
               tools={[
                 { label: "Email Logs",  id: "emails" },
                 { label: "Bulk Mailer", id: "mailer" },
+                { label: "Bulk SMS",    id: "bulksms" },
               ]}
               setTab={setTab}
             >
@@ -1764,6 +1799,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           )}
           {tab === "emails" && <AdminEmailLogsPanel />}
           {tab === "mailer" && <AdminMailerPanel />}
+          {tab === "bulksms" && <AdminBulkSmsPanel />}
           {tab === "billing" && (
             <PanelWithTools
               tools={[
@@ -1824,6 +1860,16 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {tab === "backuphealth" && <AdminBackupHealthPanel />}
           {tab === "mailerautoreply" && <AdminMailerAutoReplyPanel />}
           {tab === "suitemaint" && <AdminSuiteMaintenancePanel />}
+          {tab === "equipment" && <AdminEquipmentPanel />}
+          {tab === "dooraccess" && <AdminDoorAccessPanel />}
+          {tab === "onboardvideo" && <AdminOnboardingVideosPanel />}
+          {tab === "supplies" && <AdminSuppliesPanel />}
+          {tab === "emaildeliv" && <AdminEmailDeliverabilityPanel />}
+          {tab === "cotm" && <AdminCustomerOfMonthPanel />}
+          {tab === "renewaloffers" && <AdminRenewalOffersPanel />}
+          {tab === "referralleader" && <AdminReferralLeaderboardPanel />}
+          {tab === "marketingflyer" && <AdminMarketingFlyerPanel />}
+          {tab === "weeklynewsletter" && <AdminWeeklyNewsletterPanel />}
           {tab === "affiliates" && <AdminAffiliateEarningsPanel />}
           {tab === "idexpiring" && <AdminIdExpiringPanel />}
           {tab === "webhooks" && <AdminWebhooksPanel />}
@@ -1874,7 +1920,8 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             />
           )}
           {tab === "settings" && (
-            <div className="flex flex-col h-full gap-3">
+            // iter-144 — natural page flow.
+            <div className="flex flex-col gap-3">
               {/* Settings sub-tools — fold the 4 system sub-pages here so
                   they live one click away inside Settings, not as
                   separate sidebar entries. */}
@@ -1905,7 +1952,10 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
                   onClick={() => setTab("backuphealth")}
                 />
               </div>
-              <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1 pb-2 space-y-4">
+              {/* iter-144 — natural page flow. */}
+              <div className="-mx-1 px-1 pb-2 space-y-4">
+              {/* iter-155 — Per-station printer prefs (this device only). */}
+              <AdminPrintStationPicker />
               {/* Settings header — Command Tower variant matching the rest
                   of the polished admin chrome. */}
               <div

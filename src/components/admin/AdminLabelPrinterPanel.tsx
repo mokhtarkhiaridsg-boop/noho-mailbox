@@ -278,20 +278,38 @@ export default function AdminLabelPrinterPanel() {
   return (
     <div className="space-y-4">
       <style jsx global>{`
+        /* iter-165 — Print-only wrapper. Hidden on screen via display:none
+           (no off-screen positioning trick — that broke print because an
+           absolute-positioned inner uses the nearest positioned ancestor
+           as its origin, not the page). In print mode we display:block
+           the wrapper and pin the label to the page corner with
+           position:fixed (fixed always anchors to the viewport / page
+           box, ignoring ancestor offsets). */
+        .label-print-only { display: none; }
         @media print {
           @page { size: 4in 6in; margin: 0; }
-          html, body { background: white !important; margin: 0 !important; padding: 0 !important; }
+          html, body { background: white !important; margin: 0 !important; padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           body * { visibility: hidden !important; }
+          .label-print-only { display: block !important; }
           .label-print-area, .label-print-area * { visibility: visible !important; }
           .label-print-area {
-            position: absolute !important;
+            position: fixed !important;
             left: 0 !important;
             top: 0 !important;
             width: 4in !important;
             height: 6in !important;
             margin: 0 !important;
+            padding: 0 !important;
             box-shadow: none !important;
             border: none !important;
+            /* iter-149 — clip any overshoot at the page boundary so a
+               stray 1px never produces a blank second page. */
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
+            break-after: avoid-page !important;
+            break-inside: avoid-page !important;
           }
           .no-print { display: none !important; }
         }
@@ -472,7 +490,12 @@ export default function AdminLabelPrinterPanel() {
             </div>
           </div>
 
-          <div style={{ position: "absolute", left: -9999, top: 0 }}>
+          {/* iter-165 — Hidden via display:none on screen, displayed +
+              position:fixed to page corner in print. NO off-screen
+              transform / left:-9999 (that broke print because an
+              absolute-positioned inner used the wrapper's offset as
+              origin, painting outside the page). */}
+          <div className="label-print-only">
             <ShippingLabel data={labelData} className="label-print-area" />
           </div>
         </>
@@ -613,7 +636,39 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-// ─── 7-zone formal shipping label (unchanged from iter-129) ─────────────
+// ─── iter-146 — USPS-style shipping label, NOHO-branded ─────────────────
+//
+// Mirrors the Shippo USPS Ground Advantage label (the carrier industry-
+// standard layout) so it scans with every driver, every depot, every
+// regional hub. Replaces Shippo's branding with ours:
+//
+//   ┌────────────────────────────────────┐
+//   │ [NOHO LOGO]      [Service-class]   │  Header (0.95in)
+//   │                  NOHO POSTAGE PAID │
+//   ├────────────────────────────────────┤
+//   │     CARRIER · SERVICE LEVEL        │  Service banner (0.45in)
+//   ├────────────────────────────────────┤
+//   │ NOHO MAILBOX (sender)  Ship Date   │  From + meta (0.85in)
+//   │ 5062 Lankershim …      Weight      │
+//   │ NOHO CA 91601-4225     STE# / RDC  │
+//   ├────────────────────────────────────┤
+//   │                                    │  TO block (1.85in)
+//   │ [DM]    RECIPIENT NAME             │
+//   │         RECIPIENT NAME (line 2)    │
+//   │         ADDRESS LINE 1             │
+//   │         CITY ST ZIP                │
+//   │                                    │
+//   ├────────────────────────────────────┤
+//   │     CARRIER TRACKING #             │  Tracking band (1.40in)
+//   │  ▌▌█▌█▌▌█▌█▌▌█▌▌█▌█▌▌█▌█▌▌█▌█      │
+//   │     9334 6208 4550 0002 4952 83    │
+//   ├────────────────────────────────────┤
+//   │ [LOGO] NOHO Mailbox · nohomailbox  │  Marketing footer (0.50in)
+//   │  "Real street address · scan/fwd"  │
+//   └────────────────────────────────────┘
+//
+// Side accent strips (NOHO blue 0.04in) sit on the FAR left/right
+// edges — center stays pure white per USPS scannability rules.
 function ShippingLabel({ data, className }: { data: LabelData; className?: string }) {
   const barcodeSvg = useMemo(() => {
     const raw = generateCode128(data.trackingNumber, {
@@ -632,180 +687,256 @@ function ShippingLabel({ data, className }: { data: LabelData; className?: strin
     return lb > 0 ? `${lb} lb${oz > 0 ? ` ${oz} oz` : ""}` : `${oz} oz`;
   })();
 
+  // Service-class label (carrier + Ground Advantage / Priority / etc).
+  // Defaults to a generic "STANDARD" when admin hasn't typed a carrier.
+  const carrier = (data.carrier ?? "STANDARD").toUpperCase();
+  const serviceLabel = carrier === "USPS"
+    ? "USPS GROUND ADVANTAGE"
+    : carrier === "UPS"  ? "UPS GROUND"
+    : carrier === "FEDEX" ? "FEDEX HOME DELIVERY"
+    : carrier === "DHL"   ? "DHL EXPRESS"
+    : `${carrier} STANDARD`;
+
   return (
     <div className={className} style={{
       width: "4in", height: "6in", background: "white", color: NOHO_INK,
       boxSizing: "border-box",
       fontFamily: "'Helvetica Neue', Inter, Arial, sans-serif",
-      display: "flex", flexDirection: "column",
-      border: `2px solid ${NOHO_INK}`,
+      display: "flex", flexDirection: "row",
+      border: `1.5pt solid ${NOHO_INK}`,
       boxShadow: "0 4px 18px rgba(45,16,15,0.10)",
+      position: "relative",
     }}>
-      <header style={{
-        height: "0.55in", background: NOHO_INK, color: NOHO_CREAM,
-        padding: "0.10in 0.15in",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        flexShrink: 0,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.10in" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/logo-trans.png" alt="NOHO Mailbox"
-            style={{ height: "0.40in", width: "auto", filter: "brightness(0) invert(1)" }} />
-          <span style={{ fontSize: "0.18in", fontWeight: 800, letterSpacing: "0.02in", textTransform: "uppercase", color: NOHO_CREAM }}>NOHO Mailbox</span>
-        </div>
-        <span style={{
-          background: NOHO_CREAM, color: NOHO_INK,
-          fontSize: "0.08in", fontWeight: 800, letterSpacing: "0.03in",
-          textTransform: "uppercase",
-          padding: "0.05in 0.10in", borderRadius: "0.04in", whiteSpace: "nowrap",
-        }}>Private Mailbox Service</span>
-      </header>
+      {/* Brand accent strip (left) — narrow vertical band, never touches
+          the scanner zones. Cream + blue stripe so the label is
+          unmistakably NOHO from across a room. */}
+      <div style={{
+        width: "0.06in", flexShrink: 0,
+        background: `linear-gradient(180deg, ${NOHO_BLUE} 0%, ${NOHO_BLUE} 50%, ${NOHO_CREAM} 50%, ${NOHO_CREAM} 100%)`,
+      }} />
 
-      <section style={{
-        height: "0.75in", display: "grid", gridTemplateColumns: "0.55in 1fr",
-        background: "white", borderBottom: `2px solid ${NOHO_INK}`, flexShrink: 0,
-      }}>
-        <div style={{ background: NOHO_CREAM, borderRight: `2px solid ${NOHO_INK}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontSize: "0.16in", fontWeight: 800, color: NOHO_INK, letterSpacing: "0.04in" }}>FROM</span>
-        </div>
-        <div style={{ padding: "0.08in 0.12in", display: "flex", flexDirection: "column", gap: "0.02in", justifyContent: "center" }}>
-          <p style={{ margin: 0, fontSize: "0.13in", fontWeight: 800, color: NOHO_INK }}>NOHO MAILBOX</p>
-          <p style={{ margin: 0, fontSize: "0.11in", fontWeight: 600, color: NOHO_INK }}>5062 Lankershim Blvd</p>
-          <p style={{ margin: 0, fontSize: "0.11in", fontWeight: 600, color: NOHO_INK }}>North Hollywood, CA 91601</p>
-          <p style={{ margin: 0, fontSize: "0.09in", fontWeight: 500, color: NOHO_BLUE_DEEP }}>(818) 506-7744 · nohomailbox.org</p>
-        </div>
-      </section>
-
-      <section style={{
-        height: "1.85in", background: "white",
-        borderBottom: `2px solid ${NOHO_INK}`, position: "relative", flexShrink: 0,
-      }}>
-        <div style={{
-          position: "absolute", top: 0, left: 0,
-          background: NOHO_BLUE, color: "white",
-          fontSize: "0.16in", fontWeight: 800, letterSpacing: "0.04in",
-          padding: "0.04in 0.18in 0.05in", borderBottomRightRadius: "0.04in",
-        }}>TO</div>
-        {data.suiteNumber && (
-          <div style={{
-            position: "absolute", top: "0.10in", right: "0.12in",
-            background: NOHO_INK, color: NOHO_CREAM,
-            fontSize: "0.18in", fontWeight: 900,
-            fontFamily: "ui-monospace, 'IBM Plex Mono', monospace",
-            padding: "0.06in 0.12in", borderRadius: "0.04in", letterSpacing: "0.01in",
-          }}>STE #{data.suiteNumber}</div>
-        )}
-        <div style={{
-          padding: "0.42in 0.18in 0.15in",
-          display: "flex", flexDirection: "column", gap: "0.04in",
-          height: "100%", boxSizing: "border-box",
+      {/* Main label content */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        {/* ─── Header ──────────────────────────────────────────────
+            USPS prints a giant service-class letter top-left. We use
+            the NOHO logo box in the same anchor position — same visual
+            weight, ours instead of theirs.
+            iter-149 — heights trimmed: 0.95 → 0.80in. */}
+        <header style={{
+          height: "0.80in",
+          display: "grid",
+          gridTemplateColumns: "1.00in 1fr",
+          flexShrink: 0,
+          background: "white",
+          borderBottom: `1pt solid ${NOHO_INK}`,
         }}>
-          {/* iter-141 — Recipient may be blank when admin printed
-              from a tracking-only online lookup. Fall back to a clear
-              "(verify at counter)" line so the label still prints
-              cleanly and the bureau staff knows what's missing. */}
-          <p style={{
-            margin: 0, fontSize: "0.26in", fontWeight: 900, lineHeight: 1.1,
-            color: data.recipientName || data.customerName ? NOHO_INK : "#888",
-            textTransform: "uppercase", letterSpacing: "-0.005em",
+          <div style={{
+            background: NOHO_INK,
+            borderRight: `1pt solid ${NOHO_INK}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "0.05in",
           }}>
-            {(data.recipientName || data.customerName || "(verify recipient at counter)").toUpperCase()}
-          </p>
-          {data.recipientName && data.customerName && data.recipientName !== data.customerName && (
-            <p style={{ margin: 0, fontSize: "0.10in", fontWeight: 500, color: "#666", fontStyle: "italic" }}>c/o {data.customerName}</p>
-          )}
-          {data.customerEmail && (
-            <p style={{
-              margin: "0.02in 0 0", fontSize: "0.09in", fontWeight: 500,
-              fontFamily: "ui-monospace, 'IBM Plex Mono', monospace",
-              color: NOHO_BLUE_DEEP,
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-            }}>{data.customerEmail}</p>
-          )}
-          <div style={{ marginTop: "auto", paddingTop: "0.08in", borderTop: `1.5pt solid ${NOHO_CREAM}` }}>
-            <p style={{ margin: 0, fontSize: "0.13in", fontWeight: 800, color: NOHO_INK, textTransform: "uppercase" }}>NOHO MAILBOX{data.suiteNumber ? ` — STE ${data.suiteNumber}` : ""}</p>
-            <p style={{ margin: 0, fontSize: "0.13in", fontWeight: 800, color: NOHO_INK, textTransform: "uppercase" }}>5062 LANKERSHIM BLVD</p>
-            <p style={{ margin: 0, fontSize: "0.13in", fontWeight: 800, color: NOHO_INK, textTransform: "uppercase" }}>NORTH HOLLYWOOD CA 91601</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/logo-trans.png" alt="NOHO Mailbox"
+              style={{
+                height: "0.66in", width: "auto", maxWidth: "100%",
+                objectFit: "contain",
+                filter: "brightness(0) invert(1)",
+              }} />
           </div>
-        </div>
-      </section>
+          <div style={{
+            padding: "0.06in 0.12in",
+            display: "flex", flexDirection: "column", justifyContent: "center", gap: "0.012in",
+          }}>
+            <p style={{
+              margin: 0, fontSize: "0.095in", fontWeight: 900,
+              letterSpacing: "0.06em", textTransform: "uppercase", color: NOHO_INK,
+              lineHeight: 1.15,
+            }}>{serviceLabel}</p>
+            <p style={{ margin: 0, fontSize: "0.080in", fontWeight: 800, color: NOHO_INK, lineHeight: 1.2 }}>U.S. POSTAGE PAID</p>
+            <p style={{ margin: 0, fontSize: "0.080in", fontWeight: 800, color: NOHO_BLUE_DEEP, lineHeight: 1.2 }}>NOHO Mailbox</p>
+            <p style={{ margin: 0, fontSize: "0.072in", fontWeight: 700, color: NOHO_INK, fontFamily: "ui-monospace, monospace", lineHeight: 1.2 }}>
+              {carrier === "USPS" ? "USPS Ship" : carrier === "UPS" ? "UPS Ship" : "Carrier Ship"}
+            </p>
+          </div>
+        </header>
 
-      <section style={{
-        height: "0.45in", background: NOHO_CREAM,
-        borderBottom: `2px solid ${NOHO_INK}`,
-        display: "grid", gridTemplateColumns: "1fr 1fr 1fr", flexShrink: 0,
-      }}>
-        <Cell label="Carrier" value={(data.carrier ?? "—").toUpperCase()} mono />
-        <Cell label="Weight" value={weightDisplay ?? "—"} mono divider />
-        <Cell label="Dimensions" value={data.dimensions ?? "—"} mono divider />
-      </section>
+        {/* ─── Service banner ──────────────────────────────────────
+            iter-149 — height trimmed: 0.45 → 0.36in. */}
+        <section style={{
+          height: "0.36in",
+          background: "white",
+          borderBottom: `1.5pt solid ${NOHO_INK}`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          flexShrink: 0,
+        }}>
+          <span style={{
+            fontSize: "0.18in", fontWeight: 900,
+            letterSpacing: "0.01em", textTransform: "uppercase",
+            color: NOHO_INK,
+          }}>{serviceLabel}</span>
+        </section>
 
-      <section style={{
-        height: "0.40in", background: "white",
-        borderBottom: `2px solid ${NOHO_INK}`,
-        display: "grid", gridTemplateColumns: "1.4fr 1fr", flexShrink: 0,
-      }}>
-        <Cell label="Intake" value={data.intakeDate} mono />
-        <Cell label="Ref / Label #" value={data.labelNumber} mono divider bigValue />
-      </section>
+        {/* ─── From + ship meta ───────────────────────────────────── */}
+        <section style={{
+          height: "0.78in", background: "white",
+          borderBottom: `1pt solid ${NOHO_INK}`,
+          display: "grid", gridTemplateColumns: "1.6fr 1fr",
+          flexShrink: 0,
+        }}>
+          <div style={{ padding: "0.08in 0.12in", display: "flex", flexDirection: "column", justifyContent: "center", gap: "0.015in" }}>
+            <p style={{ margin: 0, fontSize: "0.105in", fontWeight: 700, color: NOHO_INK, textTransform: "uppercase" }}>NOHO MAILBOX</p>
+            {data.suiteNumber && (
+              <p style={{ margin: 0, fontSize: "0.10in", fontWeight: 700, color: NOHO_INK, textTransform: "uppercase" }}>STE #{data.suiteNumber}</p>
+            )}
+            <p style={{ margin: 0, fontSize: "0.10in", fontWeight: 600, color: NOHO_INK, textTransform: "uppercase" }}>5062 LANKERSHIM BLVD</p>
+            <p style={{ margin: 0, fontSize: "0.10in", fontWeight: 600, color: NOHO_INK, textTransform: "uppercase" }}>NORTH HOLLYWOOD CA 91601-4225</p>
+          </div>
+          <div style={{ padding: "0.08in 0.12in", display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "flex-end", gap: "0.015in" }}>
+            <p style={{ margin: 0, fontSize: "0.085in", fontWeight: 600, color: NOHO_INK }}>Ship Date: {data.intakeDate}</p>
+            {weightDisplay && (
+              <p style={{ margin: 0, fontSize: "0.085in", fontWeight: 600, color: NOHO_INK }}>Weight: {weightDisplay}</p>
+            )}
+            <p style={{ margin: "0.06in 0 0", fontSize: "0.16in", fontWeight: 900, color: NOHO_INK, fontFamily: "ui-monospace, monospace" }}>
+              REF {data.labelNumber}
+            </p>
+          </div>
+        </section>
 
-      <section style={{
-        flex: 1, background: "white",
-        borderBottom: `2px solid ${NOHO_INK}`,
-        padding: "0.10in 0.15in 0.08in",
-        display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center", minHeight: "1.45in",
-      }}>
-        <p style={{ margin: 0, fontSize: "0.08in", fontWeight: 700, letterSpacing: "0.04in", textTransform: "uppercase", color: NOHO_INK }}>Tracking Number</p>
-        <p style={{
-          margin: "0.04in 0 0.06in", fontSize: "0.16in", fontWeight: 800,
-          fontFamily: "ui-monospace, 'IBM Plex Mono', monospace",
-          letterSpacing: "0.02in", color: NOHO_INK, textAlign: "center",
-        }}>{data.trackingNumber}</p>
-        <div
-          style={{ width: "3.7in", maxWidth: "3.7in", display: "flex", justifyContent: "center", overflow: "hidden" }}
-          dangerouslySetInnerHTML={{ __html: barcodeSvg }}
-        />
-        <p style={{
-          margin: "0.04in 0 0", fontSize: "0.10in", fontWeight: 500,
-          fontFamily: "ui-monospace, 'IBM Plex Mono', monospace",
-          color: NOHO_INK, textAlign: "center",
-        }}>{data.trackingNumber}</p>
-      </section>
+        {/* ─── TO block — DOMINANT (1.75in) ───────────────────────
+            iter-149 — height trimmed: 1.85 → 1.75in. */}
+        <section style={{
+          height: "1.75in", background: "white",
+          borderBottom: `1.5pt solid ${NOHO_INK}`,
+          padding: "0.18in 0.16in",
+          display: "grid", gridTemplateColumns: "0.60in 1fr",
+          gap: "0.12in",
+          flexShrink: 0,
+        }}>
+          {/* Compact data-matrix style placeholder. Real DM payload
+              would be a separate barcode lib; we render a subtle
+              square so the visual weight matches the carrier label.
+              Drivers route via the Code 128 below regardless. */}
+          <div style={{
+            width: "0.60in", height: "0.60in",
+            background: `repeating-linear-gradient(90deg, ${NOHO_INK} 0, ${NOHO_INK} 1.5pt, white 1.5pt, white 3pt), repeating-linear-gradient(0deg, ${NOHO_INK} 0, ${NOHO_INK} 1.5pt, white 1.5pt, white 3pt)`,
+            backgroundBlendMode: "multiply",
+            border: `1pt solid ${NOHO_INK}`,
+            alignSelf: "start",
+          }} aria-hidden="true" />
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.04in", minWidth: 0 }}>
+            <p style={{
+              margin: 0, fontSize: "0.20in", fontWeight: 900, lineHeight: 1.1,
+              color: data.recipientName || data.customerName ? NOHO_INK : "#888",
+              textTransform: "uppercase", letterSpacing: "-0.005em",
+              wordBreak: "break-word",
+            }}>
+              {(data.recipientName || data.customerName || "(verify recipient at counter)").toUpperCase()}
+            </p>
+            {data.customerName && data.recipientName && data.customerName !== data.recipientName && (
+              <p style={{
+                margin: 0, fontSize: "0.16in", fontWeight: 800, lineHeight: 1.1,
+                color: NOHO_INK, textTransform: "uppercase",
+              }}>
+                {data.customerName.toUpperCase()}
+              </p>
+            )}
+            {data.dimensions && (
+              <p style={{ margin: "0.04in 0 0", fontSize: "0.10in", fontWeight: 600, color: NOHO_INK }}>{data.dimensions}</p>
+            )}
+            {data.customerEmail && (
+              <p style={{
+                margin: "auto 0 0", fontSize: "0.085in", fontWeight: 500,
+                fontFamily: "ui-monospace, monospace",
+                color: NOHO_BLUE_DEEP,
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>{data.customerEmail}</p>
+            )}
+          </div>
+        </section>
 
-      <footer style={{
-        height: "0.45in", background: NOHO_INK, color: NOHO_CREAM,
-        padding: "0.06in 0.15in",
-        display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0,
-      }}>
-        <span style={{ fontSize: "0.08in", fontWeight: 600, fontFamily: "ui-monospace, 'IBM Plex Mono', monospace" }}>
-          {data.mailItemId ? `MAIL ID: ${data.mailItemId.slice(-12).toUpperCase()}` : `LABEL: ${data.labelNumber}`}
-        </span>
-        <span style={{ fontSize: "0.10in", fontWeight: 700 }}>nohomailbox.org</span>
-        <span style={{ fontSize: "0.08in", fontWeight: 800, letterSpacing: "0.04in", textTransform: "uppercase" }}>Retain Until Pickup</span>
-      </footer>
+        {/* ─── Tracking band ──────────────────────────────────────
+            Pure-white background, big Code 128 barcode, human-
+            readable tracking number above and below — exactly
+            matches the Shippo / USPS scan zone.
+            iter-149 — min-height trimmed: 1.40 → 1.25in. The flex:1
+            container absorbs whatever vertical room is left after the
+            other fixed sections. */}
+        <section style={{
+          flex: 1, minHeight: "1.25in",
+          background: "white",
+          borderBottom: `1pt solid ${NOHO_INK}`,
+          padding: "0.06in 0.15in 0.04in",
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        }}>
+          <p style={{
+            margin: 0, fontSize: "0.10in", fontWeight: 800,
+            letterSpacing: "0.04in", textTransform: "uppercase", color: NOHO_INK,
+          }}>{carrier} TRACKING #</p>
+          <div
+            style={{ width: "3.5in", maxWidth: "3.5in", margin: "0.06in 0 0.04in", display: "flex", justifyContent: "center", overflow: "hidden" }}
+            dangerouslySetInnerHTML={{ __html: barcodeSvg }}
+          />
+          <p style={{
+            margin: 0, fontSize: "0.135in", fontWeight: 800,
+            fontFamily: "ui-monospace, 'IBM Plex Mono', monospace",
+            letterSpacing: "0.04in", color: NOHO_INK, textAlign: "center",
+          }}>{data.trackingNumber.replace(/(.{4})/g, "$1 ").trim()}</p>
+        </section>
+
+        {/* ─── Marketing footer ───────────────────────────────────
+            Where Shippo had its logo + wordmark, we put OUR brand:
+            logo + tagline + URL + phone. This is the marketing
+            surface a recipient sees every time they pick up a
+            package. Makes the bureau look polished + drives
+            referrals from neighbors who recognize the address. */}
+        {/* iter-149 — height trimmed: 0.55 → 0.46in. */}
+        <footer style={{
+          height: "0.46in", background: NOHO_INK, color: NOHO_CREAM,
+          padding: "0.05in 0.12in",
+          display: "grid", gridTemplateColumns: "auto 1fr auto", gap: "0.08in",
+          alignItems: "center", flexShrink: 0,
+        }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo-trans.png" alt="NOHO"
+            style={{ height: "0.30in", width: "auto", filter: "brightness(0) invert(1)" }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.01in", minWidth: 0 }}>
+            <p style={{
+              margin: 0, fontSize: "0.10in", fontWeight: 900,
+              letterSpacing: "0.02in", textTransform: "uppercase", color: NOHO_CREAM,
+            }}>NOHO MAILBOX</p>
+            <p style={{
+              margin: 0, fontSize: "0.075in", fontWeight: 600,
+              color: NOHO_CREAM, opacity: 0.92, lineHeight: 1.3,
+            }}>
+              Real street address · package handling · mail forwarding
+            </p>
+            <p style={{
+              margin: 0, fontSize: "0.075in", fontWeight: 700,
+              color: NOHO_CREAM, fontFamily: "ui-monospace, monospace",
+            }}>
+              nohomailbox.org · (818) 506-7744
+            </p>
+          </div>
+          <div style={{
+            padding: "0.04in 0.08in",
+            background: NOHO_CREAM, color: NOHO_INK,
+            fontSize: "0.07in", fontWeight: 800, letterSpacing: "0.04in",
+            textTransform: "uppercase", textAlign: "center",
+            borderRadius: "0.04in", whiteSpace: "nowrap",
+          }}>
+            Retain<br/>Until<br/>Pickup
+          </div>
+        </footer>
+      </div>
+
+      {/* Brand accent strip (right) — mirrors left edge. */}
+      <div style={{
+        width: "0.06in", flexShrink: 0,
+        background: `linear-gradient(180deg, ${NOHO_CREAM} 0%, ${NOHO_CREAM} 50%, ${NOHO_BLUE} 50%, ${NOHO_BLUE} 100%)`,
+      }} />
     </div>
   );
 }
 
-function Cell({ label, value, mono = false, divider = false, bigValue = false }: {
-  label: string; value: string; mono?: boolean; divider?: boolean; bigValue?: boolean;
-}) {
-  return (
-    <div style={{
-      padding: "0.06in 0.10in",
-      display: "flex", flexDirection: "column", justifyContent: "center",
-      borderLeft: divider ? `1.5pt solid ${NOHO_INK}` : "none",
-    }}>
-      <p style={{ margin: 0, fontSize: "0.07in", fontWeight: 700, letterSpacing: "0.04in", textTransform: "uppercase", color: NOHO_BLUE_DEEP }}>{label}</p>
-      <p style={{
-        margin: "0.02in 0 0",
-        fontSize: bigValue ? "0.15in" : "0.13in",
-        fontWeight: bigValue ? 900 : 800,
-        fontFamily: mono ? "ui-monospace, 'IBM Plex Mono', monospace" : undefined,
-        color: NOHO_INK, letterSpacing: bigValue ? "0.02in" : "0.005em",
-        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-      }}>{value}</p>
-    </div>
-  );
-}
+// iter-146 — Cell helper retired with the old 7-zone layout. Removed.

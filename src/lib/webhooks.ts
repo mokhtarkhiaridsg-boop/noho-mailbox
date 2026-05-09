@@ -30,6 +30,9 @@ export type WebhookEvent =
   | "id.expiring"
   | "storage.dispute_filed"
   | "storage.threshold_alert"
+  | "door.code_issued"
+  | "customer.of_month_awarded"
+  | "renewal.discount_offer_sent"
   | "billing.auto_renewed"
   | "wallet.auto_top_up_fired"
   | "holiday.notice_sent"
@@ -46,6 +49,9 @@ export const ALL_WEBHOOK_EVENTS: { key: WebhookEvent; label: string; example: st
   { key: "id.expiring",          label: "Customer ID expiring",   example: "⚠️ Karim's DL expires in 7 days" },
   { key: "storage.dispute_filed", label: "Storage-fee dispute filed", example: "⚖️ Mariem disputed a $5.00 storage fee" },
   { key: "storage.threshold_alert", label: "Package crossed storage threshold", example: "📦 Karim · suite #042 · package on shelf 30 days · $156.00 (30d)" },
+  { key: "door.code_issued",        label: "Door access code issued",          example: "🔑 New door code · Karim · suite #042 · rotates in 90d" },
+  { key: "customer.of_month_awarded", label: "Customer of the month awarded",   example: "🌟 Mariem is Customer of the Month for May 2026" },
+  { key: "renewal.discount_offer_sent", label: "Renewal discount offer sent",   example: "🎁 Karim got a 10% renewal discount (health: Watch)" },
   { key: "billing.auto_renewed", label: "Auto-renewal completed", example: "🔁 Auto-renewed Karim · $175 · Business 1mo" },
   { key: "wallet.auto_top_up_fired", label: "Wallet auto top-up triggered", example: "💳 Auto top-up fired for Mariem · $25 request" },
   { key: "holiday.notice_sent",  label: "Holiday closure notice sent",   example: "📣 Holiday notice sent · Memorial Day · 84/86 recipients" },

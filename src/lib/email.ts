@@ -183,6 +183,80 @@ function p(text: string) {
 // Both fire from `requestMailbox` in `auth.ts`. Was missing entirely — a real
 // customer would submit the form, see "we'll text or call shortly" success
 // screen, and then nothing because the admin never knew a row was added.
+// iter-153 — Renewal discount offer email. Sent when a customer is
+// flagged at-risk (per iter-140 health score) AND their renewal is in
+// the next 30 days. Hero showcases the discount code + percentage; CTA
+// to dashboard where they can lock it in with auto-renew.
+export async function sendRenewalDiscountOfferEmail(data: {
+  email: string;
+  name: string;
+  code: string;
+  percentOff: number;
+  expiresAtIso: string;
+}) {
+  const firstName = data.name.split(" ")[0] || "there";
+  const exp = new Date(data.expiresAtIso);
+  const expLabel = exp.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+  const html = layout(`A small thank-you — ${data.percentOff}% off your renewal`, `
+    ${h1(`A little thank-you ✨`)}
+    ${p(`Hi ${firstName}, you've been with NOHO for a bit and we wanted to make renewal easy. Here's <strong>${data.percentOff}% off</strong> your next renewal as a token of appreciation:`)}
+    <div style="margin:20px 0;padding:18px 24px;background:linear-gradient(135deg,#337485,#23596A);border-radius:14px;text-align:center;color:#fff;box-shadow:0 8px 22px rgba(51,116,133,0.35);">
+      <p style="margin:0;font-size:11px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;opacity:0.9;">Your discount code</p>
+      <p style="margin:6px 0 0;font-size:28px;font-weight:900;letter-spacing:0.06em;font-family:ui-monospace,monospace;">${data.code}</p>
+      <p style="margin:8px 0 0;font-size:11px;opacity:0.85;">Valid through ${expLabel}</p>
+    </div>
+    ${p(`Apply it from your dashboard before ${expLabel}, or just hit Renew and we'll honor it automatically.`)}
+    ${btn(`${BASE_URL}/dashboard?tab=wallet`, "Lock in the discount")}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">One-time use, applies to your next renewal only. Reply to this email if anything's unclear.</span>`)}
+  `);
+  return sendEmail({
+    to: data.email,
+    subject: `${data.percentOff}% off your renewal — code ${data.code}`,
+    html,
+    kind: "renewal_discount_offer",
+    userId: await uidFromEmail(data.email),
+  });
+}
+
+// iter-152 — Customer-of-the-month congrats email. Sent right after
+// admin nominates. Recipient sees a celebratory hero + their citation
+// rendered as a pull-quote + a CTA back to the dashboard where the
+// badge sits next to their suite #.
+export async function sendCustomerOfMonthEmail(data: {
+  email: string;
+  name: string;
+  year: number;
+  month: number;          // 1-12
+  citation: string;
+  suiteNumber: string | null;
+}) {
+  const firstName = data.name.split(" ")[0] || "there";
+  const monthName = new Date(data.year, data.month - 1, 1).toLocaleString("en-US", { month: "long" });
+  const html = layout(`You're our Customer of the Month — ${monthName} ${data.year}`, `
+    <div style="text-align:center;margin:0 0 18px;">
+      <div style="display:inline-block;padding:14px 28px;border-radius:14px;background:linear-gradient(135deg,#F5A623,#F5C242);box-shadow:0 8px 22px rgba(245,166,35,0.30);">
+        <p style="margin:0;font-size:11px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:#5C2A0A;">Customer of the Month</p>
+        <p style="margin:2px 0 0;font-size:22px;font-weight:900;color:#5C2A0A;">${monthName} ${data.year}</p>
+      </div>
+    </div>
+    ${h1(`Congrats, ${firstName} 🎉`)}
+    ${p(`We picked one customer this month who's been a delight to work with — and it's you.`)}
+    <blockquote style="margin:18px 0;padding:14px 18px;background:#fffbeb;border-left:3px solid #F5A623;border-radius:6px;font-style:italic;color:#5C2A0A;font-size:14px;line-height:1.6;">
+      ${data.citation.replace(/\n/g, "<br/>")}
+    </blockquote>
+    ${p(`A celebratory badge is now sitting on your dashboard${data.suiteNumber ? ` next to suite #${data.suiteNumber}` : ""}. We just wanted to take a moment to say <strong>thank you</strong>.`)}
+    ${btn(`${BASE_URL}/dashboard`, "View your badge")}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">— The NOHO Mailbox team · (818) 506-7744</span>`)}
+  `);
+  return sendEmail({
+    to: data.email,
+    subject: `🌟 You're our Customer of the Month — ${monthName} ${data.year}`,
+    html,
+    kind: "customer_of_month",
+    userId: await uidFromEmail(data.email),
+  });
+}
+
 export async function sendNewSignupAlert(data: {
   name: string;
   email: string;

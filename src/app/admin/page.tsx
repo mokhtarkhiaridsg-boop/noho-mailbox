@@ -16,6 +16,34 @@ export const maxDuration = 60;
 export default async function AdminPage() {
   const admin = await verifyAdmin();
 
+  // Square auto-sync — fire-and-forget if the last completed sync is
+  // older than 10 min (or none exists). Cron handles the regular cadence
+  // every 15 min; this catches the case where an admin opens the page
+  // expecting today's transactions to be there before the next cron run.
+  // Awaited:false so it doesn't block the page render — sync runs in
+  // the background and the next page load (or this same page after
+  // refresh) will pick up the fresh rows.
+  void (async () => {
+    try {
+      const lastSync = await prisma.squareSyncLog.findFirst({
+        where: { syncType: "payments", status: "completed" },
+        orderBy: { completedAt: "desc" },
+      });
+      const stale =
+        !lastSync?.completedAt ||
+        Date.now() - lastSync.completedAt.getTime() > 10 * 60 * 1000;
+      if (stale) {
+        const { runSyncSquarePayments, runSyncSquareCustomers } = await import("@/lib/square-sync");
+        // Run customers first then payments so user-link map is fresh.
+        await runSyncSquareCustomers();
+        await runSyncSquarePayments();
+      }
+    } catch {
+      // Background sync failure is non-fatal — admin will see stale
+      // sync log timestamp and can retry manually.
+    }
+  })();
+
   // Owner label — emails listed in OWNER_EMAILS env get the "Owner"
   // role label in the admin chrome. Functionally identical to ADMIN
   // (same dashboard, same permissions); the label is purely cosmetic
@@ -558,13 +586,14 @@ export default async function AdminPage() {
         squareLink: string | null;
         notes: string | null;
         createdAt: Date;
+        linkSentAt: Date | null;
       }>>
     }
   }).creditRequest.findMany({
     where: { status: { in: ["Pending", "LinkSent"] } },
     orderBy: { createdAt: "desc" },
     take: 100,
-  }).catch(() => [] as Array<{ id: string; userId: string; amountCents: number; status: string; squareLink: string | null; notes: string | null; createdAt: Date }>);
+  }).catch(() => [] as Array<{ id: string; userId: string; amountCents: number; status: string; squareLink: string | null; notes: string | null; createdAt: Date; linkSentAt: Date | null }>);
 
   const creditRequestUsers = await prisma.user.findMany({
     where: { id: { in: creditRequestsRaw.map((r) => r.userId) } },
@@ -584,6 +613,9 @@ export default async function AdminPage() {
       squareLink: r.squareLink,
       notes: r.notes,
       createdAt: r.createdAt.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
+      // iter-11.8 — pass through so the panel can fetch matching Square
+      // payments and surface "Payment received" badges on each row.
+      linkSentAtIso: r.linkSentAt?.toISOString() ?? null,
     };
   });
 

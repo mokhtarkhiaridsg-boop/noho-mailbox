@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { type NotaryBooking } from "./types";
 import { IconNotary, IconClock, IconChevron } from "@/components/MemberIcons";
+import NotaryBookingCalendar from "./NotaryBookingCalendar";
 
 type Props = {
   bookings: NotaryBooking[];
@@ -48,17 +49,9 @@ export default function NotaryPanel({ bookings }: Props) {
             Schedule a certified in-store notary appointment.
             Premium members get a discount.
           </p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-1.5 mt-4 px-4 h-10 rounded-full text-[13px] font-semibold transition-colors"
-            style={{
-              background: "#337485",
-              color: "#F7EEC2",
-            }}
-          >
-            Book appointment
-            <IconChevron className="w-3.5 h-3.5" strokeWidth={2} />
-          </Link>
+          <p className="text-[11px] mt-3" style={{ color: "rgba(45,29,15,0.55)" }}>
+            Pick a slot below — we&rsquo;ll confirm by email and have everything ready when you arrive.
+          </p>
         </div>
         <span
           className="shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center"
@@ -68,6 +61,11 @@ export default function NotaryPanel({ bookings }: Props) {
           <IconNotary className="w-7 h-7" style={{ color: "#337485" }} strokeWidth={1.5} />
         </span>
       </motion.div>
+
+      {/* iter-160 — Interactive booking calendar. Pulls availability
+          from operating hours, blocks already-booked slots, atomic
+          create with double-book guard. */}
+      <NotaryBookingCalendar />
 
       {/* Active bookings list */}
       {bookings.length > 0 && (

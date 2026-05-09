@@ -19,6 +19,10 @@ import {
 } from "@/components/MemberIcons";
 import { AiEnvelope } from "@/components/AnimatedIcons";
 import OnboardingChecklistCard from "./OnboardingChecklistCard";
+import CustomerOfMonthBadge from "./CustomerOfMonthBadge";
+import RenewalDiscountCard from "./RenewalDiscountCard";
+import ReferralLeaderboardCard from "./ReferralLeaderboardCard";
+import PlanUpgradeNudgeCard from "./PlanUpgradeNudgeCard";
 
 // Animated number counter — counts up from 0 to value over 600ms with a
 // spring-damped tween. Used in the metric cards so big numbers feel earned
@@ -307,6 +311,22 @@ export default function OverviewPanel({
 
   return (
     <div className="space-y-5 sm:space-y-7">
+      {/* iter-152: Customer-of-the-month badge. Renders nothing for
+          non-winners; a celebratory hero with citation when admin has
+          nominated this member. Sits ABOVE the onboarding checklist
+          so it's the first thing they see. */}
+      <CustomerOfMonthBadge />
+
+      {/* iter-153: Renewal discount card. Renders nothing for members
+          without an active offer; for at-risk members near renewal,
+          shows the limited-time discount + countdown. */}
+      <RenewalDiscountCard />
+
+      {/* iter-158: Plan upgrade nudge. Renders ONLY when a Basic
+          member's recent volume justifies it. 7-day dismiss grace
+          via localStorage so we never spam. */}
+      <PlanUpgradeNudgeCard />
+
       {/* iter-114: Onboarding checklist — top of the overview so new
           members see "what's next" before anything else. Self-collapses
           to a small chip once everything's done. */}
@@ -642,6 +662,11 @@ export default function OverviewPanel({
           </ul>
         )}
       </DashCard>
+
+      {/* iter-156 — Referral leaderboard. Sits right above the
+          cross-sell upsells so the social-proof + earning-incentive
+          narrative is right next to the "what to add" prompts. */}
+      <ReferralLeaderboardCard />
 
       {/* Cross-sell upsells — moved from the global shell */}
       <div>

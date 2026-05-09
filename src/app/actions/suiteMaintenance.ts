@@ -16,16 +16,9 @@
 import { prisma } from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
-
-export type MaintKind = "cleaned" | "inspected" | "repaired" | "lock_changed" | "other";
-
-export const MAINT_KINDS: Array<{ key: MaintKind; label: string; emoji: string }> = [
-  { key: "cleaned",      label: "Cleaned",       emoji: "🧹" },
-  { key: "inspected",    label: "Inspected",     emoji: "🔍" },
-  { key: "repaired",     label: "Repaired",      emoji: "🔧" },
-  { key: "lock_changed", label: "Lock changed",  emoji: "🔑" },
-  { key: "other",        label: "Other",         emoji: "📝" },
-];
+// iter-11.5 — Types + constants moved to /lib so the "use server"
+// constraint (only async exports) doesn't blow up the admin shell.
+import { MAINT_KINDS, type MaintKind } from "@/lib/suite-maintenance-config";
 
 const VALID_KINDS = new Set<MaintKind>(MAINT_KINDS.map((k) => k.key));
 

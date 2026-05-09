@@ -1,23 +1,39 @@
 import { SquareClient, SquareEnvironment, SquareError } from "square";
 
+// iter-11.6 — Defensive env reader. Vercel env values pulled from a
+// previous `vercel env pull` ended up with literal `\n` (backslash + n,
+// two chars) baked INSIDE the quoted token, making every Square request
+// 401 UNAUTHORIZED. This helper strips:
+//   - real whitespace (newlines, tabs, surrounding spaces)
+//   - literal "\n" / "\r" sequences anyone wrote into the env file
+// All Square env reads route through it.
+function cleanEnv(raw: string | undefined): string {
+  if (!raw) return "";
+  return raw
+    .replace(/\\[rn]/g, "") // literal \n or \r typed as 2 chars
+    .replace(/[\r\n\t]/g, "") // actual control chars
+    .trim();
+}
+
 function getSquareClient(): SquareClient | null {
-  const token = process.env.SQUARE_ACCESS_TOKEN?.trim();
+  const token = cleanEnv(process.env.SQUARE_ACCESS_TOKEN);
   if (!token) return null;
 
   // SquareEnvironment is a URL constant (e.g. "https://connect.squareupsandbox.com").
   // The SDK uses it as the base URL — passing the literal string "sandbox" makes
   // it concatenate "sandbox/v2/…" and every request 500s with "Failed to parse URL".
+  const envName = cleanEnv(process.env.SQUARE_ENVIRONMENT).toLowerCase();
   return new SquareClient({
     token,
     environment:
-      process.env.SQUARE_ENVIRONMENT === "production"
+      envName === "production"
         ? SquareEnvironment.Production
         : SquareEnvironment.Sandbox,
   });
 }
 
 export function isSquareConfigured(): boolean {
-  return !!process.env.SQUARE_ACCESS_TOKEN?.trim();
+  return !!cleanEnv(process.env.SQUARE_ACCESS_TOKEN);
 }
 
 export async function getSquareCustomers() {

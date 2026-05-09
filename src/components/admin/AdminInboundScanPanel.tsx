@@ -38,6 +38,7 @@ import { findGuestPickupByToken, markGuestAuthUsed } from "@/app/actions/guestPi
 import { parseWeightInput } from "@/lib/units";
 import { getRecipientSuggestions, type RecipientSuggestion } from "@/app/actions/recipientSuggestions";
 import { routeRecipientName, type SmartRouteResult, type SmartRouteCandidate } from "@/app/actions/smartRouting";
+import { parseEnvelopePhoto, type ParseEnvelopeResult } from "@/app/actions/aiAddressOcr";
 
 const NOHO_BLUE = "#1976FF";
 const NOHO_BLUE_DEEP = "#0F5BD9";
@@ -254,6 +255,13 @@ export function AdminInboundScanPanel() {
   const [weightInput, setWeightInput] = useState("");      // free-form: "2 lb 6 oz" / "36 oz" / "36"
   const [dimensions, setDimensions] = useState("");
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  // iter-149 — OCR address parser. When admin clicks "Scan envelope",
+  // we upload the picked file, run Claude Vision OCR + smart-routing,
+  // then surface the parsed fields as a banner with Apply / Discard.
+  const [ocrPending, setOcrPending] = useState(false);
+  const [ocrResult, setOcrResult] = useState<Extract<ParseEnvelopeResult, { ok: true }> | null>(null);
+  const [ocrError, setOcrError] = useState<string | null>(null);
+  const ocrFileRef = useRef<HTMLInputElement>(null);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
   // Pickup-mode lookup state. Populated when admin scans/types a tracking
@@ -778,6 +786,55 @@ export function AdminInboundScanPanel() {
     });
   }
 
+  // iter-149 — OCR envelope: file picker → upload → Vision OCR → banner
+  // with Apply / Discard. Best-effort — never blocks the manual flow.
+  async function handleOcrFile(file: File) {
+    setOcrPending(true);
+    setOcrError(null);
+    setOcrResult(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const upRes = await fetch("/api/upload", { method: "POST", body: fd });
+      if (!upRes.ok) throw new Error("Upload failed");
+      const upData = await upRes.json() as { url?: string };
+      if (!upData.url) throw new Error("Upload returned no URL");
+      // Reuse the photo as the package's exterior image too — saves admin a re-upload.
+      setPhotoUrl(upData.url);
+      const res = await parseEnvelopePhoto({ imageUrl: upData.url });
+      if (!res.ok) {
+        setOcrError(res.error);
+      } else {
+        setOcrResult(res);
+      }
+    } catch (e) {
+      setOcrError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setOcrPending(false);
+      if (ocrFileRef.current) ocrFileRef.current.value = "";
+    }
+  }
+  function applyOcr(r: Extract<ParseEnvelopeResult, { ok: true }>) {
+    if (r.trackingNumber && !tracking.trim()) setTracking(r.trackingNumber);
+    if (r.carrier) setCarrierOverride(r.carrier);
+    if (r.recipientName) setRecipientName(r.recipientName);
+    // If smart routing matched a customer, pre-pick them.
+    if (r.routedTopMatch && !pickedCustomer) {
+      pick({
+        id: r.routedTopMatch.userId,
+        name: r.routedTopMatch.customerName,
+        email: r.routedTopMatch.email,
+        suiteNumber: r.routedTopMatch.suiteNumber,
+        plan: r.routedTopMatch.plan,
+      });
+    } else if (r.suiteNumber && !pickedCustomer) {
+      // No DB match but we have a suite number — drop it into the
+      // customer search so admin sees the suite-number candidates.
+      setCustomerQuery(r.suiteNumber);
+    }
+    setOcrResult(null);
+  }
+
   // Photo capture: takes a snapshot Blob from the modal, posts to /api/upload,
   // gets back a Vercel-Blob URL, stores it on the form. Best-effort — errors
   // surface inline; the scan still works without a photo.
@@ -936,6 +993,93 @@ export function AdminInboundScanPanel() {
           numbers so the bureau can answer "how busy were we today?" without
           opening a report. */}
       {stats && <DailyIntakeStatsCard stats={stats} />}
+
+      {/* iter-149 — OCR envelope shortcut. Admin photographs the
+          envelope, we extract recipient/suite/carrier/tracking via
+          Claude Vision + smart-routing, then pre-fill the form. */}
+      <div
+        className="rounded-md p-3"
+        style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(51,116,133,0.06))", border: "1px solid rgba(51,116,133,0.18)" }}
+      >
+        <input
+          ref={ocrFileRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void handleOcrFile(f);
+          }}
+        />
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            type="button"
+            disabled={ocrPending}
+            onClick={() => ocrFileRef.current?.click()}
+            className="text-[12px] font-black px-3 py-2 rounded-lg text-white disabled:opacity-50"
+            style={{ background: "#1976FF" }}
+          >
+            {ocrPending ? "Reading…" : "📷 Scan envelope (auto-fill)"}
+          </button>
+          <p className="text-[10.5px] flex-1 min-w-0" style={{ color: "rgba(45,16,15,0.65)" }}>
+            Snap a photo of the front of the package · we extract recipient, suite, carrier, and tracking.
+          </p>
+        </div>
+        {ocrError && (
+          <p className="mt-2 text-[11px] font-semibold" style={{ color: "#991b1b" }}>
+            {ocrError}
+          </p>
+        )}
+        {ocrResult && (
+          <div className="mt-3 rounded-lg p-3" style={{ background: "white", border: "1px solid #ECEEF1" }}>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(45,16,15,0.55)" }}>
+                Parsed fields ·{" "}
+                <span style={{ color: ocrResult.confidence === "high" ? "#15803d" : ocrResult.confidence === "medium" ? "#92400e" : "#991b1b" }}>
+                  {ocrResult.confidence} confidence
+                </span>
+              </p>
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => applyOcr(ocrResult)}
+                  className="text-[10.5px] font-black px-2.5 py-1 rounded-md text-white"
+                  style={{ background: "#16A34A" }}
+                >
+                  Apply to form
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOcrResult(null)}
+                  className="text-[10.5px] font-bold px-2.5 py-1 rounded-md"
+                  style={{ background: "rgba(45,16,15,0.05)", color: "rgba(45,16,15,0.55)", border: "1px solid #ECEEF1" }}
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+            <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-[11.5px]" style={{ color: "#1A1D23" }}>
+              <li><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>Recipient:</span>{" "}{ocrResult.recipientName ?? <em style={{ color: "rgba(45,16,15,0.40)" }}>—</em>}</li>
+              <li><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>Suite #:</span>{" "}<span className="font-mono">{ocrResult.suiteNumber ?? <em style={{ color: "rgba(45,16,15,0.40)" }}>—</em>}</span></li>
+              <li><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>Tracking:</span>{" "}<span className="font-mono">{ocrResult.trackingNumber ?? <em style={{ color: "rgba(45,16,15,0.40)" }}>—</em>}</span></li>
+              <li><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>Carrier:</span>{" "}{ocrResult.carrier ?? <em style={{ color: "rgba(45,16,15,0.40)" }}>—</em>}</li>
+              {ocrResult.recipientCo && <li className="sm:col-span-2"><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>c/o:</span> {ocrResult.recipientCo}</li>}
+              {ocrResult.senderName && <li className="sm:col-span-2"><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>Sender:</span> {ocrResult.senderName}</li>}
+            </ul>
+            {ocrResult.routedTopMatch && (
+              <p className="mt-2 text-[11px]" style={{ color: "#15803d", fontWeight: 700 }}>
+                ✨ Smart-matched <strong>{ocrResult.routedTopMatch.customerName}</strong> · suite #{ocrResult.routedTopMatch.suiteNumber ?? "—"} · {ocrResult.routedTopMatch.score}% match
+              </p>
+            )}
+            {ocrResult.notes && (
+              <p className="mt-1 text-[10.5px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+                Note: {ocrResult.notes}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Tracking input + scan button */}
       <div
@@ -1412,15 +1556,28 @@ export function AdminInboundScanPanel() {
         >
           <span>{submitMsg}</span>
           {lastReceiptId && submitMsg.startsWith("✓") && (
-            <a
-              href={`/admin/inbound/receipt/${lastReceiptId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1.5 rounded-lg text-xs font-black text-white shrink-0"
-              style={{ background: "#15803d" }}
-            >
-              Open receipt →
-            </a>
+            <div className="flex gap-1.5 shrink-0">
+              <a
+                href={`/admin/inbound/receipt/${lastReceiptId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-lg text-xs font-black text-white"
+                style={{ background: "#15803d" }}
+              >
+                4×6 receipt →
+              </a>
+              {/* iter-155 — 80mm thermal receipt for narrow Star/Epson printers. */}
+              <a
+                href={`/admin/print/thermal/intake/${lastReceiptId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-lg text-xs font-black"
+                style={{ background: "white", color: "#15803d", border: "1px solid rgba(22,163,74,0.40)" }}
+                title="Print 80mm narrow thermal receipt"
+              >
+                🧾 80mm
+              </a>
+            </div>
           )}
         </div>
       )}

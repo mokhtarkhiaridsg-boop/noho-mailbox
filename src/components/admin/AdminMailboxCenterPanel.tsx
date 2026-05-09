@@ -965,7 +965,8 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
   }
 
   return (
-    <div className="flex flex-col h-full gap-3">
+    // iter-144 — natural page flow. Removed h-full constraint.
+    <div className="flex flex-col gap-3">
       {/* ─── Branded title row — Baloo 2 for the heading (warm postal
           feel) + Pacifico script accent. Apple-clean layout, NOHO brand. */}
       <div className="shrink-0 flex items-baseline gap-3 flex-wrap">

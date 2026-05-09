@@ -9,6 +9,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { DEFAULT_HOURS, type OperatingHoursConfig, type DayHours, type Holiday } from "@/lib/operating-hours";
+import AdminStaffOnDutyCard from "./AdminStaffOnDutyCard";
 import {
   getOperatingHours,
   updateOperatingHours,
@@ -115,6 +116,9 @@ export default function AdminOperatingHoursPanel() {
           Drives the marketing-site Hours block, the open/closed pill on the dashboard, and email signatures. Holiday exceptions override the weekly grid for those dates.
         </p>
       </div>
+
+      {/* iter-154 — Staff on duty card. Drives the public /open page. */}
+      <AdminStaffOnDutyCard />
 
       {msg && (
         <div
