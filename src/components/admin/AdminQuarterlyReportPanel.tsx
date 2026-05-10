@@ -165,7 +165,7 @@ export function AdminQuarterlyReportPanel() {
             fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
           }}
         >
-          Quarterly Statements
+          Quarterly Report
         </h2>
         <span
           className="text-[15px] hidden sm:inline"

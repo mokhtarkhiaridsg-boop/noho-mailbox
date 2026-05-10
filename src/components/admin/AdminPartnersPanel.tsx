@@ -257,7 +257,7 @@ export function AdminPartnersPanel({ partners }: Props) {
               fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
             }}
           >
-            Partner network
+            Partners
           </h2>
           <span
             className="text-[15px] hidden sm:inline"

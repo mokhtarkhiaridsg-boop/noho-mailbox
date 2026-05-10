@@ -236,7 +236,7 @@ export function AdminTenantsPanel({ tenants }: Props) {
             fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
           }}
         >
-          Tenant operations
+          Tenants
         </h2>
         <span
           className="text-[15px] hidden sm:inline"
