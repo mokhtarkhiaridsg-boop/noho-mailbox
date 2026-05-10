@@ -12,6 +12,7 @@ import {
   markTourNoShow,
   cancelMailboxTour,
   getMailboxTourCounts,
+  getTourCalendarSubscribeUrl,
   type MailboxTourRow,
 } from "@/app/actions/mailboxTour";
 
@@ -37,10 +38,26 @@ export default function AdminMailboxToursPanel() {
   const [counts, setCounts] = useState<Awaited<ReturnType<typeof getMailboxTourCounts>> | null>(null);
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // iter-201: iCal subscribe URL — null until admin clicks "Reveal"
+  const [calUrl, setCalUrl] = useState<{ url: string | null; configured: boolean } | null>(null);
+  const [showCal, setShowCal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   function refresh() {
     void listMailboxTours({ status: filter === "all" ? undefined : (filter as MailboxTourRow["status"]) }).then(setRows).catch(() => setRows([]));
     void getMailboxTourCounts().then(setCounts).catch(() => undefined);
+  }
+
+  function loadCalUrl() {
+    setShowCal(true);
+    if (calUrl) return;
+    void getTourCalendarSubscribeUrl().then(setCalUrl).catch(() => setCalUrl({ url: null, configured: false }));
+  }
+  function copyCalUrl() {
+    if (!calUrl?.url) return;
+    void navigator.clipboard.writeText(calUrl.url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(refresh, [filter]);
@@ -101,6 +118,53 @@ export default function AdminMailboxToursPanel() {
           <Tile label="Conversion 30d" value={`${counts.conversionRate30d}%`} accent={counts.conversionRate30d >= 30 ? T.success : counts.conversionRate30d >= 10 ? T.warning : T.danger} />
         </div>
       )}
+
+      {/* iter-201: Subscribe-to-calendar widget */}
+      <div className="rounded-2xl p-3" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+        <div className="flex items-start justify-between gap-2 flex-wrap">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: T.inkFaint }}>📅 Subscribe in your calendar</p>
+            <p className="text-[11px] mt-0.5" style={{ color: T.inkSoft }}>
+              Add this feed to Google Calendar / Apple Calendar / Outlook to see tours alongside your personal events. Updates every ~15min automatically.
+            </p>
+          </div>
+          {!showCal ? (
+            <button type="button" onClick={loadCalUrl} className="text-[10.5px] font-bold px-2.5 py-1 rounded-md text-white" style={{ background: T.blue }}>
+              Reveal subscribe URL
+            </button>
+          ) : (
+            <button type="button" onClick={() => setShowCal(false)} className="text-[10.5px] font-bold px-2.5 py-1 rounded-md" style={{ background: T.surfaceAlt, color: T.inkSoft, border: `1px solid ${T.border}` }}>
+              Hide
+            </button>
+          )}
+        </div>
+        {showCal && calUrl && (
+          <div className="mt-2">
+            {!calUrl.configured ? (
+              <p className="text-[11px] font-semibold" style={{ color: T.danger }}>
+                ⚠️ ADMIN_CAL_TOKEN env var not set on the server. Configure it (any random 32+ char string) and reload.
+              </p>
+            ) : calUrl.url ? (
+              <>
+                <code className="block text-[10.5px] break-all rounded p-2 font-mono" style={{ background: T.surfaceAlt, color: T.ink, border: `1px solid ${T.border}` }}>
+                  {calUrl.url}
+                </code>
+                <div className="flex gap-2 mt-2">
+                  <button type="button" onClick={copyCalUrl} className="text-[10.5px] font-bold px-2.5 py-1 rounded-md text-white" style={{ background: copied ? T.success : T.blue }}>
+                    {copied ? "✓ Copied!" : "📋 Copy URL"}
+                  </button>
+                  <a href={calUrl.url.replace(/^https?:/, "webcal:")} className="text-[10.5px] font-bold px-2.5 py-1 rounded-md" style={{ background: T.surfaceAlt, color: T.inkSoft, border: `1px solid ${T.border}`, textDecoration: "none" }}>
+                    Open in Calendar (webcal://)
+                  </a>
+                </div>
+                <p className="text-[10px] mt-1.5" style={{ color: T.inkFaint }}>
+                  Treat this URL as a secret — anyone with it can read tour bookings. Rotate by changing ADMIN_CAL_TOKEN on the server.
+                </p>
+              </>
+            ) : null}
+          </div>
+        )}
+      </div>
 
       <div className="flex flex-wrap gap-1.5">
         {STATUSES.map((s) => (

@@ -99,13 +99,31 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-black text-lg uppercase tracking-wide text-text-light">Revenue</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.5)" }}>
-          {squareStatus.configured
-            ? `Live from Square · ${squareStatus.totalPayments} payments synced`
-            : "Connect Square to populate live revenue data."}
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Revenue
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          live from Square
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {squareStatus.configured ? `${squareStatus.totalPayments} payments synced` : "Connect Square to populate live data"}
+        </span>
       </div>
 
       {/* ─── KPI tiles ───────────────────────────────────────────────── */}

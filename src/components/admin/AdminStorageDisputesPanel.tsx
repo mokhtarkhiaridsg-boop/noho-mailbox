@@ -1,6 +1,8 @@
 "use client";
 
 // iter-105 — Admin storage-fee disputes panel.
+// iter-186 — Adds chat thread modal so admin can negotiate with member
+// inline before resolving.
 
 import { useEffect, useState, useTransition } from "react";
 import {
@@ -8,6 +10,12 @@ import {
   adminResolveStorageDispute,
 } from "@/app/actions/storageDispute";
 import type { AdminDisputeRow } from "@/lib/storage-dispute-types";
+import {
+  getAdminDisputeThread,
+  postDisputeMessage,
+  markDisputeRead,
+  type DisputeThreadView,
+} from "@/app/actions/disputeMessages";
 
 const NOHO_BLUE = "#1976FF";
 const NOHO_BLUE_DEEP = "#0F5BD9";
@@ -20,6 +28,7 @@ export default function AdminStorageDisputesPanel() {
   const [filter, setFilter] = useState<StatusFilter>("Open");
   const [pending, startTransition] = useTransition();
   const [resolving, setResolving] = useState<AdminDisputeRow | null>(null);
+  const [threadOpen, setThreadOpen] = useState<AdminDisputeRow | null>(null);
 
   function refresh() {
     void listAdminStorageDisputes({ status: filter })
@@ -97,13 +106,21 @@ export default function AdminStorageDisputesPanel() {
                       </p>
                     )}
                   </div>
-                  {r.status === "Open" && (
-                    <button type="button" onClick={() => setResolving(r)} disabled={pending}
-                      className="px-3 py-1.5 rounded-lg text-[11px] font-black text-white disabled:opacity-50"
-                      style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}>
-                      Review
+                  <div className="flex flex-col gap-1.5 shrink-0">
+                    {/* iter-186 — chat thread button always visible (works for closed disputes too as a read-only audit) */}
+                    <button type="button" onClick={() => setThreadOpen(r)}
+                      className="px-3 py-1.5 rounded-lg text-[11px] font-black"
+                      style={{ background: "white", color: NOHO_BLUE_DEEP, border: `1px solid ${NOHO_BLUE}` }}>
+                      💬 Thread
                     </button>
-                  )}
+                    {r.status === "Open" && (
+                      <button type="button" onClick={() => setResolving(r)} disabled={pending}
+                        className="px-3 py-1.5 rounded-lg text-[11px] font-black text-white disabled:opacity-50"
+                        style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}>
+                        Review
+                      </button>
+                    )}
+                  </div>
                 </div>
               </li>
             ))}
@@ -114,6 +131,100 @@ export default function AdminStorageDisputesPanel() {
       {resolving && (
         <ResolveModal row={resolving} onClose={() => setResolving(null)} onResolved={() => { setResolving(null); refresh(); }} />
       )}
+      {threadOpen && (
+        <ThreadModal row={threadOpen} onClose={() => setThreadOpen(null)} />
+      )}
+    </div>
+  );
+}
+
+// iter-186 — Admin-side dispute chat thread modal. Loads on open,
+// auto-marks-read, lets admin post replies inline. Closed disputes
+// render read-only (no composer).
+function ThreadModal({ row, onClose }: { row: AdminDisputeRow; onClose: () => void }) {
+  const [thread, setThread] = useState<DisputeThreadView | null>(null);
+  const [body, setBody] = useState("");
+  const [busy, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function load() {
+    void getAdminDisputeThread({ disputeId: row.id }).then(setThread).catch(() => setThread(null));
+  }
+  useEffect(() => {
+    load();
+    void markDisputeRead({ disputeId: row.id }).catch(() => undefined);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function onPost() {
+    setError(null);
+    if (body.trim().length < 2) { setError("Type a reply."); return; }
+    startTransition(async () => {
+      const res = await postDisputeMessage({ disputeId: row.id, body });
+      if (!res.ok) { setError(res.error ?? "Send failed"); return; }
+      setBody("");
+      load();
+    });
+  }
+
+  const isClosed = row.status === "Waived" || row.status === "Upheld";
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4" style={{ background: "rgba(15,23,42,0.55)" }} onClick={onClose}>
+      <div className="relative w-full max-w-lg rounded-2xl flex flex-col max-h-[90vh]" style={{ background: "white", border: `1px solid #ECEEF1` }} onClick={(e) => e.stopPropagation()}>
+        <div className="px-5 py-4" style={{ borderBottom: `1px solid #ECEEF1` }}>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: NOHO_BLUE }}>Dispute thread</p>
+          <h3 className="text-lg font-black" style={{ color: NOHO_INK }}>{row.filedByName} · ${(row.feeCents / 100).toFixed(2)}</h3>
+          <p className="text-[11px] italic mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>"{row.reason}"</p>
+        </div>
+        <div className="flex-1 overflow-y-auto p-5 space-y-2" style={{ background: "#FAFAF8" }}>
+          {!thread ? (
+            <p className="text-[11.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+          ) : thread.messages.length === 0 ? (
+            <p className="text-[11.5px] italic text-center" style={{ color: "rgba(45,16,15,0.55)" }}>No messages yet — start the conversation below.</p>
+          ) : thread.messages.map((m) => {
+            const isAdmin = m.authorRole === "ADMIN";
+            return (
+              <div key={m.id} className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}>
+                <div className="max-w-[80%] rounded-2xl px-3 py-2" style={{
+                  background: isAdmin ? NOHO_BLUE : "white",
+                  color: isAdmin ? "white" : NOHO_INK,
+                  border: isAdmin ? "none" : `1px solid #ECEEF1`,
+                }}>
+                  <p className="text-[10px] font-black uppercase tracking-wider opacity-75">
+                    {isAdmin ? (m.authorName ?? "Admin") : "Member"}
+                  </p>
+                  <p className="text-[12.5px] mt-0.5 whitespace-pre-wrap" style={{ lineHeight: 1.45 }}>{m.body}</p>
+                  <p className="text-[9.5px] mt-0.5 opacity-70">
+                    {new Date(m.createdAtIso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {!isClosed ? (
+          <div className="px-5 py-3 space-y-2" style={{ borderTop: `1px solid #ECEEF1` }}>
+            <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={2} maxLength={2000} placeholder="Reply to member…" className="w-full px-3 py-2 rounded-lg text-[12.5px] resize-none" style={{ background: "white", border: `1px solid #ECEEF1`, color: NOHO_INK }} />
+            {error && <p className="text-[11px] font-semibold" style={{ color: "#b91c1c" }}>{error}</p>}
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={onClose} className="text-[11.5px] font-bold px-3 py-1.5 rounded-lg" style={{ background: "white", color: NOHO_INK, border: `1px solid #ECEEF1` }}>Close</button>
+              <button type="button" disabled={busy || body.trim().length < 2} onClick={onPost} className="text-[11.5px] font-black px-3 py-1.5 rounded-lg text-white disabled:opacity-50" style={{ background: NOHO_BLUE }}>
+                {busy ? "Sending…" : "Send reply"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="px-5 py-3 text-center" style={{ borderTop: `1px solid #ECEEF1` }}>
+            <p className="text-[11px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+              Dispute is {row.status} — thread is read-only.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

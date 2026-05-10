@@ -161,3 +161,62 @@ function parseHHMM(s: string): number | null {
   if (h < 0 || h > 23 || mn < 0 || mn > 59) return null;
   return h * 60 + mn;
 }
+
+// iter-197 — Find the next bureau-open Date relative to `from`. Walks
+// forward up to 14 days looking for a non-holiday day with `open=true`
+// + valid openHHMM. Used by the onboarding-pickup-reminder cron to ask
+// "are we within X minutes of opening?". Returns null if the bureau is
+// closed for the entire 14-day window (configuration error).
+export function nextOpenDate(cfg: OperatingHoursConfig, from: Date = new Date()): Date | null {
+  const tz = cfg.timezone;
+  for (let dayOffset = 0; dayOffset <= 14; dayOffset++) {
+    const probe = new Date(from.getTime() + dayOffset * 24 * 3600 * 1000);
+    // Resolve probe day in bureau TZ.
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour12: false,
+    });
+    const parts = fmt.formatToParts(probe);
+    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+    const isoDay = `${get("year")}-${get("month")}-${get("day")}`;
+    const weekdayShort = get("weekday").toLowerCase().slice(0, 3);
+    const dayIdx = ["sun","mon","tue","wed","thu","fri","sat"].indexOf(weekdayShort);
+
+    const holiday = cfg.holidays.find((h) => h.date === isoDay) ?? null;
+    let openHHMM: string | undefined;
+    if (holiday) {
+      if (holiday.closed) continue;
+      openHHMM = holiday.openClose?.open;
+    } else {
+      const day = cfg.weekly[dayIdx];
+      if (!day?.open) continue;
+      openHHMM = day.openHHMM;
+    }
+    if (!openHHMM) continue;
+
+    // Build the open Date for that day in bureau TZ. We approximate by
+    // formatting the bureau-tz wall-clock-time string and re-parsing —
+    // browsers + Node both handle this for IANA tz names.
+    const [hh, mm] = openHHMM.split(":").map((s) => parseInt(s, 10));
+    if (!Number.isFinite(hh) || !Number.isFinite(mm)) continue;
+    const candidate = wallClockToDate(isoDay, hh, mm, tz);
+    if (candidate.getTime() > from.getTime()) return candidate;
+  }
+  return null;
+}
+
+// Approximate a wall-clock instant in tz to a UTC Date. Computes the
+// offset by formatting a known UTC value in tz and reading the parts
+// back. Sufficient accuracy for cron-level (minute-grained) decisions.
+function wallClockToDate(isoDay: string, hour: number, minute: number, tz: string): Date {
+  // Start from naive UTC interpretation, then correct by the TZ offset
+  // at that moment.
+  const naive = new Date(`${isoDay}T${String(hour).padStart(2,"0")}:${String(minute).padStart(2,"0")}:00Z`);
+  const fmt = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour12: false, hour: "2-digit", minute: "2-digit", year: "numeric", month: "2-digit", day: "2-digit" });
+  const parts = fmt.formatToParts(naive);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  const tzHour = parseInt(get("hour"), 10);
+  const tzMin = parseInt(get("minute"), 10);
+  // Offset = (UTC time as seen in tz) − (intended local time)
+  const offsetMin = (tzHour * 60 + tzMin) - (hour * 60 + minute);
+  return new Date(naive.getTime() - offsetMin * 60 * 1000);
+}

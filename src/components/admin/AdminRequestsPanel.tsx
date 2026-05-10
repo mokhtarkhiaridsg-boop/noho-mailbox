@@ -49,24 +49,39 @@ export function AdminRequestsPanel({ mailRequests }: Props) {
     <div className="space-y-4">
       {/* Header strip */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
+        <div className="flex items-baseline gap-3 flex-wrap">
           <h2
-            className="text-[10px] font-bold uppercase tracking-[0.16em]"
-            style={{ color: T.ink }}
+            className="text-2xl font-bold"
+            style={{
+              color: "#1A1D23",
+              letterSpacing: "-0.01em",
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+            }}
           >
-            Mail request queue
+            Mail Requests
           </h2>
-          <p
-            className="text-[11px] mt-1"
-            style={{ color: T.inkFaint, ...TAB_NUM }}
+          <span
+            className="text-[15px] hidden sm:inline"
+            style={{
+              color: "#1976FF",
+              fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+              transform: "translateY(-1px)",
+              display: "inline-block",
+            }}
           >
-            {mailRequests.length} pending
+            today&apos;s queue
+          </span>
+          <span
+            className="text-[12px] ml-1 hidden md:inline"
+            style={{ color: "#7A8290", ...TAB_NUM }}
+          >
+            · {mailRequests.length} pending
             {mailRequests.length > 0 &&
               " · " +
                 Object.entries(counts)
                   .map(([k, n]) => `${n} ${k.toLowerCase()}`)
                   .join(" · ")}
-          </p>
+          </span>
         </div>
       </div>
 

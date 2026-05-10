@@ -20,8 +20,15 @@ import {
   requestReturnToSender,
   updateMailLabel,
 } from "@/app/actions/mail";
-import { togglePriorityFlag, addJunkSender } from "@/app/actions/mailPreferences";
+import { togglePriorityFlag } from "@/app/actions/mailPreferences";
+import { reportMailItemAsJunk } from "@/app/actions/junkReports";
 import { getTrackingUrl } from "@/lib/trackingUtils";
+import {
+  translateMyMailItem,
+  getMyMailItemTranslation,
+  type MailTranslationView,
+} from "@/app/actions/mailTranslation";
+import { SUPPORTED_LANGUAGES, type LanguageCode } from "@/lib/aiTranslation";
 
 // ─── LabelEditor (unchanged) ─────────────────────────────────────────────
 function LabelEditor({
@@ -123,6 +130,9 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [confirmBulk, setConfirmBulk] = useState<"forward" | "discard" | null>(null);
+  // iter-194: per-item translation modal state. `translateItem` holds the
+  // mail item the modal is opened for; null = closed.
+  const [translateItem, setTranslateItem] = useState<MailItem | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // ─── Filtered list ────────────────────────────────────────────────────
@@ -712,6 +722,21 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
                             onClick={() => setScanPreview(item.scanImageUrl)}
                           />
                         )}
+                        {/* iter-194: Translate scan — Claude Vision OCR + translate */}
+                        {item.scanned && item.scanImageUrl && (
+                          <ActionButton
+                            tone="brown"
+                            label="Translate"
+                            icon={
+                              <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M2 4 L7 4 M4.5 4 L4.5 2.5 M3 7 C3 9 5 11 7 11 M7 4 C7 7 5 9 3 9" />
+                                <path d="M9 14 L11.5 8 L14 14" />
+                                <path d="M10 12 L13 12" />
+                              </svg>
+                            }
+                            onClick={() => setTranslateItem(item)}
+                          />
+                        )}
                         <ActionButton
                           tone="blue"
                           label="Scan"
@@ -765,8 +790,10 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
                           }
                           disabled={isPending}
                           onClick={() => {
-                            if (!window.confirm(`Block all mail from "${item.from}"?`)) return;
-                            runAction("Sender blocked", () => addJunkSender(item.from));
+                            // iter-202: single-tap junk report. After 3 taps
+                            // for the same sender, the suggestion card on the
+                            // dashboard offers to make it a permanent rule.
+                            runAction(item.junkBlocked ? "Already marked junk" : "Marked junk", () => reportMailItemAsJunk({ mailItemId: item.id }));
                           }}
                         />
                         <ActionButton
@@ -792,11 +819,158 @@ export default function MailPanel({ mailItems, isPending, runAction, setScanPrev
           </ul>
         )}
       </div>
+
+      {/* iter-194: Translation modal — opens when member taps "Translate" */}
+      {translateItem && (
+        <TranslationModal
+          item={translateItem}
+          onClose={() => setTranslateItem(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ─── Sub-components ─────────────────────────────────────────────────────
+
+// iter-194 — Auto-translate inbound mail scans modal.
+//
+// Opens over the dashboard with two-column original/translated layout.
+// First load tries the server-cached translation (free); if miss or if
+// the user picks a different target language, fires the actual model
+// call. Cache hits show a "✓ Cached" badge so members understand why
+// instant.
+function TranslationModal({ item, onClose }: { item: MailItem; onClose: () => void }) {
+  const [target, setTarget] = useState<LanguageCode>("en");
+  const [translation, setTranslation] = useState<MailTranslationView | null | undefined>(undefined);
+  const [busy, startTx] = useTransition();
+  const [err, setErr] = useState<string | null>(null);
+  const [fromCache, setFromCache] = useState(false);
+
+  // Try cached fetch on first open. If we already have a translation in
+  // the language the user happened to pick, render it instantly.
+  useEffect(() => {
+    let cancelled = false;
+    void getMyMailItemTranslation({ mailItemId: item.id }).then((t) => {
+      if (cancelled) return;
+      setTranslation(t);
+      if (t?.ok) setTarget(t.language);
+      setFromCache(!!t?.ok);
+    }).catch(() => setTranslation(null));
+    return () => { cancelled = true; };
+  }, [item.id]);
+
+  function runTranslate(lang: LanguageCode) {
+    setErr(null);
+    setFromCache(false);
+    setTarget(lang);
+    startTx(async () => {
+      const res = await translateMyMailItem({ mailItemId: item.id, targetLanguage: lang });
+      if (res.error) { setErr(res.error); return; }
+      setTranslation(res.result ?? null);
+    });
+  }
+
+  const showOriginal = translation?.ok ? translation.originalText : "";
+  const showTranslated = translation?.ok ? translation.translatedText : "";
+  const sourceLang = translation?.ok ? translation.sourceLanguage : null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(45,16,15,0.55)" }} onClick={onClose}>
+      <div className="rounded-2xl bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto p-5" style={{ border: `1px solid ${BRAND.border}` }} onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between gap-2 flex-wrap mb-3">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: BRAND.blueDeep }}>
+              🌐 Auto-translate scan
+            </p>
+            <h3 className="text-base font-black tracking-tight" style={{ color: BRAND.ink }}>
+              {item.from || "Mail item"} <span className="text-[11px] font-mono" style={{ color: BRAND.inkFaint }}>· {item.date}</span>
+            </h3>
+            <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>
+              Powered by Claude Vision. Names, addresses, dollar amounts, and account numbers are preserved exactly.
+            </p>
+          </div>
+          <button type="button" onClick={onClose} className="text-[11px] font-bold px-2.5 py-1 rounded" style={{ background: BRAND.bg, color: BRAND.inkSoft, border: `1px solid ${BRAND.border}` }}>
+            ✕ Close
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          <span className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: BRAND.inkFaint }}>Translate to:</span>
+          <select value={target} onChange={(e) => runTranslate(e.target.value as LanguageCode)} disabled={busy}
+            className="text-[12px] font-bold px-2 py-1 rounded-lg disabled:opacity-50"
+            style={{ background: "white", border: `1px solid ${BRAND.border}`, color: BRAND.ink }}>
+            {SUPPORTED_LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>{l.flag} {l.label}</option>
+            ))}
+          </select>
+          <button type="button" onClick={() => runTranslate(target)} disabled={busy}
+            className="text-[11px] font-black px-3 py-1 rounded-lg text-white disabled:opacity-50" style={{ background: BRAND.blue }}>
+            {busy ? "Translating…" : translation?.ok ? "↻ Re-translate" : "Translate"}
+          </button>
+          {fromCache && translation?.ok && (
+            <span className="text-[9.5px] font-black px-1.5 py-0.5 rounded uppercase tracking-[0.10em]" style={{ background: "rgba(34,197,94,0.12)", color: "#15803d" }}>
+              ✓ Cached
+            </span>
+          )}
+          {translation?.ok && sourceLang && (
+            <span className="text-[10px]" style={{ color: BRAND.inkFaint }}>
+              · detected {sourceLang.toUpperCase()}
+            </span>
+          )}
+        </div>
+
+        {err && <p className="text-[11.5px] font-semibold mb-2" style={{ color: "#b91c1c" }}>{err}</p>}
+
+        {translation === undefined ? (
+          <p className="text-[12px] italic py-6 text-center" style={{ color: BRAND.inkFaint }}>Loading…</p>
+        ) : translation === null && !busy ? (
+          <div className="rounded-xl px-4 py-6 text-center" style={{ background: BRAND.bg, border: `1px dashed ${BRAND.border}` }}>
+            <p className="text-[12px]" style={{ color: BRAND.inkSoft }}>
+              No translation yet. Pick a language above and tap <strong>Translate</strong>.
+            </p>
+          </div>
+        ) : translation && !translation.ok ? (
+          <div className="rounded-xl px-4 py-4" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.30)" }}>
+            <p className="text-[11.5px] font-semibold" style={{ color: "#b91c1c" }}>
+              Couldn&apos;t translate this scan.
+            </p>
+            <p className="text-[10.5px] mt-1" style={{ color: BRAND.inkSoft }}>
+              Reason: <code className="font-mono">{translation.reason}</code>
+              {translation.reason === "no_api_key" && " — translation isn't configured in this bureau yet."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="rounded-xl p-3" style={{ background: BRAND.bg, border: `1px solid ${BRAND.border}` }}>
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: BRAND.inkFaint }}>
+                Original {sourceLang ? `· ${sourceLang.toUpperCase()}` : ""}
+              </p>
+              <p className="text-[12px] whitespace-pre-line leading-relaxed" style={{ color: BRAND.ink }}>
+                {showOriginal || <span className="italic" style={{ color: BRAND.inkFaint }}>(no text detected)</span>}
+              </p>
+            </div>
+            <div className="rounded-xl p-3" style={{ background: "rgba(51,116,133,0.06)", border: `1px solid ${BRAND.border}` }}>
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: BRAND.blueDeep }}>
+                Translated · {translation?.ok ? translation.languageLabel : ""}
+              </p>
+              <p className="text-[12px] whitespace-pre-line leading-relaxed" style={{ color: BRAND.ink }}>
+                {showTranslated || <span className="italic" style={{ color: BRAND.inkFaint }}>(empty)</span>}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {translation?.ok && (
+          <p className="text-[9.5px] mt-3 text-center" style={{ color: BRAND.inkFaint }}>
+            Translated {new Date(translation.translatedAtIso).toLocaleString()} · machine translation, verify critical details.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 function ActionButton({
   tone,

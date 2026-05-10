@@ -19,6 +19,9 @@ import {
 } from "@/components/MemberIcons";
 import { AiEnvelope } from "@/components/AnimatedIcons";
 import OnboardingChecklistCard from "./OnboardingChecklistCard";
+import JunkSuggestionsCard from "./JunkSuggestionsCard";
+import MailPredictionsCard from "./MailPredictionsCard";
+import MemberSupplyShopCard from "./MemberSupplyShopCard";
 import CustomerOfMonthBadge from "./CustomerOfMonthBadge";
 import CotmSpotlightOptInCard from "./CotmSpotlightOptInCard";
 import LoyaltyTierCard from "./LoyaltyTierCard";
@@ -26,6 +29,7 @@ import RenewalDiscountCard from "./RenewalDiscountCard";
 import ReferralLeaderboardCard from "./ReferralLeaderboardCard";
 import PlanUpgradeNudgeCard from "./PlanUpgradeNudgeCard";
 import SenderNotesCard from "./SenderNotesCard";
+import DisputeThreadCard from "./DisputeThreadCard";
 
 // Animated number counter — counts up from 0 to value over 600ms with a
 // spring-damped tween. Used in the metric cards so big numbers feel earned
@@ -345,10 +349,29 @@ export default function OverviewPanel({
           Lazy-loaded so quiet mailboxes don't pay for an empty card. */}
       <SenderNotesCard />
 
+      {/* iter-186: Storage-fee dispute thread — chat with admin while
+          dispute is Open. Renders nothing for members without an open
+          dispute. */}
+      <DisputeThreadCard />
+
       {/* iter-114: Onboarding checklist — top of the overview so new
           members see "what's next" before anything else. Self-collapses
           to a small chip once everything's done. */}
       <OnboardingChecklistCard />
+
+      {/* iter-202: Junk-rule learning — surfaces only when the member has
+          tapped Block 3+ times for the same sender (no rule yet). One-tap
+          promotes to a permanent JunkSender rule. */}
+      <JunkSuggestionsCard />
+
+      {/* iter-204: Sender-side mail predictions — recurring senders + cadence
+          forecast so members pre-stage forwarding for trips. Renders nothing
+          for new accounts or members with sparse history. */}
+      <MailPredictionsCard />
+
+      {/* iter-208: Member supply marketplace — boxes/tape/labels at member
+          pricing through the wallet. Renders nothing if no priced supplies. */}
+      <MemberSupplyShopCard />
 
       {/* ─── Hero Panel ──────────────────────────────────────────────────
           Single unified above-the-fold band combining: branded mailbox

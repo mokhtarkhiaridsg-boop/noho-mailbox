@@ -208,13 +208,31 @@ export function AdminDeliveriesPanel({ deliveryOrders, isPending, handleDelivery
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="font-black text-lg uppercase tracking-wide" style={{ color: NOHO_INK }}>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              color: "#1A1D23",
+              letterSpacing: "-0.01em",
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+            }}
+          >
             Deliveries
           </h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.5)" }}>
-            {deliveryOrders.length} orders · {inTransit} in transit · {todayDelivered} delivered today
-          </p>
+          <span
+            className="text-[15px] hidden sm:inline"
+            style={{
+              color: "#1976FF",
+              fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+              transform: "translateY(-1px)",
+              display: "inline-block",
+            }}
+          >
+            in flight today
+          </span>
+          <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+            · {deliveryOrders.length} orders · {inTransit} in transit · {todayDelivered} delivered today
+          </span>
         </div>
         <div
           className="inline-flex rounded-xl p-0.5"

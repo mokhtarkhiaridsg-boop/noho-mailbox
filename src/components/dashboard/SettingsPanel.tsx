@@ -17,6 +17,10 @@ import PlanDowngradeCard from "./PlanDowngradeCard";
 import SuiteTransferCard from "./SuiteTransferCard";
 import TimeZoneCard from "./TimeZoneCard";
 import LocaleSettingCard from "./LocaleSettingCard";
+import MailingCertificatesCard from "./MailingCertificatesCard";
+import ForwardingAddressBookCard from "./ForwardingAddressBookCard";
+import PlanPauseCard from "./PlanPauseCard";
+import LobbyWallOptInCard from "./LobbyWallOptInCard";
 import ApiTokensCard from "./ApiTokensCard";
 import MemberWebhooksCard from "./MemberWebhooksCard";
 import AchPaymentCard from "./AchPaymentCard";
@@ -1098,11 +1102,24 @@ export default function SettingsPanel({
         {/* Guest Pickup */}
         <GuestPickupCard setToast={setToast} />
 
+        {/* iter-192: Forwarding address book — multi-address CRUD with
+            default-flag semantics + categories + recipientName overrides. */}
+        <ForwardingAddressBookCard />
+
         {/* Scheduled Forwarding */}
         <ScheduledForwardingCard addresses={addresses} setToast={setToast} />
 
         {/* Vacation Hold */}
         <VacationHoldCard setToast={setToast} />
+
+        {/* iter-206: Plan pause — snowbird/traveler holding-fee. Different
+            from Vacation Hold: mail still arrives, $5/mo holding fee, longer
+            windows (≥14d). */}
+        <PlanPauseCard />
+
+        {/* iter-207: Lobby selfie wall opt-in. Renders nothing if member
+            doesn't engage; otherwise shows status + revoke. */}
+        <LobbyWallOptInCard />
 
         {/* Junk Senders */}
         <JunkSendersCard />
@@ -1202,6 +1219,8 @@ export default function SettingsPanel({
     <TimeZoneCard />
     {/* iter-183: Dashboard language — persists across devices via User.locale. */}
     <LocaleSettingCard />
+    {/* iter-187: Mailing certificates — proof-of-receipt for legal/compliance. */}
+    <MailingCertificatesCard />
     {/* iter-166: API tokens — read-only bearer tokens for /api/v1/* */}
     <ApiTokensCard />
     {/* iter-167: Member-registered webhooks — push events to your URL */}

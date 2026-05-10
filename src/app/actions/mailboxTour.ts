@@ -356,3 +356,16 @@ function buildTourConfirmEmail(name: string, date: string, time: string, partySi
   </td></tr>
 </table></td></tr></table></body></html>`;
 }
+
+// iter-201 — Returns the public iCal subscribe URL for the admin's
+// MailboxTour feed, with the ADMIN_CAL_TOKEN baked in. Server-only
+// so the secret never touches the client bundle. Returns null when
+// the env var is unset (admin needs to configure it first).
+export async function getTourCalendarSubscribeUrl(): Promise<{ url: string | null; configured: boolean }> {
+  await verifyAdmin();
+  const tok = (process.env.ADMIN_CAL_TOKEN ?? "").trim();
+  if (!tok) return { url: null, configured: false };
+  const base = process.env.AUTH_URL ?? "https://nohomailbox.org";
+  const url = `${base.replace(/\/$/, "")}/api/cal/tours.ics?token=${encodeURIComponent(tok)}`;
+  return { url, configured: true };
+}

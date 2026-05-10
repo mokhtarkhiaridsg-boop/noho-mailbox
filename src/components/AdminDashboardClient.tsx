@@ -98,6 +98,7 @@ const navGroups: NavGroup[] = [
       { id: "notary",          label: "Notary",          Icon: IconNotary },
       { id: "shippingcenter",  label: "Shipping",        Icon: IconShipping },
       { id: "rateshop",        label: "Rate Shop",       Icon: IconReceipt },
+      { id: "reshelf",         label: "Re-shelving",     Icon: IconBox },
       { id: "shop",            label: "Shop",            Icon: IconShop },
     ],
   },
@@ -109,6 +110,8 @@ const navGroups: NavGroup[] = [
       // Insights. Bulk Mailer + Email Logs fold into Messages.
       { id: "billing",        label: "Billing",       Icon: IconReceipt },
       { id: "revenue",        label: "Revenue",       Icon: IconReport },
+      { id: "forecast",       label: "Forecast",      Icon: IconReport },
+      { id: "bulkrenew",      label: "Bulk Renew",    Icon: IconCredit },
       { id: "square",         label: "Square",        Icon: IconSquare },
       { id: "messages",       label: "Messages",      Icon: IconChat },
       { id: "insights",       label: "Insights",      Icon: IconReport },
@@ -135,6 +138,7 @@ const hiddenNav: NavItem[] = [
   // Customers fold-ins
   { id: "idexpiring",      label: "ID Expirations",  Icon: IconCompliance },
   { id: "cmrareport",      label: "CMRA Report",     Icon: IconCompliance },
+  { id: "kyctrust",        label: "KYC Trust",       Icon: IconCompliance },
   { id: "csvonboard",      label: "Bulk Onboard",    Icon: IconCustomers },
   // Operations fold-ins
   { id: "notarycheckin",   label: "Notary Check-in", Icon: IconNotary },
@@ -143,6 +147,12 @@ const hiddenNav: NavItem[] = [
   { id: "keyledger",       label: "Key Ledger",      Icon: IconKey },
   { id: "pickupqueue",     label: "Pickup Queue",    Icon: IconCalendar },
   { id: "occupancy",       label: "Occupancy Map",   Icon: IconBox },
+  { id: "mailboxtags",     label: "Mailbox Tags",    Icon: IconClipboard },
+  { id: "insclaims",       label: "Insurance Claims", Icon: IconReceipt },
+  { id: "carriermismatch", label: "Carrier Mismatch", Icon: IconCompliance },
+  { id: "supplyforecast",  label: "Supply Forecast",  Icon: IconBox },
+  { id: "gbphours",        label: "Google Hours",     Icon: IconBuilding },
+  { id: "lobbywall",       label: "Lobby Wall",       Icon: IconClipboard },
   { id: "stickynotes",     label: "Sticky Notes",    Icon: IconClipboard },
   { id: "suitetransfers",  label: "Suite Transfers", Icon: IconBox },
   // Money & Comms fold-ins
@@ -419,7 +429,7 @@ function CommandPalette(props: {
       aria-label="Command palette"
       className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-20 sm:pt-24"
       style={{
-        background: "rgba(45,16,15,0.45)",
+        background: "rgba(0,0,0,0.45)",
         backdropFilter: "blur(4px)",
         WebkitBackdropFilter: "blur(4px)",
       }}
@@ -430,18 +440,18 @@ function CommandPalette(props: {
         className="w-full max-w-xl rounded-2xl overflow-hidden flex flex-col"
         style={{
           background: "#FFFFFF",
-          border: "1px solid rgba(45,16,15,0.12)",
+          border: "1px solid rgba(0,0,0,0.12)",
           boxShadow:
-            "0 28px 90px rgba(45,16,15,0.32), 0 1px 0 rgba(255,255,255,0.7) inset",
+            "0 28px 90px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.7) inset",
           maxHeight: "min(72vh, 560px)",
         }}
       >
         {/* Search input row */}
         <div
           className="flex items-center gap-3 px-4 h-12 shrink-0"
-          style={{ borderBottom: "1px solid rgba(45,16,15,0.08)" }}
+          style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}
         >
-          <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" style={{ color: "rgba(45,16,15,0.5)" }} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+          <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" style={{ color: "rgba(0,0,0,0.5)" }} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
             <circle cx="11" cy="11" r="6" />
             <path d="m17 17 4 4" />
           </svg>
@@ -457,7 +467,7 @@ function CommandPalette(props: {
           />
           <kbd
             className="text-[10px] font-mono px-1.5 h-5 rounded inline-flex items-center shrink-0"
-            style={{ background: "rgba(45,16,15,0.05)", color: "rgba(45,16,15,0.5)", border: "1px solid rgba(45,16,15,0.1)" }}
+            style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.5)", border: "1px solid rgba(0,0,0,0.1)" }}
           >
             Esc
           </kbd>
@@ -466,7 +476,7 @@ function CommandPalette(props: {
         {/* Filtered results */}
         <div className="flex-1 overflow-y-auto py-1">
           {filtered.length === 0 && (
-            <div className="px-5 py-8 text-center text-[12px]" style={{ color: "rgba(45,16,15,0.5)" }}>
+            <div className="px-5 py-8 text-center text-[12px]" style={{ color: "rgba(0,0,0,0.5)" }}>
               No matches for &ldquo;{query}&rdquo;
             </div>
           )}
@@ -474,7 +484,7 @@ function CommandPalette(props: {
             <div key={groupName} className="py-1">
               <div
                 className="px-4 pt-1.5 pb-1 text-[9px] font-black uppercase tracking-[0.18em]"
-                style={{ color: "rgba(45,16,15,0.4)" }}
+                style={{ color: "rgba(0,0,0,0.4)" }}
               >
                 {groupName}
               </div>
@@ -497,8 +507,8 @@ function CommandPalette(props: {
                         <span
                           className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
                           style={{
-                            background: active ? "#337485" : "rgba(45,16,15,0.05)",
-                            color: active ? "#fff" : "rgba(45,16,15,0.7)",
+                            background: active ? "#337485" : "rgba(0,0,0,0.05)",
+                            color: active ? "#fff" : "rgba(0,0,0,0.7)",
                             transition: "all 150ms",
                           }}
                         >
@@ -509,7 +519,7 @@ function CommandPalette(props: {
                         <span className="flex-1 min-w-0">
                           <span className="block text-[13px] font-bold truncate">{a.label}</span>
                           {a.hint && (
-                            <span className="block text-[10px] truncate" style={{ color: "rgba(45,16,15,0.5)" }}>{a.hint}</span>
+                            <span className="block text-[10px] truncate" style={{ color: "rgba(0,0,0,0.5)" }}>{a.hint}</span>
                           )}
                         </span>
                         {active && (
@@ -534,20 +544,20 @@ function CommandPalette(props: {
           className="flex items-center gap-3 px-4 h-8 text-[10px] font-semibold shrink-0"
           style={{
             background: "rgba(247,230,194,0.4)",
-            borderTop: "1px solid rgba(45,16,15,0.06)",
-            color: "rgba(45,16,15,0.55)",
+            borderTop: "1px solid rgba(0,0,0,0.06)",
+            color: "rgba(0,0,0,0.55)",
           }}
         >
           <span className="inline-flex items-center gap-1">
-            <kbd className="font-mono text-[9px] px-1 h-4 rounded inline-flex items-center" style={{ background: "rgba(45,16,15,0.06)", border: "1px solid rgba(45,16,15,0.1)" }}>↑↓</kbd>
+            <kbd className="font-mono text-[9px] px-1 h-4 rounded inline-flex items-center" style={{ background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.1)" }}>↑↓</kbd>
             navigate
           </span>
           <span className="inline-flex items-center gap-1">
-            <kbd className="font-mono text-[9px] px-1 h-4 rounded inline-flex items-center" style={{ background: "rgba(45,16,15,0.06)", border: "1px solid rgba(45,16,15,0.1)" }}>↵</kbd>
+            <kbd className="font-mono text-[9px] px-1 h-4 rounded inline-flex items-center" style={{ background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.1)" }}>↵</kbd>
             run
           </span>
           <span className="inline-flex items-center gap-1">
-            <kbd className="font-mono text-[9px] px-1 h-4 rounded inline-flex items-center" style={{ background: "rgba(45,16,15,0.06)", border: "1px solid rgba(45,16,15,0.1)" }}>esc</kbd>
+            <kbd className="font-mono text-[9px] px-1 h-4 rounded inline-flex items-center" style={{ background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.1)" }}>esc</kbd>
             close
           </span>
           <span className="ml-auto opacity-60">{filtered.length} result{filtered.length === 1 ? "" : "s"}</span>
@@ -617,6 +627,16 @@ import AdminDropoffBarcodePanel from "@/components/admin/AdminDropoffBarcodePane
 import AdminMailboxToursPanel from "@/components/admin/AdminMailboxToursPanel";
 import AdminSuitePinsPanel from "@/components/admin/AdminSuitePinsPanel";
 import AdminRateShopPanel from "@/components/admin/AdminRateShopPanel";
+import AdminReshelfPanel from "@/components/admin/AdminReshelfPanel";
+import AdminKycTrustPanel from "@/components/admin/AdminKycTrustPanel";
+import AdminRevenueForecastPanel from "@/components/admin/AdminRevenueForecastPanel";
+import AdminBulkRenewalPanel from "@/components/admin/AdminBulkRenewalPanel";
+import AdminMailboxTagsPanel from "@/components/admin/AdminMailboxTagsPanel";
+import AdminInsuranceClaimsPanel from "@/components/admin/AdminInsuranceClaimsPanel";
+import AdminCarrierMismatchPanel from "@/components/admin/AdminCarrierMismatchPanel";
+import AdminSupplyForecastPanel from "@/components/admin/AdminSupplyForecastPanel";
+import AdminGbpHoursPanel from "@/components/admin/AdminGbpHoursPanel";
+import AdminLobbyWallPanel from "@/components/admin/AdminLobbyWallPanel";
 import { AdminQRPickupPanel } from "@/components/admin/AdminQRPickupPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
@@ -888,7 +908,7 @@ function ProfileDropdown() {
   const INK = "#2D100F";
   const CREAM = "#F7E6C2";
   const SURFACE = "#FFFFFF";
-  const BORDER = "#E5DACA";
+  const BORDER = "#ECEEF1";
   const BLUE = "#337485";
   const RED = "#E70013";
   return (
@@ -899,10 +919,10 @@ function ProfileDropdown() {
         aria-haspopup="menu"
         className="flex items-center gap-2 pl-0.5 pr-2 h-8 rounded-full transition-all"
         style={{
-          background: open ? "rgba(45,16,15,0.06)" : "transparent",
-          border: `1px solid ${open ? "rgba(45,16,15,0.10)" : "transparent"}`,
+          background: open ? "rgba(0,0,0,0.06)" : "transparent",
+          border: `1px solid ${open ? "rgba(0,0,0,0.10)" : "transparent"}`,
         }}
-        onMouseEnter={(e) => { if (!open) e.currentTarget.style.background = "rgba(45,16,15,0.04)"; }}
+        onMouseEnter={(e) => { if (!open) e.currentTarget.style.background = "rgba(0,0,0,0.04)"; }}
         onMouseLeave={(e) => { if (!open) e.currentTarget.style.background = "transparent"; }}
       >
         <span
@@ -918,7 +938,7 @@ function ProfileDropdown() {
         <svg
           viewBox="0 0 12 12"
           className="w-2.5 h-2.5 transition-transform duration-150"
-          style={{ color: "rgba(45,16,15,0.5)", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+          style={{ color: "rgba(0,0,0,0.5)", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
@@ -934,7 +954,7 @@ function ProfileDropdown() {
           style={{
             background: SURFACE,
             border: `1px solid ${BORDER}`,
-            boxShadow: "0 12px 36px rgba(45,16,15,0.16)",
+            boxShadow: "0 12px 36px rgba(0,0,0,0.16)",
             animation: "profile-pop 160ms cubic-bezier(0.22, 1, 0.36, 1) both",
           }}
         >
@@ -951,14 +971,14 @@ function ProfileDropdown() {
               style={{
                 background: `linear-gradient(135deg, ${INK} 0%, #4A1F1C 100%)`,
                 color: CREAM,
-                boxShadow: "0 1px 0 rgba(255,255,255,0.18) inset, 0 2px 4px rgba(45,16,15,0.18)",
+                boxShadow: "0 1px 0 rgba(255,255,255,0.18) inset, 0 2px 4px rgba(0,0,0,0.18)",
               }}
             >
               NM
             </span>
             <div className="min-w-0">
               <p className="text-xs font-black truncate" style={{ color: INK }}>Admin · NOHO Mailbox</p>
-              <p className="text-[10px] mt-0.5" style={{ color: "rgba(45,16,15,0.5)" }}>
+              <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.5)" }}>
                 Signed in as administrator
               </p>
             </div>
@@ -1057,7 +1077,7 @@ function DropdownSection({ label, children }: { label: string; children: React.R
     <div className="py-1">
       <p
         className="px-4 pt-1.5 pb-0.5 text-[9px] font-black uppercase tracking-[0.18em]"
-        style={{ color: "rgba(45,16,15,0.42)" }}
+        style={{ color: "rgba(0,0,0,0.42)" }}
       >
         {label}
       </p>
@@ -1084,7 +1104,7 @@ function DropdownLink({
       onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(247,230,194,0.55)"; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
     >
-      <span className="w-5 h-5 inline-flex items-center justify-center" style={{ color: "rgba(45,16,15,0.65)" }}>
+      <span className="w-5 h-5 inline-flex items-center justify-center" style={{ color: "rgba(0,0,0,0.65)" }}>
         {icon}
       </span>
       {children}
@@ -1492,7 +1512,7 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
   ];
 
   return (
-    <div className="min-h-screen text-[#2D100F]" style={{ background: "#F7E6C2" }}>
+    <div className="min-h-screen" style={{ background: "#FFFFFF", color: "#1A1D23" }}>
       {/* ─── Single 44px command bar (replaces 28px status strip + 64px
           header — net +48px reclaimed). Logo · breadcrumb · ⌘K · clock ·
           to-do · member-view · profile, all in one row. */}
@@ -1895,6 +1915,16 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {tab === "mailboxtours" && <AdminMailboxToursPanel />}
           {tab === "suitepins" && <AdminSuitePinsPanel />}
           {tab === "rateshop" && <AdminRateShopPanel />}
+          {tab === "reshelf" && <AdminReshelfPanel />}
+          {tab === "kyctrust" && <AdminKycTrustPanel />}
+          {tab === "forecast" && <AdminRevenueForecastPanel />}
+          {tab === "bulkrenew" && <AdminBulkRenewalPanel />}
+          {tab === "mailboxtags" && <AdminMailboxTagsPanel />}
+          {tab === "insclaims" && <AdminInsuranceClaimsPanel />}
+          {tab === "carriermismatch" && <AdminCarrierMismatchPanel />}
+          {tab === "supplyforecast" && <AdminSupplyForecastPanel />}
+          {tab === "gbphours" && <AdminGbpHoursPanel />}
+          {tab === "lobbywall" && <AdminLobbyWallPanel />}
           {tab === "lockboxboard" && <AdminLockboxBoardPanel />}
           {tab === "espsync" && <AdminEspSyncPanel />}
           {tab === "carrierpickup" && <AdminCarrierPickupPanel />}

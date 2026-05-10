@@ -70,6 +70,13 @@ model User {
   // When set, takes precedence over the iter-110 cookie on dashboard
   // load so device changes (phone vs laptop) preserve the choice.
   locale                    String?
+  // iter-189: KYC trust score 0-100, computed nightly. Surfaces in
+  // admin customer drawer as a colored chip + dedicated low-trust
+  // panel for compliance triage. JSON flags array snapshots which
+  // axes failed at compute time.
+  kycTrustScore             Int?
+  kycTrustComputedAt        DateTime?
+  kycTrustFlagsJson         String?
 
   // Box ownership type — required for CMRA compliance.
   // A company cannot exist as an individual; if Business, an Owner must be on file.
@@ -145,6 +152,16 @@ model User {
   // Inverse of AgentConversation.owner. Required for Prisma relation
   // validation; AgentConversation defaults to onDelete: Cascade.
   agentConversations      AgentConversation[]
+  // iter-193 — admin-assigned colored tags for fast visual triage in the
+  // iter-92 occupancy map ("VIP", "Compliance flag", "Translator-needed",
+  // "Snowbird-Q4", etc.). Many-to-many through MailboxTagAssignment.
+  mailboxTagAssignments   MailboxTagAssignment[]
+  // iter-202 — per-tap junk reports for AI-suggested rule promotion.
+  junkReports             JunkReport[]
+  // iter-206 — member self-serve plan pause (snowbird/traveler holding fee).
+  planPauses              PlanPause[]
+  // iter-207 — opt-in lobby selfie wall entries (community spotlight).
+  lobbyWallEntries        LobbyWallEntry[]
 }
 
 model SharedMailboxAccess {
@@ -281,6 +298,15 @@ model MailItem {
   pickupSignatureSvg String?
   pickupSignerName   String?
   pickupSignedAt     DateTime?
+  // iter-194: AI translation of the scanned letter (Claude Vision OCR +
+  // translate). JSON blob with shape:
+  //   { language, sourceLanguage, originalText, translatedText, model,
+  //     promptVersion, translatedAtIso }
+  // Member can re-translate to a different language; the latest result
+  // overwrites. Null until member clicks "🌐 Translate". Reuses the
+  // iter-108 AI pattern (lib helper, fallback when ANTHROPIC_API_KEY
+  // unset, audit log on every call).
+  translationJson    String?
 
   createdAt    DateTime @default(now())
 
@@ -288,6 +314,8 @@ model MailItem {
   requests MailRequest[]
   storageAlerts StorageThresholdAlert[]
   senderThankYous SenderThankYou[]    // iter-168
+  insuranceClaims InsuranceClaim[]   // iter-196
+  junkReports     JunkReport[]       // iter-202
 
   // Hot-path indexes — dashboard reads /admin reads scan by these constantly.
   @@index([userId, status])
@@ -303,6 +331,99 @@ model JunkSender {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// iter-207 — Lobby selfie wall (Tier 15 #116).
+//
+// Opt-in only. Members upload a photo + (optional) display-name override
+// + consent timestamp. Admin reviews + approves; only Approved entries
+// appear on the public `/wall` route and in the iter-195 lobby kiosk
+// loop. Members can revoke anytime → status flips to Removed and the
+// entry stops surfacing immediately.
+//
+// `joinedYear` snapshots the calendar year the member's mailboxAssignedAt
+// or createdAt fell in, used to render the "since 2024" sticker.
+model LobbyWallEntry {
+  id              String    @id @default(cuid())
+  userId          String
+  photoUrl        String
+  displayName     String                                  // first name OR member-provided override
+  suiteNumber     String?                                 // snapshotted at opt-in
+  joinedYear      Int                                     // YYYY for the "since" sticker
+  consentedAt     DateTime  @default(now())               // when member tapped "I consent"
+  status          String    @default("Pending")          // "Pending" | "Approved" | "Removed"
+  reviewedById    String?                                 // admin who approved/removed
+  reviewedAt      DateTime?
+  removedReason   String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([userId])
+}
+
+// iter-206 — Member self-serve plan pause (Tier 14 #115).
+//
+// Snowbirds + long-term travelers pay a $5/mo holding fee to keep
+// their suite + mail intake while their full subscription is paused.
+// When the pause `startDate` hits, the cron sweeper sets status=Active
+// and snapshots the member's `plan + planTerm` so we can restore them
+// on resume. When `endDate` hits, the sweeper sets status=Resumed and
+// puts the original plan back. Member can cancel a Scheduled pause
+// (before it starts) or early-resume an Active pause anytime.
+//
+// Lifecycle:
+//   Scheduled → Active → Resumed (auto on endDate or member-initiated early)
+//             → Cancelled (member-initiated, only while Scheduled)
+model PlanPause {
+  id                  String    @id @default(cuid())
+  userId              String
+  startDate           String                              // YYYY-MM-DD
+  endDate             String                              // YYYY-MM-DD (auto-resume target)
+  holdingFeeCents     Int                                 // total fee for the pause window (snapshot at request)
+  reason              String?                             // free-text member note
+  status              String    @default("Scheduled")    // "Scheduled" | "Active" | "Resumed" | "Cancelled"
+  originalPlan        String?                             // snapshot of User.plan at request time
+  originalPlanTerm    String?                             // snapshot of User.planTerm at request time
+  activatedAt         DateTime?
+  resumedAt           DateTime?
+  resumedEarly        Boolean   @default(false)           // member resumed before endDate
+  cancelledAt         DateTime?
+  cancelledReason     String?
+  createdAt           DateTime  @default(now())
+  createdById         String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([status, startDate])
+  @@index([status, endDate])
+}
+
+// iter-202 — Per-tap junk reports for AI-suggested rule promotion.
+// Each time a member taps "Block / Discard junk" on a single mail item
+// we drop a row here. When ≥3 reports stack up for the same normalized
+// sender (no JunkSender rule yet), the dashboard surfaces a "Auto-
+// discard from this sender going forward?" suggestion. Promoting the
+// suggestion creates a real JunkSender rule + marks these reports as
+// promoted so they stop nudging.
+model JunkReport {
+  id               String   @id @default(cuid())
+  userId           String
+  mailItemId       String
+  senderRaw        String                                  // original "from" string
+  normalizedSender String                                  // lowercased + trimmed for grouping
+  createdAt        DateTime @default(now())
+  promotedToRule   Boolean  @default(false)
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mailItem MailItem @relation(fields: [mailItemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, mailItemId])                           // one report per item per user — re-tapping is idempotent
+  @@index([userId, normalizedSender])
+  @@index([userId, promotedToRule, createdAt])
 }
 
 model VacationHold {
@@ -492,10 +613,31 @@ model StorageFeeDispute {
 
   filedBy    User @relation("DisputeFiledBy", fields: [filedById], references: [id], onDelete: Cascade)
   resolvedBy User? @relation("DisputeResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+  messages   DisputeMessage[]                // iter-186
 
   @@index([mailItemId])
   @@index([status, createdAt])
   @@index([filedById, createdAt])
+}
+
+// iter-186 — Member ↔ admin chat thread on a billing dispute (Tier 12 #95).
+// Lets both sides negotiate before resolution. Each post knows its
+// author + role + read receipts on each side so we can show "1 unread"
+// badges + admin can prioritize threads with new member messages.
+model DisputeMessage {
+  id              String    @id @default(cuid())
+  disputeId       String
+  authorId        String                            // user.id of the poster
+  authorRole      String                            // "MEMBER" | "ADMIN"
+  body            String                            // 1-2000 chars
+  readByMemberAt  DateTime?
+  readByAdminAt   DateTime?
+  createdAt       DateTime  @default(now())
+
+  dispute         StorageFeeDispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+
+  @@index([disputeId, createdAt])
+  @@index([authorId, createdAt])
 }
 
 // iter-103 — Slack/Discord/generic webhook bridge.
@@ -756,6 +898,72 @@ model OnboardingTouch {
 
   @@unique([userId, touchKey])
   @@index([sentAt])
+}
+
+// iter-188 — Smart re-shelving suggestions (Tier 13 #97).
+// Daily cron analyzes mail volume × suite assignment × plan tier and
+// surfaces actionable nudges: "release dormant suite X to waitlist",
+// "Karim is overflowing — upsell him to Business plan", "small box →
+// big member" mismatches. Each suggestion can be snoozed 30 days,
+// dismissed permanently, or marked as acted-on (links to follow-up).
+model ReShelvingSuggestion {
+  id             String    @id @default(cuid())
+  kind           String                              // "dormant_suite" | "overflow_member" | "size_mismatch" | "vacant_box_for_waitlist"
+  severity       String    @default("medium")        // "low" | "medium" | "high"
+  suiteNumber    String?                             // when applies to a specific suite
+  userId         String?                             // when applies to a specific member
+  reasonsJson    String                              // JSON array of {label, value} pairs admin sees
+  suggestedAction String                             // one-line plain-English suggestion
+  snoozedUntil   DateTime?                           // member-set hide window
+  dismissedAt    DateTime?
+  dismissedBy    String?
+  actedAt        DateTime?
+  actedBy        String?
+  actedNote      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([kind, suiteNumber, userId])              // one open suggestion per kind+target — re-running cron updates
+  @@index([dismissedAt, snoozedUntil, createdAt])
+  @@index([severity, createdAt])
+}
+
+// iter-187 — Public proof-of-mailing certificate (Tier 13 #96).
+// Issued at intake (admin-driven OR auto on iter-83 scan). The
+// certificate documents that NOHO received a piece of mail from
+// sender X on date Y, addressed to member Z's suite — a printable
+// chain-of-custody artifact members can show in court / disputes /
+// HR / IRS. Each cert has a public verify URL keyed off
+// `verifyToken` so anyone (lawyer, judge, agency) can prove
+// authenticity at /cert/<token>. The verify page renders the same
+// data + a "verified by NOHO Mailbox" sigil so the recipient can
+// trust what the member showed them.
+model MailingCertificate {
+  id                  String    @id @default(cuid())
+  mailItemId          String                            // the MailItem being certified
+  certificateNumber   String    @unique                 // human-readable "NMC-2026-00001234"
+  verifyToken         String    @unique                 // 16-char public URL token (rotatable)
+  // Immutable snapshots — even if the source MailItem is later edited
+  // or deleted, the certificate stays correct. Court evidence rules
+  // require this.
+  recipientName       String
+  recipientSuite      String?
+  senderName          String
+  itemType            String                            // "Letter" | "Package" | etc — copied from MailItem.type
+  itemDate            String                            // YYYY-MM-DD intake date
+  trackingNumber      String?
+  carrier             String?
+  weightOz            Int?
+  exteriorImageUrl    String?
+  notes               String?                           // optional admin note ("hand-delivered + ID verified")
+  issuedById          String?                           // admin user id
+  revokedAt           DateTime?
+  revokedReason       String?
+  createdAt           DateTime  @default(now())
+
+  @@index([mailItemId])
+  @@index([verifyToken])
+  @@index([createdAt])
 }
 
 // iter-184 — Carrier label rate shopping (Tier 12 #93).
@@ -1403,13 +1611,29 @@ model ShopOrder {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// iter-129 + iter-192 — Member's saved forwarding-address book.
+// iter-192 promoted from a minimal {label, address} model to a full
+// address book: per-row default flag (exactly one default per user
+// enforced in server action via demote-siblings), optional recipient
+// name override, category enum for visual grouping, free-text notes,
+// lastUsedAt stamped by iter-170 batch sweep.
 model ForwardingAddress {
-  id      String @id @default(cuid())
-  userId  String
-  label   String
-  address String
+  id            String   @id @default(cuid())
+  userId        String
+  label         String                         // member-friendly nickname e.g. "Snowbird condo"
+  address       String                         // multi-line street address
+  recipientName String?                        // optional name override on the package
+  category      String?                        // "home" | "work" | "snowbird" | "family" | "storage" | "other"
+  notes         String?                        // ≤300 chars
+  isDefault     Boolean  @default(false)
+  lastUsedAt    DateTime?                      // bumped by iter-170 when used in a batch
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isDefault])
+  @@index([userId, lastUsedAt])
 }
 
 model ContactSubmission {
@@ -1734,6 +1958,11 @@ model Referral {
   creditCents  Int       @default(1000) // $10 credit for both parties
   createdAt    DateTime  @default(now())
   creditedAt   DateTime?
+  // iter-200 — Referral landing page analytics. Bumped each time the
+  // public /r/{code} page is visited; null landingVisits means "never
+  // visited via landing" (existing rows backfill 0 on read).
+  landingVisits  Int       @default(0)
+  lastLandingAt  DateTime?
 
   referrer User @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
 
@@ -2565,5 +2794,95 @@ model ApiTokenUsage {
   token       ApiToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
 
   @@index([tokenId, createdAt])
+  @@index([createdAt])
+}
+
+// iter-193 — Mailbox color-tag system (Tier 13 #102).
+//
+// Admin defines a small library of named, colored tags ("VIP",
+// "Compliance flag", "Translator-needed", "Snowbird-Q4") and assigns
+// any combination to suites. Renders as colored dots on every cell of
+// the iter-117 occupancy heatmap so triage is one glance instead of
+// drilling into each customer record.
+//
+// Color is hex (e.g. "#E70013") so the UI can use it directly for both
+// the tag chip background and the suite-cell dot fill. Description is
+// the hover/tooltip explanation of what the tag means in practice.
+model MailboxTag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  color       String                                  // hex e.g. "#E70013"
+  description String?                                 // ≤200 chars
+  createdAt   DateTime @default(now())
+  createdById String?
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  assignments MailboxTagAssignment[]
+
+  @@index([name])
+}
+
+// iter-196 — Carrier insurance claim assistant (Tier 13 #105).
+//
+// Tracks an admin-initiated claim against a carrier (USPS/UPS/FedEx/DHL/
+// Amazon) for a damaged/lost mail item. The assistant gathers all the
+// evidence the carrier portals ask for — declared value (iter-91),
+// intake + supplemental photos (iter-135), tracking number (iter-94),
+// storage timeline (iter-87) — and pre-fills it as a JSON blob the
+// admin pastes into the carrier portal. We can't auto-submit (no
+// public claim API for any major carrier), but we can collapse the
+// 30-min "find all the evidence" busywork into 2 minutes.
+//
+// Status lifecycle:
+//   Draft → Filed → (Paid | Denied | Closed)
+// Filing date is when admin records the carrier's claim # back in our
+// system. Paid/Denied capture the carrier's resolution + amount.
+model InsuranceClaim {
+  id                String    @id @default(cuid())
+  mailItemId        String
+  userId            String                              // denormalized for fast member-lookup queries
+  carrier           String                              // "USPS" | "UPS" | "FedEx" | "DHL" | "Amazon" | "Other"
+  claimType         String                              // "damaged" | "lost" | "missing_contents" | "other"
+  declaredValueCents Int                                // snapshot from MailItem at claim-start
+  claimedAmountCents Int                                // what we're actually claiming (often == declared)
+  status            String    @default("Draft")        // "Draft" | "Filed" | "Paid" | "Denied" | "Closed"
+  carrierClaimNumber String?                            // returned by carrier portal once admin files
+  evidenceJson      String                              // JSON blob: photos[], timeline[], tracking, sender, intakeDate
+  prefillJson       String                              // JSON blob: per-carrier form fields admin can paste
+  notes             String?                             // free-form admin notes
+  filedAt           DateTime?
+  filedById         String?
+  paidAt            DateTime?
+  paidAmountCents   Int?
+  deniedAt          DateTime?
+  denialReason      String?
+  closedAt          DateTime?
+  createdAt         DateTime  @default(now())
+  createdById       String
+  updatedAt         DateTime  @default(now()) @updatedAt
+
+  mailItem MailItem @relation(fields: [mailItemId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([mailItemId])
+  @@index([status])
+  @@index([carrier, status])
+  @@index([createdAt])
+}
+
+model MailboxTagAssignment {
+  id          String   @id @default(cuid())
+  userId      String
+  tagId       String
+  note        String?                                 // optional context per assignment
+  createdAt   DateTime @default(now())
+  createdById String?
+
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  MailboxTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tagId])                           // each tag at most once per user
+  @@index([userId])
+  @@index([tagId])
   @@index([createdAt])
 }

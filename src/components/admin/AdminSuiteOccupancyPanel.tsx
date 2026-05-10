@@ -12,6 +12,7 @@ import {
   type SuiteCell,
   type SuiteOccupancyResult,
 } from "@/app/actions/suiteOccupancy";
+import { getAllUserTagAssignments, type SuiteTagSummary } from "@/app/actions/mailboxTags";
 
 const NOHO_BLUE = "#1976FF";
 const NOHO_BLUE_DEEP = "#0F5BD9";
@@ -24,12 +25,22 @@ export default function AdminSuiteOccupancyPanel() {
   const [pending, startTransition] = useTransition();
   const [filter, setFilter] = useState<Filter>("all");
   const [selected, setSelected] = useState<SuiteCell | null>(null);
+  // iter-193: per-user tag overlay. Renders as colored dots inside each
+  // suite cell + as full chips in the detail drawer. Loaded in parallel
+  // with the occupancy data so the heatmap is one synchronous render.
+  const [tagsByUserId, setTagsByUserId] = useState<Map<string, SuiteTagSummary>>(new Map());
 
   function refresh() {
     startTransition(async () => {
       try {
-        const r = await getSuiteOccupancy();
+        const [r, tagSummaries] = await Promise.all([
+          getSuiteOccupancy(),
+          getAllUserTagAssignments().catch(() => [] as SuiteTagSummary[]),
+        ]);
         setData(r);
+        const m = new Map<string, SuiteTagSummary>();
+        for (const s of tagSummaries) m.set(s.userId, s);
+        setTagsByUserId(m);
       } catch {
         setData(null);
       }
@@ -95,26 +106,41 @@ export default function AdminSuiteOccupancyPanel() {
           <p className="px-2 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>No occupied suites yet.</p>
         ) : (
           <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(54px, 1fr))" }}>
-            {visible.map((c) => (
-              <button
-                key={c.suite}
-                type="button"
-                onClick={() => setSelected(c)}
-                className="aspect-square rounded-md flex flex-col items-center justify-center text-[10px] font-mono font-black transition-transform hover:scale-110"
-                style={cellStyle(c)}
-                title={c.status === "vacant"
-                  ? `Suite ${c.suite} · vacant`
-                  : `${c.userName ?? "(unknown)"} · suite ${c.suite} · ${c.recentMailCount} mail items in last 30d${c.daysSinceLastIntake != null ? ` · last intake ${c.daysSinceLastIntake}d ago` : ""}`}
-              >
-                <span style={{ fontSize: 11 }}>{c.suite}</span>
-                {c.status !== "vacant" && c.recentMailCount > 0 && (
-                  <span style={{ fontSize: 8, opacity: 0.85 }}>×{c.recentMailCount}</span>
-                )}
-                {c.status === "vacant" && (
-                  <span style={{ fontSize: 8, opacity: 0.7 }}>—</span>
-                )}
-              </button>
-            ))}
+            {visible.map((c) => {
+              const cellTags = c.userId ? tagsByUserId.get(c.userId)?.tags ?? [] : [];
+              const tagTitle = cellTags.length > 0 ? ` · tags: ${cellTags.map((t) => t.name).join(", ")}` : "";
+              return (
+                <button
+                  key={c.suite}
+                  type="button"
+                  onClick={() => setSelected(c)}
+                  className="relative aspect-square rounded-md flex flex-col items-center justify-center text-[10px] font-mono font-black transition-transform hover:scale-110"
+                  style={cellStyle(c)}
+                  title={c.status === "vacant"
+                    ? `Suite ${c.suite} · vacant`
+                    : `${c.userName ?? "(unknown)"} · suite ${c.suite} · ${c.recentMailCount} mail items in last 30d${c.daysSinceLastIntake != null ? ` · last intake ${c.daysSinceLastIntake}d ago` : ""}${tagTitle}`}
+                >
+                  <span style={{ fontSize: 11 }}>{c.suite}</span>
+                  {c.status !== "vacant" && c.recentMailCount > 0 && (
+                    <span style={{ fontSize: 8, opacity: 0.85 }}>×{c.recentMailCount}</span>
+                  )}
+                  {c.status === "vacant" && (
+                    <span style={{ fontSize: 8, opacity: 0.7 }}>—</span>
+                  )}
+                  {/* iter-193: colored tag dots, top-right of cell */}
+                  {cellTags.length > 0 && (
+                    <span className="absolute top-0.5 right-0.5 flex gap-0.5" aria-hidden>
+                      {cellTags.slice(0, 4).map((t) => (
+                        <span key={t.id} className="block rounded-full" style={{ width: 5, height: 5, background: t.color, boxShadow: "0 0 1px rgba(0,0,0,0.5)" }} />
+                      ))}
+                      {cellTags.length > 4 && (
+                        <span className="text-[7px] font-black leading-none" style={{ color: "rgba(0,0,0,0.65)" }}>+{cellTags.length - 4}</span>
+                      )}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -154,6 +180,25 @@ export default function AdminSuiteOccupancyPanel() {
                   <Stat label="Status" value={selected.status === "occupied_active" ? "Active" : "Dormant"} />
                   <Stat label="Signed up" value={selected.signedUpAtIso ? new Date(selected.signedUpAtIso).toLocaleDateString() : "—"} />
                 </div>
+                {/* iter-193: tag chips for the selected suite */}
+                {(() => {
+                  const tags = selected.userId ? tagsByUserId.get(selected.userId)?.tags ?? [] : [];
+                  if (tags.length === 0) return null;
+                  return (
+                    <div className="mt-3">
+                      <p className="text-[9.5px] font-black uppercase tracking-wider mb-1" style={{ color: "rgba(45,16,15,0.55)" }}>Mailbox tags</p>
+                      <div className="flex flex-wrap gap-1">
+                        {tags.map((t) => (
+                          <span key={t.id} className="text-[10px] font-black px-1.5 py-0.5 rounded"
+                            style={{ background: t.color, color: "white", border: `1px solid ${t.color}` }}
+                            title={[t.description, t.note ? `Note: ${t.note}` : null].filter(Boolean).join(" · ") || undefined}>
+                            {t.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
                 {selected.userId && (
                   <a href={`/admin?tab=customers&q=${encodeURIComponent(selected.userEmail ?? "")}`}
                     className="mt-3 block w-full text-center py-2.5 rounded-lg text-white font-black text-[12px]"

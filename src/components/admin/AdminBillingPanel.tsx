@@ -395,13 +395,31 @@ export default function AdminBillingPanel() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="font-black text-lg uppercase tracking-wide" style={{ color: NOHO_INK }}>
-            Billing & Renewals
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              color: "#1A1D23",
+              letterSpacing: "-0.01em",
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+            }}
+          >
+            Billing
           </h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.5)" }}>
-            Manage plan payments, late fees, and auto-renewals
-          </p>
+          <span
+            className="text-[15px] hidden sm:inline"
+            style={{
+              color: "#1976FF",
+              fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+              transform: "translateY(-1px)",
+              display: "inline-block",
+            }}
+          >
+            renewals &amp; receivables
+          </span>
+          <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+            · {overview ? `${overview.overdue.length} overdue · ${overview.warning.length} expiring · ${overview.upToDate.length} up to date` : "loading"}
+          </span>
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
