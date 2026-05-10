@@ -138,27 +138,26 @@ export function AdminQRPickupPanel() {
         />
       </div>
 
-      {/* ─── SCAN ZONE — hero card with animated scanning rings ────── */}
+      {/* ─── SCAN ZONE — iPad-OS white card with subtle accent rings ────── */}
       <div
-        className="rounded-3xl p-6 sm:p-8 relative overflow-hidden"
+        className="rounded-3xl p-6 sm:p-8 relative overflow-hidden bg-white"
         style={{
-          background:
-            "radial-gradient(ellipse at top, rgba(26,46,58,0.95) 0%, rgba(14,24,32,0.98) 60%, #0A1218 100%)",
-          boxShadow: "0 20px 60px rgba(10,18,24,0.4), inset 0 1px 0 rgba(247,230,194,0.05)",
+          border: "1px solid #ECEEF1",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 12px 32px rgba(0,0,0,0.06)",
         }}
       >
-        {/* Background glow + grid */}
+        {/* Subtle accent glow that follows scan state */}
         <div
           aria-hidden="true"
-          className="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-15 blur-3xl pointer-events-none"
+          className="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-[0.08] blur-3xl pointer-events-none"
           style={{ background: scanZoneAccent }}
         />
         <div
           aria-hidden="true"
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          className="absolute inset-0 opacity-[0.025] pointer-events-none"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
+              "linear-gradient(rgba(25,118,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(25,118,255,0.5) 1px, transparent 1px)",
             backgroundSize: "44px 44px",
             maskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
           }}
@@ -197,7 +196,7 @@ export function AdminQRPickupPanel() {
                   : "Ready to scan"}
               </span>
             </div>
-            <span className="text-[10px] font-bold" style={{ color: "rgba(247,230,194,0.4)" }}>
+            <span className="text-[10px] font-bold" style={{ color: "#7A8290" }}>
               QR · BARCODE · KEYBOARD
             </span>
           </div>
@@ -227,10 +226,10 @@ export function AdminQRPickupPanel() {
               placeholder="ENTER 8-CHAR CODE"
               className="w-full font-mono font-black text-3xl sm:text-4xl tracking-[0.3em] text-center rounded-2xl px-4 py-5 transition-all"
               style={{
-                background: "rgba(247,230,194,0.08)",
+                background: "#F4F5F7",
                 border: `2px solid ${scanZoneAccent}`,
-                color: NOHO_CREAM,
-                boxShadow: `0 0 0 4px ${scanZoneAccent}22, inset 0 1px 0 rgba(247,230,194,0.06)`,
+                color: NOHO_INK,
+                boxShadow: `0 0 0 4px ${scanZoneAccent}22, inset 0 1px 0 rgba(0,0,0,0.02)`,
                 fontVariantLigatures: "none",
               }}
               autoFocus
@@ -266,16 +265,16 @@ export function AdminQRPickupPanel() {
               }}
               className="px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.18em]"
               style={{
-                background: "rgba(247,230,194,0.06)",
-                color: "rgba(247,230,194,0.65)",
-                border: "1px solid rgba(247,230,194,0.12)",
+                background: "#F4F5F7",
+                color: "#7A8290",
+                border: "1px solid #ECEEF1",
               }}
             >
               Clear
             </button>
           </div>
 
-          <p className="text-[10px] text-center mt-3" style={{ color: "rgba(247,230,194,0.35)" }}>
+          <p className="text-[10px] text-center mt-3" style={{ color: "#7A8290" }}>
             Barcode scanner auto-submits · Press <kbd className="font-mono">Enter</kbd> to confirm
           </p>
         </div>

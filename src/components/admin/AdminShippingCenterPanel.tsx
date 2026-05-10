@@ -662,7 +662,7 @@ function CarrierTodayMix({ counts, total }: { counts: Map<SubviewId, number>; to
     <div className="mt-2.5 max-w-[420px]">
       <div
         className="h-2 rounded-full overflow-hidden flex"
-        style={{ background: "rgba(247,230,194,0.10)", border: "1px solid rgba(247,230,194,0.16)" }}
+        style={{ background: "#F4F5F7", border: "1px solid #ECEEF1" }}
       >
         {entries.map(([id, n]) => (
           <span
@@ -681,11 +681,11 @@ function CarrierTodayMix({ counts, total }: { counts: Map<SubviewId, number>; to
           <span
             key={id}
             className="inline-flex items-center gap-1 text-[9.5px] font-bold"
-            style={{ color: "rgba(247,230,194,0.75)" }}
+            style={{ color: "#7A8290" }}
           >
             <span className="inline-block w-1.5 h-1.5 rounded-sm" style={{ background: CARRIER_MIX_COLOR[id] ?? NOHO_BLUE }} />
             {CARRIER_MIX_LABEL[id] ?? id}
-            <span className="text-[#EBF2FF] font-black">·{n}</span>
+            <span style={{ color: NOHO_INK }} className="font-black">·{n}</span>
           </span>
         ))}
       </div>
@@ -762,19 +762,19 @@ function ShippingCenterHero({
   }
   return (
     <div
-      className="relative rounded-3xl overflow-hidden p-5 sm:p-7"
+      className="relative rounded-3xl overflow-hidden p-5 sm:p-7 bg-white"
       style={{
-        background: "radial-gradient(ellipse at top, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
-        boxShadow: "0 30px 80px rgba(10,18,24,0.45), inset 0 1px 0 rgba(255,255,255,0.04)",
+        border: "1px solid #ECEEF1",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 18px 46px rgba(0,0,0,0.06)",
       }}
     >
-      {/* Floor grid (perspective) */}
+      {/* Subtle floor grid in iPad-OS blue (low opacity) */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 pointer-events-none opacity-[0.18]"
+        className="absolute inset-0 pointer-events-none opacity-[0.04]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(147,196,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(147,196,255,0.5) 1px, transparent 1px)",
+            "linear-gradient(rgba(25,118,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(25,118,255,0.5) 1px, transparent 1px)",
           backgroundSize: "44px 44px",
           maskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
           transform: "perspective(800px) rotateX(58deg) translateY(20%) scale(1.4)",
@@ -782,9 +782,9 @@ function ShippingCenterHero({
         }}
       />
 
-      {/* Glow orbs */}
-      <div aria-hidden="true" className="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none" style={{ background: NOHO_BLUE }} />
-      <div aria-hidden="true" className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full opacity-15 blur-3xl pointer-events-none" style={{ background: NOHO_RED }} />
+      {/* Soft accent glows */}
+      <div aria-hidden="true" className="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-[0.08] blur-3xl pointer-events-none" style={{ background: NOHO_BLUE }} />
+      <div aria-hidden="true" className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full opacity-[0.05] blur-3xl pointer-events-none" style={{ background: NOHO_RED }} />
 
       <div className="relative z-10"><HeroBody activeSubview={activeSubview} onPick={onPick} todayCount={todayCount} todayRevenueCents={todayRevenueCents} todayMarginCents={todayMarginCents} openOrderCount={openOrderCount} stuckOrderCount={stuckOrderCount} carrierTodayCounts={carrierTodayCounts} /></div>
     </div>
@@ -810,14 +810,14 @@ function HeroBody({
         {/* Header strip */}
         <div className="flex items-start justify-between flex-wrap gap-3 mb-5">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.28em] mb-1" style={{ color: "rgba(147,196,255,0.6)" }}>
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] mb-1" style={{ color: `${NOHO_BLUE}B0` }}>
               <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: NOHO_RED, boxShadow: `0 0 8px ${NOHO_RED}` }} />
               FLEET OPERATIONS · LIVE
             </p>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: NOHO_CREAM, fontFamily: "var(--font-baloo), sans-serif" }}>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: NOHO_INK, fontFamily: "var(--font-baloo), sans-serif" }}>
               Shipping Center
             </h2>
-            <p className="text-xs mt-1" style={{ color: "rgba(247,230,194,0.55)" }}>
+            <p className="text-xs mt-1" style={{ color: "#7A8290" }}>
               Five carriers. One console. Every label lands here.
             </p>
             {/* Per-carrier today-mix mini-bar — at-a-glance stacked
@@ -847,9 +847,9 @@ function HeroBody({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 self-stretch px-3 rounded-xl text-[10.5px] font-black uppercase tracking-wider transition-all hover:-translate-y-0.5"
               style={{
-                background: "rgba(247,230,194,0.10)",
-                color: NOHO_CREAM,
-                border: `1px solid ${NOHO_CREAM}40`,
+                background: "#F4F5F7",
+                color: NOHO_INK,
+                border: "1px solid #ECEEF1",
               }}
               title="Open today's printable run sheet"
             >
@@ -876,17 +876,17 @@ function HeroBody({
                 onClick={() => onPick(s.id)}
                 className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-all"
                 style={{
-                  background: active ? NOHO_BLUE : "rgba(255,255,255,0.06)",
-                  border: `1px solid ${active ? NOHO_BLUE : "rgba(255,255,255,0.08)"}`,
-                  color: active ? "#fff" : "rgba(247,230,194,0.85)",
+                  background: active ? NOHO_BLUE : "#F4F5F7",
+                  border: `1px solid ${active ? NOHO_BLUE : "#ECEEF1"}`,
+                  color: active ? "#fff" : NOHO_INK,
                 }}
               >
-                <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: active ? "rgba(255,255,255,0.15)" : "rgba(147,196,255,0.08)" }}>
+                <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: active ? "rgba(255,255,255,0.15)" : "#FFFFFF" }}>
                   <s.Icon className="w-4 h-4" />
                 </span>
                 <div className="min-w-0">
                   <p className="text-[11px] font-black truncate">{s.label}</p>
-                  <p className="text-[9px] truncate" style={{ color: active ? "rgba(255,255,255,0.7)" : "rgba(247,230,194,0.5)" }}>{s.hint}</p>
+                  <p className="text-[9px] truncate" style={{ color: active ? "rgba(255,255,255,0.7)" : "#7A8290" }}>{s.hint}</p>
                 </div>
               </button>
             );
@@ -909,18 +909,18 @@ function StatTile({
   title?: string;
 }) {
   const reduce = useReducedMotion();
-  // Tile palette stays inside the dark-cinematic hero — cyan for neutral,
-  // teal for revenue, green for margin, NOHO red for queue/urgent. Stuck
-  // gets a deeper red gradient + halo + subtle pulse so the eye snaps to it.
+  // Tile palette for iPad-OS chrome — soft white surface with colored accent
+  // label and ink value. Stuck keeps a red tint + halo + subtle pulse so the
+  // eye still snaps to it on the white hero.
   const palette = stuck
-    ? { bg: "linear-gradient(135deg, rgba(231,0,19,0.30), rgba(231,0,19,0.18))", border: "rgba(231,0,19,0.65)", labelC: "rgba(255,200,200,0.95)", valueC: "#FFD0D5", subC: "rgba(255,200,200,0.85)" }
+    ? { bg: "rgba(255,59,48,0.08)", border: "rgba(255,59,48,0.55)", labelC: "#dc2626", valueC: "#dc2626", subC: "#dc2626" }
     : revenue
-    ? { bg: "rgba(51,116,133,0.20)", border: "rgba(51,116,133,0.45)", labelC: "rgba(180,221,232,0.85)", valueC: "#CBE7EF", subC: "rgba(180,221,232,0.6)" }
+    ? { bg: "#F4F5F7", border: "#ECEEF1", labelC: `${NOHO_BLUE_DEEP}B0`, valueC: NOHO_INK, subC: "#7A8290" }
     : margin
-      ? { bg: "rgba(22,163,74,0.18)", border: "rgba(22,163,74,0.40)", labelC: "rgba(180,232,196,0.85)", valueC: "#B7F0CB", subC: "rgba(180,232,196,0.55)" }
+      ? { bg: "#F4F5F7", border: "#ECEEF1", labelC: "#15803d", valueC: NOHO_INK, subC: "#7A8290" }
       : accent
-        ? { bg: "rgba(231,0,19,0.15)", border: "rgba(231,0,19,0.35)", labelC: "rgba(255,180,187,0.85)", valueC: "#FFB4BB", subC: "rgba(255,180,187,0.6)" }
-        : { bg: "rgba(147,196,255,0.08)", border: "rgba(147,196,255,0.16)", labelC: "rgba(147,196,255,0.7)", valueC: NOHO_CREAM, subC: "rgba(247,230,194,0.5)" };
+        ? { bg: "#F4F5F7", border: "#ECEEF1", labelC: "#dc2626", valueC: NOHO_INK, subC: "#7A8290" }
+        : { bg: "#F4F5F7", border: "#ECEEF1", labelC: `${NOHO_BLUE}B0`, valueC: NOHO_INK, subC: "#7A8290" };
   return (
     <div
       className="rounded-xl px-3.5 py-2.5 min-w-[112px]"

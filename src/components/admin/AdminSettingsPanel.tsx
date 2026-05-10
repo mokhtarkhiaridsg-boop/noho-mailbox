@@ -7,7 +7,6 @@ const NOHO_BLUE_DEEP = "#0F5BD9";
 const NOHO_INK = "#1A1D23";
 const NOHO_AMBER = "#F5A623";
 const NOHO_RED = "#FF3B30";
-const NOHO_CREAM = "#EBF2FF";
 const NOHO_GREEN = "#22C55E";
 
 type StoreField = {
@@ -107,61 +106,35 @@ export function AdminSettingsPanel() {
 
   return (
     <div className="space-y-5">
-      {/* Hero strip — Command Tower variant. */}
-      <div
-        className="relative overflow-hidden rounded-2xl"
-        style={{
-          background:
-            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
-          boxShadow:
-            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
-        <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+      {/* Brand title row — iPad-OS white shell. */}
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="font-bold tracking-tight"
           style={{
-            backgroundImage:
-              "radial-gradient(circle at 25% 30%, white 1.2px, transparent 1.2px)",
-            backgroundSize: "24px 24px",
+            fontFamily: "var(--font-baloo, system-ui)",
+            fontSize: "clamp(1.5rem, 3vw, 1.875rem)",
+            color: NOHO_INK,
           }}
-        />
-        <div className="absolute right-6 top-6 opacity-15 pointer-events-none">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke={NOHO_CREAM} strokeWidth="1.2">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-        </div>
-
-        <div className="relative p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div
-              className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: NOHO_AMBER }}
-            />
-            <span
-              className="text-[10px] font-black uppercase tracking-[0.2em]"
-              style={{ color: NOHO_CREAM }}
-            >
-              Store Configuration
-            </span>
-          </div>
-          <h2
-            className="font-black tracking-tight mb-1"
-            style={{
-              fontFamily: "var(--font-baloo, system-ui)",
-              fontSize: "clamp(1.5rem, 3vw, 2rem)",
-              color: "white",
-              textShadow: "0 2px 8px rgba(0,0,0,0.30)",
-            }}
-          >
-            Settings
-          </h2>
-          <p className="text-[12px] font-medium max-w-md" style={{ color: `${NOHO_CREAM}cc` }}>
-            Storefront information shown to customers and notification preferences for the
-            mailroom team.
-          </p>
-        </div>
+        >
+          Settings
+        </h2>
+        <span
+          style={{
+            color: NOHO_BLUE,
+            fontFamily: "var(--font-pacifico, cursive)",
+            fontSize: "1.05rem",
+          }}
+        >
+          tune your storefront
+        </span>
+        <span className="text-[12px] font-medium" style={{ color: "#7A8290" }}>
+          · {storeInfo.length} store fields · {notifications.filter((n) => n.on).length}/{notifications.length} alerts on
+        </span>
       </div>
+      <p className="text-[12px] font-medium max-w-md -mt-3" style={{ color: "#7A8290" }}>
+        Storefront information shown to customers and notification preferences for the
+        mailroom team.
+      </p>
 
       {/* Store info card */}
       <div

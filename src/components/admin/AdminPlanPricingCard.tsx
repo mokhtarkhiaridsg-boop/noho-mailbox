@@ -112,20 +112,19 @@ export function AdminPlanPricingCard() {
         border: "1px solid #ECEEF1",
       }}
     >
-      {/* Branded header strip — Command Tower variant. */}
+      {/* Branded header strip — iPad-OS chrome variant. */}
       <div
-        className="relative px-5 py-4 overflow-hidden"
+        className="relative px-5 py-4 overflow-hidden bg-white"
         style={{
-          background:
-            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
+          borderBottom: "1px solid #ECEEF1",
         }}
       >
         <div
           aria-hidden="true"
-          className="absolute inset-0 pointer-events-none opacity-[0.13]"
+          className="absolute inset-0 pointer-events-none opacity-[0.04]"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
+              "linear-gradient(rgba(25,118,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(25,118,255,0.5) 1px, transparent 1px)",
             backgroundSize: "44px 44px",
             maskImage:
               "radial-gradient(ellipse at center, black 30%, transparent 80%)",
@@ -136,11 +135,11 @@ export function AdminPlanPricingCard() {
             <div className="flex items-center gap-2 mb-1">
               <div
                 className="w-1.5 h-1.5 rounded-full animate-pulse"
-                style={{ background: NOHO_AMBER }}
+                style={{ background: NOHO_BLUE }}
               />
               <span
                 className="text-[9px] font-black uppercase tracking-[0.2em]"
-                style={{ color: NOHO_CREAM }}
+                style={{ color: `${NOHO_BLUE}B0` }}
               >
                 /pricing · live config
               </span>
@@ -148,13 +147,13 @@ export function AdminPlanPricingCard() {
             <h3
               className="font-black text-lg leading-tight"
               style={{
-                color: "white",
+                color: NOHO_INK,
                 fontFamily: "var(--font-baloo, system-ui)",
               }}
             >
               Plan Pricing
             </h3>
-            <p className="text-[11px] mt-0.5" style={{ color: `${NOHO_CREAM}aa` }}>
+            <p className="text-[11px] mt-0.5" style={{ color: "#7A8290" }}>
               What customers see on the pricing page · whole-dollar amounts
             </p>
           </div>
@@ -162,8 +161,8 @@ export function AdminPlanPricingCard() {
             <span
               className="text-[10px] font-black px-2.5 py-1.5 rounded-lg uppercase tracking-wider"
               style={{
-                background: msg.ok ? `${NOHO_GREEN}22` : `${NOHO_RED}22`,
-                color: msg.ok ? "#bbf7d0" : "#fecaca",
+                background: msg.ok ? `${NOHO_GREEN}1A` : `${NOHO_RED}1A`,
+                color: msg.ok ? "#15803d" : "#dc2626",
                 border: `1px solid ${msg.ok ? NOHO_GREEN : NOHO_RED}66`,
               }}
             >
