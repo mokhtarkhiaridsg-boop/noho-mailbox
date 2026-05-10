@@ -11,7 +11,8 @@
  */
 
 import { useEffect, useState, useTransition } from "react";
-import { getCapacityHeatmap, dayOfWeekName, type HeatmapResult } from "@/app/actions/capacityHeatmap";
+import { getCapacityHeatmap } from "@/app/actions/capacityHeatmap";
+import { dayOfWeekName, type HeatmapResult } from "@/lib/capacityHeatmap-types";
 
 const T = {
   surface: "#FFFFFF",

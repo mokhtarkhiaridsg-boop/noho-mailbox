@@ -17,22 +17,19 @@
 import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
-
-export const CARRIER_OPTIONS = ["Cheapest", "USPS", "UPS", "FedEx", "DHL"] as const;
-export type CarrierPreference = typeof CARRIER_OPTIONS[number];
-
-export const CARRIER_LABELS: Record<CarrierPreference, { label: string; emoji: string; sub: string }> = {
-  Cheapest: { label: "Cheapest", emoji: "💰", sub: "Lowest-cost option across all carriers" },
-  USPS:     { label: "USPS",     emoji: "📮", sub: "Best for letters + small packages, residential" },
-  UPS:      { label: "UPS",      emoji: "🚚", sub: "Reliable for medium/large packages, business" },
-  FedEx:    { label: "FedEx",    emoji: "📦", sub: "Fast express + international" },
-  DHL:      { label: "DHL",      emoji: "✈️", sub: "International-only specialty" },
-};
-
-export function asCarrierPreference(s: string | null | undefined): CarrierPreference {
-  if (!s) return "Cheapest";
-  return (CARRIER_OPTIONS as readonly string[]).includes(s) ? (s as CarrierPreference) : "Cheapest";
-}
+// Constants + non-async helpers live in lib/ — Next 16 forbids
+// non-async exports in "use server" files.
+import {
+  CARRIER_OPTIONS,
+  CARRIER_LABELS,
+  asCarrierPreference,
+  type CarrierPreference,
+} from "@/lib/carrierPreference-types";
+// Re-export so existing imports of CARRIER_OPTIONS / CARRIER_LABELS /
+// CarrierPreference / asCarrierPreference from the action path keep
+// working while we migrate callers.
+export { CARRIER_OPTIONS, CARRIER_LABELS, asCarrierPreference };
+export type { CarrierPreference };
 
 export async function getMyCarrierPreference(): Promise<{ preferred: CarrierPreference }> {
   const session = await verifySession();

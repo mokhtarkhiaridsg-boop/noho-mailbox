@@ -19,32 +19,14 @@
 import { prisma } from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/dal";
 import { getOperatingHours } from "@/app/actions/operatingHours";
+// Types + non-async helpers live in lib/ — Next 16 forbids non-async
+// exports in "use server" files. Re-export so existing import paths
+// still resolve until the AdminCapacityHeatmapPanel migration lands.
+import type { HeatmapEventKind, HeatmapCell, HeatmapResult } from "@/lib/capacityHeatmap-types";
+export type { HeatmapEventKind, HeatmapCell, HeatmapResult };
 
 const WINDOW_DAYS_DEFAULT = 90;
 const WINDOW_DAYS_MAX = 365;
-
-export type HeatmapEventKind = "intake" | "pickup" | "bellring" | "appointment";
-
-export type HeatmapCell = {
-  dayOfWeek: number;     // 0..6, Sun..Sat in bureau TZ
-  hour: number;          // 0..23 in bureau TZ
-  count: number;
-};
-
-export type HeatmapResult = {
-  windowDays: number;
-  totalEvents: number;
-  byKind: Record<HeatmapEventKind, number>;
-  cells: HeatmapCell[];                            // 168 cells (7×24), all populated even when count=0
-  peakDayOfWeek: number;
-  peakHour: number;
-  peakCount: number;
-  busiestWindow: { day: number; startHour: number; endHour: number; count: number } | null;
-  timezone: string;
-};
-
-const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-export function dayOfWeekName(d: number): string { return DAY_NAMES[d] ?? "?"; }
 
 // In-bureau-TZ extraction: format the date with the bureau timezone +
 // extract weekday + hour. JS Intl avoids a per-row Date allocation
