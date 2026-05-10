@@ -219,7 +219,6 @@ export default function AdminMailerPanel() {
       style={{
         background: T.surface,
         border: `1px solid ${T.border}`,
-        height: "calc(100vh - 44px - 44px - 32px)",
         minHeight: 560,
       }}
     >

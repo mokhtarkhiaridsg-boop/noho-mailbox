@@ -43,6 +43,7 @@ import NotaryPanel from "./dashboard/NotaryPanel";
 import SettingsPanel from "./dashboard/SettingsPanel";
 import WalletPanel from "./dashboard/WalletPanel";
 import MessagesPanel from "./dashboard/MessagesPanel";
+import NeighborsPanel from "./dashboard/NeighborsPanel";
 import { MemberChatPanel } from "./dashboard/ChatPanel";
 import DeliveriesPanel from "./dashboard/DeliveriesPanel";
 import InvoicesPanel from "./dashboard/InvoicesPanel";
@@ -99,6 +100,7 @@ const sideNavGroups: NavGroup[] = [
     label: "Communications",
     items: [
       { Icon: IconMessage, label: "Messages",   id: "messages" },
+      { Icon: IconStar,    label: "Neighbors",  id: "neighbors" },
       { Icon: IconBell,    label: "Email Logs", id: "emails" },
     ],
   },
@@ -1024,6 +1026,7 @@ export default function DashboardClient({
           {activeTab === "messages" && (
             <MemberChatPanel meId={user.id} />
           )}
+          {activeTab === "neighbors" && <NeighborsPanel />}
           {false && (
             <MessagesPanel
               threads={threads}

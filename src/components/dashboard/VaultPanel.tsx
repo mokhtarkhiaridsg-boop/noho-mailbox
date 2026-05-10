@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { deleteVaultItem, uploadVaultItem } from "@/app/actions/vault";
+import { searchMyVault, type VaultSearchHit } from "@/app/actions/vaultAutoArchive";
 import { BRAND } from "./types";
 import { EmptyState } from "./ui";
 
@@ -61,7 +62,23 @@ export default function VaultPanel({ vaultItems }: Props) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [vaultErr, setVaultErr] = useState<string | null>(null);
 
+  // iter-218: full-text search across vault (title + extractedText + tags).
+  const [searchQ, setSearchQ] = useState("");
+  const [searchHits, setSearchHits] = useState<VaultSearchHit[] | null>(null);
+  const [searching, setSearching] = useState(false);
+
   const filtered = filter === "All" ? vaultItems : vaultItems.filter((v) => v.kind === filter);
+
+  async function runSearch(q: string) {
+    setSearchQ(q);
+    if (q.trim().length < 2) { setSearchHits(null); return; }
+    setSearching(true);
+    try {
+      const hits = await searchMyVault({ q });
+      setSearchHits(hits);
+    } catch { setSearchHits([]); }
+    finally { setSearching(false); }
+  }
 
   async function handleUpload() {
     if (!uploadFile) return;
@@ -248,6 +265,42 @@ export default function VaultPanel({ vaultItems }: Props) {
             )}
           </div>
         )}
+
+        {/* iter-218: Full-text search bar — auto-archived scans are
+            searchable by content, not just filename. */}
+        <div className="mb-3">
+          <input value={searchQ} onChange={(e) => runSearch(e.target.value)}
+            placeholder="🔎 Search by content (e.g. 'IRS', 'PG&E', 'jury duty')…"
+            className="w-full rounded-xl px-4 py-2.5 text-[12.5px]"
+            style={{ background: "white", border: "1px solid rgba(45,29,15,0.12)", color: "#2D1D0F" }} />
+          {searchHits != null && (
+            <div className="mt-3 space-y-1.5">
+              {searching && <p className="text-[11px]" style={{ color: "rgba(45,29,15,0.55)" }}>Searching…</p>}
+              {!searching && searchHits.length === 0 && (
+                <p className="text-[11px] italic" style={{ color: "rgba(45,29,15,0.55)" }}>No matches.</p>
+              )}
+              {searchHits.map((h) => (
+                <a key={h.id} href={h.blobUrl} target="_blank" rel="noopener noreferrer"
+                  className="block rounded-xl p-3" style={{ background: "rgba(51,116,133,0.04)", border: "1px solid rgba(51,116,133,0.18)", textDecoration: "none" }}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[12px] font-black" style={{ color: "#23596A" }}>{h.title}</span>
+                    {h.autoArchived && <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(34,197,94,0.10)", color: "#15803d" }}>AUTO</span>}
+                    {h.category && <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(122,130,144,0.10)", color: "#3B4252" }}>{h.category}</span>}
+                    <span className="text-[10px] ml-auto" style={{ color: "rgba(45,29,15,0.55)" }}>{new Date(h.createdAtIso).toLocaleDateString()}</span>
+                  </div>
+                  {h.excerpt && <p className="text-[10.5px] mt-1 italic" style={{ color: "rgba(45,29,15,0.65)" }}>“{h.excerpt}”</p>}
+                  {h.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {h.tags.slice(0, 6).map((t) => (
+                        <span key={t} className="text-[9.5px] px-1.5 py-0.5 rounded" style={{ background: "rgba(45,29,15,0.06)", color: "#5C4540" }}>{t}</span>
+                      ))}
+                    </div>
+                  )}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Filter pills — motion shared layoutId, brand-blue active */}
         <div className="flex gap-1 flex-wrap mb-5">

@@ -229,7 +229,6 @@ export function AdminChatPanel({ meId, customers }: Props) {
           border: `1px solid ${NOHO_INK}11`,
           boxShadow:
             "0 1px 3px rgba(45,16,15,0.04), 0 8px 22px rgba(45,16,15,0.06)",
-          height: "calc(100vh - 240px)",
           minHeight: 540,
         }}
       >

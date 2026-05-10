@@ -155,131 +155,97 @@ export function AdminQuarterlyReportPanel() {
 
   return (
     <div className="space-y-5">
-      {/* Hero strip — Command Tower variant. */}
-      <div
-        className="relative overflow-hidden rounded-2xl"
-        style={{
-          background:
-            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
-          boxShadow:
-            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
-        {/* Pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+      {/* Title row — iPad-OS branded pattern. */}
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
           style={{
-            backgroundImage:
-              "radial-gradient(circle at 25% 30%, white 1.2px, transparent 1.2px), radial-gradient(circle at 75% 75%, white 1px, transparent 1px)",
-            backgroundSize: "40px 40px, 28px 28px",
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
           }}
-        />
-        {/* Filing-cabinet corner */}
-        <div className="absolute right-6 top-6 opacity-15 pointer-events-none">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke={NOHO_CREAM} strokeWidth="1.2">
-            <rect x="3" y="3" width="18" height="6" rx="1" />
-            <rect x="3" y="9" width="18" height="6" rx="1" />
-            <rect x="3" y="15" width="18" height="6" rx="1" />
-            <line x1="9" y1="6" x2="15" y2="6" />
-            <line x1="9" y1="12" x2="15" y2="12" />
-            <line x1="9" y1="18" x2="15" y2="18" />
+        >
+          Quarterly Statements
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          this quarter&apos;s books
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {(rows ?? []).length} customers · {qmeta.range}
+        </span>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          onClick={handleGenerateAll}
+          disabled={isPending}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all hover:scale-105 disabled:opacity-50"
+          style={{
+            background: NOHO_INK,
+            color: NOHO_CREAM,
+            boxShadow: `0 4px 14px ${NOHO_INK}33`,
+          }}
+          title="Sweep — generate any missing snapshots for the current quarter"
+        >
+          {isPending ? (
+            <>
+              <div
+                className="w-2.5 h-2.5 rounded-full animate-pulse"
+                style={{ background: NOHO_BLUE }}
+              />
+              Sweeping…
+            </>
+          ) : (
+            <>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.8 1 6.5 2.7" />
+                <polyline points="21 5 21 12 14 12" />
+              </svg>
+              Generate Current Q
+            </>
+          )}
+        </button>
+        <button
+          onClick={openAllInTabs}
+          disabled={!filtered.some((r) => r.statementId)}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all disabled:opacity-50"
+          style={{
+            background: "white",
+            color: NOHO_INK,
+            border: `1px solid ${NOHO_INK}22`,
+          }}
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M14 4h6v6 M21 3l-9 9 M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
           </svg>
-        </div>
-
-        <div className="relative p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div
-              className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: NOHO_AMBER }}
-            />
-            <span
-              className="text-[10px] font-black uppercase tracking-[0.2em]"
-              style={{ color: NOHO_CREAM }}
-            >
-              CMRA Compliance · State Filings
-            </span>
-          </div>
-          <h2
-            className="font-black tracking-tight mb-1"
-            style={{
-              fontFamily: "var(--font-baloo, system-ui)",
-              fontSize: "clamp(1.5rem, 3vw, 2rem)",
-              color: "white",
-              textShadow: "0 2px 8px rgba(0,0,0,0.30)",
-            }}
-          >
-            Quarterly Statements
-          </h2>
-          <p className="text-[12px] font-medium max-w-md" style={{ color: `${NOHO_CREAM}cc` }}>
-            Auto-generated for every active customer · Q1 = Jan–Mar, Q2 = Apr–Jun, Q3 = Jul–Sep,
-            Q4 = Oct–Dec
-          </p>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button
-              onClick={handleGenerateAll}
-              disabled={isPending}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all hover:scale-105 disabled:opacity-50"
-              style={{
-                background: NOHO_CREAM,
-                color: NOHO_INK,
-                boxShadow: `0 4px 14px ${NOHO_CREAM}66`,
-              }}
-              title="Sweep — generate any missing snapshots for the current quarter"
-            >
-              {isPending ? (
-                <>
-                  <div
-                    className="w-2.5 h-2.5 rounded-full animate-pulse"
-                    style={{ background: NOHO_BLUE }}
-                  />
-                  Sweeping…
-                </>
-              ) : (
-                <>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.8 1 6.5 2.7" />
-                    <polyline points="21 5 21 12 14 12" />
-                  </svg>
-                  Generate Current Q
-                </>
-              )}
-            </button>
-            <button
-              onClick={openAllInTabs}
-              disabled={!filtered.some((r) => r.statementId)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all disabled:opacity-50"
-              style={{
-                background: `${NOHO_CREAM}1a`,
-                color: NOHO_CREAM,
-                border: `1px solid ${NOHO_CREAM}33`,
-              }}
-            >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M14 4h6v6 M21 3l-9 9 M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
-              </svg>
-              Open all in tabs
-            </button>
-            <button
-              onClick={handleScrubV1}
-              disabled={isPending}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all disabled:opacity-50 ml-auto"
-              style={{
-                background: `${NOHO_RED}1a`,
-                color: "#fecaca",
-                border: `1px solid ${NOHO_RED}66`,
-              }}
-              title="One-time PII migration — rewrite v1 snapshots to mask full DL/passport numbers"
-            >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6 M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                <line x1="10" y1="11" x2="10" y2="17" />
-                <line x1="14" y1="11" x2="14" y2="17" />
-              </svg>
-              Scrub v1 PII
-            </button>
-          </div>
-        </div>
+          Open all in tabs
+        </button>
+        <button
+          onClick={handleScrubV1}
+          disabled={isPending}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all disabled:opacity-50 ml-auto"
+          style={{
+            background: `${NOHO_RED}10`,
+            color: NOHO_RED,
+            border: `1px solid ${NOHO_RED}44`,
+          }}
+          title="One-time PII migration — rewrite v1 snapshots to mask full DL/passport numbers"
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6 M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" />
+          </svg>
+          Scrub v1 PII
+        </button>
       </div>
 
       {msg && (

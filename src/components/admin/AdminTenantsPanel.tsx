@@ -226,68 +226,32 @@ export function AdminTenantsPanel({ tenants }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Hero strip — Command Tower variant matching Overview shell. */}
-      <div
-        className="relative overflow-hidden rounded-2xl px-5 sm:px-6 py-5"
-        style={{
-          background:
-            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
-          boxShadow:
-            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 pointer-events-none opacity-[0.13]"
+      {/* Title row — iPad-OS branded pattern. */}
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
           style={{
-            backgroundImage:
-              "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
-            maskImage:
-              "radial-gradient(ellipse at center, black 30%, transparent 80%)",
-            transform:
-              "perspective(800px) rotateX(58deg) translateY(20%) scale(1.4)",
-            transformOrigin: "center bottom",
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
           }}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full opacity-15 blur-3xl pointer-events-none"
-          style={{ background: NOHO_BLUE_DEEP }}
-        />
-
-        <div className="relative">
-          <p
-            className="text-[10px] font-black uppercase tracking-[0.28em] mb-1"
-            style={{ color: "rgba(247,230,194,0.6)" }}
-          >
-            <span
-              aria-hidden
-              className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle"
-              style={{
-                background: NOHO_GREEN,
-                boxShadow: `0 0 8px ${NOHO_GREEN}`,
-              }}
-            />
-            SaaS · CMRA operators
-          </p>
-          <h2
-            className="font-bold tracking-tight"
-            style={{
-              fontSize: "clamp(1.4rem, 2.8vw, 1.8rem)",
-              color: "#FFFFFF",
-            }}
-          >
-            Tenant operations
-          </h2>
-          <p
-            className="text-[12px] mt-1 max-w-md"
-            style={{ color: "rgba(247,230,194,0.7)" }}
-          >
-            White-label NOHO Mailbox to other CMRA operators. Manage trials,
-            tiers, and billing for downstream tenants.
-          </p>
-        </div>
+        >
+          Tenant operations
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          co-working &amp; shared boxes
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {stats.activeCount} active · {stats.trial} in trial
+        </span>
       </div>
 
       {/* KPI tiles — SaaS metrics */}

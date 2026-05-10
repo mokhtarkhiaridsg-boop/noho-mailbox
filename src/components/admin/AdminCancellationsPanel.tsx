@@ -348,13 +348,31 @@ export function AdminCancellationsPanel() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="font-black text-lg uppercase tracking-wide" style={{ color: NOHO_INK }}>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              color: "#1A1D23",
+              letterSpacing: "-0.01em",
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+            }}
+          >
             Cancellations
           </h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.5)" }}>
-            Member close-out workflow · 30-day grace period · CMRA 2-year retention
-          </p>
+          <span
+            className="text-[15px] hidden sm:inline"
+            style={{
+              color: "#1976FF",
+              fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+              transform: "translateY(-1px)",
+              display: "inline-block",
+            }}
+          >
+            exits &amp; refunds
+          </span>
+          <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+            · {counts.Pending} pending · {counts.Approved} in grace · {completedThisMonth} closed this month
+          </span>
         </div>
         <button
           onClick={load}

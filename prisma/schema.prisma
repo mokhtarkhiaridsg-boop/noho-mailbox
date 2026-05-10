@@ -77,6 +77,43 @@ model User {
   kycTrustScore             Int?
   kycTrustComputedAt        DateTime?
   kycTrustFlagsJson         String?
+  // iter-221: opt-in to the bureau-wide shared-junk blocklist. Defaults
+  // to true (opt-out, not opt-in) since auto-blocking unwanted mail is
+  // a clear member benefit — but member can disable in settings.
+  shareJunkLearning         Boolean   @default(true)
+  // iter-222: Smart renewal-reminder cadence profile. JSON blob with
+  // {leadTimeDays, sampleSize, avgLatency, recomputedAtIso} learned
+  // from MailboxRenewal history. Null until the recompute sweep has
+  // observed enough renewals to personalize; falls back to fixed 7d
+  // baseline matching iter-111.
+  renewalCadenceJson        String?
+  // iter-223: opt-in to the public referral leaderboard at /leaderboard.
+  // Defaults to false (opt-IN since this is public visibility, not a
+  // private benefit). When enabled, member's first name + last initial
+  // + credited referral count surface publicly; the rest stays private.
+  leaderboardOptIn          Boolean   @default(false)
+  // iter-224: Preferred carrier for forwarding (iter-129 + rate-shop).
+  // One of "USPS" | "UPS" | "FedEx" | "DHL" | "Cheapest" (default).
+  // When set, the rate-quote helper picks the lowest-cost quote within
+  // that carrier family; falls back to global cheapest when no quote
+  // exists for the preferred carrier.
+  preferredCarrier          String?
+  // iter-232: 1-line custom slogan that prints under the suite # on every
+  // intake/pickup thermal receipt + Avery 5160 suite-pin label. Member-
+  // editable from settings, admin-editable from the customer panel.
+  // ≤80 chars; sanitized to strip control chars + collapse whitespace.
+  suitePinSlogan            String?
+  // iter-236: Weekly outbound shipment digest opt-in. When true, the
+  // Sunday cron sweep emails a recap of every ShippoLabel + iter-212
+  // ShipmentReceipt the member sent in the past 7d (with carrier +
+  // tracking + receipt links). Off by default — not everyone wants it.
+  outboundDigestOptIn       Boolean   @default(false)
+  outboundDigestLastSentAt  DateTime?
+  // iter-225: Lockbox auto-assign month-pass — when set to a future
+  // date, member's incoming packages auto-assign to a free Lockbox
+  // (iter-202) instead of holding at counter. PIN sent via iter-84
+  // SMS. Subscription billing for the pass is tracked separately.
+  lockboxMonthPassUntil     DateTime?
 
   // Box ownership type — required for CMRA compliance.
   // A company cannot exist as an individual; if Business, an Owner must be on file.
@@ -149,6 +186,13 @@ model User {
   mailerThreads           MailerThread[]
   suiteTransferRequests   SuiteTransferRequest[] @relation("TransferRequestedBy")
   suiteTransfersDecided   SuiteTransferRequest[] @relation("TransferDecidedBy")
+  // iter-231: family-transfer requests filed by this user (as primary owner).
+  mailboxFamilyTransfers  MailboxFamilyTransfer[]
+  // iter-233: address-of-record curated contacts + change-notice runs.
+  addressNotificationContacts AddressNotificationContact[]
+  addressChangeNoticeRuns     AddressChangeNoticeRun[]
+  // iter-235: lobby-playlist song suggestions filed by this user.
+  lobbyPlaylistSongs          LobbyPlaylistSong[]
   // Inverse of AgentConversation.owner. Required for Prisma relation
   // validation; AgentConversation defaults to onDelete: Cascade.
   agentConversations      AgentConversation[]
@@ -162,6 +206,16 @@ model User {
   planPauses              PlanPause[]
   // iter-207 — opt-in lobby selfie wall entries (community spotlight).
   lobbyWallEntries        LobbyWallEntry[]
+  // iter-209 — opt-in member directory profile (community/social graph).
+  neighborProfile         NeighborProfile?
+  // iter-211 — door-camera OCR matches resolved to this user.
+  doorWalkInOcrMatches    DoorWalkInOcr[]
+  // iter-212 — outbound shipment receipts (1×1in QR sticker on every label).
+  shipmentReceipts        ShipmentReceipt[]
+  // iter-216 — auto-awarded milestone badges (community + retention).
+  memberBadges            MemberBadge[]
+  // iter-226 — votes cast on the public roadmap.
+  roadmapVotes            RoadmapVote[]
 }
 
 model SharedMailboxAccess {
@@ -307,6 +361,13 @@ model MailItem {
   // iter-108 AI pattern (lib helper, fallback when ANTHROPIC_API_KEY
   // unset, audit log on every call).
   translationJson    String?
+  // iter-227: AI mail-priority inference (Tier 17 #136).
+  // 0-100 attention-priority score computed from (a) iter-218 doc-
+  // classifier category, (b) regex hits in OCR'd text, (c) sender
+  // pattern, (d) member-side flags (junkBlocked → 0). Recomputed by
+  // the iter-227 sweep when scan + classify + translate are all done.
+  priorityScore      Int?
+  priorityReasonsJson String?     // JSON array of {reason, weight} for explain-ability
 
   createdAt    DateTime @default(now())
 
@@ -331,6 +392,288 @@ model JunkSender {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// iter-221 — Bureau-wide crowdsourced junk-sender blocklist (Tier 16 #130).
+//
+// When ≥10 unique members tag the same normalized sender as junk
+// (via iter-202 JunkReport or iter-149 JunkSender rule), promote
+// it to the bureau-wide blocklist. Members opted in via
+// `User.shareJunkLearning=true` benefit from the shared learning
+// (iter-202 hook auto-flips junkBlocked on inbound mail). Admin
+// can manually add or remove from the panel.
+//
+// `evidenceCount` snapshots the # of unique reporters at promotion
+// time (audit trail). `lastReportedAt` ticks each time a fresh
+// report would have triggered if the row didn't already exist.
+model BureauJunkSender {
+  id                String    @id @default(cuid())
+  normalizedSender  String    @unique                       // lowercased + trimmed canonical sender
+  displayName       String                                  // most-recent senderRaw — preserves capitalization for UI
+  status            String    @default("Active")           // "Active" | "Removed"
+  evidenceCount     Int       @default(0)                  // # unique members who reported at promotion time
+  source            String    @default("crowdsourced")     // "crowdsourced" | "manual"
+  notes             String?
+  addedById         String?                                 // admin id when source=manual
+  addedAt           DateTime  @default(now())
+  lastReportedAt    DateTime?                               // bumped when a new report on this sender lands
+  removedAt         DateTime?
+  removedById       String?
+  removedReason     String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
+
+  @@index([status, addedAt])
+  @@index([normalizedSender])
+}
+
+// iter-226 — Public roadmap voting (Tier 16 #135).
+//
+// Admin-curated list of upcoming features that members can upvote
+// at the public `/roadmap` route. Each member gets one vote per
+// item (idempotent via @@unique). Items have a status lifecycle so
+// admin can move them through Idea → Planned → InProgress → Shipped.
+//
+// `position` lets admin manually re-order featured items above the
+// vote-count sort; defaults to 0 so vote-count sort applies.
+model RoadmapItem {
+  id           String    @id @default(cuid())
+  title        String                                       // ≤80 chars
+  description  String                                       // ≤500 chars
+  category     String?                                      // free-form, e.g. "Mobile" / "Billing" / "Notary"
+  status       String    @default("Idea")                 // "Idea" | "Planned" | "InProgress" | "Shipped" | "Declined"
+  position     Int       @default(0)                       // optional manual ordering (high = top)
+  shippedIter  Int?                                         // when status=Shipped, the iter number that delivered it
+  createdById  String?                                      // admin who added it
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+
+  votes        RoadmapVote[]
+
+  @@index([status, position])
+  @@index([createdAt])
+}
+
+model RoadmapVote {
+  id           String    @id @default(cuid())
+  roadmapItemId String
+  userId       String
+  createdAt    DateTime  @default(now())
+
+  item RoadmapItem @relation(fields: [roadmapItemId], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roadmapItemId, userId])                        // one vote per item per user
+  @@index([userId])
+  @@index([roadmapItemId])
+}
+
+// iter-217 — Smart pickup-bell QR (Tier 16 #126).
+//
+// Customer scans a single QR sticker on the front-desk bell, enters
+// their suite #, and an admin gets a push notification "🛎️ #042 is
+// at the counter". Captures who walked in, how many open packages
+// they have, when they arrived, when admin acknowledged.
+//
+// Throttle: rate-limited per IP via a query against `[ip, ringedAt]`
+// before insert (no schema-side trigger since Prisma+SQLite). Public-
+// facing — no auth — but resolves to userId when the suite # matches
+// a User row so admin sees the member's name.
+model BellRing {
+  id                String    @id @default(cuid())
+  suiteNumber       String                                 // typed by walk-in customer
+  userId            String?                                // resolved when suite # matches
+  ringedAt          DateTime  @default(now())
+  ip                String?                                // diagnostic + throttling
+  userAgent         String?
+  acknowledgedAt    DateTime?
+  acknowledgedById  String?
+  notes             String?
+
+  @@index([acknowledgedAt, ringedAt])                     // unack queue + recency sort
+  @@index([userId, ringedAt])
+  @@index([ip, ringedAt])                                  // throttle lookup
+}
+
+// iter-216 — Member milestone badges (Tier 15 #125).
+//
+// Auto-awarded by the daily cron sweep when a member crosses a
+// threshold (1y tenure, 100 packages received, $1000 lifetime
+// spend, 10 referrals credited, etc). Badges are append-only —
+// once awarded, the row stays even if the member's later activity
+// dips below the threshold. The `@@unique([userId, badgeKey])`
+// constraint makes the sweep idempotent.
+//
+// Surfaces:
+//   - Member dashboard: <MemberBadgesCard>
+//   - iter-180 iCal feed: as separate "🏆 1-year member" all-day
+//     events on the awarded date
+//   - iter-209 NeighborsPanel: badge emoji row next to display name
+//   - iter-207 LobbyWallEntry: future overlay
+model MemberBadge {
+  id             String    @id @default(cuid())
+  userId         String
+  badgeKey       String                                   // "tenure_1y" | "packages_100" | "spend_1000" | etc
+  label          String                                   // "1-year member"
+  emoji          String                                   // "🎂"
+  color          String                                   // hex for chip background
+  description    String                                   // ≤200 chars context
+  awardedAt      DateTime  @default(now())
+  awardedReason  String?                                  // computed evidence: "Joined 2024-05-09 · 365 days ago"
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeKey])                            // idempotent sweep — one of each per member
+  @@index([userId, awardedAt])
+  @@index([badgeKey])
+}
+
+// iter-214 — Bureau alumni network (Tier 15 #123).
+//
+// When a member finalizes their cancellation, admin can offer them a
+// free "alumni" tier: we keep their email + Form 1583 archived for 5
+// years (CMRA minimum) + send a quarterly "we miss you" newsletter
+// (iter-152 pattern). Pure reactivation funnel — no schema change to
+// User, alumni stand on their own row so we don't pollute the active
+// member table.
+//
+// Lifecycle:
+//   originalUserId is set when the source is a member cancellation,
+//   null when admin manually adds someone (e.g. former owner of a
+//   bureau franchise that just acquired NOHO).
+//   reactivatedToUserId fires when an alumni signs back up; we mark
+//   the alumni row Reactivated + link the new User to track funnel
+//   conversion.
+//
+// Privacy: archived for 5y from alumniSince, then admin can soft-purge
+// via `admin.alumni.purged` audited action (not cron-automated — manual
+// per-row decision matters legally).
+model AlumniMember {
+  id                   String    @id @default(cuid())
+  originalUserId       String?                                  // set when source=cancellation; nullable when manually added
+  email                String                                   // canonical lowercase
+  name                 String                                   // snapshot at conversion
+  alumniSince          DateTime  @default(now())
+  planEndDate          String?                                  // member's last plan due date — for context in newsletter
+  kycForm1583Url       String?                                  // snapshot, archived for the 5y CMRA retention window
+  source               String    @default("cancellation")      // "cancellation" | "manual" | "import"
+  status               String    @default("Active")             // "Active" | "Reactivated" | "Unsubscribed" | "Purged"
+  unsubscribeToken     String    @unique                        // public token for one-click unsubscribe link
+  reactivatedAt        DateTime?
+  reactivatedToUserId  String?                                  // when alumni signs back up
+  lastNewsletterAt     DateTime?                                // bumped by the quarterly cron
+  newsletterSentCount  Int       @default(0)
+  unsubscribedAt       DateTime?
+  unsubscribedReason   String?
+  notes                String?                                  // admin-typed
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @default(now()) @updatedAt
+
+  @@unique([email])
+  @@index([status, alumniSince])
+  @@index([status, lastNewsletterAt])
+  @@index([originalUserId])
+}
+
+// iter-212 — Postage-stamp QR receipt (Tier 15 #121).
+//
+// Every paid USPS / UPS / FedEx shipment ships with a 1×1in sticker
+// on the box. The sticker has a QR linking to /receipt/{verifyToken}
+// — recipient scans it with their phone and lands on a clean page
+// confirming "This package came from NOHO Mailbox · sent by {sender}
+// from suite #X · on {date}." Builds trust ("this isn't a phishing
+// label") + brand recognition, no PII leaked.
+//
+// Tied to a ShippoLabel (preferred) OR free-form (admin-issued for
+// hand-shipped packages). verifyToken is short + URL-safe so it
+// QR-encodes compactly even at 1×1in.
+model ShipmentReceipt {
+  id              String    @id @default(cuid())
+  verifyToken     String    @unique                          // 12-char base64url
+  shippoLabelId   String?                                    // back-link to iter-shipping label when shipped via Shippo
+  userId          String?                                    // sender (null only when admin issues for non-member)
+  senderDisplay   String                                     // shown on the receipt page
+  recipientDisplay String                                    // shown on the receipt page (blurred to first name + last initial)
+  carrier         String?                                    // "USPS" | "UPS" | "FedEx" | "DHL" | etc
+  trackingNumber  String?
+  shippedFrom     String                                     // bureau name + suite # snapshot
+  shippedAt       DateTime  @default(now())                  // when admin printed the label
+  scanCount       Int       @default(0)                      // bumped each public scan
+  lastScannedAt   DateTime?
+  createdAt       DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([shippoLabelId])
+}
+
+// iter-211 — Door-camera OCR for walk-ins (Tier 15 #120).
+//
+// When iter-156 DoorAccessEntry logs an unknown / denied code (or any
+// time the camera captures a face the system doesn't recognize), an
+// integration uploads the camera frame here. We run iter-108 Claude
+// Vision OCR against it to extract any visible card/badge text (e.g.
+// the suite # on a printed pickup pass, a member ID, a name on a
+// driver's license they're holding) and try to match against User
+// rows. Admin reviews the queue, confirms or dismisses.
+//
+// Status lifecycle:
+//   Pending  → admin hasn't looked yet
+//   Matched  → admin confirmed `matchedUserId` is who walked in
+//   Dismissed → false positive (delivery driver, lost tourist, etc.)
+//
+// `doorEntryId` optionally links back to the iter-156 DoorAccessEntry
+// row that triggered the capture, so admin can see "this was the
+// 11:42 AM denied attempt".
+model DoorWalkInOcr {
+  id                String    @id @default(cuid())
+  capturedAt        DateTime  @default(now())
+  imageUrl          String                                  // Vercel Blob / external CDN URL of the camera frame
+  doorEntryId       String?                                 // iter-156 link, when triggered by a door event
+  ocrText           String?                                 // raw text extracted by Vision (≤2000 chars)
+  ocrConfidence     Float?                                  // 0..1 model self-rating
+  detectedHints     String?                                 // JSON: { suiteNumber?, memberName?, idType?, hasFace? }
+  matchedUserId     String?                                 // resolved on confirm
+  status            String    @default("Pending")          // "Pending" | "Matched" | "Dismissed"
+  reviewedById      String?
+  reviewedAt        DateTime?
+  notes             String?
+  createdAt         DateTime  @default(now())
+
+  matchedUser User? @relation(fields: [matchedUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, capturedAt])
+  @@index([matchedUserId])
+}
+
+// iter-209 — Mailbox neighbor introductions (Tier 15 #118).
+//
+// Opt-in member directory. When a member opts in, they get to SEE
+// other opted-in members' first name + suite # + bio + photo at
+// `/dashboard?tab=neighbors`. Reciprocal — if you're not opted in,
+// you can't see the directory and other members can't see you. This
+// is the social-graph foundation for community features (cookouts,
+// notary buddies, supply trades).
+//
+// Messaging: members can send each other text-only DMs through the
+// `messageNeighbor` server action which fires an email to the target
+// via the existing iter-84 sendEmail infrastructure — the target's
+// email address is NEVER exposed to the sender's client.
+model NeighborProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  displayName     String                                  // member's chosen public name
+  bio             String                                  // ≤300 chars
+  photoUrl        String?                                 // optional avatar
+  status          String    @default("Active")           // "Active" | "Hidden"
+  consentedAt     DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, updatedAt])
 }
 
 // iter-207 — Lobby selfie wall (Tier 15 #116).
@@ -1319,6 +1662,10 @@ model Lockbox {
   location           String?                   // "Front room east wall, top row"
   serial             String?                   // physical serial / model
   isActive           Boolean   @default(true)
+  // iter-225: opt this lockbox into the auto-assign rotation. Some
+  // bureaus reserve a few boxes for VIPs / oversized only — toggle
+  // those off here so the auto-assigner skips them.
+  autoAssignEnabled  Boolean   @default(true)
   state              String    @default("closed") // "closed" | "open" | "ajar" | "fault"
   openedAt           DateTime?                 // when the most-recent open event fired
   openedByUserId     String?                   // resolved member id, when known
@@ -1335,6 +1682,35 @@ model Lockbox {
 
   @@index([state, isActive])
   @@index([openedAt])
+}
+
+// iter-225 — Lockbox auto-assign records (Tier 16 #134).
+//
+// One row per auto-assignment. When a MailItem arrives + the member
+// has a current month-pass + an opted-in Lockbox is free, the cron
+// claims the box, generates a 6-digit pickup PIN, fires an SMS, and
+// drops the row here. status walks Open → PickedUp (member opens with
+// PIN) → Released (admin closes after pickup) → Expired (PIN unused
+// past expiresAt).
+model LockboxAssignment {
+  id                String    @id @default(cuid())
+  lockboxId         String                                // FK to Lockbox
+  mailItemId        String                                @unique  // one assignment per package
+  userId            String                                // denormalized for quick member-lookup
+  pickupPin         String                                // 6-digit, stored plaintext (admin needs to look it up)
+  status            String    @default("Open")           // "Open" | "PickedUp" | "Released" | "Expired"
+  assignedAt        DateTime  @default(now())
+  expiresAt         DateTime                              // typically 7d after assigned
+  pickedUpAt        DateTime?
+  releasedAt        DateTime?
+  releasedById      String?
+  smsStatus         String?                               // "queued" | "sent" | "failed: …"
+  notes             String?
+  createdAt         DateTime  @default(now())
+
+  @@index([status, expiresAt])
+  @@index([userId, status])
+  @@index([lockboxId, status])
 }
 
 // One row per state-change event — every open/close/fault. Member-side
@@ -1413,6 +1789,36 @@ model DoorAccessEntry {
 // row records serial + assignedTo + location + state. The
 // EquipmentServiceLog table records every service event so admin can
 // see the full lifecycle without spreadsheets.
+// iter-228 — Suite ↔ printer pairing (Tier 17 #137).
+//
+// Admin claims a Bluetooth thermal printer (Equipment row with
+// category="printer") for a specific suite #. When a new MailItem
+// arrives or a member checks in, the iter-155 thermal print route
+// auto-fires + targets the paired printer (admin sets the system's
+// default printer to the paired one before printing). Per-suite
+// auto flags let admin opt out of intake or pickup auto-print.
+//
+// One active pairing per suite — `@@unique([suiteNumber, releasedAt])`
+// would be ideal but Prisma+SQLite needs `@@unique([suiteNumber])`
+// with explicit release flow (set releasedAt + create new row).
+model SuitePrinterPairing {
+  id              String    @id @default(cuid())
+  suiteNumber     String                                  // member's suite #
+  equipmentId     String                                  // FK to Equipment (category=printer)
+  printerLabel    String                                  // snapshot of equipment.name at pairing
+  autoIntake      Boolean   @default(true)               // auto-print on new mail intake
+  autoPickup      Boolean   @default(true)               // auto-print on pickup signed
+  notes           String?
+  claimedAt       DateTime  @default(now())
+  claimedById     String                                  // admin who paired
+  releasedAt      DateTime?                               // null = active
+  releasedById    String?
+  releasedReason  String?
+
+  @@index([suiteNumber, releasedAt])
+  @@index([equipmentId, releasedAt])
+}
+
 model Equipment {
   id              String   @id @default(cuid())
   name            String                          // "Jaden D300", "Honeywell 1900GHD", etc.
@@ -1802,9 +2208,20 @@ model DocumentVaultItem {
   sourceInvoiceId   String?
   sourceDeliveryId  String?
   tags              String?  // JSON array
+  // iter-218 — auto-archive incoming PDFs.
+  // `extractedText` is the OCR'd body of the scan (≤8000 chars), used
+  // for member-side full-text search. `autoArchived=true` when the
+  // row was created by the iter-194 translation hook + iter-218
+  // classifier (vs member upload). `archiveCategory` is the AI
+  // classifier's guess (e.g. "tax_form", "utility_bill", "official").
+  extractedText     String?
+  autoArchived      Boolean  @default(false)
+  archiveCategory   String?
   createdAt         DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, autoArchived, createdAt])
 }
 
 model MailRequest {
@@ -2559,6 +2976,341 @@ model POSLineItem {
 
   @@index([saleId])
   @@index([sku])
+}
+
+// ─── iter-235 — Member-curated lobby playlist ──────────────────────────
+// Opted-in members suggest songs for the bureau lobby speakers + vote
+// for their favorites. Top 25 by votes display on the public
+// `/lobby/playlist` "NOHO TV" page that runs on the lobby monitor.
+// Admin can hide inappropriate suggestions.
+
+model LobbyPlaylistSong {
+  id                String   @id @default(cuid())
+  suggestedById     String
+  suggestedByName   String?                                  // snapshot at submission time
+  suggestedBySuite  String?
+  title             String
+  artist            String
+  link              String?                                  // YouTube / Spotify / Apple Music URL
+  notes             String?                                  // member's optional "why this song" (≤120 chars)
+  votesCount        Int      @default(1)                     // denormalized; bumped on vote insert (1 = self-vote at submit)
+  hiddenAt          DateTime?
+  hiddenReason      String?
+  hiddenById        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user  User                @relation(fields: [suggestedById], references: [id], onDelete: Cascade)
+  votes LobbyPlaylistVote[]
+
+  @@index([hiddenAt, votesCount])
+  @@index([suggestedById, createdAt])
+}
+
+model LobbyPlaylistVote {
+  id        String   @id @default(cuid())
+  songId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  song LobbyPlaylistSong @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@unique([songId, userId])
+  @@index([userId, createdAt])
+}
+
+// ─── iter-234 — Smart fraud detection ──────────────────────────────────
+// Pure-rules detector that scans recent MailItems + intake patterns
+// against 6 fraud signals (high-volume same-sender, suspended-account
+// activity, low-KYC-trust + high-value, recipient-name mismatch, cross-
+// suite tracking dupes, new-account spike) and writes FraudFlag rows
+// for admin review. Idempotent via `@@unique([signalKey])` so re-runs
+// don't dupe.
+//
+// Reuses iter-227 pure-rules + cron-sweep pattern + iter-228-style
+// atomic prisma.$transaction([entity.update, audit]).
+
+model FraudFlag {
+  id             String   @id @default(cuid())
+  signalKey      String   @unique                 // dedup key, e.g. "high_volume_sender:KARIM_AMAZON:2026-W19"
+  signalType     String                            // "high_volume_sender" | "suspended_account_activity" | "low_kyc_high_value" | "recipient_mismatch" | "cross_suite_tracking" | "new_account_spike"
+  severity       String                            // "low" | "medium" | "high" | "critical"
+  entityType     String                            // "User" | "MailItem" | "Suite"
+  entityId       String                            // primary entity referenced (User.id, MailItem.id, suite#)
+  userId         String?                           // affected member (for user-side filters)
+  suiteNumber    String?                           // affected suite #
+  summary        String                            // 1-line human-readable summary
+  detailJson     String                            // structured detail (counts, refs, scores)
+  evidenceCount  Int       @default(1)             // # of items / events evidencing the flag
+  status         String    @default("Open")        // "Open" | "Reviewed" | "Dismissed" | "Escalated"
+  reviewedAt     DateTime?
+  reviewedById   String?
+  reviewNote     String?
+  firstSeenAt    DateTime  @default(now())
+  lastSeenAt     DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status, severity, firstSeenAt])
+  @@index([signalType, status])
+  @@index([userId, status])
+  @@index([suiteNumber, status])
+}
+
+// ─── iter-233 — Address-of-record auto-update ──────────────────────────
+// Member curates a list of orgs that need to know their address (banks,
+// schools, employers, subscriptions, government). When their iter-129
+// ForwardingAddress changes — or any time on demand — they trigger a
+// "notice run" that emails each org with a templated address-change
+// letter. Postal-only contacts get a letter pre-generated for admin to
+// drop in the mail manually.
+//
+// Reuses iter-228 atomic prisma.$transaction([entity.update, audit])
+// and iter-225-style fire-and-forget post-tx email side effects.
+
+model AddressNotificationContact {
+  id              String   @id @default(cuid())
+  userId          String
+  label           String                              // "Chase Bank", "Stanford Alumni", "Apple HR"
+  category        String?                             // "bank" | "school" | "employer" | "government" | "subscription" | "insurance" | "other"
+  contactEmail    String?                             // canonical lowercase
+  contactPostal   String?                             // multi-line postal address; null if email-only
+  accountNumber   String?                             // optional, e.g. "Account ending 4421"
+  notes           String?                             // member-only memo
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, active])
+  @@index([userId, category])
+}
+
+model AddressChangeNoticeRun {
+  id                  String   @id @default(cuid())
+  userId              String
+  triggeredFromAddrId String?                        // FK ForwardingAddress.id when launched from a saved address change
+  oldAddressBody      String?                        // snapshot of the prior address text (optional)
+  newAddressBody      String                         // snapshot of the new address (multi-line)
+  effectiveDate       String?                        // YYYY-MM-DD
+  noticeMessage       String?                        // member's optional personal note added to each notice
+  contactsTotal       Int      @default(0)
+  emailsSent          Int      @default(0)
+  postalGenerated     Int      @default(0)
+  status              String   @default("Pending")   // "Pending" | "Running" | "Completed" | "Cancelled"
+  createdAt           DateTime @default(now())
+  completedAt         DateTime?
+
+  user  User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items AddressChangeNoticeItem[]
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+model AddressChangeNoticeItem {
+  id              String   @id @default(cuid())
+  runId           String
+  contactId       String?                            // FK to source contact (snapshots below in case it gets edited later)
+  contactLabel    String
+  contactCategory String?
+  channel         String                             // "email" | "postal"
+  recipient       String                             // email address OR multi-line postal address
+  accountNumber   String?                            // snapshot at run time
+  status          String   @default("queued")       // "queued" | "sent" | "failed" | "mailed" | "skipped"
+  error           String?
+  emailLogId      String?                            // FK EmailLog.id when channel=email
+  sentAt          DateTime?                          // emails: provider-acked; postal: when admin marked mailed
+  createdAt       DateTime @default(now())
+
+  run AddressChangeNoticeRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, status])
+  @@index([channel, status])
+}
+
+// ─── iter-231 — Self-serve mailbox transfer to family ──────────────────
+// Member-initiated handover of an entire mailbox account to a family
+// member (spouse, child, parent, sibling). Workflow:
+//   1. Member files request with recipient email + name + relationship
+//   2. System emails recipient with "visit the bureau in person" CTA
+//      (per KHIARI no-e-sign rule), emails primary user a confirmation
+//   3. Admin verifies KYC docs + Form 1583 in person, uploads scans
+//   4. Admin Approves → atomic: revoke all iter-100 SharedMailboxAccess
+//      held by the primary user (snapshot revoked IDs onto the row),
+//      audit, send completion emails, fire webhook
+//   5. Admin manually creates the new User account + Completes the
+//      transfer (links to the new User.id snapshot for audit trail)
+//
+// Distinct from iter-122 SuiteTransferRequest (which is just changing
+// the suite # for the same member); this is a true ownership change.
+
+model MailboxFamilyTransfer {
+  id                          String    @id @default(cuid())
+  primaryUserId               String
+  primaryUserName             String?                       // snapshot
+  primaryUserSuite            String?                       // snapshot
+  primaryUserEmail            String?                       // snapshot
+
+  recipientEmail              String                         // canonical lowercase
+  recipientName               String
+  recipientPhone              String?
+  relationship                String                         // "spouse" | "child" | "parent" | "sibling" | "other"
+  reason                      String?                        // member's note
+
+  // Admin-uploaded after in-person visit
+  kycIdImageUrl               String?
+  kycForm1583Url              String?
+  kycNotes                    String?
+  visitedBureauAt             DateTime?
+
+  status                      String    @default("Pending") // "Pending" | "AwaitingVisit" | "Approved" | "Completed" | "Cancelled" | "Denied"
+  approvedAt                  DateTime?
+  approvedById                String?
+  decisionNote                String?
+  completedAt                 DateTime?
+  newUserId                   String?                        // FK snapshot of recipient's User row when admin creates it
+  cancelledAt                 DateTime?
+  cancelledReason             String?
+  deniedAt                    DateTime?
+  deniedReason                String?
+
+  // Snapshot of revoked SharedMailboxAccess IDs at approval time
+  revokedSharedAccessIdsJson  String?
+
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+
+  primaryUser                 User      @relation(fields: [primaryUserId], references: [id], onDelete: Cascade)
+
+  @@index([primaryUserId, status])
+  @@index([status, createdAt])
+  @@index([recipientEmail])
+}
+
+// ─── iter-230 — Forwarding cost-share split ────────────────────────────
+// When ≥2 members are forwarding to the same destination address, an
+// admin can batch them into one combined shipment and split the postage
+// savings (totalIndividualCost − combinedCost) evenly back to each
+// member's wallet (WalletTransaction kind="Refund"). Each split is
+// audited + a `forwarding.cost_share_split` webhook fires for ops
+// visibility.
+//
+// Members also see the credit on their wallet history with a clear
+// description: "Forwarding cost-share · NYC 10128 · saved $4.25 with 2
+// neighbors".
+
+model ForwardingCostShareGroup {
+  id                    String   @id @default(cuid())
+  destAddressHash       String                                   // normalized "{zip}|{streetTokens}" — used to match suggestions
+  destAddressLabel      String                                   // human-readable address snapshot at create time
+  destCity              String?
+  destState             String?
+  destZip               String?
+  carrier               String?                                  // "USPS" | "UPS" | "FedEx" | "DHL" | null
+  trackingNumber        String?                                  // assigned at approval/ship time
+  totalIndividualCents  Int                                      // sum of what each member would have paid alone
+  combinedPostageCents  Int                                      // actual combined-shipment cost
+  savingsCents          Int      @default(0)                     // totalIndividual - combined
+  perMemberCreditCents  Int      @default(0)                     // floor(savings / memberCount)
+  status                String   @default("Suggested")           // "Suggested" | "Approved" | "Shipped" | "Cancelled"
+  notes                 String?
+  approvedAt            DateTime?
+  approvedById          String?
+  shippedAt             DateTime?
+  cancelledAt           DateTime?
+  cancelledReason       String?
+  createdAt             DateTime @default(now())
+  createdById           String
+
+  members               ForwardingCostShareMember[]
+
+  @@index([status, createdAt])
+  @@index([destAddressHash, createdAt])
+}
+
+model ForwardingCostShareMember {
+  id                    String   @id @default(cuid())
+  groupId               String
+  userId                String
+  userNameSnapshot      String?
+  suiteSnapshot         String?
+  individualPostageCents Int                                     // what they would have paid solo
+  creditCents           Int      @default(0)                     // applied at approval (== group.perMemberCreditCents at that time)
+  walletTxnId           String?                                  // link to the WalletTransaction created at split
+  createdAt             DateTime @default(now())
+
+  group                 ForwardingCostShareGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId, createdAt])
+}
+
+// ─── iter-229 — Cash-drawer reconciliation ─────────────────────────────
+// Daily cash-drawer session: admin opens with a counted starting float,
+// rings POS sales through the shift, logs paid-in/paid-out cash
+// adjustments (petty cash, supply runs, refunds outside POS), then
+// closes with a counted ending cash count. Server computes
+// expected = openingCents + cashSalesCents - cashRefundsCents + sum(adjustments)
+// and surfaces the signed variance vs the counted closingCents.
+// Sessions with |variance| > tolerance are flagged "Variance" until
+// admin signs off (with a reason memo) — and emit a webhook +
+// audit-log breadcrumb for compliance.
+
+model CashDrawerSession {
+  id                    String   @id @default(cuid())
+  number                Int      @unique     // human-friendly session # (auto-increment)
+  stationLabel          String?              // optional: "Front desk", "Back office"
+  openingCents          Int                  // counted starting cash float
+  openedAt              DateTime @default(now())
+  openedById            String                // admin who opened
+  openedByName          String?               // snapshot
+
+  // Computed at close (denormalized for fast dashboard reads)
+  cashSalesCents        Int      @default(0)  // sum of cash POSSale totals during window
+  cashRefundsCents      Int      @default(0)  // sum of cash refunds during window
+  adjustmentsCents      Int      @default(0)  // sum of (paid_in - paid_out) adjustments
+  expectedClosingCents  Int      @default(0)  // opening + sales - refunds + adjustments
+  closingCents          Int?                  // counted ending float
+  varianceCents         Int?                  // closingCents - expectedClosingCents (signed)
+  varianceFlagged       Boolean  @default(false)
+  varianceTolerance     Int      @default(500) // 5.00 USD default tolerance
+  closeNote             String?               // free-form memo at close
+  signOffReason         String?               // if flagged, admin's explanation
+  signedOffAt           DateTime?
+  signedOffById         String?
+  closedAt              DateTime?
+  closedById            String?
+  closedByName          String?
+
+  status                String   @default("Open") // "Open" | "Closed" | "Variance"
+  notes                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  adjustments           CashDrawerAdjustment[]
+
+  @@index([status, openedAt])
+  @@index([openedById])
+  @@index([closedAt])
+}
+
+model CashDrawerAdjustment {
+  id            String   @id @default(cuid())
+  sessionId     String
+  kind          String                          // "paid_in" | "paid_out"
+  amountCents   Int                             // always positive — sign comes from kind
+  reason        String                          // mandatory short reason
+  category      String?                         // "petty_cash" | "supply_run" | "refund_external" | "deposit" | "other"
+  receiptRef    String?                         // optional receipt # / vendor / check #
+  byActorId     String
+  byActorName   String?
+  createdAt     DateTime @default(now())
+
+  session       CashDrawerSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@index([kind, createdAt])
 }
 
 // ─── AI Assistant agent (iter 10) ───────────────────────────────────────

@@ -225,17 +225,31 @@ export function AdminEmailLogsPanel() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="font-black text-lg uppercase tracking-wide" style={{ color: NOHO_INK }}>
-            Email Delivery Log
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              color: "#1A1D23",
+              letterSpacing: "-0.01em",
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+            }}
+          >
+            Email Logs
           </h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.5)" }}>
-            {totalCount} recent · {todayCount} today · {failedOrNotSent > 0 ? (
-              <span className="font-bold text-amber-700">{failedOrNotSent} need attention</span>
-            ) : (
-              "all delivered"
-            )}
-          </p>
+          <span
+            className="text-[15px] hidden sm:inline"
+            style={{
+              color: "#1976FF",
+              fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+              transform: "translateY(-1px)",
+              display: "inline-block",
+            }}
+          >
+            delivery audit
+          </span>
+          <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+            · {totalCount} recent · {todayCount} today{failedOrNotSent > 0 ? ` · ${failedOrNotSent} need attention` : " · all delivered"}
+          </span>
         </div>
         <div className="flex gap-1.5 flex-wrap">
           {(["all", "sent", "failed", "not_sent"] as const).map((f) => (

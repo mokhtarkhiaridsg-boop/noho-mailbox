@@ -153,6 +153,24 @@ const hiddenNav: NavItem[] = [
   { id: "supplyforecast",  label: "Supply Forecast",  Icon: IconBox },
   { id: "gbphours",        label: "Google Hours",     Icon: IconBuilding },
   { id: "lobbywall",       label: "Lobby Wall",       Icon: IconClipboard },
+  { id: "suitepinlabels",  label: "Suite QR Labels",  Icon: IconQR },
+  { id: "doorwalkin",      label: "Door Walk-Ins",    Icon: IconCompliance },
+  { id: "shipreceipts",    label: "Ship Receipts",    Icon: IconQR },
+  { id: "alumni",          label: "Alumni Network",   Icon: IconCustomers },
+  { id: "bureauidentity",  label: "Bureau Identity",  Icon: IconBuilding },
+  { id: "bellrings",       label: "Bell Rings",       Icon: IconChat },
+  { id: "capacityhm",      label: "Capacity Heatmap", Icon: IconReport },
+  { id: "bureaujunk",      label: "Bureau Junk",      Icon: IconCompliance },
+  { id: "renewalcadence",  label: "Smart Renewal",    Icon: IconCredit },
+  { id: "lockerassign",    label: "Locker Auto",      Icon: IconBox },
+  { id: "roadmap",         label: "Public Roadmap",   Icon: IconReport },
+  { id: "suiteprinter",    label: "Printer Pairings", Icon: IconReceipt },
+  { id: "cashdrawer",      label: "Cash Drawer",      Icon: IconCredit },
+  { id: "costshare",       label: "Cost-Share Split", Icon: IconBox },
+  { id: "familytransfer",  label: "Family Transfer",  Icon: IconCompliance },
+  { id: "addrnotices",     label: "Address Notices",  Icon: IconEmail },
+  { id: "fraudflags",      label: "Fraud Flags",      Icon: IconCompliance },
+  { id: "lobbyplaylist",   label: "Lobby Playlist",   Icon: IconChat },
   { id: "stickynotes",     label: "Sticky Notes",    Icon: IconClipboard },
   { id: "suitetransfers",  label: "Suite Transfers", Icon: IconBox },
   // Money & Comms fold-ins
@@ -637,6 +655,24 @@ import AdminCarrierMismatchPanel from "@/components/admin/AdminCarrierMismatchPa
 import AdminSupplyForecastPanel from "@/components/admin/AdminSupplyForecastPanel";
 import AdminGbpHoursPanel from "@/components/admin/AdminGbpHoursPanel";
 import AdminLobbyWallPanel from "@/components/admin/AdminLobbyWallPanel";
+import AdminSuitePinLabelsPanel from "@/components/admin/AdminSuitePinLabelsPanel";
+import AdminDoorWalkInPanel from "@/components/admin/AdminDoorWalkInPanel";
+import AdminShipmentReceiptsPanel from "@/components/admin/AdminShipmentReceiptsPanel";
+import AdminAlumniPanel from "@/components/admin/AdminAlumniPanel";
+import AdminBureauIdentityPanel from "@/components/admin/AdminBureauIdentityPanel";
+import AdminBellRingsPanel from "@/components/admin/AdminBellRingsPanel";
+import AdminCapacityHeatmapPanel from "@/components/admin/AdminCapacityHeatmapPanel";
+import AdminBureauJunkPanel from "@/components/admin/AdminBureauJunkPanel";
+import AdminRenewalCadencePanel from "@/components/admin/AdminRenewalCadencePanel";
+import AdminLockerAssignmentsPanel from "@/components/admin/AdminLockerAssignmentsPanel";
+import AdminRoadmapPanel from "@/components/admin/AdminRoadmapPanel";
+import AdminSuitePrinterPairingsPanel from "@/components/admin/AdminSuitePrinterPairingsPanel";
+import AdminCashDrawerPanel from "@/components/admin/AdminCashDrawerPanel";
+import AdminForwardingCostSharePanel from "@/components/admin/AdminForwardingCostSharePanel";
+import AdminFamilyTransferPanel from "@/components/admin/AdminFamilyTransferPanel";
+import AdminAddressNoticesPanel from "@/components/admin/AdminAddressNoticesPanel";
+import AdminFraudFlagsPanel from "@/components/admin/AdminFraudFlagsPanel";
+import AdminLobbyPlaylistPanel from "@/components/admin/AdminLobbyPlaylistPanel";
 import { AdminQRPickupPanel } from "@/components/admin/AdminQRPickupPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
@@ -1925,6 +1961,24 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {tab === "supplyforecast" && <AdminSupplyForecastPanel />}
           {tab === "gbphours" && <AdminGbpHoursPanel />}
           {tab === "lobbywall" && <AdminLobbyWallPanel />}
+          {tab === "suitepinlabels" && <AdminSuitePinLabelsPanel />}
+          {tab === "doorwalkin" && <AdminDoorWalkInPanel />}
+          {tab === "shipreceipts" && <AdminShipmentReceiptsPanel />}
+          {tab === "alumni" && <AdminAlumniPanel />}
+          {tab === "bureauidentity" && <AdminBureauIdentityPanel />}
+          {tab === "bellrings" && <AdminBellRingsPanel />}
+          {tab === "capacityhm" && <AdminCapacityHeatmapPanel />}
+          {tab === "bureaujunk" && <AdminBureauJunkPanel />}
+          {tab === "renewalcadence" && <AdminRenewalCadencePanel />}
+          {tab === "lockerassign" && <AdminLockerAssignmentsPanel />}
+          {tab === "roadmap" && <AdminRoadmapPanel />}
+          {tab === "suiteprinter" && <AdminSuitePrinterPairingsPanel />}
+          {tab === "cashdrawer" && <AdminCashDrawerPanel />}
+          {tab === "costshare" && <AdminForwardingCostSharePanel />}
+          {tab === "familytransfer" && <AdminFamilyTransferPanel />}
+          {tab === "addrnotices" && <AdminAddressNoticesPanel />}
+          {tab === "fraudflags" && <AdminFraudFlagsPanel />}
+          {tab === "lobbyplaylist" && <AdminLobbyPlaylistPanel />}
           {tab === "lockboxboard" && <AdminLockboxBoardPanel />}
           {tab === "espsync" && <AdminEspSyncPanel />}
           {tab === "carrierpickup" && <AdminCarrierPickupPanel />}

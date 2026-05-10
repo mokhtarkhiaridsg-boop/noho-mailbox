@@ -50,9 +50,10 @@ export async function runSyncSquareCustomers(): Promise<SyncResult> {
     return { success: false, syncType: "customers", itemsSynced: 0, error: "Square not configured." };
   }
   const log = await createSyncLog("customers");
+  let synced = 0;
+  let errMsg: string | undefined;
   try {
     const customers = await getSquareCustomers();
-    let synced = 0;
     for (const c of customers) {
       const composedEmail = c.emailAddress ?? `${c.id}@square.placeholder`;
       const composedName = [c.givenName, c.familyName].filter(Boolean).join(" ") || "Square Customer";
@@ -65,13 +66,14 @@ export async function runSyncSquareCustomers(): Promise<SyncResult> {
       }
       synced++;
     }
-    await completeSyncLog(log.id, synced);
-    return { success: true, syncType: "customers", itemsSynced: synced };
   } catch (err) {
-    const msg = isSquareError(err) ? err.message : err instanceof Error ? err.message : String(err);
-    await completeSyncLog(log.id, 0, msg);
-    return { success: false, syncType: "customers", itemsSynced: 0, error: msg };
+    errMsg = isSquareError(err) ? err.message : err instanceof Error ? err.message : String(err);
+  } finally {
+    await completeSyncLog(log.id, synced, errMsg).catch(() => { /* swallow */ });
   }
+  return errMsg
+    ? { success: false, syncType: "customers", itemsSynced: synced, error: errMsg }
+    : { success: true, syncType: "customers", itemsSynced: synced };
 }
 
 export async function runSyncSquarePayments(): Promise<SyncResult> {
@@ -79,6 +81,8 @@ export async function runSyncSquarePayments(): Promise<SyncResult> {
     return { success: false, syncType: "payments", itemsSynced: 0, error: "Square not configured." };
   }
   const log = await createSyncLog("payments");
+  let synced = 0;
+  let errMsg: string | undefined;
   try {
     const dbHasPayments = (await prisma.payment.count()) > 0;
     const lastSync = dbHasPayments
@@ -107,7 +111,6 @@ export async function runSyncSquarePayments(): Promise<SyncResult> {
       if (u.squareCustomerId) userIdByCustomerId.set(u.squareCustomerId, u.id);
     }
 
-    let synced = 0;
     for (const p of payments) {
       const userId = p.customerId ? userIdByCustomerId.get(p.customerId) ?? null : null;
       const updateData: Record<string, unknown> = {
@@ -133,14 +136,17 @@ export async function runSyncSquarePayments(): Promise<SyncResult> {
       });
       synced++;
     }
-
-    await completeSyncLog(log.id, synced);
-    return { success: true, syncType: "payments", itemsSynced: synced };
   } catch (err) {
-    const msg = isSquareError(err) ? err.message : err instanceof Error ? err.message : String(err);
-    await completeSyncLog(log.id, 0, msg);
-    return { success: false, syncType: "payments", itemsSynced: 0, error: msg };
+    errMsg = isSquareError(err) ? err.message : err instanceof Error ? err.message : String(err);
+  } finally {
+    // ALWAYS close the log row — never leak `running`. Catches even
+    // the case where the catch's earlier completeSyncLog itself failed
+    // (which is what hung 36 rows in production).
+    await completeSyncLog(log.id, synced, errMsg).catch(() => { /* swallow — better stale row than crash */ });
   }
+  return errMsg
+    ? { success: false, syncType: "payments", itemsSynced: synced, error: errMsg }
+    : { success: true, syncType: "payments", itemsSynced: synced };
 }
 
 export async function runSyncSquareCatalog(): Promise<SyncResult> {
@@ -148,9 +154,10 @@ export async function runSyncSquareCatalog(): Promise<SyncResult> {
     return { success: false, syncType: "catalog", itemsSynced: 0, error: "Square not configured." };
   }
   const log = await createSyncLog("catalog");
+  let synced = 0;
+  let errMsg: string | undefined;
   try {
     const items = await getSquareCatalog();
-    let synced = 0;
     for (const item of items) {
       await prisma.catalogItem.upsert({
         where: { squareCatalogId: item.id },
@@ -174,11 +181,12 @@ export async function runSyncSquareCatalog(): Promise<SyncResult> {
       });
       synced++;
     }
-    await completeSyncLog(log.id, synced);
-    return { success: true, syncType: "catalog", itemsSynced: synced };
   } catch (err) {
-    const msg = isSquareError(err) ? err.message : err instanceof Error ? err.message : String(err);
-    await completeSyncLog(log.id, 0, msg);
-    return { success: false, syncType: "catalog", itemsSynced: 0, error: msg };
+    errMsg = isSquareError(err) ? err.message : err instanceof Error ? err.message : String(err);
+  } finally {
+    await completeSyncLog(log.id, synced, errMsg).catch(() => { /* swallow */ });
   }
+  return errMsg
+    ? { success: false, syncType: "catalog", itemsSynced: synced, error: errMsg }
+    : { success: true, syncType: "catalog", itemsSynced: synced };
 }

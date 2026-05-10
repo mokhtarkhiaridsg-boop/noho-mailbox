@@ -22,6 +22,11 @@ import OnboardingChecklistCard from "./OnboardingChecklistCard";
 import JunkSuggestionsCard from "./JunkSuggestionsCard";
 import MailPredictionsCard from "./MailPredictionsCard";
 import MemberSupplyShopCard from "./MemberSupplyShopCard";
+import SnowbirdPlaybookCard from "./SnowbirdPlaybookCard";
+import MemberBadgesCard from "./MemberBadgesCard";
+import PunctualityStreakCard from "./PunctualityStreakCard";
+import PriorityQueueCard from "./PriorityQueueCard";
+import FamilyTransferCard from "./FamilyTransferCard";
 import CustomerOfMonthBadge from "./CustomerOfMonthBadge";
 import CotmSpotlightOptInCard from "./CotmSpotlightOptInCard";
 import LoyaltyTierCard from "./LoyaltyTierCard";
@@ -372,6 +377,28 @@ export default function OverviewPanel({
       {/* iter-208: Member supply marketplace — boxes/tape/labels at member
           pricing through the wallet. Renders nothing if no priced supplies. */}
       <MemberSupplyShopCard />
+
+      {/* iter-213: Snowbird playbook — bundles default forwarding address +
+          translate locale + recurring cadence + plan pause into one wizard.
+          Self-hides when member already has an active pause. */}
+      <SnowbirdPlaybookCard />
+
+      {/* iter-216: Member milestone badges — auto-awarded by daily cron
+          for tenure / volume / spend / referral milestones. */}
+      <MemberBadgesCard />
+
+      {/* iter-220: Pickup-punctuality streak — progress toward the
+          "Punctual pal" badge. Self-hides when no pickup history. */}
+      <PunctualityStreakCard />
+
+      {/* iter-227: 🔥 Priority queue — surfaces high-score unscanned mail.
+          Self-hides when nothing's pending. */}
+      <PriorityQueueCard />
+
+      {/* iter-231: 👨‍👩‍👧 Family transfer — opt-in member-initiated handover
+          to a spouse/child/parent/sibling. Always renders so the option
+          stays discoverable; closed-state shows just the "Transfer →" CTA. */}
+      <FamilyTransferCard />
 
       {/* ─── Hero Panel ──────────────────────────────────────────────────
           Single unified above-the-fold band combining: branded mailbox

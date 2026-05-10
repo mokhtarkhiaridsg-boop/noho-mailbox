@@ -21,6 +21,13 @@ import MailingCertificatesCard from "./MailingCertificatesCard";
 import ForwardingAddressBookCard from "./ForwardingAddressBookCard";
 import PlanPauseCard from "./PlanPauseCard";
 import LobbyWallOptInCard from "./LobbyWallOptInCard";
+import JunkSharingCard from "./JunkSharingCard";
+import LeaderboardOptInCard from "./LeaderboardOptInCard";
+import SuitePinSloganCard from "./SuitePinSloganCard";
+import AddressNoticesCard from "./AddressNoticesCard";
+import LobbyPlaylistCard from "./LobbyPlaylistCard";
+import OutboundDigestCard from "./OutboundDigestCard";
+import CarrierPreferenceCard from "./CarrierPreferenceCard";
 import ApiTokensCard from "./ApiTokensCard";
 import MemberWebhooksCard from "./MemberWebhooksCard";
 import AchPaymentCard from "./AchPaymentCard";
@@ -1120,6 +1127,27 @@ export default function SettingsPanel({
         {/* iter-207: Lobby selfie wall opt-in. Renders nothing if member
             doesn't engage; otherwise shows status + revoke. */}
         <LobbyWallOptInCard />
+
+        {/* iter-221: Shared junk learning opt-in toggle. */}
+        <JunkSharingCard />
+
+        {/* iter-223: Public referral leaderboard opt-in. */}
+        <LeaderboardOptInCard />
+
+        {/* iter-224: Per-member preferred carrier for forwarding. */}
+        <CarrierPreferenceCard />
+
+        {/* iter-232: Custom suite-pin slogan — prints on intake receipts + Avery 5160 stickers. */}
+        <SuitePinSloganCard />
+
+        {/* iter-233: Address-of-record notices — curate orgs + fire change letters. */}
+        <AddressNoticesCard />
+
+        {/* iter-235: Lobby playlist — suggest + vote on songs for the bureau speakers. */}
+        <LobbyPlaylistCard />
+
+        {/* iter-236: Weekly outbound shipment digest opt-in. */}
+        <OutboundDigestCard />
 
         {/* Junk Senders */}
         <JunkSendersCard />

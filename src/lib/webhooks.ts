@@ -39,6 +39,11 @@ export type WebhookEvent =
   | "plan.upgraded"
   | "mailer.reply_received"
   | "suite.transfer_requested"
+  | "cashdrawer.variance_flagged"
+  | "forwarding.cost_share_split"
+  | "family_transfer.requested"
+  | "family_transfer.approved"
+  | "fraud.flag_raised"
   | "test.ping";
 
 export const ALL_WEBHOOK_EVENTS: { key: WebhookEvent; label: string; example: string }[] = [
@@ -58,6 +63,11 @@ export const ALL_WEBHOOK_EVENTS: { key: WebhookEvent; label: string; example: st
   { key: "plan.upgraded",        label: "Member upgraded plan",          example: "⬆️ Karim upgraded Basic → Business · charged $480" },
   { key: "mailer.reply_received", label: "Customer reply landed in mailbox", example: "📨 New reply from sarah@example.com · \"Question about my package\"" },
   { key: "suite.transfer_requested", label: "Member requested suite transfer", example: "🔀 Karim wants to move from suite #042 → #143" },
+  { key: "cashdrawer.variance_flagged", label: "Cash-drawer variance flagged", example: "💰 Drawer #042 closed −$8.25 over expected · needs sign-off" },
+  { key: "forwarding.cost_share_split", label: "Forwarding cost-share split applied", example: "🤝 Karim + Mariem batched to NYC 10128 · saved $4.25 each" },
+  { key: "family_transfer.requested", label: "Mailbox family-transfer requested", example: "👨‍👩‍👧 Karim filed transfer of suite #042 → spouse Mariem (in-person visit pending)" },
+  { key: "family_transfer.approved",  label: "Mailbox family-transfer approved",  example: "✅ Suite #042 family-transfer approved · 1 SharedAccess revoked" },
+  { key: "fraud.flag_raised",         label: "Smart fraud signal raised",          example: "🚨 [HIGH] Suite #042 · 12 packages from same sender in 7 days" },
   { key: "test.ping",            label: "Test ping",              example: "🧪 NOHO webhook test — all good." },
 ];
 

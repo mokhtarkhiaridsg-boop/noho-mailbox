@@ -728,3 +728,33 @@ for (const sql of phase12) {
   }
 }
 console.log("Phase 12 migration done.");
+
+// Phase 13 — User.locale column + backfill stuck SquareSyncLog rows.
+//
+// Root cause discovered by sync-investigation agent: prisma/schema.prisma
+// added User.locale at iter-183 but no ALTER ran on Turso. Every Prisma
+// SELECT on User now fails with "no such column: main.User.locale", which
+// is why Square payment sync sat at status='running' indefinitely (the
+// payment-sync flow does prisma.user.findMany to resolve the userId
+// link, hits the SQL error, jumps to catch — but the catch's
+// completeSyncLog() also touches User columns through the connection
+// recovery path and silently never resolves). 36 sync-log rows are
+// stuck in "running"; this phase backfills them to "failed" so the
+// admin UI shows truth.
+const phase13 = [
+  `ALTER TABLE User ADD COLUMN locale TEXT`,
+  `UPDATE SquareSyncLog SET status = 'failed', errors = 'Stale row — locked while User.locale column was missing in prod (migration 13)', completedAt = CURRENT_TIMESTAMP WHERE status = 'running' AND completedAt IS NULL`,
+];
+for (const sql of phase13) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 13 migration done.");

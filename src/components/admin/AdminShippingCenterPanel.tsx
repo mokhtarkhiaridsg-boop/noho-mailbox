@@ -2,6 +2,25 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AdminShippoPanel } from "./AdminShippoPanel";
+
+/**
+ * Returns true when the user has requested reduced motion via OS / browser
+ * accessibility setting. Used to disable infinite CSS keyframe animations
+ * that otherwise burn FPS on the admin panels. SSR-safe: returns false on
+ * the server, then re-renders if the live query reports `matches`.
+ */
+function useReducedMotion(): boolean {
+  const [reduce, setReduce] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduce(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReduce(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduce;
+}
 import { AdminLabelOrdersPanel, type LabelOrderRow, isStuckOrder, STUCK_ORDER_HOURS } from "./AdminLabelOrdersPanel";
 import { AdminEmbeddedPortal } from "./AdminEmbeddedPortal";
 import { AdminInboundScanPanel } from "./AdminInboundScanPanel";
@@ -493,6 +512,7 @@ function HealthCard({
 }
 
 function SeverityDot({ severity, pulse }: { severity: "ok" | "warn" | "fail"; pulse?: boolean }) {
+  const reduce = useReducedMotion();
   const map = {
     ok: { bg: "#22C55E", glow: "rgba(22,163,74,0.45)" },
     warn: { bg: "#F5A623", glow: "rgba(245,166,35,0.45)" },
@@ -505,7 +525,7 @@ function SeverityDot({ severity, pulse }: { severity: "ok" | "warn" | "fail"; pu
       style={{
         background: c.bg,
         boxShadow: `0 0 8px ${c.glow}`,
-        animation: pulse ? "noho-stuck-pulse 2.4s ease-in-out infinite" : undefined,
+        animation: pulse && !reduce ? "noho-stuck-pulse 2.4s ease-in-out infinite" : undefined,
       }}
       aria-label={severity}
     />
@@ -888,6 +908,7 @@ function StatTile({
   stuck?: boolean;
   title?: string;
 }) {
+  const reduce = useReducedMotion();
   // Tile palette stays inside the dark-cinematic hero — cyan for neutral,
   // teal for revenue, green for margin, NOHO red for queue/urgent. Stuck
   // gets a deeper red gradient + halo + subtle pulse so the eye snaps to it.
@@ -907,7 +928,7 @@ function StatTile({
         background: palette.bg,
         border: `1px solid ${palette.border}`,
         boxShadow: stuck ? "0 0 18px rgba(231,0,19,0.35)" : undefined,
-        animation: stuck ? "noho-stuck-pulse 2.4s ease-in-out infinite" : undefined,
+        animation: stuck && !reduce ? "noho-stuck-pulse 2.4s ease-in-out infinite" : undefined,
       }}
       title={title}
     >
@@ -931,6 +952,7 @@ function FleetScene({
   onPick: (id: SubviewId) => void;
   carrierTodayCounts: Map<SubviewId, number>;
 }) {
+  const reduce = useReducedMotion();
   // 5 endpoints arranged around a central hub. SVG coords 800×360.
   const endpoints: Array<{
     id: SubviewId;
@@ -967,7 +989,7 @@ function FleetScene({
 
         {/* Background scan rings */}
         {[60, 110, 160, 210].map((r, i) => (
-          <circle key={r} cx={hub.x} cy={hub.y} r={r} fill="none" stroke="rgba(147,196,255,0.08)" strokeWidth="1" strokeDasharray="2 5" style={{ animation: `scan-rotate ${20 + i * 6}s linear infinite ${i % 2 === 0 ? "" : "reverse"}` }} />
+          <circle key={r} cx={hub.x} cy={hub.y} r={r} fill="none" stroke="rgba(147,196,255,0.08)" strokeWidth="1" strokeDasharray="2 5" style={{ animation: reduce ? undefined : `scan-rotate ${20 + i * 6}s linear infinite ${i % 2 === 0 ? "" : "reverse"}` }} />
         ))}
         {/* Hub glow */}
         <circle cx={hub.x} cy={hub.y} r="100" fill="url(#hub-glow)" />
@@ -1027,7 +1049,7 @@ function FleetScene({
           <rect x="46" y="62" width="20" height="40" fill={NOHO_BLUE} stroke={NOHO_INK} strokeWidth="1.5" />
           <circle cx="61" cy="82" r="1.2" fill={NOHO_CREAM} />
           {/* Star pulse atop */}
-          <g style={{ animation: "hub-pulse 3.5s ease-in-out infinite" }}>
+          <g style={{ animation: reduce ? undefined : "hub-pulse 3.5s ease-in-out infinite" }}>
             <circle cx="56" cy="6" r="3.5" fill={NOHO_RED} stroke={NOHO_INK} strokeWidth="1.2" />
           </g>
         </g>
@@ -1088,7 +1110,7 @@ function FleetScene({
                       fill={NOHO_RED}
                       stroke={NOHO_CREAM}
                       strokeWidth="1.5"
-                      style={{ animation: "noho-puck-pulse 2.6s ease-in-out infinite", filter: "drop-shadow(0 0 8px rgba(231,0,19,0.55))" }}
+                      style={{ animation: reduce ? undefined : "noho-puck-pulse 2.6s ease-in-out infinite", filter: "drop-shadow(0 0 8px rgba(231,0,19,0.55))" }}
                     />
                     <text
                       x={x + w - 14} y={y + h - 9}
@@ -1129,9 +1151,8 @@ function FleetScene({
           0%, 100% { box-shadow: 0 0 18px rgba(231,0,19,0.35); }
           50% { box-shadow: 0 0 28px rgba(231,0,19,0.65); }
         }
-        @media (prefers-reduced-motion: reduce) {
-          @keyframes noho-stuck-pulse { from { } to { } }
-        }
+        /* Reduced-motion is honored via runtime checks (useReducedMotion)
+           on each animated element — see SeverityDot, StatTile, FleetScene. */
       `}</style>
     </div>
   );

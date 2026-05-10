@@ -44,6 +44,24 @@ const D = {
   shapeRendering: "geometricPrecision" as const,
 } as const;
 
+/**
+ * Shared <Heart> helper. Used by LpCustomers + LpMailbox so the same
+ * curve is reused at different scales — keeps the silhouette identical
+ * and avoids drift between near-duplicate inline paths.
+ *
+ *   cx, cy → top-center cusp of the heart (the dip between the two lobes)
+ *   scale  → 1 = ~6×6 unit heart; pass 1.17 to match the old LpMailbox heart
+ */
+function Heart({ cx, cy, scale = 1, fill = C.red }: { cx: number; cy: number; scale?: number; fill?: string }) {
+  return (
+    <path
+      d={`M ${cx} ${cy} c ${-1 * scale} ${-1.5 * scale} ${-3 * scale} ${-1.2 * scale} ${-3 * scale} ${0.6 * scale} c 0 ${1.6 * scale} ${3 * scale} ${3 * scale} ${3 * scale} ${3 * scale} c 0 0 ${3 * scale} ${-1.4 * scale} ${3 * scale} ${-3 * scale} c 0 ${-1.8 * scale} ${-2 * scale} ${-2.1 * scale} ${-3 * scale} ${-0.6 * scale} z`}
+      fill={fill}
+      stroke="none"
+    />
+  );
+}
+
 /* ─── Row 1 · Today ───────────────────────────────────────────────────── */
 
 export function LpRegister({ className, ...rest }: Props) {
@@ -51,8 +69,10 @@ export function LpRegister({ className, ...rest }: Props) {
     <svg viewBox="0 0 64 64" className={className} xmlns="http://www.w3.org/2000/svg" {...rest}>
       <rect x="10" y="22" width="44" height="32" rx="4" {...D} fill={C.paper} />
       <rect x="14" y="14" width="36" height="10" rx="2" {...D} fill={C.cream} />
-      <rect x="16" y="28" width="14" height="8" rx="1.5" fill={C.blue} stroke="none" />
-      <text x="23" y="34.5" textAnchor="middle" fontSize="6" fontWeight="700" fill={C.paper} fontFamily="sans-serif">$</text>
+      <rect x="16" y="28" width="14" height="8" rx="2" fill={C.blue} stroke="none" />
+      {/* "$" glyph: bold S-curve + vertical bar (hand-pathed for cross-OS consistency) */}
+      <path d="M25 30.2 c -1.5 0 -2.4 0.7 -2.4 1.7 c 0 0.9 0.7 1.4 2 1.7 c 1.3 0.3 2 0.8 2 1.7 c 0 1 -0.9 1.7 -2.4 1.7 c -1.1 0 -2 -0.3 -2.6 -0.9" stroke={C.paper} strokeWidth="1" fill="none" strokeLinecap="round" />
+      <path d="M23 29.2 V35.2" stroke={C.paper} strokeWidth="1" strokeLinecap="round" />
       <circle cx="38" cy="32" r="1.6" fill={C.ink} />
       <circle cx="44" cy="32" r="1.6" fill={C.ink} />
       <circle cx="50" cy="32" r="1.6" fill={C.ink} />
@@ -81,7 +101,9 @@ export function LpCredits({ className, ...rest }: Props) {
       <circle cx="44" cy="40" r="3" fill={C.green} />
       <path d="M14 36 H22" {...D} />
       <circle cx="54" cy="20" r="6" fill={C.green} stroke="none" />
-      <text x="54" y="24" textAnchor="middle" fontSize="9" fontWeight="700" fill={C.paper} fontFamily="sans-serif">$</text>
+      {/* "$" glyph: bold S-curve + vertical bar (hand-pathed for cross-OS consistency) */}
+      <path d="M56.5 17.6 c -2.2 0 -3.5 1 -3.5 2.4 c 0 1.3 1 2 2.9 2.4 c 1.9 0.4 2.9 1.1 2.9 2.4 c 0 1.4 -1.3 2.4 -3.5 2.4 c -1.6 0 -2.9 -0.4 -3.8 -1.3" stroke={C.paper} strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M54 16 V24" stroke={C.paper} strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -95,7 +117,7 @@ export function LpCustomers({ className, ...rest }: Props) {
       <path d="M8 50 a12 12 0 0 1 24 0" {...D} fill={C.cream} />
       <path d="M32 50 a12 12 0 0 1 24 0" {...D} fill={C.cream} />
       <path d="M20 48 a12 12 0 0 1 24 0" {...D} fill={C.paper} />
-      <path d="M28 36 c -1 -1.5 -3 -1.2 -3 0.6 c 0 1.6 3 3 3 3 c 0 0 3 -1.4 3 -3 c 0 -1.8 -2 -2.1 -3 -0.6 z" fill={C.red} stroke="none" />
+      <Heart cx={28} cy={36} scale={1} fill={C.red} />
     </svg>
   );
 }
@@ -105,7 +127,7 @@ export function LpMailbox({ className, ...rest }: Props) {
     <svg viewBox="0 0 64 64" className={className} xmlns="http://www.w3.org/2000/svg" {...rest}>
       {/* mailbox body */}
       <path d="M12 26 a10 10 0 0 1 10 -10 H50 v22 H12 z" {...D} fill={C.cream} />
-      <rect x="12" y="38" width="38" height="12" rx="1.5" {...D} fill={C.cream} />
+      <rect x="12" y="38" width="38" height="12" rx="2" {...D} fill={C.cream} />
       {/* slot */}
       <rect x="18" y="22" width="8" height="2.5" rx="1" fill={C.ink} />
       {/* flag pole + flag */}
@@ -113,8 +135,8 @@ export function LpMailbox({ className, ...rest }: Props) {
       <path d="M50 18 H42 V26 H50 z" {...D} fill={C.red} />
       {/* post */}
       <path d="M28 50 V58 M22 58 H38" {...D} />
-      {/* heart on body */}
-      <path d="M36 32 c -1 -1.5 -3.5 -1.2 -3.5 0.7 c 0 2 3.5 3.5 3.5 3.5 c 0 0 3.5 -1.5 3.5 -3.5 c 0 -1.9 -2.5 -2.2 -3.5 -0.7 z" fill={C.blue} stroke="none" />
+      {/* heart on body — shared <Heart>, scale 1.17 ≈ original 3.5 lobes */}
+      <Heart cx={36} cy={32} scale={1.17} fill={C.blue} />
     </svg>
   );
 }
@@ -136,7 +158,7 @@ export function LpMail({ className, ...rest }: Props) {
       <rect x="6" y="14" width="52" height="36" rx="3" {...D} fill={C.cream} />
       <path d="M6 18 L32 36 L58 18" {...D} />
       <circle cx="48" cy="42" r="4" {...D} fill={C.red} />
-      <path d="M48 40 V44 M46 42 H50" stroke={C.paper} strokeWidth="1.5" />
+      <path d="M48 40 V44 M46 42 H50" stroke={C.paper} strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -145,7 +167,7 @@ export function LpRequests({ className, ...rest }: Props) {
   return (
     <svg viewBox="0 0 64 64" className={className} xmlns="http://www.w3.org/2000/svg" {...rest}>
       <rect x="10" y="10" width="34" height="44" rx="3" {...D} fill={C.paper} />
-      <rect x="18" y="6" width="18" height="6" rx="1.5" {...D} fill={C.cream} />
+      <rect x="18" y="6" width="18" height="6" rx="2" {...D} fill={C.cream} />
       <path d="M16 24 H38 M16 30 H38 M16 36 H30" {...D} />
       <circle cx="50" cy="44" r="9" {...D} fill={C.amber} />
       <path d="M46 44 H54 M50 40 V48" stroke={C.paper} strokeWidth="2.5" strokeLinecap="round" />
@@ -228,7 +250,7 @@ export function LpShipping({ className, ...rest }: Props) {
       <path d="M32 28 V56" {...D} />
       <path d="M21 13 L43 23" stroke={C.red} strokeWidth="3" strokeLinecap="round" />
       <rect x="36" y="34" width="14" height="9" rx="1" {...D} fill={C.paper} />
-      <path d="M39 38 H47 M39 41 H45" stroke={C.ink} strokeWidth="1.4" />
+      <path d="M39 38 H47 M39 41 H45" stroke={C.ink} strokeWidth="1" strokeLinecap="round" />
     </svg>
   );
 }
@@ -250,7 +272,9 @@ export function LpBilling({ className, ...rest }: Props) {
       <path d="M14 8 H50 V58 L44 54 L38 58 L32 54 L26 58 L20 54 L14 58 z" {...D} fill={C.paper} />
       <path d="M22 22 H42 M22 30 H38 M22 38 H42" {...D} />
       <circle cx="44" cy="38" r="6" fill={C.blue} stroke="none" />
-      <text x="44" y="41.5" textAnchor="middle" fontSize="8" fontWeight="700" fill={C.paper} fontFamily="sans-serif">$</text>
+      {/* "$" glyph: bold S-curve + vertical bar (hand-pathed for cross-OS consistency) */}
+      <path d="M46 35.4 c -2 0 -3.1 0.9 -3.1 2.1 c 0 1.1 0.9 1.7 2.6 2.1 c 1.7 0.4 2.6 1 2.6 2.1 c 0 1.2 -1.1 2.1 -3.1 2.1 c -1.4 0 -2.6 -0.4 -3.4 -1.1" stroke={C.paper} strokeWidth="1" fill="none" strokeLinecap="round" />
+      <path d="M44 34 V42" stroke={C.paper} strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -312,7 +336,9 @@ export function LpMessages({ className, ...rest }: Props) {
       <circle cx="30" cy="28" r="2" fill={C.ink} />
       <circle cx="40" cy="28" r="2" fill={C.ink} />
       <circle cx="50" cy="48" r="6" fill={C.red} stroke="none" />
-      <text x="50" y="52" textAnchor="middle" fontSize="9" fontWeight="700" fill={C.paper} fontFamily="sans-serif">!</text>
+      {/* "!" glyph: vertical bar + dot (hand-pathed for cross-OS consistency) */}
+      <rect x="49" y="44" width="2" height="5" rx="1" fill={C.paper} stroke="none" />
+      <circle cx="50" cy="51" r="1" fill={C.paper} stroke="none" />
     </svg>
   );
 }
@@ -323,8 +349,8 @@ export function LpEmails({ className, ...rest }: Props) {
       <rect x="14" y="6"  width="40" height="14" rx="2" {...D} fill={C.cream} />
       <rect x="10" y="22" width="44" height="14" rx="2" {...D} fill={C.paper} />
       <rect x="6"  y="38" width="48" height="20" rx="2" {...D} fill={C.cream} />
-      <path d="M6 38 L30 50 L54 38" stroke={C.ink} strokeWidth="1.8" fill="none" />
-      <path d="M14 12 L34 12 M14 28 L46 28" stroke={C.ink} strokeWidth="1.4" />
+      <path d="M6 38 L30 50 L54 38" stroke={C.ink} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M14 12 L34 12 M14 28 L46 28" stroke={C.ink} strokeWidth="1" strokeLinecap="round" />
     </svg>
   );
 }

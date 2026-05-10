@@ -2,6 +2,24 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+
+/**
+ * Returns true when the user has requested reduced motion. Used to disable
+ * infinite CSS keyframe animations that otherwise burn FPS on the admin
+ * dashboard. SSR-safe.
+ */
+function useReducedMotion(): boolean {
+  const [reduce, setReduce] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduce(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReduce(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduce;
+}
 import {
   processMailboxRenewal,
   resendRenewalReceipt,
@@ -2656,6 +2674,7 @@ function StatTile({
   // human-readable announcement without losing the visual layout.
   const announce = `${label}: ${value}${title ? ` — ${title}` : suffix ? ` — ${suffix}` : ""}`;
   const animated = useAnimatedCount(value);
+  const reduce = useReducedMotion();
   const Tag = onClick ? "button" : "div";
 
   // iPad-OS look: white surface, hairline border, ink text. Accent (red)
@@ -2698,7 +2717,7 @@ function StatTile({
           style={{
             background: "#FF3B30",
             boxShadow: "0 0 8px rgba(255,59,48,0.7)",
-            animation: "stat-pulse 1.8s ease-in-out infinite",
+            animation: reduce ? undefined : "stat-pulse 1.8s ease-in-out infinite",
           }}
         />
       )}
@@ -2728,9 +2747,7 @@ function StatTile({
           0%, 100% { opacity: 0.55; transform: scale(1); }
           50%      { opacity: 1;    transform: scale(1.35); }
         }
-        @media (prefers-reduced-motion: reduce) {
-          [class*="rounded-xl"] { animation: none !important; }
-        }
+        /* Reduced-motion is honored via runtime checks (useReducedMotion). */
       `}</style>
     </Tag>
   );
@@ -2747,6 +2764,7 @@ function NpcScene({
   onPick: (m: Mode) => void;
   onHover: (m: Mode | null) => void;
 }) {
+  const reduce = useReducedMotion();
   // 4 menu options arranged in an arc above + sides + below the agent.
   const menu: Array<{
     id: Mode;
@@ -2811,7 +2829,7 @@ function NpcScene({
             stroke="rgba(247,230,194,0.1)"
             strokeWidth="1"
             strokeDasharray="2 6"
-            style={{ animation: `npc-ring-rotate ${30 + i * 6}s linear infinite ${i % 2 === 0 ? "" : "reverse"}` }}
+            style={{ animation: reduce ? undefined : `npc-ring-rotate ${30 + i * 6}s linear infinite ${i % 2 === 0 ? "" : "reverse"}` }}
           />
         ))}
 
@@ -2834,7 +2852,7 @@ function NpcScene({
         })}
 
         {/* The Agent (NPC) — friendly NOHO Mailbox shopkeeper */}
-        <g transform={`translate(${cx - 50} ${cy - 60})`} style={{ animation: "agent-breathe 5s ease-in-out infinite", transformOrigin: `${cx}px ${cy}px` }}>
+        <g transform={`translate(${cx - 50} ${cy - 60})`} style={{ animation: reduce ? undefined : "agent-breathe 5s ease-in-out infinite", transformOrigin: `${cx}px ${cy}px` }}>
           {/* Counter */}
           <rect x="-10" y="86" width="120" height="34" rx="3" fill="#3a2a18" stroke={NOHO_INK} strokeWidth="2" />
           <rect x="-10" y="86" width="120" height="6" fill="#52391f" stroke={NOHO_INK} strokeWidth="1.5" />
@@ -2859,7 +2877,7 @@ function NpcScene({
           {/* Brows */}
           <path d="M40 28 L46 27 M54 27 L60 28" stroke={NOHO_INK} strokeWidth="2" strokeLinecap="round" />
           {/* Eyes — blink animation */}
-          <g style={{ animation: "agent-blink 5s steps(1, end) infinite", transformOrigin: "50px 33px" }}>
+          <g style={{ animation: reduce ? undefined : "agent-blink 5s steps(1, end) infinite", transformOrigin: "50px 33px" }}>
             <circle cx="42" cy="33" r="1.6" fill={NOHO_INK} />
             <circle cx="58" cy="33" r="1.6" fill={NOHO_INK} />
           </g>
@@ -2933,9 +2951,7 @@ function NpcScene({
             0%, 92%, 100% { transform: scaleY(1); }
             94%, 96%      { transform: scaleY(0.05); }
           }
-          @media (prefers-reduced-motion: reduce) {
-            svg circle, svg g { animation: none !important; }
-          }
+          /* Reduced-motion is honored via runtime checks (useReducedMotion). */
         `}</style>
       </svg>
 

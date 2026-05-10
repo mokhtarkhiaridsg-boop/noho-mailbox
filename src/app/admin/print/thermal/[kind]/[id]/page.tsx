@@ -37,7 +37,9 @@ export default async function ThermalReceiptPage({
 
   const item = await prisma.mailItem.findUnique({
     where: { id },
-    include: { user: { select: { name: true, suiteNumber: true, email: true, phone: true } } },
+    // iter-232: pull suitePinSlogan so the receipt renders the member's
+    // 1-liner under the #suite block.
+    include: { user: { select: { name: true, suiteNumber: true, email: true, phone: true, suitePinSlogan: true } } },
   });
   if (!item) return notFound();
 
@@ -118,6 +120,12 @@ export default async function ThermalReceiptPage({
       <Section label="Customer">
         <Row label="Name" value={item.user?.name ?? "—"} />
         <Row label="Suite" value={item.user?.suiteNumber ? `#${item.user.suiteNumber}` : "—"} />
+        {/* iter-232: member-set slogan renders italicized under the suite # */}
+        {item.user?.suitePinSlogan && (
+          <p style={{ margin: "1px 0 4px", fontSize: 9, fontStyle: "italic", textAlign: "center", color: "#000" }}>
+            {item.user.suitePinSlogan}
+          </p>
+        )}
         {item.user?.phone && <Row label="Phone" value={item.user.phone} />}
       </Section>
 

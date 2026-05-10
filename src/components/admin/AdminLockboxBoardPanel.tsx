@@ -64,8 +64,10 @@ export default function AdminLockboxBoardPanel() {
   useEffect(() => {
     refresh();
     const handle = window.setInterval(refresh, POLL_MS);
-    // 1-second tick for live duration counters (no DB hit).
-    const tickHandle = window.setInterval(() => setTick((t) => t + 1), 1_000);
+    // Tick drives the live duration counters on each tile. Per-second
+    // re-renders flooded the board (FPS audit, May 2026); 30 s is plenty
+    // since tile copy is rendered as `2h 14m`-style minute-level deltas.
+    const tickHandle = window.setInterval(() => setTick((t) => t + 1), 30_000);
     return () => { window.clearInterval(handle); window.clearInterval(tickHandle); };
   }, []);
 
