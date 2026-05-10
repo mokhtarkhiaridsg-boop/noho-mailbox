@@ -75,17 +75,36 @@ export default function AdminLockboxBoardPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.blue}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.blue, boxShadow: `0 0 6px ${T.blue}` }} />
-          Operations · Lockbox board
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>Lockbox live board</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-          Auto-refreshes every 5s. Click a tile to open / close / mark fault. Boxes open past their window light up red and fire an admin webhook.
-        </p>
-        <p ref={liveRef} className="sr-only" aria-live="polite">{board?.openCount ?? 0} open · {board?.overdueCount ?? 0} overdue</p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Lockbox Board
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          live & locked
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {board?.openCount ?? 0} open · {board?.overdueCount ?? 0} overdue
+        </span>
       </div>
+      <p className="text-[11px] -mt-2" style={{ color: T.inkFaint }}>
+        Auto-refreshes every 5s. Click a tile to open / close / mark fault. Boxes open past their window light up red and fire an admin webhook.
+      </p>
+      <p ref={liveRef} className="sr-only" aria-live="polite">{board?.openCount ?? 0} open · {board?.overdueCount ?? 0} overdue</p>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <Tile label="Lockboxes" value={board?.tiles.length ?? 0} accent={T.blueDeep} />

@@ -44,16 +44,35 @@ export default function AdminIdExpiringPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${NOHO_BLUE}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: NOHO_BLUE, boxShadow: `0 0 6px ${NOHO_BLUE}` }} />
-          Compliance · ID expirations
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>ID expiring soon</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-          USPS Form 1583 requires every CMRA customer to have an unexpired ID on file. Daily cron sends graduated reminders at 90/30/7/0 day thresholds.
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          ID Expiring
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          renew before it lapses
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {rows?.length ?? 0} due soon
+        </span>
       </div>
+      <p className="text-[11px] -mt-2" style={{ color: "rgba(0,0,0,0.55)" }}>
+        USPS Form 1583 requires every CMRA customer to have an unexpired ID on file. Daily cron sends graduated reminders at 90/30/7/0 day thresholds.
+      </p>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <Tile label="Expired" value={expired} accent="#991b1b" />

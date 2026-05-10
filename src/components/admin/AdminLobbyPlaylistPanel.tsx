@@ -66,16 +66,35 @@ export default function AdminLobbyPlaylistPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.purple}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.purple, boxShadow: `0 0 6px ${T.purple}` }} />
-          Community · Lobby playlist
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>🎵 NOHO lobby playlist moderation</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-          Members suggest + vote on songs for the lobby speakers. Top 25 (by vote) display on `/lobby/playlist` (the NOHO TV page). Hide anything inappropriate with a reason — the action audits + the song stops appearing in member views immediately.
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Lobby Playlist
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          set the vibe
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {songs?.length ?? 0} tracks
+        </span>
       </div>
+      <p className="text-[11px] -mt-2" style={{ color: T.inkFaint }}>
+        Members suggest + vote on songs for the lobby speakers. Top 25 (by vote) display on `/lobby/playlist` (the NOHO TV page). Hide anything inappropriate with a reason — the action audits + the song stops appearing in member views immediately.
+      </p>
 
       {info && <p className="text-[11.5px] font-semibold" style={{ color: T.green }}>{info}</p>}
       {error && <p className="text-[11.5px] font-semibold" style={{ color: T.red }}>{error}</p>}

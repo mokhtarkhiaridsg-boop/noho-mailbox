@@ -63,16 +63,35 @@ export default function AdminGbpHoursPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.blue}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.blue, boxShadow: `0 0 6px ${T.blue}` }} />
-          Marketing · Google Business
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>GBP hours auto-publish</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-          Daily cron pushes iter-90 OperatingHours (weekly + holidays) to your Google Business Profile so customers searching Google see live hours and holiday closures. Skips the push if nothing changed.
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          GBP Hours
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          we are open
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {data?.configured ? "configured" : "setup pending"}
+        </span>
       </div>
+      <p className="text-[11px] -mt-2" style={{ color: T.inkFaint }}>
+        Daily cron pushes iter-90 OperatingHours (weekly + holidays) to your Google Business Profile so customers searching Google see live hours and holiday closures. Skips the push if nothing changed.
+      </p>
 
       {info && <p className="text-[11.5px] font-semibold" style={{ color: T.success }}>{info}</p>}
       {error && <p className="text-[11.5px] font-semibold" style={{ color: T.danger }}>{error}</p>}

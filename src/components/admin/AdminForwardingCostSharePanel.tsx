@@ -161,16 +161,35 @@ export default function AdminForwardingCostSharePanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.blue}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.blue, boxShadow: `0 0 6px ${T.blue}` }} />
-          Operations · Cost-share split
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>🤝 Forwarding cost-share split</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-          When ≥2 members are forwarding to the same destination, batch their packages into one combined shipment. The postage savings split evenly back to each member's wallet (audited via WalletTransaction kind=&quot;Refund&quot;).
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Forwarding Cost-Share
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          better together
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {rows?.length ?? 0} groups
+        </span>
       </div>
+      <p className="text-[11px] -mt-2" style={{ color: T.inkFaint }}>
+        When ≥2 members are forwarding to the same destination, batch their packages into one combined shipment. The postage savings split evenly back to each member's wallet (audited via WalletTransaction kind=&quot;Refund&quot;).
+      </p>
 
       {info && <p className="text-[11.5px] font-semibold" style={{ color: T.green }}>{info}</p>}
       {error && <p className="text-[11.5px] font-semibold" style={{ color: T.red }}>{error}</p>}

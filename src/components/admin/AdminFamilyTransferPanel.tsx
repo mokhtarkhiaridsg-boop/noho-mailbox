@@ -125,16 +125,35 @@ export default function AdminFamilyTransferPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.blue}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.blue, boxShadow: `0 0 6px ${T.blue}` }} />
-          Compliance · Family transfers
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>👨‍👩‍👧 Mailbox family transfers</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-          Member-initiated handovers of an entire mailbox to a spouse / child / parent / sibling. Per CMRA + KHIARI policy, recipient must visit the bureau in person; admin uploads ID scan + signed Form 1583 here, then approves to atomically revoke iter-100 SharedMailboxAccess and trigger handover emails.
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Family Transfer
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          keep it in the family
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {rows?.length ?? 0} transfers
+        </span>
       </div>
+      <p className="text-[11px] -mt-2" style={{ color: T.inkFaint }}>
+        Member-initiated handovers of an entire mailbox to a spouse / child / parent / sibling. Per CMRA + KHIARI policy, recipient must visit the bureau in person; admin uploads ID scan + signed Form 1583 here, then approves to atomically revoke iter-100 SharedMailboxAccess and trigger handover emails.
+      </p>
 
       {info && <p className="text-[11.5px] font-semibold" style={{ color: T.green }}>{info}</p>}
       {error && <p className="text-[11.5px] font-semibold" style={{ color: T.red }}>{error}</p>}

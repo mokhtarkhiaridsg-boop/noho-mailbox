@@ -315,16 +315,35 @@ export default function AdminLabelPrinterPanel() {
         }
       `}</style>
 
-      <div className="no-print">
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${NOHO_BLUE}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: NOHO_BLUE, boxShadow: `0 0 6px ${NOHO_BLUE}` }} />
-          Operations · Label printer
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Thermal label printer</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-          Type or scan any tracking #. We hit the carrier&apos;s tracking API live (USPS / UPS / FedEx / DHL) and overlay our intake data when the package is one of ours. Code 128 barcode scannable by every driver. Prints 4×6 on Jadens.
-        </p>
+      <div className="no-print flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Label Printer
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          4x6 thermal magic
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · live carrier lookup
+        </span>
       </div>
+      <p className="no-print text-[11px] -mt-2" style={{ color: "rgba(0,0,0,0.55)" }}>
+        Type or scan any tracking #. We hit the carrier&apos;s tracking API live (USPS / UPS / FedEx / DHL) and overlay our intake data when the package is one of ours. Code 128 barcode scannable by every driver. Prints 4×6 on Jadens.
+      </p>
 
       <div className="no-print rounded-2xl bg-white border p-4 space-y-3" style={{ borderColor: "#e8e5e0" }}>
         {/* Tracking row with status pill */}

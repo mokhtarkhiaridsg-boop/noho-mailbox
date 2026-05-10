@@ -201,15 +201,31 @@ export default function AdminInsuranceClaimsPanel() {
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-2 flex-wrap">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.blue}B0` }}>
-            <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.blue, boxShadow: `0 0 6px ${T.blue}` }} />
-            Operations · Insurance claims
-          </p>
-          <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>Carrier insurance claim assistant</h2>
-          <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-            Pre-fills USPS / UPS / FedEx / DHL / Amazon claim forms with declared value + intake photos + storage timeline. Cuts the 30-min evidence-gathering job to 2 min.
-          </p>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              color: "#1A1D23",
+              letterSpacing: "-0.01em",
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+            }}
+          >
+            Insurance Claims
+          </h2>
+          <span
+            className="text-[15px] hidden sm:inline"
+            style={{
+              color: "#1976FF",
+              fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+              transform: "translateY(-1px)",
+              display: "inline-block",
+            }}
+          >
+            recover what's owed
+          </span>
+          <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+            · {totals.total} claims
+          </span>
         </div>
         <button type="button" onClick={() => setWizardOpen(!wizardOpen)} className="text-[11.5px] font-black px-3 py-1.5 rounded-lg text-white" style={{ background: T.blue }}>
           {wizardOpen ? "✕ Close" : "+ Start claim"}

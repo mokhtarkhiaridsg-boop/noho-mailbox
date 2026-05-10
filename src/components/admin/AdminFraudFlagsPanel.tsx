@@ -96,16 +96,35 @@ export default function AdminFraudFlagsPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.red}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.red, boxShadow: `0 0 6px ${T.red}` }} />
-          Compliance · Smart fraud detection
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>🚨 Fraud signal queue</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-          Pure-rules detector scans recent intake patterns + member state for 6 fraud signals. Cron runs hourly; high+critical signals fire `fraud.flag_raised` webhook for ops on-call.
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Fraud Flags
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          spot the bad apples
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {summary?.openTotal ?? 0} open
+        </span>
       </div>
+      <p className="text-[11px] -mt-2" style={{ color: T.inkFaint }}>
+        Pure-rules detector scans recent intake patterns + member state for 6 fraud signals. Cron runs hourly; high+critical signals fire `fraud.flag_raised` webhook for ops on-call.
+      </p>
 
       {info && <p className="text-[11.5px] font-semibold" style={{ color: T.green }}>{info}</p>}
       {error && <p className="text-[11.5px] font-semibold" style={{ color: T.red }}>{error}</p>}

@@ -80,15 +80,31 @@ export default function AdminKeyLedgerPanel() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${NOHO_BLUE}B0` }}>
-            <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: NOHO_BLUE, boxShadow: `0 0 6px ${NOHO_BLUE}` }} />
-            Operations · Key audit ledger
-          </p>
-          <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Mailbox key audit ledger</h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-            Every physical key on file with full audit trail. Click any row for the per-key history. Export to CSV for end-of-quarter compliance review.
-          </p>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h2
+            className="text-2xl font-bold"
+            style={{
+              color: "#1A1D23",
+              letterSpacing: "-0.01em",
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+            }}
+          >
+            Key Ledger
+          </h2>
+          <span
+            className="text-[15px] hidden sm:inline"
+            style={{
+              color: "#1976FF",
+              fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+              transform: "translateY(-1px)",
+              display: "inline-block",
+            }}
+          >
+            every key accounted for
+          </span>
+          <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+            · {counts.total} keys
+          </span>
         </div>
         <button
           type="button"

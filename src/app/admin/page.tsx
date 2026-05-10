@@ -23,6 +23,9 @@ export const maxDuration = 60;
 // invoked from AdminDashboardClient's useEffect after mount, so the
 // HTTP request keeps the function alive for its full maxDuration.
 
+export default async function AdminPage() {
+  const admin = await verifyAdmin();
+
   // Owner label — emails listed in OWNER_EMAILS env get the "Owner"
   // role label in the admin chrome. Functionally identical to ADMIN
   // (same dashboard, same permissions); the label is purely cosmetic
