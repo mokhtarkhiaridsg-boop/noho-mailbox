@@ -58,16 +58,35 @@ export default function AdminBulkRenewalPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.blue}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.blue, boxShadow: `0 0 6px ${T.blue}` }} />
-          Money · Bulk renewal sweep
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>One-tap renewal sweep</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-          Charge every auto-renewing member due in the next N days right now. Preview shows who would succeed + who's blocked (insufficient wallet, no plan). Each successful charge writes a real MailboxRenewal + WalletTransaction + audit row.
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Bulk Renewal
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          sweep them home
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {preview ? `${preview.willSucceed} ready` : "loading"}
+        </span>
       </div>
+      <p className="text-[11px]" style={{ color: T.inkFaint }}>
+        Charge every auto-renewing member due in the next N days right now. Preview shows who would succeed + who&apos;s blocked (insufficient wallet, no plan). Each successful charge writes a real MailboxRenewal + WalletTransaction + audit row.
+      </p>
 
       <div className="rounded-2xl p-4" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
         <div className="flex items-center gap-2 flex-wrap">

@@ -192,23 +192,32 @@ export default function AdminDailyZReport() {
 
   return (
     <div className="space-y-4">
-      {/* ─── Header strip ─── */}
-      <div
-        className="rounded-xl flex items-center justify-between gap-3 px-4 py-3 flex-wrap"
-        style={{ background: T.surface, border: `1px solid ${T.border}` }}
-      >
-        <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: T.inkFaint }}>
-            Daily activity
-          </p>
-          <h2 className="text-xl font-extrabold tracking-tight" style={{ color: T.ink }}>
-            Register Activity Report
-          </h2>
-          <p className="text-[11px]" style={{ color: T.inkFaint }}>
-            5062 Lankershim Blvd · N HOLLYWOOD, CA 91601
-          </p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Daily Z Report
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          close the till
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · 5062 Lankershim Blvd
+        </span>
+        <div className="ml-auto flex items-center gap-2 flex-wrap">
           <label
             className="inline-flex items-center gap-2 h-9 px-3 rounded-md text-[11px] font-bold"
             style={{ background: T.surfaceAlt, color: T.ink, border: `1px solid ${T.border}` }}

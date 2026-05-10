@@ -81,35 +81,45 @@ export default function AdminBackupHealthPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${NOHO_BLUE}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: NOHO_BLUE, boxShadow: `0 0 6px ${NOHO_BLUE}` }} />
-          System · Backup health
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Backup verification + DB health</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-          5-check probe: connectivity, write round-trip, schema integrity, write-recency, env-var presence. Plus row counts across every critical table. Re-runs every page open + on demand. Each run is audit-logged.
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Backup Health
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          everything safe
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {report ? OVERALL_COLOR[report.overall].label.toLowerCase() : "running checks"}
+        </span>
       </div>
+      <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>
+        5-check probe: connectivity, write round-trip, schema integrity, write-recency, env-var presence. Plus row counts across every critical table. Re-runs every page open + on demand. Each run is audit-logged.
+      </p>
 
-      {/* Headline + run-now */}
+      {/* Re-run button */}
       {report && (
-        <div className="rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap"
-          style={{ background: OVERALL_COLOR[report.overall].bg, color: OVERALL_COLOR[report.overall].fg }}>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
-              Overall status
-            </p>
-            <p className="text-xl font-black tracking-tight">
-              {OVERALL_COLOR[report.overall].label}
-            </p>
-            <p className="text-[10.5px] opacity-80 mt-0.5">
-              Last run: {new Date(report.generatedAtIso).toLocaleString()}
-            </p>
-          </div>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
+            Last run: {new Date(report.generatedAtIso).toLocaleString()}
+          </p>
           <button type="button" onClick={runCheck} disabled={pending}
             className="px-4 py-2 rounded-xl font-black text-[12px] disabled:opacity-50"
-            style={{ background: "white", color: NOHO_INK }}>
+            style={{ background: NOHO_BLUE, color: "white" }}>
             {pending ? "Running…" : "Re-run check"}
           </button>
         </div>

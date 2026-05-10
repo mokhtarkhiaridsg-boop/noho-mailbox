@@ -101,15 +101,34 @@ export default function AdminSuppliesPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.blue}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.blue, boxShadow: `0 0 6px ${T.blue}` }} />
-          Operations · Supplies inventory
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>
-          Supplies &amp; consumables
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Supplies
         </h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          stocked and ready
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {counts.all ?? 0} items · {counts.low ?? 0} low · {counts.out ?? 0} out
+        </span>
+      </div>
+      <div>
+        <p className="text-[11px]" style={{ color: T.inkFaint }}>
           On-hand counts for boxes, tape, labels, mailers, and printer ribbon. Reorder threshold flags low stock.
           {(counts.low ?? 0) + (counts.out ?? 0) > 0 && (
             <span className="ml-1 font-bold" style={{ color: T.warning }}>

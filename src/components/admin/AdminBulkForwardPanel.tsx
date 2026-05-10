@@ -107,16 +107,35 @@ export default function AdminBulkForwardPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${NOHO_BLUE}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: NOHO_BLUE, boxShadow: `0 0 6px ${NOHO_BLUE}` }} />
-          Operations · Bulk forward
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Bulk forward batch</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-          Process multiple Forward requests in one shot. Pick the destination per row, hit Process — each item flips atomically + audit-logged. Failures stay selected so you can retry just the broken ones.
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Bulk Forward
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          let it rain
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {data?.count ?? 0} pending
+        </span>
       </div>
+      <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>
+        Process multiple Forward requests in one shot. Pick the destination per row, hit Process — each item flips atomically + audit-logged. Failures stay selected so you can retry just the broken ones.
+      </p>
 
       {msg && (
         <div className="rounded-xl px-3 py-2 text-[11.5px] font-bold"
