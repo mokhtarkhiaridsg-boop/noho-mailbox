@@ -95,17 +95,31 @@ export default function AdminMailerAutoReplyPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.blue}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.blue, boxShadow: `0 0 6px ${T.blue}` }} />
-          Money & Comms · Mailer auto-replies
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>
-          Auto-reply rules
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Auto-Reply
         </h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-          Inbound mailer threads matching a rule's keywords get a templated reply automatically. Cooldown prevents reply-loops. Each fire is audit-logged.
-        </p>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          smart replies on autopilot
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {rows == null ? "loading" : `${rows.length} rule${rows.length === 1 ? "" : "s"}`}
+        </span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-3">

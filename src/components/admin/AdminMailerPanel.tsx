@@ -214,14 +214,42 @@ export default function AdminMailerPanel() {
   const activeThread = activeThreadId ? threads.find((t) => t.id === activeThreadId) ?? null : null;
 
   return (
-    <div
-      className="flex rounded-2xl overflow-hidden"
-      style={{
-        background: T.surface,
-        border: `1px solid ${T.border}`,
-        minHeight: 560,
-      }}
-    >
+    <div className="space-y-4">
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Mailer
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          send the word
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {counts ? `${counts.inboxUnread} unread · ${counts.inboxTotal} threads` : "live console"}
+        </span>
+      </div>
+
+      <div
+        className="flex rounded-2xl overflow-hidden"
+        style={{
+          background: T.surface,
+          border: `1px solid ${T.border}`,
+          minHeight: 560,
+        }}
+      >
       {/* ─── Left rail: Compose + folders ─── */}
       <aside
         className="hidden md:flex flex-col w-56 shrink-0"
@@ -560,6 +588,7 @@ export default function AdminMailerPanel() {
           }}
         />
       )}
+      </div>
     </div>
   );
 }

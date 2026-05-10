@@ -87,17 +87,31 @@ export default function AdminMarketingFlyerPanel() {
         }
       `}</style>
 
-      <div className="no-print">
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.blue}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.blue, boxShadow: `0 0 6px ${T.blue}` }} />
-          Marketing · Flyer generator
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>
-          Geo-radius door-hanger flyer
+      <div className="no-print flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Marketing Flyer
         </h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-          Type a ZIP, see customer-density signals, and print a Letter-sized targeted flyer ready for distribution.
-        </p>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          door-hangers, on demand
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · type a ZIP, print Letter-sized
+        </span>
       </div>
 
       <div className="no-print rounded-2xl p-4 space-y-3" style={{ background: T.surface, border: `1px solid ${T.border}` }}>

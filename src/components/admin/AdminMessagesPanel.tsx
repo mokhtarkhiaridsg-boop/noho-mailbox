@@ -201,9 +201,32 @@ export function AdminMessagesPanel({
 
   return (
     <div className="space-y-6">
-      <h2 className="font-black text-lg uppercase tracking-wide text-text-light">
-        Messages &amp; Contact Submissions
-      </h2>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Messages
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          every conversation, in one place
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {contactSubmissions.length} contact · {messageThreads.length} thread{messageThreads.length === 1 ? "" : "s"}
+        </span>
+      </div>
 
       {/* Type counter pills */}
       <div className="flex flex-wrap gap-2">

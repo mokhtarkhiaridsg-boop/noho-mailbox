@@ -69,15 +69,31 @@ export default function AdminLockerAssignmentsPanel() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: `${T.blue}B0` }}>
-          <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: T.blue, boxShadow: `0 0 6px ${T.blue}` }} />
-          Operations · Locker auto-assign
-        </p>
-        <h2 className="text-xl font-black tracking-tight" style={{ color: T.ink }}>📦 Locker assignments</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>
-          Members with a current `lockboxMonthPassUntil` get auto-assigned to the next free auto-enabled Lockbox + an SMS with their 6-digit PIN. Unclaimed assignments expire after 7 days and the locker frees up.
-        </p>
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1A1D23",
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Locker Assignments
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          lockbox + pin, on the house
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {open} open · auto-assigned by suite
+        </span>
       </div>
 
       {info && <p className="text-[11.5px] font-semibold" style={{ color: T.success }}>{info}</p>}
