@@ -758,3 +758,39 @@ for (const sql of phase13) {
   }
 }
 console.log("Phase 13 migration done.");
+
+// Phase 14 — 13 more missing User columns discovered after Phase 13
+// fixed `locale`. All were added to schema.prisma at various iters
+// without an ALTER landing on Turso. Until now every Prisma SELECT on
+// User threw "no such column: User.kycTrustScore" (or similar) and
+// dragged Square sync, /admin queries, and several panels down with it.
+const phase14 = [
+  `ALTER TABLE User ADD COLUMN kycTrustScore INTEGER`,
+  `ALTER TABLE User ADD COLUMN kycTrustComputedAt DATETIME`,
+  `ALTER TABLE User ADD COLUMN kycTrustFlagsJson TEXT`,
+  `ALTER TABLE User ADD COLUMN shareJunkLearning INTEGER DEFAULT 1`,
+  `ALTER TABLE User ADD COLUMN renewalCadenceJson TEXT`,
+  `ALTER TABLE User ADD COLUMN leaderboardOptIn INTEGER DEFAULT 0`,
+  `ALTER TABLE User ADD COLUMN preferredCarrier TEXT`,
+  `ALTER TABLE User ADD COLUMN suitePinSlogan TEXT`,
+  `ALTER TABLE User ADD COLUMN outboundDigestOptIn INTEGER DEFAULT 0`,
+  `ALTER TABLE User ADD COLUMN outboundDigestLastSentAt DATETIME`,
+  `ALTER TABLE User ADD COLUMN lockboxMonthPassUntil DATETIME`,
+  `ALTER TABLE User ADD COLUMN loyaltyTier TEXT`,
+  `ALTER TABLE User ADD COLUMN loyaltyTierAt DATETIME`,
+  // Backfill the 8 rows that re-stuck in 'running' between Phase 13 and now.
+  `UPDATE SquareSyncLog SET status='failed', errors='Pre-phase14 stale row', completedAt=CURRENT_TIMESTAMP WHERE status='running' AND completedAt IS NULL`,
+];
+for (const sql of phase14) {
+  try {
+    await client.execute(sql);
+    console.log("OK:", sql.slice(0, 60));
+  } catch (e) {
+    if (e.message?.includes("already exists") || e.message?.includes("duplicate column")) {
+      console.log("SKIP:", sql.slice(0, 60));
+    } else {
+      console.error("ERR:", e.message);
+    }
+  }
+}
+console.log("Phase 14 migration done.");
