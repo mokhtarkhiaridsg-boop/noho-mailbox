@@ -18,9 +18,9 @@ const NOHO_INK = "#1A1D23";
 const STATUS_STYLES: Record<string, { bg: string; fg: string }> = {
   InStock:  { bg: "rgba(22,163,74,0.10)",  fg: "#15803d" },
   Issued:   { bg: "rgba(245,166,35,0.14)", fg: "#92400e" },
-  Returned: { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.55)" },
+  Returned: { bg: "rgba(0,0,0,0.06)",   fg: "rgba(0,0,0,0.55)" },
   Lost:     { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" },
-  Retired:  { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.45)" },
+  Retired:  { bg: "rgba(0,0,0,0.06)",   fg: "rgba(0,0,0,0.45)" },
 };
 
 function humanizeAction(action: string): string {
@@ -86,7 +86,7 @@ export default function AdminKeyLedgerPanel() {
             Operations · Key audit ledger
           </p>
           <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Mailbox key audit ledger</h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
             Every physical key on file with full audit trail. Click any row for the per-key history. Export to CSV for end-of-quarter compliance review.
           </p>
         </div>
@@ -106,7 +106,7 @@ export default function AdminKeyLedgerPanel() {
         {(["ALL", "InStock", "Issued", "Returned", "Lost", "Retired"] as const).map((s) => {
           const active = filter === s;
           const n = s === "ALL" ? counts.total : (counts.byStatus[s] ?? 0);
-          const stl = s === "ALL" ? { bg: "rgba(45,16,15,0.06)", fg: NOHO_INK } : STATUS_STYLES[s] ?? { bg: "rgba(45,16,15,0.06)", fg: NOHO_INK };
+          const stl = s === "ALL" ? { bg: "rgba(0,0,0,0.06)", fg: NOHO_INK } : STATUS_STYLES[s] ?? { bg: "rgba(0,0,0,0.06)", fg: NOHO_INK };
           return (
             <button
               key={s}
@@ -126,9 +126,9 @@ export default function AdminKeyLedgerPanel() {
 
       {/* Inventory table */}
       {rows === null ? (
-        <p className="text-sm" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+        <p className="text-sm" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
       ) : visible.length === 0 ? (
-        <div className="rounded-md border border-dashed p-5 text-center" style={{ borderColor: "rgba(45,16,15,0.25)", color: "rgba(45,16,15,0.55)" }}>
+        <div className="rounded-md border border-dashed p-5 text-center" style={{ borderColor: "rgba(0,0,0,0.25)", color: "rgba(0,0,0,0.55)" }}>
           No keys match the current filter.
         </div>
       ) : (
@@ -136,7 +136,7 @@ export default function AdminKeyLedgerPanel() {
           <div className="overflow-x-auto">
             <table className="w-full text-[12px]">
               <thead>
-                <tr style={{ color: "rgba(45,16,15,0.55)" }}>
+                <tr style={{ color: "rgba(0,0,0,0.55)" }}>
                   <th className="text-left px-3 py-2 font-black text-[10px] uppercase tracking-wider">Key</th>
                   <th className="text-left px-3 py-2 font-black text-[10px] uppercase tracking-wider">Suite</th>
                   <th className="text-left px-3 py-2 font-black text-[10px] uppercase tracking-wider">Status</th>
@@ -147,7 +147,7 @@ export default function AdminKeyLedgerPanel() {
               </thead>
               <tbody>
                 {visible.map((r) => {
-                  const stl = STATUS_STYLES[r.status] ?? { bg: "rgba(45,16,15,0.06)", fg: NOHO_INK };
+                  const stl = STATUS_STYLES[r.status] ?? { bg: "rgba(0,0,0,0.06)", fg: NOHO_INK };
                   return (
                     <tr key={r.id} style={{ borderTop: "1px solid #e8e5e0" }}>
                       <td className="px-3 py-2">
@@ -161,18 +161,18 @@ export default function AdminKeyLedgerPanel() {
                           {r.status}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-[11.5px]" style={{ color: "rgba(45,16,15,0.65)" }}>
-                        {r.issuedToName ?? <span style={{ color: "rgba(45,16,15,0.40)" }}>—</span>}
+                      <td className="px-3 py-2 text-[11.5px]" style={{ color: "rgba(0,0,0,0.65)" }}>
+                        {r.issuedToName ?? <span style={{ color: "rgba(0,0,0,0.40)" }}>—</span>}
                         {r.issuedAtIso && (
-                          <span style={{ marginLeft: 6, color: "rgba(45,16,15,0.40)" }}>
+                          <span style={{ marginLeft: 6, color: "rgba(0,0,0,0.40)" }}>
                             · {new Date(r.issuedAtIso).toLocaleDateString()}
                           </span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-[11.5px]" style={{ color: "rgba(45,16,15,0.65)" }}>
-                        {r.lastAction ? humanizeAction(r.lastAction) : <span style={{ color: "rgba(45,16,15,0.40)" }}>—</span>}
+                      <td className="px-3 py-2 text-[11.5px]" style={{ color: "rgba(0,0,0,0.65)" }}>
+                        {r.lastAction ? humanizeAction(r.lastAction) : <span style={{ color: "rgba(0,0,0,0.40)" }}>—</span>}
                         {r.lastActionAtIso && (
-                          <span style={{ marginLeft: 6, color: "rgba(45,16,15,0.40)" }}>
+                          <span style={{ marginLeft: 6, color: "rgba(0,0,0,0.40)" }}>
                             · {new Date(r.lastActionAtIso).toLocaleDateString()}
                           </span>
                         )}
@@ -216,7 +216,7 @@ function KeyHistoryDrawer({ keyId, onClose }: { keyId: string; onClose: () => vo
       role="dialog"
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3"
-      style={{ background: "rgba(45,16,15,0.55)", backdropFilter: "blur(4px)" }}
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
     >
       <div
@@ -233,7 +233,7 @@ function KeyHistoryDrawer({ keyId, onClose }: { keyId: string; onClose: () => vo
               {data?.key?.keyTag ?? keyId.slice(0, 8)}
             </p>
             {data?.key && (
-              <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+              <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                 Suite #{data.key.suiteNumber} · current status <strong style={{ color: NOHO_INK }}>{data.key.status}</strong>
               </p>
             )}
@@ -243,9 +243,9 @@ function KeyHistoryDrawer({ keyId, onClose }: { keyId: string; onClose: () => vo
 
         <div className="overflow-y-auto p-5 flex-1">
           {!data ? (
-            <p className="text-[12px]" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+            <p className="text-[12px]" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
           ) : data.events.length === 0 ? (
-            <p className="text-[12px]" style={{ color: "rgba(45,16,15,0.55)" }}>No audit events on file for this key.</p>
+            <p className="text-[12px]" style={{ color: "rgba(0,0,0,0.55)" }}>No audit events on file for this key.</p>
           ) : (
             <ol className="space-y-3">
               {data.events.map((e, i) => {
@@ -259,16 +259,16 @@ function KeyHistoryDrawer({ keyId, onClose }: { keyId: string; onClose: () => vo
                       <p className="text-[12.5px] font-black" style={{ color: NOHO_INK }}>
                         {humanizeAction(e.action)}
                       </p>
-                      <span className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+                      <span className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
                         {new Date(e.createdAtIso).toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-[10.5px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <p className="text-[10.5px] mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>
                       Actor: <strong style={{ color: NOHO_INK }}>{e.actorName ?? e.actorId.slice(0, 8)}</strong>
                       <span style={{ marginLeft: 6 }}>· {e.actorRole}</span>
                     </p>
                     {meta && (
-                      <pre className="text-[10px] font-mono mt-1.5 whitespace-pre-wrap p-2 rounded" style={{ background: "rgba(45,16,15,0.04)", color: "rgba(45,16,15,0.65)" }}>
+                      <pre className="text-[10px] font-mono mt-1.5 whitespace-pre-wrap p-2 rounded" style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.65)" }}>
                         {JSON.stringify(meta, null, 2)}
                       </pre>
                     )}

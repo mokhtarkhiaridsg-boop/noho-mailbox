@@ -41,7 +41,7 @@ export function CustomerHealthBadge({
     return (
       <span
         className="inline-flex items-center gap-1 text-[9.5px] font-bold px-1.5 py-0.5 rounded-full"
-        style={{ background: "rgba(45,16,15,0.04)", color: "rgba(45,16,15,0.40)" }}
+        style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.40)" }}
         title="No health data yet"
       >
         —

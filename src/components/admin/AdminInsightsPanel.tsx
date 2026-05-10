@@ -19,7 +19,7 @@ function StarsRow({ rating }: { rating: number }) {
   const r = Math.max(0, Math.min(5, Math.round(rating)));
   return (
     <span aria-label={`${r} of 5 stars`} style={{ color: "#f59e0b", letterSpacing: 1 }}>
-      {"★".repeat(r)}<span style={{ color: "rgba(45,16,15,0.20)" }}>{"★".repeat(5 - r)}</span>
+      {"★".repeat(r)}<span style={{ color: "rgba(0,0,0,0.20)" }}>{"★".repeat(5 - r)}</span>
     </span>
   );
 }
@@ -27,9 +27,9 @@ function StarsRow({ rating }: { rating: number }) {
 function StatTile({ label, value, sub, ink }: { label: string; value: string; sub?: string; ink?: string }) {
   return (
     <div className="rounded-md p-3" style={{ border: "1px solid #ECEEF1", background: "white" }}>
-      <p className="text-[9.5px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(45,16,15,0.55)" }}>{label}</p>
+      <p className="text-[9.5px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(0,0,0,0.55)" }}>{label}</p>
       <p className="text-2xl font-black mt-1 tabular-nums leading-none" style={{ color: ink ?? NOHO_INK }}>{value}</p>
-      {sub && <p className="text-[10.5px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>{sub}</p>}
+      {sub && <p className="text-[10.5px] mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>{sub}</p>}
     </div>
   );
 }
@@ -67,13 +67,13 @@ export default function AdminInsightsPanel() {
         >
           neighborhood pulse
         </span>
-        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "rgba(0,0,0,0.55)" }}>
           · pickup surveys mint automatically on Picked Up
         </span>
       </div>
 
       {!agg ? (
-        <p className="text-sm" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+        <p className="text-sm" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
       ) : (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -120,12 +120,12 @@ export default function AdminInsightsPanel() {
           <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
             <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "#e8e5e0" }}>
               <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#f59e0b", boxShadow: "0 0 6px #f59e0b" }} />
-              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
                 Recent comments · {agg.recentComments.length}
               </p>
             </div>
             {agg.recentComments.length === 0 ? (
-              <p className="px-4 py-6 text-[12px] text-center" style={{ color: "rgba(45,16,15,0.45)" }}>
+              <p className="px-4 py-6 text-[12px] text-center" style={{ color: "rgba(0,0,0,0.45)" }}>
                 No written comments yet — they'll appear here as customers submit them.
               </p>
             ) : (
@@ -142,11 +142,11 @@ export default function AdminInsightsPanel() {
                           </span>
                         )}
                       </p>
-                      <span className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+                      <span className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
                         {new Date(c.submittedAt).toLocaleString()}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-[12.5px] italic" style={{ color: "rgba(45,16,15,0.75)" }}>
+                    <p className="mt-1.5 text-[12.5px] italic" style={{ color: "rgba(0,0,0,0.75)" }}>
                       "{c.comment}"
                     </p>
                   </li>

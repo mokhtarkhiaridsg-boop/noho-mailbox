@@ -151,18 +151,18 @@ export default function AdminBookkeepingPanel() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-3">
         {/* Date range + summary */}
         <div className="rounded-2xl bg-white border p-4 space-y-3" style={{ borderColor: "#e8e5e0" }}>
-          <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
             Date range (UTC, half-open)
           </p>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>From</label>
+              <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>From</label>
               <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
                 className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-mono"
                 style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
             </div>
             <div>
-              <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>To (exclusive)</label>
+              <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>To (exclusive)</label>
               <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
                 className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-mono"
                 style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
@@ -188,11 +188,11 @@ export default function AdminBookkeepingPanel() {
           </div>
 
           <div className="rounded-xl border p-3 mt-2" style={{ borderColor: "#e8e5e0", background: "#fafaf7" }}>
-            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
               Summary {pending && "· loading…"}
             </p>
             {!summary ? (
-              <p className="text-[12px] italic mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>—</p>
+              <p className="text-[12px] italic mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>—</p>
             ) : (
               <ul className="text-[12px] mt-1 space-y-0.5" style={{ color: NOHO_INK }}>
                 <li className="flex justify-between"><span>Square payments</span><span className="font-black tabular-nums">{summary.payments}</span></li>
@@ -213,7 +213,7 @@ export default function AdminBookkeepingPanel() {
         {/* Download buttons */}
         <div className="rounded-2xl bg-white border p-4 space-y-3" style={{ borderColor: "#e8e5e0" }}>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
               QuickBooks Desktop / SMB accounting
             </p>
             <button type="button" onClick={downloadIif} disabled={busyKey !== null || !summary}
@@ -221,13 +221,13 @@ export default function AdminBookkeepingPanel() {
               style={{ background: `linear-gradient(135deg, ${NOHO_BLUE}, ${NOHO_BLUE_DEEP})` }}>
               {busyKey === "iif" ? "Building IIF…" : "Download QuickBooks IIF"}
             </button>
-            <p className="text-[10.5px] mt-1 italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10.5px] mt-1 italic" style={{ color: "rgba(0,0,0,0.55)" }}>
               One file with POS + invoices + renewals as DEPOSIT transactions, posted into a single income account.
             </p>
           </div>
 
           <div className="border-t pt-3" style={{ borderColor: "#e8e5e0" }}>
-            <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
               Per-table CSV (Excel / Google Sheets)
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -239,7 +239,7 @@ export default function AdminBookkeepingPanel() {
             </div>
           </div>
 
-          <p className="text-[10.5px] mt-2 italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10.5px] mt-2 italic" style={{ color: "rgba(0,0,0,0.55)" }}>
             All downloads are audit-logged with row counts + the exact date range. Square payments overlap POS-with-Square sales; CSVs are kept separate so you can reconcile by hand if needed.
           </p>
         </div>

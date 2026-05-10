@@ -37,7 +37,7 @@ export default function AdminSuiteTransfersPanel() {
           Operations · Suite transfers
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Suite transfer requests</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Members can request to move to any vacant suite. Approving atomically updates User.suiteNumber + audit. Decisions email the customer.
         </p>
       </div>
@@ -67,9 +67,9 @@ export default function AdminSuiteTransfersPanel() {
 
       <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
         {!data ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
         ) : data.rows.length === 0 ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
             {filter === "Pending" ? "No pending requests — all clear. ✓" : "No requests in this view."}
           </p>
         ) : (
@@ -82,7 +82,7 @@ export default function AdminSuiteTransfersPanel() {
                       {r.userName} <StatusChip status={r.status} />
                     </p>
                     <p className="text-[12px] mt-0.5 font-mono tabular-nums" style={{ color: NOHO_INK }}>
-                      <span style={{ color: "rgba(45,16,15,0.55)" }}>#{r.fromSuite}</span>
+                      <span style={{ color: "rgba(0,0,0,0.55)" }}>#{r.fromSuite}</span>
                       <span className="mx-1">→</span>
                       <span style={{ color: NOHO_BLUE_DEEP }}>#{r.toSuite}</span>
                       {r.status === "Pending" && !r.vacantNow && (
@@ -91,14 +91,14 @@ export default function AdminSuiteTransfersPanel() {
                         </span>
                       )}
                     </p>
-                    <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                       {r.userEmail} · filed {new Date(r.createdAtIso).toLocaleDateString()}
                     </p>
                     <p className="text-[11.5px] mt-1.5 italic" style={{ color: NOHO_INK, background: "rgba(245,166,35,0.06)", padding: "8px 10px", borderRadius: "8px" }}>
                       "{r.reason}"
                     </p>
                     {r.decisionNote && (
-                      <p className="text-[11px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>
+                      <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>
                         <strong>Admin note:</strong> {r.decisionNote}
                         {r.decidedByName && <span className="opacity-70"> — {r.decidedByName}</span>}
                       </p>
@@ -138,7 +138,7 @@ function StatusChip({ status }: { status: string }) {
   const c = status === "Pending"   ? { bg: "rgba(245,166,35,0.18)", fg: "#92400e" }
           : status === "Approved"  ? { bg: "rgba(22,163,74,0.14)",  fg: "#15803d" }
           : status === "Denied"    ? { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" }
-          :                          { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.55)" };
+          :                          { bg: "rgba(0,0,0,0.06)",   fg: "rgba(0,0,0,0.55)" };
   return (
     <span className="ml-1 text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: c.bg, color: c.fg }}>
       {status}
@@ -166,9 +166,9 @@ function DecideModal({ row, onClose, onDecided }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(45,16,15,0.55)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.55)" }}>
       <div className="rounded-2xl bg-white max-w-lg w-full p-5" style={{ border: "1px solid #e8e5e0" }}>
-        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
           Review transfer
         </p>
         <h3 className="text-lg font-black mt-1" style={{ color: NOHO_INK }}>
@@ -188,7 +188,7 @@ function DecideModal({ row, onClose, onDecided }: {
           </p>
         )}
         <div className="mt-3">
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Note to customer (optional)</label>
+          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>Note to customer (optional)</label>
           <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
             placeholder="Brief reason — appears in their email."
             className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"

@@ -58,7 +58,7 @@ export default function AdminDeferredEmailsPanel() {
           System · Deferred emails
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Holiday-aware email queue</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Time-sensitive emails (storage warnings, plan-renewal nudges, ID-expiry alerts) get queued here when they land during a closure. The hourly drain cron sends them when the bureau re-opens — so customers don't get a "renew today" email when we're closed.
         </p>
       </div>
@@ -98,9 +98,9 @@ export default function AdminDeferredEmailsPanel() {
 
       <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
         {!data ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
         ) : data.rows.length === 0 ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
             {filter === "Pending" ? "No emails queued — all sends going out in real time. ✓" : "No emails in this view."}
           </p>
         ) : (
@@ -117,7 +117,7 @@ export default function AdminDeferredEmailsPanel() {
                       </span>
                     </p>
                     <p className="text-[11.5px] mt-0.5" style={{ color: NOHO_INK }}>{r.subject}</p>
-                    <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                       {r.recipientEmail} · enqueued {new Date(r.enqueuedAtIso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                       {r.sentAtIso && ` · sent ${new Date(r.sentAtIso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`}
                     </p>
@@ -152,13 +152,13 @@ export default function AdminDeferredEmailsPanel() {
       </div>
 
       <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
-        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
           Cron setup
         </p>
         <p className="text-[11.5px] mt-1" style={{ color: NOHO_INK }}>
-          Schedule a periodic GET to <code className="font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.06)" }}>/api/cron/deferred-email-drain</code> with header <code className="font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.06)" }}>Authorization: Bearer ${'${CRON_SECRET}'}</code>. Recommended: every hour during business hours.
+          Schedule a periodic GET to <code className="font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.06)" }}>/api/cron/deferred-email-drain</code> with header <code className="font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.06)" }}>Authorization: Bearer ${'${CRON_SECRET}'}</code>. Recommended: every hour during business hours.
         </p>
-        <p className="text-[10.5px] mt-2 italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10.5px] mt-2 italic" style={{ color: "rgba(0,0,0,0.55)" }}>
           Default deferred kinds: storage_fee, plan_renewal_reminder, id_expiring, vacation_hold_*, auto_renew_reminder, wallet_auto_top_up_fired, guest_pickup_auth, package_insured.
         </p>
       </div>
@@ -179,7 +179,7 @@ function StatusChip({ status }: { status: string }) {
   const c = status === "Pending"   ? { bg: "rgba(245,166,35,0.18)", fg: "#92400e" }
           : status === "Sent"      ? { bg: "rgba(22,163,74,0.14)",  fg: "#15803d" }
           : status === "Failed"    ? { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" }
-          :                          { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.55)" };
+          :                          { bg: "rgba(0,0,0,0.06)",   fg: "rgba(0,0,0,0.55)" };
   return (
     <span className="ml-1 text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: c.bg, color: c.fg }}>
       {status}

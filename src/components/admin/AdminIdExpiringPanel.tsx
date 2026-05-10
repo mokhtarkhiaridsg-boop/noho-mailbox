@@ -50,7 +50,7 @@ export default function AdminIdExpiringPanel() {
           Compliance · ID expirations
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>ID expiring soon</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           USPS Form 1583 requires every CMRA customer to have an unexpired ID on file. Daily cron sends graduated reminders at 90/30/7/0 day thresholds.
         </p>
       </div>
@@ -64,9 +64,9 @@ export default function AdminIdExpiringPanel() {
 
       <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
         {!rows ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading expirations…</p>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading expirations…</p>
         ) : rows.length === 0 ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>No customer IDs expiring within 90 days. ✓</p>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>No customer IDs expiring within 90 days. ✓</p>
         ) : (
           <ul>
             {rows.map((r, i) => (
@@ -87,7 +87,7 @@ export default function AdminIdExpiringPanel() {
                       </span>
                     )}
                   </p>
-                  <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                  <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                     {r.email} · {r.type ?? "ID"} ({r.document})
                     {r.lastAlertStage && r.lastAlertSentAt && (
                       <> · last reminder: {r.lastAlertStage} on {new Date(r.lastAlertSentAt).toLocaleDateString()}</>
@@ -170,13 +170,13 @@ function RenewModal({ row, onClose, onSaved }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(45,16,15,0.5)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }}>
       <div className="rounded-2xl bg-white max-w-md w-full p-5" style={{ border: "1px solid #e8e5e0" }}>
-        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
           Compliance · Mark ID renewed
         </p>
         <h3 className="text-lg font-black mt-1" style={{ color: NOHO_INK }}>{row.name}</h3>
-        <p className="text-[11.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           {row.document} ID · current expiry: <span className="font-bold tabular-nums">{row.expDate}</span>
         </p>
 
@@ -188,13 +188,13 @@ function RenewModal({ row, onClose, onSaved }: {
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <div className="col-span-2">
-            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>New expiry date *</label>
+            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>New expiry date *</label>
             <input type="date" value={newExpDate} onChange={(e) => setNewExpDate(e.target.value)}
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
               style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
           </div>
           <div>
-            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Type</label>
+            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>Type</label>
             <select value={newType} onChange={(e) => setNewType(e.target.value)}
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
               style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }}>
@@ -207,13 +207,13 @@ function RenewModal({ row, onClose, onSaved }: {
             </select>
           </div>
           <div>
-            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Number / Ref</label>
+            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>Number / Ref</label>
             <input type="text" value={newNumber} onChange={(e) => setNewNumber(e.target.value)} placeholder="optional"
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
               style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
           </div>
           <div className="col-span-2">
-            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Issuer</label>
+            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>Issuer</label>
             <input type="text" value={newIssuer} onChange={(e) => setNewIssuer(e.target.value)} placeholder="state / country / agency"
               className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
               style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />

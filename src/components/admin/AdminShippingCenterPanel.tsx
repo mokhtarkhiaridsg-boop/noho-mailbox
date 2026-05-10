@@ -431,10 +431,10 @@ function HealthCard({
             ? "linear-gradient(90deg, rgba(245,166,35,0.10), rgba(245,166,35,0.02))"
             : "linear-gradient(90deg, rgba(22,163,74,0.08), rgba(22,163,74,0.02))",
         title: NOHO_INK,
-        subtle: "rgba(45,16,15,0.55)",
+        subtle: "rgba(0,0,0,0.55)",
         rowTitle: NOHO_INK,
-        rowDetail: "rgba(45,16,15,0.55)",
-        divider: "rgba(45,16,15,0.08)",
+        rowDetail: "rgba(0,0,0,0.55)",
+        divider: "rgba(0,0,0,0.08)",
       };
 
   return (
@@ -447,7 +447,7 @@ function HealthCard({
         WebkitBackdropFilter: translucent ? "blur(8px) saturate(140%)" : undefined,
         boxShadow: translucent
           ? "0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 22px rgba(0,0,0,0.18)"
-          : "0 1px 3px rgba(45,16,15,0.04), 0 6px 18px rgba(45,16,15,0.05)",
+          : "0 1px 3px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.05)",
       }}
     >
       {/* Header strip */}
@@ -575,13 +575,13 @@ function ShortcutHelpOverlay({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
         className="rounded-2xl w-full max-w-md bg-white border overflow-hidden"
         style={{
-          borderColor: "rgba(45,16,15,0.18)",
-          boxShadow: "0 24px 60px rgba(45,16,15,0.30)",
+          borderColor: "rgba(0,0,0,0.18)",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.30)",
         }}
       >
         <div
           className="px-4 py-3 flex items-center justify-between"
-          style={{ background: "linear-gradient(180deg, #FAF6F0, #fff)", borderBottom: `1px solid rgba(45,16,15,0.10)` }}
+          style={{ background: "linear-gradient(180deg, #FAF6F0, #fff)", borderBottom: `1px solid rgba(0,0,0,0.10)` }}
         >
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1976FF]">MailOS</p>

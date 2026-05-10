@@ -77,7 +77,7 @@ function DeliveryCard({
       style={{
         background: "white",
         border: "1px solid rgba(232,229,224,0.7)",
-        boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 10px rgba(45,16,15,0.03)",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 10px rgba(0,0,0,0.03)",
       }}
     >
       {/* Customer + suite */}
@@ -87,7 +87,7 @@ function DeliveryCard({
             {d.customerName}
           </p>
           {d.suiteNumber && (
-            <p className="text-[10px]" style={{ color: "rgba(45,16,15,0.5)" }}>
+            <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.5)" }}>
               Suite #{d.suiteNumber}
             </p>
           )}
@@ -96,7 +96,7 @@ function DeliveryCard({
           className="text-[11px] font-black tabular-nums px-2 py-0.5 rounded-md shrink-0"
           style={{
             background: d.zone === "NoHo" ? "rgba(51,116,133,0.10)" : "rgba(232,229,224,0.7)",
-            color: d.zone === "NoHo" ? NOHO_BLUE_DEEP : "rgba(45,16,15,0.6)",
+            color: d.zone === "NoHo" ? NOHO_BLUE_DEEP : "rgba(0,0,0,0.6)",
           }}
         >
           ${d.price.toFixed(2)}
@@ -108,7 +108,7 @@ function DeliveryCard({
         className="rounded-lg p-2.5 my-2"
         style={{
           background: "rgba(248,242,234,0.7)",
-          border: "1px dashed rgba(45,16,15,0.12)",
+          border: "1px dashed rgba(0,0,0,0.12)",
         }}
       >
         <div className="flex items-center gap-2">
@@ -118,10 +118,10 @@ function DeliveryCard({
             style={{ background: NOHO_INK, boxShadow: "0 0 0 2px rgba(247,230,194,0.6)" }}
           />
           <div className="flex-1 min-w-0">
-            <p className="text-[9px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(45,16,15,0.4)" }}>
+            <p className="text-[9px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(0,0,0,0.4)" }}>
               From · NOHO
             </p>
-            <p className="text-[10px] truncate" style={{ color: "rgba(45,16,15,0.65)" }}>
+            <p className="text-[10px] truncate" style={{ color: "rgba(0,0,0,0.65)" }}>
               5062 Lankershim Blvd
             </p>
           </div>
@@ -131,18 +131,18 @@ function DeliveryCard({
           <span aria-hidden="true" className="w-2.5 flex justify-center shrink-0">
             <span
               className="w-0.5 h-3"
-              style={{ background: "rgba(45,16,15,0.4)" }}
+              style={{ background: "rgba(0,0,0,0.4)" }}
             />
           </span>
           <span
             className="text-[9px] font-black uppercase tracking-[0.16em]"
-            style={{ color: "rgba(45,16,15,0.4)" }}
+            style={{ color: "rgba(0,0,0,0.4)" }}
           >
             {d.courier && d.courier !== "TBD" ? `via ${d.courier}` : "Courier TBD"}
           </span>
           <span
             className="text-[9px] font-black uppercase tracking-[0.16em]"
-            style={{ color: d.zone === "NoHo" ? NOHO_BLUE : "rgba(45,16,15,0.4)" }}
+            style={{ color: d.zone === "NoHo" ? NOHO_BLUE : "rgba(0,0,0,0.4)" }}
           >
             · {d.zone}
           </span>
@@ -157,7 +157,7 @@ function DeliveryCard({
             }}
           />
           <div className="flex-1 min-w-0">
-            <p className="text-[9px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(45,16,15,0.4)" }}>
+            <p className="text-[9px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(0,0,0,0.4)" }}>
               To
             </p>
             <p className="text-[10px] truncate" style={{ color: NOHO_INK }}>
@@ -171,7 +171,7 @@ function DeliveryCard({
       <div className="flex items-center justify-between gap-2 mt-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <StatusBadge status={d.status} />
-          <span className="text-[9px]" style={{ color: "rgba(45,16,15,0.4)" }}>
+          <span className="text-[9px]" style={{ color: "rgba(0,0,0,0.4)" }}>
             {d.date}
           </span>
         </div>
@@ -247,8 +247,8 @@ export function AdminDeliveriesPanel({ deliveryOrders, isPending, handleDelivery
                 className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.16em] transition-all"
                 style={{
                   background: active ? "white" : "transparent",
-                  color: active ? NOHO_INK : "rgba(45,16,15,0.55)",
-                  boxShadow: active ? "0 1px 2px rgba(45,16,15,0.08)" : undefined,
+                  color: active ? NOHO_INK : "rgba(0,0,0,0.55)",
+                  boxShadow: active ? "0 1px 2px rgba(0,0,0,0.08)" : undefined,
                 }}
                 aria-pressed={active}
               >
@@ -319,7 +319,7 @@ export function AdminDeliveriesPanel({ deliveryOrders, isPending, handleDelivery
                       >
                         {meta.title}
                       </p>
-                      <p className="text-[9px]" style={{ color: "rgba(45,16,15,0.5)" }}>
+                      <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.5)" }}>
                         {meta.sub}
                       </p>
                     </div>
@@ -328,7 +328,7 @@ export function AdminDeliveriesPanel({ deliveryOrders, isPending, handleDelivery
                     className="text-[11px] font-black px-2 py-0.5 rounded-full"
                     style={{
                       background: items.length > 0 ? meta.accent : "rgba(232,229,224,0.7)",
-                      color: items.length > 0 ? "white" : "rgba(45,16,15,0.55)",
+                      color: items.length > 0 ? "white" : "rgba(0,0,0,0.55)",
                       boxShadow: items.length > 0 ? `0 0 10px ${meta.accent}55` : undefined,
                     }}
                   >
@@ -342,8 +342,8 @@ export function AdminDeliveriesPanel({ deliveryOrders, isPending, handleDelivery
                       className="rounded-xl p-4 text-center text-[11px] font-bold"
                       style={{
                         background: "rgba(255,255,255,0.5)",
-                        border: "1px dashed rgba(45,16,15,0.15)",
-                        color: "rgba(45,16,15,0.4)",
+                        border: "1px dashed rgba(0,0,0,0.15)",
+                        color: "rgba(0,0,0,0.4)",
                       }}
                     >
                       Nothing here.

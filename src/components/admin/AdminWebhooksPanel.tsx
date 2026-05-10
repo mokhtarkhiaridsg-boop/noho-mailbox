@@ -86,7 +86,7 @@ export default function AdminWebhooksPanel() {
           System · Webhooks
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Outbound webhooks (Slack / Discord / generic)</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Get real-time pings in your team chat when packages arrive, get picked up, or dropped off. Per-event filters; HMAC-SHA256 signed if you set a secret.
         </p>
       </div>
@@ -95,7 +95,7 @@ export default function AdminWebhooksPanel() {
         {/* List */}
         <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
           <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid #e8e5e0" }}>
-            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
               Endpoints ({rows?.length ?? 0})
             </p>
             <button type="button" onClick={() => setEditing({ mode: "new" })}
@@ -105,9 +105,9 @@ export default function AdminWebhooksPanel() {
             </button>
           </div>
           {!rows ? (
-            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
           ) : rows.length === 0 ? (
-            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
               No webhooks configured yet. Add one to start posting events to Slack or Discord.
             </p>
           ) : (
@@ -117,14 +117,14 @@ export default function AdminWebhooksPanel() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-[12.5px] font-black truncate" style={{ color: NOHO_INK }}>{r.label}</p>
-                      <p className="text-[10.5px] mt-0.5 truncate font-mono" style={{ color: "rgba(45,16,15,0.55)" }}>
+                      <p className="text-[10.5px] mt-0.5 truncate font-mono" style={{ color: "rgba(0,0,0,0.55)" }}>
                         {maskUrl(r.url)}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                         <FormatPill format={r.format} />
                         <StatusDot active={r.active} lastStatus={r.lastStatus} />
                         {r.events.length > 0 && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.04)", color: "rgba(45,16,15,0.55)" }}>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.55)" }}>
                             {r.events.length} event{r.events.length === 1 ? "" : "s"}
                           </span>
                         )}
@@ -159,7 +159,7 @@ export default function AdminWebhooksPanel() {
                     </button>
                     <button type="button" onClick={() => setDrawerEndpointId(r.id)}
                       className="px-2 py-1 rounded text-[10.5px] font-bold border"
-                      style={{ borderColor: "#e8e5e0", color: "rgba(45,16,15,0.55)", background: "white" }}>
+                      style={{ borderColor: "#e8e5e0", color: "rgba(0,0,0,0.55)", background: "white" }}>
                       Deliveries
                     </button>
                     <button type="button" onClick={() => onDelete(r)} disabled={pending}
@@ -177,10 +177,10 @@ export default function AdminWebhooksPanel() {
         {/* Editor */}
         <div className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}>
           {!editing ? (
-            <div className="text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <div className="text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
               Pick a webhook to edit, or click <strong>+ New webhook</strong>.
               <details className="mt-3 not-italic">
-                <summary className="cursor-pointer text-[11px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>How to get a Slack webhook URL</summary>
+                <summary className="cursor-pointer text-[11px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>How to get a Slack webhook URL</summary>
                 <ol className="mt-2 text-[11.5px] space-y-1 list-decimal pl-5" style={{ color: NOHO_INK }}>
                   <li>Slack → app you control → <em>Incoming Webhooks</em></li>
                   <li>Click <em>Add New Webhook to Workspace</em>, pick a channel.</li>
@@ -188,7 +188,7 @@ export default function AdminWebhooksPanel() {
                 </ol>
               </details>
               <details className="mt-2 not-italic">
-                <summary className="cursor-pointer text-[11px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>How to get a Discord webhook URL</summary>
+                <summary className="cursor-pointer text-[11px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>How to get a Discord webhook URL</summary>
                 <ol className="mt-2 text-[11.5px] space-y-1 list-decimal pl-5" style={{ color: NOHO_INK }}>
                   <li>Discord channel → <em>Edit Channel</em> → <em>Integrations</em> → <em>Webhooks</em></li>
                   <li>Click <em>New Webhook</em>, give it a name, copy the URL.</li>
@@ -260,7 +260,7 @@ function ProblemQueue() {
 
   if (!data) {
     return (
-      <div className="rounded-2xl p-4 text-[11px]" style={{ background: "white", border: "1px solid rgba(45,16,15,0.08)", color: "rgba(45,16,15,0.55)" }}>
+      <div className="rounded-2xl p-4 text-[11px]" style={{ background: "white", border: "1px solid rgba(0,0,0,0.08)", color: "rgba(0,0,0,0.55)" }}>
         Loading retry queue…
       </div>
     );
@@ -280,7 +280,7 @@ function ProblemQueue() {
             ? "All caught up — no failed deliveries."
             : `${totals.pending} pending retr${totals.pending === 1 ? "y" : "ies"} · ${totals.deadLettered} dead letter${totals.deadLettered === 1 ? "" : "s"}`}
         </h3>
-        <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Failed deliveries auto-retry on exponential backoff (60s / 5m / 30m / 2h / 12h). After {pendingRetries[0]?.maxAttempts ?? 6} attempts they land in dead-letter — replay manually or discard.
         </p>
       </div>
@@ -337,19 +337,19 @@ function ProblemRow({ row, kind, onReplay, onDiscard, busy }: {
   };
 
   return (
-    <li className="px-4 py-2.5 flex items-start gap-3" style={{ borderBottom: "1px solid rgba(45,16,15,0.05)" }}>
+    <li className="px-4 py-2.5 flex items-start gap-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[11px] font-black" style={{ color: NOHO_INK }}>{row.event}</span>
-          <span className="text-[10px]" style={{ color: "rgba(45,16,15,0.55)" }}>→ {row.endpointLabel}</span>
+          <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.55)" }}>→ {row.endpointLabel}</span>
           {!row.endpointActive && (
-            <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.10)", color: "rgba(45,16,15,0.55)" }}>endpoint paused</span>
+            <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.10)", color: "rgba(0,0,0,0.55)" }}>endpoint paused</span>
           )}
-          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.06)", color: "rgba(45,16,15,0.55)" }}>
+          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.55)" }}>
             attempt {row.attempt}/{row.maxAttempts}
           </span>
         </div>
-        <div className="text-[10.5px] mt-0.5 truncate" style={{ color: "rgba(45,16,15,0.65)" }}>
+        <div className="text-[10.5px] mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.65)" }}>
           {row.error ?? `HTTP ${row.httpStatus ?? "—"}`} · first tried {fmtRel(row.sentAt)}
           {kind === "pending" && row.nextRetryAt && <> · next retry {fmtRel(row.nextRetryAt)}</>}
         </div>
@@ -370,7 +370,7 @@ function ProblemRow({ row, kind, onReplay, onDiscard, busy }: {
             disabled={busy}
             onClick={() => onDiscard(row)}
             className="text-[10.5px] font-bold px-2 py-1 rounded-md disabled:opacity-50"
-            style={{ background: "rgba(45,16,15,0.05)", color: "rgba(45,16,15,0.65)" }}
+            style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.65)" }}
           >
             Discard
           </button>
@@ -385,7 +385,7 @@ function FormatPill({ format }: { format: string }) {
           : format === "discord"  ? { bg: "rgba(88,101,242,0.12)", fg: "#5865f2" }
           : format === "pushover" ? { bg: "rgba(36,158,255,0.12)", fg: "#0072c2" }
           : format === "ntfy"     ? { bg: "rgba(34,197,94,0.10)",  fg: "#15803d" }
-          :                          { bg: "rgba(45,16,15,0.06)",  fg: "rgba(45,16,15,0.55)" };
+          :                          { bg: "rgba(0,0,0,0.06)",  fg: "rgba(0,0,0,0.55)" };
   return (
     <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: c.bg, color: c.fg }}>
       {format}
@@ -394,8 +394,8 @@ function FormatPill({ format }: { format: string }) {
 }
 
 function StatusDot({ active, lastStatus }: { active: boolean; lastStatus: string | null }) {
-  if (!active) return <span className="text-[10px] font-bold" style={{ color: "rgba(45,16,15,0.45)" }}>○ paused</span>;
-  if (!lastStatus) return <span className="text-[10px] font-bold" style={{ color: "rgba(45,16,15,0.55)" }}>· not yet fired</span>;
+  if (!active) return <span className="text-[10px] font-bold" style={{ color: "rgba(0,0,0,0.45)" }}>○ paused</span>;
+  if (!lastStatus) return <span className="text-[10px] font-bold" style={{ color: "rgba(0,0,0,0.55)" }}>· not yet fired</span>;
   const ok = lastStatus === "ok";
   return (
     <span className="text-[10px] font-bold flex items-center gap-1">
@@ -461,7 +461,7 @@ function Editor({ state, onCancel, onSaved }: {
 
   return (
     <div>
-      <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+      <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
         {state.mode === "edit" ? "Edit webhook" : "New webhook"}
       </p>
       {err && (
@@ -471,13 +471,13 @@ function Editor({ state, onCancel, onSaved }: {
       )}
       <div className="mt-3 space-y-3">
         <div>
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Label *</label>
+          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>Label *</label>
           <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Front desk Slack"
             className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
             style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
         </div>
         <div>
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>POST URL *</label>
+          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>POST URL *</label>
           <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://hooks.slack.com/services/…"
             className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-mono"
             style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
@@ -489,7 +489,7 @@ function Editor({ state, onCancel, onSaved }: {
           )}
         </div>
         <div>
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Format</label>
+          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>Format</label>
           <div className="mt-1 flex flex-wrap gap-1.5">
             {(["slack", "discord", "generic", "pushover", "ntfy"] as const).map((f) => (
               <button key={f} type="button" onClick={() => setFormat(f)}
@@ -504,20 +504,20 @@ function Editor({ state, onCancel, onSaved }: {
             ))}
           </div>
           {format === "pushover" && (
-            <p className="mt-1.5 text-[10.5px]" style={{ color: "rgba(45,16,15,0.65)" }}>
+            <p className="mt-1.5 text-[10.5px]" style={{ color: "rgba(0,0,0,0.65)" }}>
               📲 <strong>Pushover URL format:</strong> bake your <code>token</code> + <code>user</code> into the URL as query params, e.g.{" "}
               <code style={{ background: "#F4EEE3", padding: "0 3px", borderRadius: 3 }}>https://api.pushover.net/?token=…&user=…</code>. We extract them server-side and POST to the messages endpoint with form-encoded body.
             </p>
           )}
           {format === "ntfy" && (
-            <p className="mt-1.5 text-[10.5px]" style={{ color: "rgba(45,16,15,0.65)" }}>
+            <p className="mt-1.5 text-[10.5px]" style={{ color: "rgba(0,0,0,0.65)" }}>
               🔔 <strong>ntfy URL format:</strong> use{" "}
               <code style={{ background: "#F4EEE3", padding: "0 3px", borderRadius: 3 }}>https://ntfy.sh/&lt;your-topic&gt;</code> for the public service or your self-hosted URL. Body is plain text; Title/Tags/Click come from headers. No secret needed.
             </p>
           )}
         </div>
         <div>
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
             Subscribe to events ({events.length})
           </label>
           <ul className="mt-1 space-y-1">
@@ -530,7 +530,7 @@ function Editor({ state, onCancel, onSaved }: {
                     <input type="checkbox" checked={on} onChange={() => toggleEvent(e.key)} className="mt-1" />
                     <div className="min-w-0">
                       <p className="text-[12px] font-bold" style={{ color: NOHO_INK }}>{e.label} <code className="ml-1 text-[10px] font-mono opacity-60">{e.key}</code></p>
-                      <p className="text-[10.5px] mt-0.5 italic" style={{ color: "rgba(45,16,15,0.55)" }}>{e.example}</p>
+                      <p className="text-[10.5px] mt-0.5 italic" style={{ color: "rgba(0,0,0,0.55)" }}>{e.example}</p>
                     </div>
                   </label>
                 </li>
@@ -539,14 +539,14 @@ function Editor({ state, onCancel, onSaved }: {
           </ul>
         </div>
         <div>
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
             Optional shared secret
           </label>
           <input type="password" value={secret} onChange={(e) => setSecret(e.target.value)}
             placeholder={state.mode === "edit" && initial?.hasSecret ? "(unchanged — type new value to replace)" : "leave blank for unsigned"}
             className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-mono"
             style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
-          <p className="text-[10.5px] mt-0.5 italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10.5px] mt-0.5 italic" style={{ color: "rgba(0,0,0,0.55)" }}>
             If set, every request includes <code className="font-mono">X-NOHO-Signature: sha256=…</code> (HMAC-SHA256 of the JSON body).
           </p>
         </div>
@@ -589,10 +589,10 @@ function DeliveriesDrawer({ endpointId, endpoint, onClose }: {
     <div className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}>
       <div className="flex items-center justify-between gap-2 mb-2">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
             Recent deliveries · {endpoint?.label ?? endpointId}
           </p>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
             Last 25 attempts. Auto-trims at ~200 per endpoint.
           </p>
         </div>
@@ -603,14 +603,14 @@ function DeliveriesDrawer({ endpointId, endpoint, onClose }: {
         </button>
       </div>
       {!rows ? (
-        <p className="text-[11.5px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+        <p className="text-[11.5px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
       ) : rows.length === 0 ? (
-        <p className="text-[11.5px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>No deliveries yet — fire a Test, or wait for a real event.</p>
+        <p className="text-[11.5px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>No deliveries yet — fire a Test, or wait for a real event.</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border" style={{ borderColor: "#e8e5e0" }}>
           <table className="w-full text-[11.5px]">
             <thead style={{ background: "#fafaf7" }}>
-              <tr style={{ color: "rgba(45,16,15,0.55)" }}>
+              <tr style={{ color: "rgba(0,0,0,0.55)" }}>
                 <th className="text-left px-2 py-1.5 font-black text-[10px] uppercase tracking-wider">Time</th>
                 <th className="text-left px-2 py-1.5 font-black text-[10px] uppercase tracking-wider">Event</th>
                 <th className="text-left px-2 py-1.5 font-black text-[10px] uppercase tracking-wider">Status</th>
@@ -621,7 +621,7 @@ function DeliveriesDrawer({ endpointId, endpoint, onClose }: {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id} style={{ borderTop: "1px solid #e8e5e0" }}>
-                  <td className="px-2 py-1.5 font-mono text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+                  <td className="px-2 py-1.5 font-mono text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
                     {new Date(r.sentAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                   </td>
                   <td className="px-2 py-1.5 font-mono text-[10.5px]" style={{ color: NOHO_INK }}>{r.event}</td>
@@ -634,8 +634,8 @@ function DeliveriesDrawer({ endpointId, endpoint, onClose }: {
                       {r.status === "ok" ? `ok ${r.httpStatus ?? ""}` : `fail ${r.httpStatus ?? ""}`}
                     </span>
                   </td>
-                  <td className="px-2 py-1.5 tabular-nums" style={{ color: "rgba(45,16,15,0.55)" }}>{r.durationMs ?? "—"}ms</td>
-                  <td className="px-2 py-1.5 truncate max-w-[280px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+                  <td className="px-2 py-1.5 tabular-nums" style={{ color: "rgba(0,0,0,0.55)" }}>{r.durationMs ?? "—"}ms</td>
+                  <td className="px-2 py-1.5 truncate max-w-[280px]" style={{ color: "rgba(0,0,0,0.55)" }}>
                     {r.error ?? r.payloadPreview}
                   </td>
                 </tr>

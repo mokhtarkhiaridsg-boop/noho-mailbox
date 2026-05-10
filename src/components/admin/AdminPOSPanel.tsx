@@ -1909,7 +1909,7 @@ export default function AdminPOSPanel() {
           display: inline-flex; align-items: center; gap: 4px;
           font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
           padding: 2px 7px; border-radius: 4px;
-          background: ${CREAM}; color: ${BROWN}; border: 1px solid rgba(45,16,15,0.18);
+          background: ${CREAM}; color: ${BROWN}; border: 1px solid rgba(0,0,0,0.18);
         }
         .badge-method.cash    { background: #d3f0d3; color: #1a4a1a; border-color: #2a8a2a; }
         .badge-method.zelle   { background: #d8e6f8; color: #1a3a6a; border-color: #6a9bd8; }
@@ -1933,7 +1933,7 @@ export default function AdminPOSPanel() {
         .theme-seg {
           display: inline-flex;
           background: rgba(255,255,255,0.5);
-          border: 1px solid rgba(45,16,15,0.3);
+          border: 1px solid rgba(0,0,0,0.3);
           border-radius: 6px;
           padding: 2px;
           gap: 1px;
@@ -2216,7 +2216,7 @@ export default function AdminPOSPanel() {
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.55),
             inset 0 -1px 0 rgba(0,0,0,0.3),
-            0 2px 0 rgba(45,16,15,0.5),
+            0 2px 0 rgba(0,0,0,0.5),
             0 4px 8px -2px rgba(0,0,0,0.35);
           transition: transform 100ms ease, box-shadow 100ms ease;
           cursor: pointer;
@@ -2396,7 +2396,7 @@ export default function AdminPOSPanel() {
           inset: 0;
           z-index: 80;
           background:
-            radial-gradient(ellipse at top, rgba(45,16,15,0.85), rgba(15,5,4,0.96) 70%);
+            radial-gradient(ellipse at top, rgba(0,0,0,0.85), rgba(15,5,4,0.96) 70%);
           padding: clamp(12px, 2vw, 32px);
           overflow-y: auto;
           backdrop-filter: blur(6px);
@@ -2431,7 +2431,7 @@ export default function AdminPOSPanel() {
         .pos-kiosk-hint {
           position: fixed;
           right: 16px; bottom: 16px;
-          background: rgba(45,16,15,0.85);
+          background: rgba(0,0,0,0.85);
           color: ${CREAM};
           font-size: 10px;
           font-weight: 800;
@@ -2449,7 +2449,7 @@ export default function AdminPOSPanel() {
         .plan-grid {
           background:
             linear-gradient(180deg,#fff5dd 0%,#fae9c0 100%);
-          border: 1px solid rgba(45,16,15,0.18);
+          border: 1px solid rgba(0,0,0,0.18);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
           border-radius: 12px;
           padding: 10px;
@@ -2612,8 +2612,8 @@ export default function AdminPOSPanel() {
 
         .park-empty {
           padding: 12px 14px;
-          background: rgba(45,16,15,0.04);
-          border: 1px dashed rgba(45,16,15,0.18);
+          background: rgba(0,0,0,0.04);
+          border: 1px dashed rgba(0,0,0,0.18);
           border-radius: 8px;
           color: ${BROWN};
           opacity: 0.5;
@@ -2681,7 +2681,7 @@ export default function AdminPOSPanel() {
         .z-overlay {
           position: fixed; inset: 0;
           z-index: 95;
-          background: radial-gradient(ellipse at top, rgba(45,16,15,0.85), rgba(15,5,4,0.98) 70%);
+          background: radial-gradient(ellipse at top, rgba(0,0,0,0.85), rgba(15,5,4,0.98) 70%);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
           padding: clamp(12px, 2vw, 28px);
@@ -2837,7 +2837,7 @@ export default function AdminPOSPanel() {
           font-weight: 800;
           font-size: 11px;
           cursor: pointer;
-          box-shadow: 0 1px 0 rgba(45,16,15,0.3), 0 2px 4px -1px rgba(0,0,0,0.2);
+          box-shadow: 0 1px 0 rgba(0,0,0,0.3), 0 2px 4px -1px rgba(0,0,0,0.2);
           transition: transform 100ms ease, filter 120ms ease;
         }
         .tip-chip:hover { filter: brightness(1.05); transform: translateY(-1px); }
@@ -2853,8 +2853,8 @@ export default function AdminPOSPanel() {
         .tip-chip-clear {
           padding: 3px 10px;
           border-radius: 14px;
-          background: rgba(45,16,15,0.06);
-          border: 1px dashed rgba(45,16,15,0.3);
+          background: rgba(0,0,0,0.06);
+          border: 1px dashed rgba(0,0,0,0.3);
           color: ${BROWN};
           font-size: 10px;
           font-weight: 700;
@@ -2892,7 +2892,7 @@ export default function AdminPOSPanel() {
           inset: 0;
           z-index: 50;
           background:
-            radial-gradient(ellipse at center, rgba(45,16,15,0.65) 0%, rgba(15,5,4,0.95) 70%);
+            radial-gradient(ellipse at center, rgba(0,0,0,0.65) 0%, rgba(15,5,4,0.95) 70%);
           backdrop-filter: saturate(80%) blur(2px);
           animation: idleFade 720ms ease both;
           color: ${CREAM};
@@ -3001,7 +3001,7 @@ export default function AdminPOSPanel() {
         .presence-pill.red    { background: #f5d3d0; color: #8a1010; border: 1px solid #b8606a; }
         .presence-pill.blue   { background: #d8e6f8; color: #1a3a6a; border: 1px solid #6a9bd8; }
         .presence-stat {
-          font-size: 9px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(45,16,15,0.6);
+          font-size: 9px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(0,0,0,0.6);
         }
 
         /* ── Email/SMS chips (iter-10) ─────────────────────────── */
@@ -3121,7 +3121,7 @@ export default function AdminPOSPanel() {
           border: 2px solid ${BROWN};
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.6),
-            0 12px 30px -8px rgba(45,16,15,0.55);
+            0 12px 30px -8px rgba(0,0,0,0.55);
         }
         .milestone-icon {
           font-size: 28px;
@@ -3203,8 +3203,8 @@ export default function AdminPOSPanel() {
         .door.suspended{ --door-from: #d8d8d8; --door-to: #b0b0b0; --door-border: #4a4a4a; color: #1f1f1f; }
         .door.held     { --door-from: #d8e6f8; --door-to: #b0c8e8; --door-border: #5e8bc4; color: #1a3a6a; }
         .door.vacant {
-          --door-from: rgba(45,16,15,0.18);
-          --door-to: rgba(45,16,15,0.32);
+          --door-from: rgba(0,0,0,0.18);
+          --door-to: rgba(0,0,0,0.32);
           --door-border: rgba(201,162,74,0.4);
           color: rgba(247,230,194,0.5);
           box-shadow:
@@ -3408,7 +3408,7 @@ export default function AdminPOSPanel() {
         .preview-overlay {
           position: fixed; inset: 0;
           z-index: 102;
-          background: radial-gradient(ellipse at top, rgba(45,16,15,0.7), rgba(15,5,4,0.92) 70%);
+          background: radial-gradient(ellipse at top, rgba(0,0,0,0.7), rgba(15,5,4,0.92) 70%);
           backdrop-filter: blur(6px);
           -webkit-backdrop-filter: blur(6px);
           animation: previewBackdrop 240ms ease both;
@@ -3591,7 +3591,7 @@ export default function AdminPOSPanel() {
         .returns-overlay {
           position: fixed; inset: 0;
           z-index: 98;
-          background: radial-gradient(ellipse at top, rgba(45,16,15,0.85), rgba(15,5,4,0.96) 70%);
+          background: radial-gradient(ellipse at top, rgba(0,0,0,0.85), rgba(15,5,4,0.96) 70%);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
           padding: clamp(12px, 2vw, 28px);
@@ -3615,12 +3615,12 @@ export default function AdminPOSPanel() {
           max-height: 60vh;
           overflow-y: auto;
           border-radius: 8px;
-          border: 1px solid rgba(45,16,15,0.18);
+          border: 1px solid rgba(0,0,0,0.18);
           background: rgba(255,255,255,0.45);
         }
         .returns-row {
           padding: 8px 12px;
-          border-bottom: 1px solid rgba(45,16,15,0.08);
+          border-bottom: 1px solid rgba(0,0,0,0.08);
           cursor: pointer;
           transition: background 100ms ease;
           display: flex;
@@ -3760,7 +3760,7 @@ export default function AdminPOSPanel() {
           background:
             repeating-linear-gradient(0deg, #fff8e6 0, #fff8e6 12px, #f3e6c4 12px, #f3e6c4 13px),
             #fff8e6;
-          border: 1px dashed rgba(45,16,15,0.35);
+          border: 1px dashed rgba(0,0,0,0.35);
           border-radius: 8px;
           color: ${BROWN};
           position: relative;
@@ -3780,8 +3780,8 @@ export default function AdminPOSPanel() {
           aspect-ratio: 1 / 1;
           border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          background: rgba(45,16,15,0.06);
-          border: 1.5px dashed rgba(45,16,15,0.3);
+          background: rgba(0,0,0,0.06);
+          border: 1.5px dashed rgba(0,0,0,0.3);
           color: ${BROWN};
           font-size: 9px;
           font-weight: 900;
@@ -3834,7 +3834,7 @@ export default function AdminPOSPanel() {
         .cash-overlay {
           position: fixed; inset: 0;
           z-index: 99;
-          background: radial-gradient(ellipse at top, rgba(45,16,15,0.85), rgba(15,5,4,0.96) 70%);
+          background: radial-gradient(ellipse at top, rgba(0,0,0,0.85), rgba(15,5,4,0.96) 70%);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
           padding: clamp(12px, 2vw, 28px);
@@ -4063,7 +4063,7 @@ export default function AdminPOSPanel() {
         }
         .up-strip {
           background: linear-gradient(180deg,#fff5dd 0%,#fae9c0 100%);
-          border: 1px solid rgba(45,16,15,0.18);
+          border: 1px solid rgba(0,0,0,0.18);
           border-radius: 12px;
           padding: 10px;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
@@ -4082,7 +4082,7 @@ export default function AdminPOSPanel() {
           padding: 8px 4px;
           border-radius: 8px;
           background: rgba(255,255,255,0.5);
-          border: 1px solid rgba(45,16,15,0.15);
+          border: 1px solid rgba(0,0,0,0.15);
           color: ${BROWN};
           cursor: pointer;
           text-align: center;
@@ -4157,7 +4157,7 @@ export default function AdminPOSPanel() {
           cursor: pointer;
           transition: background 100ms ease;
         }
-        .up-customer:hover { background: rgba(45,16,15,0.08); }
+        .up-customer:hover { background: rgba(0,0,0,0.08); }
 
         /* ── Calculator Overlay (iter-24) ─────────────────────── */
         @keyframes calcSlide {
@@ -4167,7 +4167,7 @@ export default function AdminPOSPanel() {
         .calc-overlay {
           position: fixed; inset: 0;
           z-index: 96;
-          background: radial-gradient(ellipse at center, rgba(45,16,15,0.55), rgba(15,5,4,0.85) 80%);
+          background: radial-gradient(ellipse at center, rgba(0,0,0,0.55), rgba(15,5,4,0.85) 80%);
           backdrop-filter: blur(4px);
           -webkit-backdrop-filter: blur(4px);
         }
@@ -4369,7 +4369,7 @@ export default function AdminPOSPanel() {
         .sig-overlay {
           position: fixed; inset: 0;
           z-index: 101;
-          background: radial-gradient(ellipse at top, rgba(45,16,15,0.85), rgba(15,5,4,0.96) 70%);
+          background: radial-gradient(ellipse at top, rgba(0,0,0,0.85), rgba(15,5,4,0.96) 70%);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
           padding: clamp(12px, 2vw, 28px);
@@ -4410,7 +4410,7 @@ export default function AdminPOSPanel() {
           position: absolute;
           left: 18px; right: 18px; bottom: 36px;
           height: 1px;
-          background: rgba(45,16,15,0.4);
+          background: rgba(0,0,0,0.4);
           pointer-events: none;
         }
         .sig-x {
@@ -4418,7 +4418,7 @@ export default function AdminPOSPanel() {
           left: 18px; bottom: 22px;
           font-size: 14px;
           font-weight: 900;
-          color: rgba(45,16,15,0.4);
+          color: rgba(0,0,0,0.4);
           pointer-events: none;
         }
         .sig-watermark {
@@ -4428,7 +4428,7 @@ export default function AdminPOSPanel() {
           font-size: 11px;
           font-weight: 800;
           letter-spacing: 0.2em;
-          color: rgba(45,16,15,0.18);
+          color: rgba(0,0,0,0.18);
           text-transform: uppercase;
           pointer-events: none;
         }
@@ -4500,11 +4500,11 @@ export default function AdminPOSPanel() {
           /* Glass body */
           background:
             linear-gradient(90deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 18%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.18) 82%, rgba(255,255,255,0.55) 100%);
-          border: 1.5px solid rgba(45,16,15,0.4);
+          border: 1.5px solid rgba(0,0,0,0.4);
           border-top-width: 0;
           border-radius: 0 0 6px 6px;
           box-shadow:
-            inset 0 -2px 4px rgba(45,16,15,0.18),
+            inset 0 -2px 4px rgba(0,0,0,0.18),
             0 2px 4px rgba(0,0,0,0.18);
           overflow: hidden;
         }
@@ -4513,7 +4513,7 @@ export default function AdminPOSPanel() {
           width: 44px;
           height: 6px;
           background: linear-gradient(180deg, #d8c89a 0%, #8c6e27 100%);
-          border: 1.5px solid rgba(45,16,15,0.4);
+          border: 1.5px solid rgba(0,0,0,0.4);
           border-radius: 3px 3px 1px 1px;
           margin-bottom: -1px;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
@@ -4592,7 +4592,7 @@ export default function AdminPOSPanel() {
           padding: 3px 8px 3px 4px;
           border-radius: 999px;
           background: rgba(255,255,255,0.5);
-          border: 1px solid rgba(45,16,15,0.3);
+          border: 1px solid rgba(0,0,0,0.3);
           color: ${BROWN};
           font-size: 11px;
           font-weight: 800;
@@ -4622,8 +4622,8 @@ export default function AdminPOSPanel() {
           position: relative;
         }
         .cashier-badge-avatar.empty {
-          background: rgba(45,16,15,0.18);
-          color: rgba(45,16,15,0.5);
+          background: rgba(0,0,0,0.18);
+          color: rgba(0,0,0,0.5);
         }
 
         .cashier-popover {
@@ -4669,7 +4669,7 @@ export default function AdminPOSPanel() {
           margin-bottom: 16px;
           padding: 10px 12px;
           background: linear-gradient(180deg, #fff5dd 0%, #fae9c0 100%);
-          border: 1px solid rgba(45,16,15,0.18);
+          border: 1px solid rgba(0,0,0,0.18);
           border-radius: 12px;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
         }
@@ -4905,7 +4905,7 @@ export default function AdminPOSPanel() {
         .gift-overlay {
           position: fixed; inset: 0;
           z-index: 100;
-          background: radial-gradient(ellipse at top, rgba(45,16,15,0.85), rgba(15,5,4,0.96) 70%);
+          background: radial-gradient(ellipse at top, rgba(0,0,0,0.85), rgba(15,5,4,0.96) 70%);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
           padding: clamp(12px, 2vw, 28px);
@@ -5848,7 +5848,7 @@ export default function AdminPOSPanel() {
           place-items: center;
           box-shadow:
             inset 0 1px 0 rgba(255,255,255,0.6),
-            0 1px 0 rgba(45,16,15,0.15);
+            0 1px 0 rgba(0,0,0,0.15);
         }
         .wall-calendar-month {
           font-size: 10px;
@@ -5908,7 +5908,7 @@ export default function AdminPOSPanel() {
           z-index: 2;
           text-shadow:
             0 1px 0 rgba(255,255,255,0.5),
-            0 -1px 0 rgba(45,16,15,0.04);
+            0 -1px 0 rgba(0,0,0,0.04);
         }
         @media (max-width: 640px) {
           .wall-calendar { left: 14px; top: 50px; width: 50px; height: 80px; }
@@ -7272,7 +7272,7 @@ export default function AdminPOSPanel() {
             className="flex items-center gap-1.5 px-2 py-1 rounded-md font-bold tracking-wide border"
             style={{
               color: BROWN,
-              borderColor: "rgba(45,16,15,0.3)",
+              borderColor: "rgba(0,0,0,0.3)",
               background: "rgba(255,255,255,0.5)",
             }}
             title="Z-Read — print today's till summary"
@@ -7285,7 +7285,7 @@ export default function AdminPOSPanel() {
             className="flex items-center gap-1.5 px-2 py-1 rounded-md font-bold tracking-wide border"
             style={{
               color: previewMode ? CREAM : BROWN,
-              borderColor: previewMode ? GOLD_DARK : "rgba(45,16,15,0.3)",
+              borderColor: previewMode ? GOLD_DARK : "rgba(0,0,0,0.3)",
               background: previewMode ? `linear-gradient(180deg, ${BLUE} 0%, #0F5BD9 100%)` : "rgba(255,255,255,0.5)",
             }}
             title={previewMode ? "Receipt preview is ON — preview shows before each charge" : "Toggle 4×6 receipt preview before charging"}
@@ -7311,7 +7311,7 @@ export default function AdminPOSPanel() {
             className="flex items-center gap-1.5 px-2 py-1 rounded-md font-bold tracking-wide border"
             style={{
               color: BROWN,
-              borderColor: "rgba(45,16,15,0.3)",
+              borderColor: "rgba(0,0,0,0.3)",
               background: "rgba(255,255,255,0.5)",
             }}
             title="Open calculator overlay"
@@ -7324,7 +7324,7 @@ export default function AdminPOSPanel() {
             className="flex items-center gap-1.5 px-2 py-1 rounded-md font-bold tracking-wide border"
             style={{
               color: BROWN,
-              borderColor: "rgba(45,16,15,0.3)",
+              borderColor: "rgba(0,0,0,0.3)",
               background: "rgba(255,255,255,0.5)",
             }}
             title="Open the customer-facing display in a separate window (drag to a second monitor)"
@@ -7350,7 +7350,7 @@ export default function AdminPOSPanel() {
             className="flex items-center gap-1.5 px-2 py-1 rounded-md font-bold tracking-wide border"
             style={{
               color: shift ? CREAM : BROWN,
-              borderColor: shift ? GOLD_DARK : "rgba(45,16,15,0.3)",
+              borderColor: shift ? GOLD_DARK : "rgba(0,0,0,0.3)",
               background: shift
                 ? `linear-gradient(180deg, ${GOLD} 0%, ${GOLD_DARK} 100%)`
                 : "rgba(255,255,255,0.5)",
@@ -7365,7 +7365,7 @@ export default function AdminPOSPanel() {
             className="flex items-center gap-1.5 px-2 py-1 rounded-md font-bold tracking-wide border"
             style={{
               color: counterMode ? CREAM : BROWN,
-              borderColor: counterMode ? GOLD_DARK : "rgba(45,16,15,0.3)",
+              borderColor: counterMode ? GOLD_DARK : "rgba(0,0,0,0.3)",
               background: counterMode ? `linear-gradient(180deg,${BROWN} 0%, #1a0a09 100%)` : "rgba(255,255,255,0.5)",
             }}
             title={counterMode ? "Exit Counter Mode (Esc)" : "Enter Counter Mode — kiosk-style fullscreen"}
@@ -7378,7 +7378,7 @@ export default function AdminPOSPanel() {
             className="flex items-center gap-1.5 px-2 py-1 rounded-md font-bold tracking-wide border"
             style={{
               color: soundOn ? BROWN : "#9c8a72",
-              borderColor: soundOn ? "rgba(45,16,15,0.3)" : "rgba(45,16,15,0.15)",
+              borderColor: soundOn ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.15)",
               background: soundOn ? "rgba(255,255,255,0.5)" : "transparent",
             }}
             title={soundOn ? "Sound on — click to mute" : "Sound off — click to enable"}
@@ -7411,7 +7411,7 @@ export default function AdminPOSPanel() {
           className="mb-4 p-3 rounded-2xl flex flex-wrap items-center gap-x-5 gap-y-2"
           style={{
             background: "linear-gradient(180deg,#fff5dd 0%,#fae9c0 100%)",
-            border: "1px solid rgba(45,16,15,0.18)",
+            border: "1px solid rgba(0,0,0,0.18)",
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
           }}
         >
@@ -7981,9 +7981,9 @@ export default function AdminPOSPanel() {
                   onClick={() => setAutoTax((v) => !v)}
                   className="absolute right-1 top-0 px-1.5 py-0.5 text-[8px] font-black tracking-[0.16em] uppercase rounded"
                   style={{
-                    background: autoTax ? BLUE : "rgba(45,16,15,0.08)",
+                    background: autoTax ? BLUE : "rgba(0,0,0,0.08)",
                     color: autoTax ? CREAM : BROWN,
-                    border: `1px solid ${autoTax ? BLUE : "rgba(45,16,15,0.3)"}`,
+                    border: `1px solid ${autoTax ? BLUE : "rgba(0,0,0,0.3)"}`,
                   }}
                   title={autoTax ? "Auto 9.5% LA county tax — click to disable" : "Auto-fill 9.5% LA county tax on (subtotal − discount)"}
                 >
@@ -8838,7 +8838,7 @@ function PlanPickerGrid({
           const monthly3 = (e3?.priceCents ?? 0) / 3;
           return (
             <div key={id} className="grid grid-cols-[1fr_repeat(3,1fr)] gap-2 items-stretch">
-              <div className="rounded-lg p-2 flex flex-col justify-center" style={{ background: "rgba(45,16,15,0.06)", border: "1px solid rgba(45,16,15,0.18)" }}>
+              <div className="rounded-lg p-2 flex flex-col justify-center" style={{ background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.18)" }}>
                 <div className="text-[14px] font-black leading-tight tracking-tight" style={{ color: BROWN }}>{baseName}</div>
                 <div className="text-[10px] opacity-70 font-bold" style={{ color: BROWN }}>
                   {id === "business" ? "Most freelancers + small biz" :
@@ -9178,7 +9178,7 @@ function MailboxWall({
               <span className="wall-legend"><span className="wall-legend-dot" style={{ background: "#ebd4a8", borderColor: "#6b4a26" }} />{data.occupied} active</span>
               <span className="wall-legend"><span className="wall-legend-dot" style={{ background: "#f0c878", borderColor: GOLD_DARK }} />{data.dueSoon} due</span>
               <span className="wall-legend"><span className="wall-legend-dot" style={{ background: "#f0a7a0", borderColor: "#a40010" }} />{data.overdue} overdue</span>
-              <span className="wall-legend"><span className="wall-legend-dot" style={{ background: "rgba(45,16,15,0.32)", borderColor: "rgba(201,162,74,0.4)" }} />{data.vacant} vacant</span>
+              <span className="wall-legend"><span className="wall-legend-dot" style={{ background: "rgba(0,0,0,0.32)", borderColor: "rgba(201,162,74,0.4)" }} />{data.vacant} vacant</span>
             </>
           )}
         </div>
@@ -9362,7 +9362,7 @@ function SignaturePad({
           <button
             onClick={onCancel}
             className="text-[10px] font-black tracking-wider px-3 py-1.5 rounded"
-            style={{ background: "rgba(45,16,15,0.1)", color: BROWN, border: "1px solid #5a4318" }}
+            style={{ background: "rgba(0,0,0,0.1)", color: BROWN, border: "1px solid #5a4318" }}
           >
             CANCEL · ESC
           </button>
@@ -11097,7 +11097,7 @@ function CashierBadge({
               disabled={!draft.trim()}
               className="flex-1 py-1.5 rounded text-[11px] font-black tracking-wider"
               style={{
-                background: draft.trim() ? BROWN : "rgba(45,16,15,0.3)",
+                background: draft.trim() ? BROWN : "rgba(0,0,0,0.3)",
                 color: CREAM,
                 cursor: draft.trim() ? "pointer" : "not-allowed",
               }}
@@ -11201,7 +11201,7 @@ function HourlySpark({ byHour }: { byHour: Array<{ hour: number; cents: number; 
           <line
             x1={PAD} y1={H - PAD * 2}
             x2={W - PAD} y2={H - PAD * 2}
-            stroke="rgba(45,16,15,0.18)"
+            stroke="rgba(0,0,0,0.18)"
             strokeWidth="1.5"
             strokeDasharray="2 3"
           />
@@ -11261,7 +11261,7 @@ function GoalProgressRing({
           {/* Track */}
           <circle cx="42" cy="42" r={r}
             fill="none"
-            stroke="rgba(45,16,15,0.12)"
+            stroke="rgba(0,0,0,0.12)"
             strokeWidth="6"
           />
           {/* Progress */}
@@ -11720,7 +11720,7 @@ function CustomerPresenceCard({
               onClick={() => setShowCredit((s) => !s)}
               className="text-[10px] font-black tracking-[0.16em] uppercase px-2 py-1 rounded"
               style={{
-                background: showCredit ? BROWN : "rgba(45,16,15,0.08)",
+                background: showCredit ? BROWN : "rgba(0,0,0,0.08)",
                 color: showCredit ? CREAM : BROWN,
                 border: `1px solid ${BROWN}`,
               }}
@@ -11736,7 +11736,7 @@ function CustomerPresenceCard({
         {showCredit && (
           <div
             className="mt-3 pt-3"
-            style={{ borderTop: "1px dashed rgba(45,16,15,0.3)" }}
+            style={{ borderTop: "1px dashed rgba(0,0,0,0.3)" }}
           >
             <div className="flex flex-wrap gap-2 items-end">
               <label className="block">
@@ -12712,7 +12712,7 @@ function HotkeyOverlay({ onClose }: { onClose: () => void }) {
             <div className="text-[10px] font-black tracking-[0.32em] uppercase" style={{ color: BLUE }}>◆ Keyboard Shortcuts ◆</div>
             <div className="text-2xl font-black tracking-tight">NOHO Cash Register</div>
           </div>
-          <button onClick={onClose} className="text-[11px] font-black px-3 py-1.5 rounded bg-[rgba(45,16,15,0.1)] border border-[#5a4318]">
+          <button onClick={onClose} className="text-[11px] font-black px-3 py-1.5 rounded bg-[rgba(0,0,0,0.1)] border border-[#5a4318]">
             Close · Esc
           </button>
         </div>
@@ -12967,7 +12967,7 @@ function ZHorizontalBars({
       {rows.map((r, i) => (
         <div key={i} className="grid grid-cols-[140px_1fr_auto] gap-2 items-center text-[11px]">
           <div className="font-bold truncate">{r.label}</div>
-          <div className="relative h-5 bg-[rgba(45,16,15,0.08)] rounded overflow-hidden">
+          <div className="relative h-5 bg-[rgba(0,0,0,0.08)] rounded overflow-hidden">
             <div
               className="z-bar-horz"
               style={{

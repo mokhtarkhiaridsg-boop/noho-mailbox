@@ -39,7 +39,7 @@ const STATUS_STYLE: Record<SuiteMaintStatus, { bg: string; fg: string; label: st
   good:     { bg: "rgba(34,197,94,0.10)",  fg: "#15803d", label: "On track" },
   due_soon: { bg: "rgba(245,158,11,0.12)", fg: "#92400e", label: "Due soon" },
   overdue:  { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b", label: "Overdue" },
-  never:    { bg: "rgba(45,16,15,0.05)",   fg: T.inkFaint,label: "Never logged" },
+  never:    { bg: "rgba(0,0,0,0.05)",   fg: T.inkFaint,label: "Never logged" },
 };
 
 type Filter = "all" | "overdue" | "due_soon" | "good" | "never";

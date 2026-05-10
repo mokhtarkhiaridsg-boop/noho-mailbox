@@ -321,7 +321,7 @@ export default function AdminLabelPrinterPanel() {
           Operations · Label printer
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Thermal label printer</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Type or scan any tracking #. We hit the carrier&apos;s tracking API live (USPS / UPS / FedEx / DHL) and overlay our intake data when the package is one of ours. Code 128 barcode scannable by every driver. Prints 4×6 on Jadens.
         </p>
       </div>
@@ -330,7 +330,7 @@ export default function AdminLabelPrinterPanel() {
         {/* Tracking row with status pill */}
         <div>
           <div className="flex items-center justify-between gap-2">
-            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
               Tracking number
             </label>
             <StatusPill status={lookupStatus} pending={lookupPending} />
@@ -393,7 +393,7 @@ export default function AdminLabelPrinterPanel() {
                     <p className="text-[12.5px] font-black" style={{ color: NOHO_INK }}>
                       {r.name} {r.suiteNumber && <span className="ml-1 text-[10px] font-mono opacity-70">#{r.suiteNumber}</span>}
                     </p>
-                    <p className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>{r.email}</p>
+                    <p className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>{r.email}</p>
                   </button>
                 </li>
               ))}
@@ -470,7 +470,7 @@ export default function AdminLabelPrinterPanel() {
           </div>
         </div>
         {!canPrint && (
-          <p className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
             Type or scan a <strong>tracking number</strong> (≥4 chars) to enable printing. Recipient name is optional — the label prints with “(verify recipient at counter)” if blank.
           </p>
         )}
@@ -480,7 +480,7 @@ export default function AdminLabelPrinterPanel() {
       {labelData && (
         <>
           <div className="no-print">
-            <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
               Live preview · 4 × 6 inches @ 85%
             </p>
             <div style={{ overflow: "auto" }}>
@@ -526,7 +526,7 @@ function StatusPill({ status, pending }: { status: LookupStatus; pending: boolea
   }
   // manual
   return (
-    <span className="text-[10.5px] font-bold inline-flex items-center gap-1" style={{ color: "rgba(45,16,15,0.55)" }}>
+    <span className="text-[10.5px] font-bold inline-flex items-center gap-1" style={{ color: "rgba(0,0,0,0.55)" }}>
       ✏️ Manual entry
     </span>
   );
@@ -551,12 +551,12 @@ function OnlineTrackingPane({ online }: {
   };
 }) {
   const STATUS_TONE: Record<string, { bg: string; fg: string; label: string }> = {
-    PRE_TRANSIT: { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.55)", label: "Label created" },
+    PRE_TRANSIT: { bg: "rgba(0,0,0,0.06)",   fg: "rgba(0,0,0,0.55)", label: "Label created" },
     TRANSIT:     { bg: "rgba(51,116,133,0.10)", fg: "#23596A",             label: "In transit" },
     DELIVERED:   { bg: "rgba(22,163,74,0.12)",  fg: "#15803d",             label: "Delivered" },
     RETURNED:    { bg: "rgba(231,0,19,0.08)",   fg: "#991b1b",             label: "Returned" },
     FAILURE:     { bg: "rgba(231,0,19,0.12)",   fg: "#991b1b",             label: "Exception" },
-    UNKNOWN:     { bg: "rgba(45,16,15,0.05)",   fg: "rgba(45,16,15,0.55)", label: "Unknown" },
+    UNKNOWN:     { bg: "rgba(0,0,0,0.05)",   fg: "rgba(0,0,0,0.55)", label: "Unknown" },
   };
 
   if (online.source === "none") return null;
@@ -566,7 +566,7 @@ function OnlineTrackingPane({ online }: {
         <span className="font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: NOHO_BLUE, color: "white" }}>
           {online.carrier}
         </span>
-        <span style={{ color: "rgba(45,16,15,0.55)" }}>
+        <span style={{ color: "rgba(0,0,0,0.55)" }}>
           Carrier auto-detected · live tracking unavailable for this carrier
         </span>
       </div>
@@ -588,7 +588,7 @@ function OnlineTrackingPane({ online }: {
           {tone.label}
         </span>
         {online.location && (
-          <span className="text-[10.5px] font-semibold" style={{ color: "rgba(45,16,15,0.65)" }}>
+          <span className="text-[10.5px] font-semibold" style={{ color: "rgba(0,0,0,0.65)" }}>
             · {online.location}
           </span>
         )}
@@ -609,8 +609,8 @@ function OnlineTrackingPane({ online }: {
           {online.history.slice(0, 4).map((h, i) => {
             const d = h.dateIso ? new Date(h.dateIso) : null;
             return (
-              <li key={i} className="text-[10.5px] flex items-baseline gap-2" style={{ color: "rgba(45,16,15,0.65)" }}>
-                <span className="font-mono shrink-0" style={{ color: "rgba(45,16,15,0.45)" }}>
+              <li key={i} className="text-[10.5px] flex items-baseline gap-2" style={{ color: "rgba(0,0,0,0.65)" }}>
+                <span className="font-mono shrink-0" style={{ color: "rgba(0,0,0,0.45)" }}>
                   {d ? d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—"}
                 </span>
                 <span className="flex-1 truncate font-semibold" style={{ color: NOHO_INK }}>{h.status}</span>
@@ -618,7 +618,7 @@ function OnlineTrackingPane({ online }: {
               </li>
             );
           })}
-          <li className="text-[9.5px] pt-1" style={{ color: "rgba(45,16,15,0.40)" }}>
+          <li className="text-[9.5px] pt-1" style={{ color: "rgba(0,0,0,0.40)" }}>
             Live from {online.source === "shippo" ? "Shippo" : "carrier"} · fetched {fetched.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
           </li>
         </ul>
@@ -630,7 +630,7 @@ function OnlineTrackingPane({ online }: {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>{label}</label>
+      <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>{label}</label>
       <div className="mt-1">{children}</div>
     </div>
   );
@@ -704,7 +704,7 @@ function ShippingLabel({ data, className }: { data: LabelData; className?: strin
       fontFamily: "'Helvetica Neue', Inter, Arial, sans-serif",
       display: "flex", flexDirection: "row",
       border: `1.5pt solid ${NOHO_INK}`,
-      boxShadow: "0 4px 18px rgba(45,16,15,0.10)",
+      boxShadow: "0 4px 18px rgba(0,0,0,0.10)",
       position: "relative",
     }}>
       {/* Brand accent strip (left) — narrow vertical band, never touches

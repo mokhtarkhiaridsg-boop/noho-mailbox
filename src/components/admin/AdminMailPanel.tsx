@@ -982,7 +982,7 @@ function MailHeroTile({
     ? { bar: T.warning, bg: "rgba(176,112,48,0.08)", text: T.warning, ring: "rgba(176,112,48,0.40)" }
     : success
     ? { bar: T.success, bg: "rgba(22,163,74,0.06)",  text: T.success, ring: "rgba(22,163,74,0.40)" }
-    : { bar: T.ink,     bg: T.surface,                text: T.ink,     ring: "rgba(45,16,15,0.32)" };
+    : { bar: T.ink,     bg: T.surface,                text: T.ink,     ring: "rgba(0,0,0,0.32)" };
 
   return (
     <button
@@ -993,7 +993,7 @@ function MailHeroTile({
         background: tone.bg,
         border: `1px solid ${active ? tone.bar : T.border}`,
         boxShadow: active
-          ? `0 0 0 2px ${tone.ring}, 0 6px 16px rgba(45,16,15,0.06), 0 1px 0 rgba(255,255,255,0.6) inset`
+          ? `0 0 0 2px ${tone.ring}, 0 6px 16px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.6) inset`
           : "0 1px 0 rgba(255,255,255,0.6) inset",
       }}
     >

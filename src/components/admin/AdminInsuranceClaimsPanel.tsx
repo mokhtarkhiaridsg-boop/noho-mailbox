@@ -425,7 +425,7 @@ export default function AdminInsuranceClaimsPanel() {
 
       {/* Detail / prefill modal */}
       {openClaimId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(45,16,15,0.55)" }} onClick={closeDetail}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.55)" }} onClick={closeDetail}>
           <div className="rounded-2xl bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto p-5" style={{ border: `1px solid ${T.border}` }} onClick={(e) => e.stopPropagation()}>
             {!detail ? (
               <p className="text-[12px]" style={{ color: T.inkFaint }}>Loading…</p>

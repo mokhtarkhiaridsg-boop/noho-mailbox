@@ -45,7 +45,7 @@ export default async function PackageLookupPage({
       </Link>
 
       <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900 }}>Package lookup</h1>
-      <p style={{ margin: "4px 0 16px", fontSize: 12, color: "rgba(45,16,15,0.55)" }}>
+      <p style={{ margin: "4px 0 16px", fontSize: 12, color: "rgba(0,0,0,0.55)" }}>
         Type any tracking number (or last 4+ chars). Searches across customer mail intake AND external dropoffs across all history.
       </p>
 
@@ -86,7 +86,7 @@ export default async function PackageLookupPage({
       </form>
 
       {q.length >= 4 && result.mailItems.length === 0 && result.dropoffs.length === 0 && (
-        <div style={{ padding: "32px 24px", textAlign: "center", border: "1px dashed #e8e5e0", borderRadius: 16, color: "rgba(45,16,15,0.55)" }}>
+        <div style={{ padding: "32px 24px", textAlign: "center", border: "1px dashed #e8e5e0", borderRadius: 16, color: "rgba(0,0,0,0.55)" }}>
           <p style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>No packages match &quot;{q}&quot;</p>
           <p style={{ margin: "6px 0 0", fontSize: 12 }}>Try a longer fragment or check the carrier.</p>
         </div>
@@ -94,7 +94,7 @@ export default async function PackageLookupPage({
 
       {result.mailItems.length > 0 && (
         <div style={{ marginBottom: 24 }}>
-          <p style={{ margin: 0, fontSize: 10, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(45,16,15,0.40)" }}>
+          <p style={{ margin: 0, fontSize: 10, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(0,0,0,0.40)" }}>
             Customer mail · {result.mailItems.length} match{result.mailItems.length === 1 ? "" : "es"}
           </p>
           <div style={{ marginTop: 8, background: "white", border: "1px solid #e8e5e0", borderRadius: 16, overflow: "hidden" }}>
@@ -126,14 +126,14 @@ export default async function PackageLookupPage({
                       </span>
                     )}
                   </p>
-                  <p style={{ margin: "2px 0 0", fontSize: 11, color: "rgba(45,16,15,0.55)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                  <p style={{ margin: "2px 0 0", fontSize: 11, color: "rgba(0,0,0,0.55)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
                     {m.carrier ?? m.from} · {m.trackingNumber}
                   </p>
-                  <p style={{ margin: "2px 0 0", fontSize: 10.5, color: "rgba(45,16,15,0.45)" }}>
+                  <p style={{ margin: "2px 0 0", fontSize: 10.5, color: "rgba(0,0,0,0.45)" }}>
                     Logged {new Date(m.createdAt).toLocaleString()}
                   </p>
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 900, padding: "3px 8px", borderRadius: 6, background: "rgba(45,16,15,0.06)", color: NOHO_INK, flexShrink: 0 }}>
+                <span style={{ fontSize: 10, fontWeight: 900, padding: "3px 8px", borderRadius: 6, background: "rgba(0,0,0,0.06)", color: NOHO_INK, flexShrink: 0 }}>
                   {m.status}
                 </span>
               </div>
@@ -144,7 +144,7 @@ export default async function PackageLookupPage({
 
       {result.dropoffs.length > 0 && (
         <div style={{ marginBottom: 24 }}>
-          <p style={{ margin: 0, fontSize: 10, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(45,16,15,0.40)" }}>
+          <p style={{ margin: 0, fontSize: 10, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(0,0,0,0.40)" }}>
             External dropoffs · {result.dropoffs.length} match{result.dropoffs.length === 1 ? "" : "es"}
           </p>
           <div style={{ marginTop: 8, background: "white", border: "1px solid #e8e5e0", borderRadius: 16, overflow: "hidden" }}>
@@ -171,16 +171,16 @@ export default async function PackageLookupPage({
                   <p style={{ margin: 0, fontSize: 14, fontWeight: 800, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {d.senderName ?? "(no sender)"}
                     {d.receiverName && (
-                      <span style={{ marginLeft: 6, fontSize: 11, fontWeight: 700, color: "rgba(45,16,15,0.55)" }}>
+                      <span style={{ marginLeft: 6, fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.55)" }}>
                         → {d.receiverName}
                       </span>
                     )}
                   </p>
-                  <p style={{ margin: "2px 0 0", fontSize: 11, color: "rgba(45,16,15,0.55)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                  <p style={{ margin: "2px 0 0", fontSize: 11, color: "rgba(0,0,0,0.55)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
                     {d.carrier} · {d.trackingNumber}
                     {d.destination && <span style={{ fontFamily: "inherit" }}> · {d.destination}</span>}
                   </p>
-                  <p style={{ margin: "2px 0 0", fontSize: 10.5, color: "rgba(45,16,15,0.45)" }}>
+                  <p style={{ margin: "2px 0 0", fontSize: 10.5, color: "rgba(0,0,0,0.45)" }}>
                     Dropped off {new Date(d.createdAt).toLocaleString()}
                     {d.carrierPickedUpAt && ` · carrier picked up ${new Date(d.carrierPickedUpAt).toLocaleString()}`}
                   </p>
@@ -206,7 +206,7 @@ export default async function PackageLookupPage({
 
       {result.audit.length > 0 && (
         <div style={{ marginBottom: 24 }}>
-          <p style={{ margin: 0, fontSize: 10, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(45,16,15,0.40)" }}>
+          <p style={{ margin: 0, fontSize: 10, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(0,0,0,0.40)" }}>
             Audit trail · {result.audit.length} event{result.audit.length === 1 ? "" : "s"}
           </p>
           <div style={{ marginTop: 8, background: "white", border: "1px solid #e8e5e0", borderRadius: 16, overflow: "hidden" }}>
@@ -228,13 +228,13 @@ export default async function PackageLookupPage({
                     fontSize: 11.5,
                   }}
                 >
-                  <span style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", color: "rgba(45,16,15,0.55)", minWidth: 150 }}>
+                  <span style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", color: "rgba(0,0,0,0.55)", minWidth: 150 }}>
                     {new Date(a.createdAt).toLocaleString()}
                   </span>
                   <span style={{ fontWeight: 800, color: NOHO_INK, minWidth: 180 }}>
                     {a.action}
                   </span>
-                  <span style={{ flex: 1, color: "rgba(45,16,15,0.55)", fontSize: 10.5, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span style={{ flex: 1, color: "rgba(0,0,0,0.55)", fontSize: 10.5, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {meta}
                   </span>
                 </div>

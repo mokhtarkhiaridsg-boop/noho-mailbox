@@ -38,7 +38,7 @@ export default function PrintButton() {
         letterSpacing: "0.06em",
         border: "none",
         cursor: "pointer",
-        boxShadow: "0 6px 20px rgba(45,16,15,0.28)",
+        boxShadow: "0 6px 20px rgba(0,0,0,0.28)",
       }}
     >
       Print invoice

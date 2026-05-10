@@ -115,7 +115,7 @@ export default function AdminVacationHoldPanel() {
       )}
 
       {rows === null ? (
-        <p className="text-sm" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+        <p className="text-sm" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
       ) : rows.length === 0 ? (
         <div
           className="rounded-md border border-dashed p-5 flex items-center gap-3"
@@ -140,7 +140,7 @@ export default function AdminVacationHoldPanel() {
             const statusColor =
               status === "expired" ? { bg: "rgba(231,0,19,0.10)", fg: "#991b1b", label: "Expired · awaiting cron" } :
               status === "active"  ? { bg: "rgba(245,166,35,0.14)", fg: "#92400e", label: "On hold now" } :
-                                     { bg: "rgba(45,16,15,0.06)", fg: "rgba(45,16,15,0.55)", label: "Future" };
+                                     { bg: "rgba(0,0,0,0.06)", fg: "rgba(0,0,0,0.55)", label: "Future" };
             return (
               <li
                 key={h.id}
@@ -162,17 +162,17 @@ export default function AdminVacationHoldPanel() {
                       {statusColor.label}
                     </span>
                   </p>
-                  <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                  <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                     {h.startDate} → {h.endDate}
                     {h.digest && <span style={{ marginLeft: 6 }}>· daily digest</span>}
-                    <span style={{ marginLeft: 6, color: "rgba(45,16,15,0.40)" }}>· {h.customerEmail}</span>
+                    <span style={{ marginLeft: 6, color: "rgba(0,0,0,0.40)" }}>· {h.customerEmail}</span>
                   </p>
                 </div>
                 <span
                   className="text-[12.5px] font-black px-2.5 py-1 rounded shrink-0"
                   style={{
-                    background: h.heldPackageCount > 0 ? "rgba(245,166,35,0.14)" : "rgba(45,16,15,0.06)",
-                    color: h.heldPackageCount > 0 ? "#92400e" : "rgba(45,16,15,0.55)",
+                    background: h.heldPackageCount > 0 ? "rgba(245,166,35,0.14)" : "rgba(0,0,0,0.06)",
+                    color: h.heldPackageCount > 0 ? "#92400e" : "rgba(0,0,0,0.55)",
                   }}
                 >
                   {h.heldPackageCount} held

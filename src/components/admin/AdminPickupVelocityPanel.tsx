@@ -52,7 +52,7 @@ export default function AdminPickupVelocityPanel() {
           Operations · Pickup velocity
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Pickup wait-time predictor</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Each customer's historical avg time-to-pickup vs. their oldest current package. Anyone running &gt;50% over their own average gets flagged "late" — these are who to nudge first.
         </p>
       </div>
@@ -86,7 +86,7 @@ export default function AdminPickupVelocityPanel() {
             </button>
           );
         })}
-        <span className="ml-2 text-[11px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <span className="ml-2 text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>
           {pending ? "Loading…" : `${filtered.length} customers`}
         </span>
       </div>
@@ -94,9 +94,9 @@ export default function AdminPickupVelocityPanel() {
       {/* Velocity table */}
       <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
         {!data ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
         ) : filtered.length === 0 ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
             {filter === "late" ? "No late customers — all caught up. ✓" : "No customers in this view."}
           </p>
         ) : (
@@ -118,7 +118,7 @@ export default function AdminPickupVelocityPanel() {
                       </span>
                     )}
                   </p>
-                  <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                  <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                     {c.avgPickupDays != null
                       ? `Typical: ${c.avgPickupDays}d (${c.pickupSamples} prior pickups)`
                       : `No prior pickups yet`}
@@ -157,7 +157,7 @@ function Tile({ label, value, accent, sub }: { label: string; value: number | st
     <div className="rounded-md bg-white p-3" style={{ border: "1px solid #E5DACA" }}>
       <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#998877" }}>{label}</p>
       <p className="text-2xl font-bold tabular-nums" style={{ color: accent, fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}>{value}</p>
-      {sub && <p className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>{sub}</p>}
+      {sub && <p className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>{sub}</p>}
     </div>
   );
 }
@@ -196,11 +196,11 @@ function Sparkbar({ avg, now, late }: { avg: number; now: number; late: boolean 
 
 function DetailDrawer({ customer, onClose }: { customer: CustomerVelocity; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(45,16,15,0.55)" }}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.55)" }}
       onClick={onClose}>
       <div className="rounded-2xl bg-white max-w-md w-full p-5" style={{ border: "1px solid #e8e5e0" }}
         onClick={(e) => e.stopPropagation()}>
-        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
           Customer
         </p>
         <h3 className="text-lg font-black mt-1" style={{ color: NOHO_INK }}>
@@ -211,7 +211,7 @@ function DetailDrawer({ customer, onClose }: { customer: CustomerVelocity; onClo
             </span>
           )}
         </h3>
-        <p className="text-[11px]" style={{ color: "rgba(45,16,15,0.55)" }}>{customer.email}</p>
+        <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>{customer.email}</p>
 
         <div className="grid grid-cols-2 gap-2 mt-3">
           <Stat label="Avg pickup" value={customer.avgPickupDays != null ? `${customer.avgPickupDays}d` : "—"} />
@@ -241,7 +241,7 @@ function DetailDrawer({ customer, onClose }: { customer: CustomerVelocity; onClo
               </p>
             )}
             {customer.predictedPickupBy && (
-              <p className="text-[10.5px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>
+              <p className="text-[10.5px] mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>
                 Predicted pickup by <strong>{customer.predictedPickupBy}</strong> based on history.
               </p>
             )}
@@ -265,8 +265,8 @@ function DetailDrawer({ customer, onClose }: { customer: CustomerVelocity; onClo
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(45,16,15,0.04)", border: "1px solid #e8e5e0" }}>
-      <p className="text-[9.5px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>{label}</p>
+    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid #e8e5e0" }}>
+      <p className="text-[9.5px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>{label}</p>
       <p className="text-[13px] font-black tabular-nums" style={{ color: NOHO_INK }}>{value}</p>
     </div>
   );

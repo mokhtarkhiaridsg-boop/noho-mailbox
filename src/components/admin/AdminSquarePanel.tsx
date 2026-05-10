@@ -188,11 +188,11 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
           <h3 className="font-black text-sm uppercase tracking-wide mb-3" style={{ color: NOHO_INK }}>
             Setup
           </h3>
-          <ol className="text-sm space-y-1.5 list-decimal list-inside" style={{ color: "rgba(45,16,15,0.65)" }}>
-            <li>Go to <span className="font-mono text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.05)", color: NOHO_BLUE }}>developer.squareup.com/apps</span></li>
+          <ol className="text-sm space-y-1.5 list-decimal list-inside" style={{ color: "rgba(0,0,0,0.65)" }}>
+            <li>Go to <span className="font-mono text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.05)", color: NOHO_BLUE }}>developer.squareup.com/apps</span></li>
             <li>Create or select your application</li>
             <li>Copy your Access Token from the Credentials tab</li>
-            <li>Add it as <span className="font-mono text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.05)", color: NOHO_BLUE }}>SQUARE_ACCESS_TOKEN</span> in your Vercel environment variables</li>
+            <li>Add it as <span className="font-mono text-xs px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.05)", color: NOHO_BLUE }}>SQUARE_ACCESS_TOKEN</span> in your Vercel environment variables</li>
           </ol>
         </div>
       )}
@@ -231,7 +231,7 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
           <h3 className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: NOHO_INK }}>
             Sync data
           </h3>
-          <p className="text-[10px]" style={{ color: "rgba(45,16,15,0.4)" }}>
+          <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
             Pulls fresh data from Square
           </p>
         </div>
@@ -358,13 +358,13 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
           <h3 className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: NOHO_INK }}>
             Sync history
           </h3>
-          <span className="text-[10px]" style={{ color: "rgba(45,16,15,0.4)" }}>
+          <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
             {squareStatus.recentLogs.length} recent
           </span>
         </div>
 
         {squareStatus.recentLogs.length === 0 ? (
-          <div className="px-5 py-10 text-center text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
+          <div className="px-5 py-10 text-center text-sm" style={{ color: "rgba(0,0,0,0.4)" }}>
             No syncs performed yet — run "Sync All" above to populate.
           </div>
         ) : (
@@ -374,7 +374,7 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
               aria-hidden="true"
               className="absolute left-4 top-5 bottom-5 w-px"
               style={{
-                background: "linear-gradient(180deg, rgba(45,16,15,0.18) 0%, rgba(45,16,15,0.05) 100%)",
+                background: "linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.05) 100%)",
               }}
             />
             {squareStatus.recentLogs.map((log) => {
@@ -428,11 +428,11 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
                         {isOk ? "Completed" : isFail ? "Failed" : (isPend ? "Running" : log.status)}
                       </span>
                     </div>
-                    <span className="text-[11px] tabular-nums" style={{ color: "rgba(45,16,15,0.5)" }}>
+                    <span className="text-[11px] tabular-nums" style={{ color: "rgba(0,0,0,0.5)" }}>
                       {relTime(log.startedAt)}
                     </span>
                   </div>
-                  <p className="text-[11px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>
+                  <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>
                     {log.itemsSynced} items
                     {log.completedAt && ` · finished in ${
                       Math.max(
@@ -546,7 +546,7 @@ function SyncCard({
           </p>
           <p
             className="text-[10px] mt-0.5"
-            style={{ color: primary ? "rgba(247,230,194,0.7)" : "rgba(45,16,15,0.5)" }}
+            style={{ color: primary ? "rgba(247,230,194,0.7)" : "rgba(0,0,0,0.5)" }}
           >
             {sub}
           </p>

@@ -87,7 +87,7 @@ const S: Record<string, React.CSSProperties> = {
   page: { background: "#F4F5F7", minHeight: "100vh", padding: "24px 16px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif' },
   banner: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, maxWidth: 720, margin: "0 auto 16px", padding: "12px 18px", background: "white", borderRadius: 12, border: "1px solid #ECEEF1" },
   bannerEyebrow: { margin: 0, fontSize: 12, fontWeight: 800, color: "#0F5BD9" },
-  bannerSub: { margin: "4px 0 0", fontSize: 12, color: "rgba(45,16,15,0.65)" },
+  bannerSub: { margin: "4px 0 0", fontSize: 12, color: "rgba(0,0,0,0.65)" },
   bannerBack: { fontSize: 11, fontWeight: 800, padding: "6px 12px", background: "#F4F5F7", color: "#3B4252", border: "1px solid #ECEEF1", borderRadius: 8, textDecoration: "none", whiteSpace: "nowrap" },
   sheet: { background: "white", maxWidth: 720, margin: "0 auto", padding: "24px 18px", borderRadius: 6, boxShadow: "0 8px 28px rgba(0,0,0,0.08)", border: "1px solid #ECEEF1", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 4 },
   label: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", border: "1px dashed #d1d5db", borderRadius: 4, height: 96 },
@@ -100,6 +100,6 @@ const S: Record<string, React.CSSProperties> = {
   errRoot: { minHeight: "100vh", background: "#F4F5F7", color: "#1A1D23", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif', display: "flex", alignItems: "center", justifyContent: "center", padding: 16 },
   errCard: { background: "white", borderRadius: 16, border: "1px solid #ECEEF1", padding: "24px 28px", maxWidth: 460, textAlign: "center" },
   errEyebrow: { fontSize: 11, fontWeight: 800, letterSpacing: ".22em", textTransform: "uppercase", color: "#92400e", margin: 0 },
-  errMsg: { fontSize: 13, color: "rgba(45,16,15,0.70)", margin: "8px 0 0", lineHeight: 1.5 },
+  errMsg: { fontSize: 13, color: "rgba(0,0,0,0.70)", margin: "8px 0 0", lineHeight: 1.5 },
   code: { fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace", padding: "1px 5px", background: "#F4F5F7", borderRadius: 4, color: "#1F2937", fontSize: 12 },
 };

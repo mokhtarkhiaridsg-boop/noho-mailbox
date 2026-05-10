@@ -32,7 +32,7 @@ const WINDOWS = [14, 30, 90, 180] as const;
 
 function cellStyle(count: number, peak: number): React.CSSProperties {
   if (count === 0 || peak === 0) {
-    return { background: "#fafaf7", color: "rgba(45,16,15,0.30)", border: "1px dashed rgba(45,16,15,0.10)" };
+    return { background: "#fafaf7", color: "rgba(0,0,0,0.30)", border: "1px dashed rgba(0,0,0,0.10)" };
   }
   const intensity = Math.min(1, count / peak);
   // Scale: 0..0.4 green, 0.4..0.75 amber, 0.75..1 red

@@ -36,7 +36,7 @@ const KIND_META: Record<string, { label: string; bg: string; fg: string }> = {
   compliance: { label: "Compliance", bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" },
   billing:    { label: "Billing",    bg: "rgba(124,58,237,0.10)", fg: "#5b21b6" },
   issue:      { label: "Issue",      bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" },
-  system:     { label: "System",     bg: "rgba(45,16,15,0.06)",   fg: "#3B4252" },
+  system:     { label: "System",     bg: "rgba(0,0,0,0.06)",   fg: "#3B4252" },
 };
 
 type SelectedCustomer = { id: string; name: string; email: string; suiteNumber: string | null };
@@ -129,16 +129,16 @@ export default function AdminPinnedNotesPanel() {
       <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-3">
         {/* ── Pinned board ── */}
         <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
-          <p className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
             All pinned ({pinned?.length ?? 0})
           </p>
           {!pinned ? (
-            <p className="text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+            <p className="text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
           ) : pinned.length === 0 ? (
             <div className="px-2 py-8 text-center">
               <p className="text-[28px]">📌</p>
               <p className="text-[12.5px] font-black mt-2" style={{ color: NOHO_INK }}>No pinned notes</p>
-              <p className="text-[11px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>
+              <p className="text-[11px] mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>
                 Pin a note from the customer panel — they'll surface here as a heads-up board.
               </p>
             </div>
@@ -174,7 +174,7 @@ export default function AdminPinnedNotesPanel() {
                     <p className="text-[12.5px] whitespace-pre-wrap" style={{ color: NOHO_INK, lineHeight: 1.5 }}>
                       {n.body}
                     </p>
-                    <p className="text-[10px] mt-2" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <p className="text-[10px] mt-2" style={{ color: "rgba(0,0,0,0.55)" }}>
                       {n.authorName ?? "—"} · {new Date(n.createdAtIso).toLocaleDateString()}
                     </p>
                   </button>
@@ -187,7 +187,7 @@ export default function AdminPinnedNotesPanel() {
         {/* ── Customer detail ── */}
         <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
           {/* Customer search */}
-          <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
             {picked ? "Customer notes" : "Pick a customer"}
           </p>
           {picked ? (
@@ -202,7 +202,7 @@ export default function AdminPinnedNotesPanel() {
                     </span>
                   )}
                 </p>
-                <p className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+                <p className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
                   {picked.email}
                 </p>
               </div>
@@ -229,7 +229,7 @@ export default function AdminPinnedNotesPanel() {
                         <p className="text-[12.5px] font-black" style={{ color: NOHO_INK }}>
                           {r.name} {r.suiteNumber && <span className="ml-1 text-[10px] font-mono opacity-70">#{r.suiteNumber}</span>}
                         </p>
-                        <p className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>{r.email}</p>
+                        <p className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>{r.email}</p>
                       </button>
                     </li>
                   ))}
@@ -250,13 +250,13 @@ export default function AdminPinnedNotesPanel() {
           {/* Note timeline for picked */}
           {picked && (
             <div className="mt-4">
-              <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+              <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                 Timeline ({picketNotes?.length ?? 0})
               </p>
               {!picketNotes ? (
-                <p className="text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+                <p className="text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
               ) : picketNotes.length === 0 ? (
-                <p className="text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>No notes yet for this customer.</p>
+                <p className="text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>No notes yet for this customer.</p>
               ) : (
                 <ul className="space-y-1.5">
                   {picketNotes.map((n) => {
@@ -272,7 +272,7 @@ export default function AdminPinnedNotesPanel() {
                             style={{ background: meta.bg, color: meta.fg }}>
                             {isPinned ? "📌 " : ""}{meta.label}
                           </span>
-                          <span className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+                          <span className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
                             {n.authorName ?? "—"} · {new Date(n.createdAtIso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                           </span>
                         </div>
@@ -308,7 +308,7 @@ export default function AdminPinnedNotesPanel() {
           )}
 
           {!picked && (
-            <p className="text-[11px] italic mt-2" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[11px] italic mt-2" style={{ color: "rgba(0,0,0,0.55)" }}>
               Or click any sticky on the left to jump straight to that customer.
             </p>
           )}
@@ -345,7 +345,7 @@ function AddNoteForm({ userId, pending, onAdded }: {
 
   return (
     <div className="rounded-lg border p-3" style={{ borderColor: "#e8e5e0", background: "#fafaf7" }}>
-      <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+      <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
         New note
       </p>
       {err && (

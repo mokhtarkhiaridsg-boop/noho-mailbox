@@ -725,7 +725,7 @@ function LifecycleStepper({ counts }: { counts: { AwaitingPayment: number; LinkS
                 style={{
                   background: active ? `${s.color}1A` : "#fff",
                   borderColor: active ? `${s.color}80` : "#e8e5e0",
-                  boxShadow: active ? `0 6px 18px ${s.color}33` : "0 1px 2px rgba(45,16,15,0.04)",
+                  boxShadow: active ? `0 6px 18px ${s.color}33` : "0 1px 2px rgba(0,0,0,0.04)",
                 }}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -733,8 +733,8 @@ function LifecycleStepper({ counts }: { counts: { AwaitingPayment: number; LinkS
                     <span
                       className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black"
                       style={{
-                        background: active ? s.color : "rgba(45,16,15,0.06)",
-                        color: active ? "#fff" : "rgba(45,16,15,0.40)",
+                        background: active ? s.color : "rgba(0,0,0,0.06)",
+                        color: active ? "#fff" : "rgba(0,0,0,0.40)",
                       }}
                     >
                       {s.n}
@@ -743,7 +743,7 @@ function LifecycleStepper({ counts }: { counts: { AwaitingPayment: number; LinkS
                   </div>
                   <span
                     className="text-[14px] font-extrabold tabular-nums"
-                    style={{ color: active ? s.color : "rgba(45,16,15,0.30)" }}
+                    style={{ color: active ? s.color : "rgba(0,0,0,0.30)" }}
                   >
                     {s.count}
                   </span>

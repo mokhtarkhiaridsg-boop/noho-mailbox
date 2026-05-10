@@ -96,10 +96,10 @@ export default function AdminAffiliateEarningsPanel() {
       {/* Monthly bar chart (closed vs paid, last 12 months) */}
       <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-          <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
             Monthly trend · last 12 months
           </p>
-          <div className="flex items-center gap-3 text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <div className="flex items-center gap-3 text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
             <span className="inline-flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: NOHO_BLUE }} /> Closed</span>
             <span className="inline-flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded" style={{ background: "#22C55E" }} /> Paid</span>
           </div>
@@ -111,14 +111,14 @@ export default function AdminAffiliateEarningsPanel() {
         {/* Leaderboard */}
         <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
           <div className="px-4 py-3" style={{ borderBottom: "1px solid #e8e5e0" }}>
-            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
               Leaderboard ({data?.partners.length ?? 0})
             </p>
           </div>
           {!data ? (
-            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
           ) : data.partners.length === 0 ? (
-            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
               No partners yet. Add some from the Partners panel.
             </p>
           ) : (
@@ -126,7 +126,7 @@ export default function AdminAffiliateEarningsPanel() {
               {data.partners.map((p, i) => (
                 <li key={p.partnerId} className="px-4 py-3 flex items-center gap-3" style={{ borderTop: i === 0 ? "none" : "1px solid #e8e5e0" }}>
                   {/* Medal */}
-                  <span className="text-[18px] w-7 text-center font-black tabular-nums" style={{ color: "rgba(45,16,15,0.45)" }}>
+                  <span className="text-[18px] w-7 text-center font-black tabular-nums" style={{ color: "rgba(0,0,0,0.45)" }}>
                     {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -137,13 +137,13 @@ export default function AdminAffiliateEarningsPanel() {
                       </span>
                       <StatusChip status={p.status} />
                     </p>
-                    <p className="text-[10.5px] truncate" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <p className="text-[10.5px] truncate" style={{ color: "rgba(0,0,0,0.55)" }}>
                       {p.contactName} · {p.category} · {Math.round(p.commissionRate * 100)}% rate
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-[14px] font-black tabular-nums" style={{ color: "#15803d" }}>{fmtCentsDecimal(p.totalEarnedCents)}</p>
-                    <p className="text-[10px] tabular-nums" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <p className="text-[10px] tabular-nums" style={{ color: "rgba(0,0,0,0.55)" }}>
                       {p.closedCount} closed · {p.leadCount} leads
                       {p.owedCents > 0 && <span className="ml-1" style={{ color: "#92400e" }}>· owe {fmtCents(p.owedCents)}</span>}
                     </p>
@@ -157,14 +157,14 @@ export default function AdminAffiliateEarningsPanel() {
         {/* Payout queue */}
         <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
           <div className="px-4 py-3" style={{ borderBottom: "1px solid #e8e5e0" }}>
-            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
               Payout queue ({data?.payoutQueue.length ?? 0}) · oldest first
             </p>
           </div>
           {!data ? (
-            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
           ) : data.payoutQueue.length === 0 ? (
-            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
               All caught up — no closed commissions awaiting payout. ✓
             </p>
           ) : (
@@ -173,7 +173,7 @@ export default function AdminAffiliateEarningsPanel() {
                 <li key={row.id} className="px-4 py-3 flex items-center gap-3" style={{ borderTop: i === 0 ? "none" : "1px solid #e8e5e0" }}>
                   <div className="min-w-0 flex-1">
                     <p className="text-[12.5px] font-black truncate" style={{ color: NOHO_INK }}>{row.partnerName}</p>
-                    <p className="text-[10.5px] truncate" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <p className="text-[10.5px] truncate" style={{ color: "rgba(0,0,0,0.55)" }}>
                       {row.product} · {row.prospectName} · closed {row.closedAtIso ? new Date(row.closedAtIso).toLocaleDateString() : "—"}
                       {row.ageDays > 30 && <span className="ml-1 font-bold" style={{ color: "#991b1b" }}>· {row.ageDays}d old</span>}
                     </p>
@@ -199,7 +199,7 @@ function Tile({ label, value, accent, sub }: { label: string; value: number | st
     <div className="rounded-md bg-white p-3" style={{ border: "1px solid #ECEEF1" }}>
       <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#7A8290" }}>{label}</p>
       <p className="text-2xl font-bold tabular-nums" style={{ color: accent, fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}>{value}</p>
-      {sub && <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>{sub}</p>}
+      {sub && <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>{sub}</p>}
     </div>
   );
 }
@@ -207,9 +207,9 @@ function Tile({ label, value, accent, sub }: { label: string; value: number | st
 function StatusChip({ status }: { status: string }) {
   const c = status === "active"     ? { bg: "rgba(22,163,74,0.14)",  fg: "#15803d" }
           : status === "pending"    ? { bg: "rgba(245,166,35,0.14)", fg: "#92400e" }
-          : status === "paused"     ? { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.55)" }
+          : status === "paused"     ? { bg: "rgba(0,0,0,0.06)",   fg: "rgba(0,0,0,0.55)" }
           : status === "terminated" ? { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" }
-          :                           { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.55)" };
+          :                           { bg: "rgba(0,0,0,0.06)",   fg: "rgba(0,0,0,0.55)" };
   return (
     <span className="ml-1 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: c.bg, color: c.fg }}>
       {status}
@@ -219,7 +219,7 @@ function StatusChip({ status }: { status: string }) {
 
 // ─── Tiny SVG bar chart — closed vs paid stacked-grouped ───────────────
 function BarChart({ series }: { series: { monthLabel: string; closedCents: number; paidCents: number }[] }) {
-  if (series.length === 0) return <p className="text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>No data yet.</p>;
+  if (series.length === 0) return <p className="text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>No data yet.</p>;
   const max = Math.max(1, ...series.flatMap((s) => [s.closedCents, s.paidCents]));
   const width = 800;
   const height = 160;
@@ -240,7 +240,7 @@ function BarChart({ series }: { series: { monthLabel: string; closedCents: numbe
             return (
               <g key={t}>
                 <line x1={0} x2={innerW} y1={y} y2={y} stroke="#e8e5e0" strokeWidth={1} />
-                <text x={-6} y={y + 4} textAnchor="end" fontSize={9} fill="rgba(45,16,15,0.55)">
+                <text x={-6} y={y + 4} textAnchor="end" fontSize={9} fill="rgba(0,0,0,0.55)">
                   ${(labelCents / 100).toLocaleString()}
                 </text>
               </g>
@@ -272,7 +272,7 @@ function BarChart({ series }: { series: { monthLabel: string; closedCents: numbe
                 >
                   <title>Paid in {s.monthLabel}: ${(s.paidCents / 100).toFixed(2)}</title>
                 </rect>
-                <text x={groupW / 2} y={innerH + 14} textAnchor="middle" fontSize={9.5} fill="rgba(45,16,15,0.55)" fontWeight={700}>
+                <text x={groupW / 2} y={innerH + 14} textAnchor="middle" fontSize={9.5} fill="rgba(0,0,0,0.55)" fontWeight={700}>
                   {s.monthLabel}
                 </text>
               </g>

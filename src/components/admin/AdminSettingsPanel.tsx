@@ -168,7 +168,7 @@ export function AdminSettingsPanel() {
         className="rounded-2xl bg-white overflow-hidden"
         style={{
           border: `1px solid ${NOHO_INK}11`,
-          boxShadow: "0 1px 3px rgba(45,16,15,0.04), 0 8px 22px rgba(45,16,15,0.06)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 22px rgba(0,0,0,0.06)",
         }}
       >
         <div
@@ -318,7 +318,7 @@ export function AdminSettingsPanel() {
         className="rounded-2xl bg-white overflow-hidden"
         style={{
           border: `1px solid ${NOHO_INK}11`,
-          boxShadow: "0 1px 3px rgba(45,16,15,0.04), 0 8px 22px rgba(45,16,15,0.06)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 22px rgba(0,0,0,0.06)",
         }}
       >
         <div
@@ -390,7 +390,7 @@ export function AdminSettingsPanel() {
                   background: n.on
                     ? `linear-gradient(180deg, ${NOHO_GREEN} 0%, #15803d 100%)`
                     : `${NOHO_INK}1a`,
-                  boxShadow: n.on ? `0 2px 6px ${NOHO_GREEN}40` : "inset 0 1px 2px rgba(45,16,15,0.10)",
+                  boxShadow: n.on ? `0 2px 6px ${NOHO_GREEN}40` : "inset 0 1px 2px rgba(0,0,0,0.10)",
                 }}
                 aria-pressed={n.on}
                 aria-label={`Toggle ${n.label}`}

@@ -69,7 +69,7 @@ export default async function InvoicePrintPage({
           border: "1px solid #E8DDD0",
           borderRadius: 16,
           overflow: "hidden",
-          boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 14px rgba(45,16,15,0.06)",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.06)",
         }}
       >
         {/* Header */}

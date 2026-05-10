@@ -64,7 +64,7 @@ export default function AdminSuiteOccupancyPanel() {
           Operations · Suite occupancy
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Mailbox occupancy heatmap</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Every suite in the range, color-coded by activity. Tap a cell for the customer + last-30d mail count. Vacancies stand out so you know where to direct new signups.
         </p>
       </div>
@@ -93,7 +93,7 @@ export default function AdminSuiteOccupancyPanel() {
             </button>
           );
         })}
-        <span className="ml-2 text-[11px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <span className="ml-2 text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>
           {pending ? "Loading…" : `${visible.length} of ${data?.totalSuitesInRange ?? 0} suites · ${data?.recentMailVolume ?? 0} mail items in last 30d`}
         </span>
       </div>
@@ -101,9 +101,9 @@ export default function AdminSuiteOccupancyPanel() {
       {/* Heatmap grid */}
       <div className="rounded-2xl bg-white border p-3" style={{ borderColor: "#e8e5e0" }}>
         {!data ? (
-          <p className="px-2 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+          <p className="px-2 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
         ) : data.cells.length === 0 ? (
-          <p className="px-2 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>No occupied suites yet.</p>
+          <p className="px-2 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>No occupied suites yet.</p>
         ) : (
           <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(54px, 1fr))" }}>
             {visible.map((c) => {
@@ -146,7 +146,7 @@ export default function AdminSuiteOccupancyPanel() {
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-2 text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+      <div className="flex flex-wrap gap-2 text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
         <Legend swatch="#22C55E" label="Active (mail in last 30d)" />
         <Legend swatch="#a16207" label="Dormant (occupied · no recent mail)" />
         <Legend swatch="#e8e5e0" label="Vacant" />
@@ -154,24 +154,24 @@ export default function AdminSuiteOccupancyPanel() {
 
       {/* Detail drawer */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(45,16,15,0.55)" }}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.55)" }}
           onClick={() => setSelected(null)}>
           <div className="rounded-2xl bg-white max-w-md w-full p-5" style={{ border: "1px solid #e8e5e0" }}
             onClick={(e) => e.stopPropagation()}>
-            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
               Suite #{selected.suite}
             </p>
             {selected.status === "vacant" ? (
               <>
                 <h3 className="text-lg font-black mt-1" style={{ color: NOHO_INK }}>Vacant</h3>
-                <p className="text-[12px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>
+                <p className="text-[12px] mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>
                   Available for the next signup. Use it in the New Customer wizard or assign manually from Mailbox Center.
                 </p>
               </>
             ) : (
               <>
                 <h3 className="text-lg font-black mt-1" style={{ color: NOHO_INK }}>{selected.userName ?? "(unknown)"}</h3>
-                <p className="text-[11.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                <p className="text-[11.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                   {selected.userEmail} · {selected.plan ?? "no plan"}
                 </p>
                 <div className="grid grid-cols-2 gap-2 mt-3">
@@ -186,7 +186,7 @@ export default function AdminSuiteOccupancyPanel() {
                   if (tags.length === 0) return null;
                   return (
                     <div className="mt-3">
-                      <p className="text-[9.5px] font-black uppercase tracking-wider mb-1" style={{ color: "rgba(45,16,15,0.55)" }}>Mailbox tags</p>
+                      <p className="text-[9.5px] font-black uppercase tracking-wider mb-1" style={{ color: "rgba(0,0,0,0.55)" }}>Mailbox tags</p>
                       <div className="flex flex-wrap gap-1">
                         {tags.map((t) => (
                           <span key={t.id} className="text-[10px] font-black px-1.5 py-0.5 rounded"
@@ -224,8 +224,8 @@ function cellStyle(c: SuiteCell): React.CSSProperties {
   if (c.status === "vacant") {
     return {
       background: "#fafaf7",
-      color: "rgba(45,16,15,0.45)",
-      border: "1px dashed rgba(45,16,15,0.20)",
+      color: "rgba(0,0,0,0.45)",
+      border: "1px dashed rgba(0,0,0,0.20)",
     };
   }
   if (c.status === "occupied_dormant") {
@@ -265,8 +265,8 @@ function Legend({ swatch, label }: { swatch: string; label: string }) {
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(45,16,15,0.04)", border: "1px solid #e8e5e0" }}>
-      <p className="text-[9.5px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>{label}</p>
+    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid #e8e5e0" }}>
+      <p className="text-[9.5px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>{label}</p>
       <p className="text-[13px] font-black tabular-nums" style={{ color: NOHO_INK }}>{value}</p>
     </div>
   );

@@ -45,7 +45,7 @@ export default function AdminStorageDisputesPanel() {
           Money · Storage-fee disputes
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Storage-fee disputes</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Review customer disputes against storage fees applied at pickup. Waiving credits the wallet automatically and writes a WalletTransaction. All decisions are audit-logged.
         </p>
       </div>
@@ -75,9 +75,9 @@ export default function AdminStorageDisputesPanel() {
 
       <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
         {!data ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
         ) : data.rows.length === 0 ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
             {filter === "Open" ? "No open disputes — all clear. ✓" : "No disputes in this view."}
           </p>
         ) : (
@@ -93,7 +93,7 @@ export default function AdminStorageDisputesPanel() {
                         </span>
                       )} <StatusChip status={r.status} />
                     </p>
-                    <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                       {r.itemSummary} · disputed <strong>${(r.feeCents / 100).toFixed(2)}</strong>
                       {r.refundCents != null && r.refundCents > 0 && <> · refunded <strong>${(r.refundCents / 100).toFixed(2)}</strong></>}
                     </p>
@@ -101,7 +101,7 @@ export default function AdminStorageDisputesPanel() {
                       "{r.reason}"
                     </p>
                     {r.resolution && (
-                      <p className="text-[11.5px] mt-1.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                      <p className="text-[11.5px] mt-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                         <strong>Admin note:</strong> {r.resolution} {r.resolvedByName && <span className="opacity-70">— {r.resolvedByName}</span>}
                       </p>
                     )}
@@ -178,13 +178,13 @@ function ThreadModal({ row, onClose }: { row: AdminDisputeRow; onClose: () => vo
         <div className="px-5 py-4" style={{ borderBottom: `1px solid #ECEEF1` }}>
           <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: NOHO_BLUE }}>Dispute thread</p>
           <h3 className="text-lg font-black" style={{ color: NOHO_INK }}>{row.filedByName} · ${(row.feeCents / 100).toFixed(2)}</h3>
-          <p className="text-[11px] italic mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>"{row.reason}"</p>
+          <p className="text-[11px] italic mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>"{row.reason}"</p>
         </div>
         <div className="flex-1 overflow-y-auto p-5 space-y-2" style={{ background: "#FAFAF8" }}>
           {!thread ? (
-            <p className="text-[11.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+            <p className="text-[11.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
           ) : thread.messages.length === 0 ? (
-            <p className="text-[11.5px] italic text-center" style={{ color: "rgba(45,16,15,0.55)" }}>No messages yet — start the conversation below.</p>
+            <p className="text-[11.5px] italic text-center" style={{ color: "rgba(0,0,0,0.55)" }}>No messages yet — start the conversation below.</p>
           ) : thread.messages.map((m) => {
             const isAdmin = m.authorRole === "ADMIN";
             return (
@@ -219,7 +219,7 @@ function ThreadModal({ row, onClose }: { row: AdminDisputeRow; onClose: () => vo
           </div>
         ) : (
           <div className="px-5 py-3 text-center" style={{ borderTop: `1px solid #ECEEF1` }}>
-            <p className="text-[11px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[11px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
               Dispute is {row.status} — thread is read-only.
             </p>
           </div>
@@ -272,15 +272,15 @@ function ResolveModal({ row, onClose, onResolved }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(45,16,15,0.55)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.55)" }}>
       <div className="rounded-2xl bg-white max-w-lg w-full p-5" style={{ border: "1px solid #e8e5e0" }}>
-        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
           Resolve dispute
         </p>
         <h3 className="text-lg font-black mt-1" style={{ color: NOHO_INK }}>
           {row.filedByName} · ${(row.feeCents / 100).toFixed(2)}
         </h3>
-        <p className="text-[11.5px] mt-0.5 italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11.5px] mt-0.5 italic" style={{ color: "rgba(0,0,0,0.55)" }}>
           {row.itemSummary}
         </p>
         <p className="text-[12px] mt-3" style={{ color: NOHO_INK, background: "rgba(245,166,35,0.06)", padding: "10px 12px", borderRadius: "8px" }}>
@@ -294,7 +294,7 @@ function ResolveModal({ row, onClose, onResolved }: {
         )}
 
         <div className="mt-3">
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Note to customer (optional)</label>
+          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>Note to customer (optional)</label>
           <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
             placeholder="Brief reasoning — appears in their email."
             className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
@@ -302,12 +302,12 @@ function ResolveModal({ row, onClose, onResolved }: {
         </div>
 
         <div className="mt-3">
-          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>If waiving, refund amount ($)</label>
+          <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>If waiving, refund amount ($)</label>
           <input type="number" step="0.01" min={0} max={(row.feeCents / 100).toFixed(2)}
             value={refundDollars} onChange={(e) => setRefundDollars(e.target.value)}
             className="mt-1 w-full rounded-lg border px-3 py-2 text-sm font-mono"
             style={{ borderColor: "#e8e5e0", background: "white", color: NOHO_INK }} />
-          <p className="text-[10.5px] mt-1 italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10.5px] mt-1 italic" style={{ color: "rgba(0,0,0,0.55)" }}>
             Default = full ${(row.feeCents / 100).toFixed(2)}. Lower for partial waiver.
           </p>
         </div>

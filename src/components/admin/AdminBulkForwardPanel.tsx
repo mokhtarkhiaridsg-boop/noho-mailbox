@@ -113,7 +113,7 @@ export default function AdminBulkForwardPanel() {
           Operations · Bulk forward
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Bulk forward batch</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Process multiple Forward requests in one shot. Pick the destination per row, hit Process — each item flips atomically + audit-logged. Failures stay selected so you can retry just the broken ones.
         </p>
       </div>
@@ -164,9 +164,9 @@ export default function AdminBulkForwardPanel() {
       {/* Queue table */}
       <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
         {!data ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading queue…</p>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading queue…</p>
         ) : data.rows.length === 0 ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
             No pending forward requests — caught up. ✓
           </p>
         ) : (
@@ -203,7 +203,7 @@ export default function AdminBulkForwardPanel() {
                           </span>
                         )}
                       </p>
-                      <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                      <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                         {row.fromSender} · {row.carrier ?? "Pkg"} {row.trackingNumber ?? ""} · intake {row.intakeDate}
                         {row.notes && <span className="ml-1 italic">"{row.notes}"</span>}
                       </p>
@@ -239,7 +239,7 @@ export default function AdminBulkForwardPanel() {
                         </div>
                       )}
                       {!isSelected && visibleAddressTargets.has(row.requestId) && (
-                        <p className="text-[10px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                        <p className="text-[10px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                           → {visibleAddressTargets.get(row.requestId)}
                         </p>
                       )}

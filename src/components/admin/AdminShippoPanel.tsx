@@ -382,7 +382,7 @@ export function AdminShippoPanel({ isConfigured, recentLabels }: Props) {
       {/* Workspace: rail + canvas */}
       <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)] gap-4">
         {/* Side rail (workspace switcher) */}
-        <aside className="rounded-2xl bg-white border border-[#e8e5e0] p-2 self-start sticky md:top-32" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 18px rgba(45,16,15,0.06)" }}>
+        <aside className="rounded-2xl bg-white border border-[#e8e5e0] p-2 self-start sticky md:top-32" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 18px rgba(0,0,0,0.06)" }}>
           <ul className="space-y-1">
             {rail.map((item) => {
               const active = view === item.id;
@@ -1041,7 +1041,7 @@ function RatesList({
         <div
           key={g.carrier}
           className="rounded-2xl bg-white border border-[#e8e5e0] overflow-hidden"
-          style={{ boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}
+          style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
         >
           <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#e8e5e0]/70" style={{ background: "linear-gradient(180deg, #FAF6F0, #fff)" }}>
             <CarrierGlyph carrier={g.carrier} className="w-7 h-7 shrink-0" />
@@ -1225,8 +1225,8 @@ function SelectedRateBar({
         background: "linear-gradient(180deg, rgba(247,230,194,0.96) 0%, rgba(244,236,219,0.98) 100%)",
         backdropFilter: "saturate(160%) blur(14px)",
         WebkitBackdropFilter: "saturate(160%) blur(14px)",
-        borderColor: "rgba(45,16,15,0.16)",
-        boxShadow: "0 12px 28px rgba(45,16,15,0.18), 0 1px 0 rgba(255,255,255,0.6) inset",
+        borderColor: "rgba(0,0,0,0.16)",
+        boxShadow: "0 12px 28px rgba(0,0,0,0.18), 0 1px 0 rgba(255,255,255,0.6) inset",
       }}
       role="region"
       aria-label="Selected rate"
@@ -1413,7 +1413,7 @@ function LabelsPane({
       </div>
 
       {/* Filter strip */}
-      <div className="rounded-2xl bg-white border border-[#e8e5e0] p-3 flex items-center gap-2 flex-wrap" style={{ boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}>
+      <div className="rounded-2xl bg-white border border-[#e8e5e0] p-3 flex items-center gap-2 flex-wrap" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}>
         <input
           type="text"
           value={query}
@@ -1501,13 +1501,13 @@ function SummaryTile({ label, value, sub, accent, margin }: { label: string; val
         border: `1px solid ${accent ? "#1A1D23" : margin ? "rgba(22,163,74,0.30)" : "#ECEEF1"}`,
       }}
     >
-      <p className="text-[9px] font-black uppercase tracking-[0.18em]" style={{ color: accent ? "rgba(247,230,194,0.75)" : margin ? "#15803d" : "rgba(45,16,15,0.45)" }}>
+      <p className="text-[9px] font-black uppercase tracking-[0.18em]" style={{ color: accent ? "rgba(247,230,194,0.75)" : margin ? "#15803d" : "rgba(0,0,0,0.45)" }}>
         {label}
       </p>
       <p className="text-lg font-extrabold tracking-tight tabular-nums" style={{ color: accent ? "#EBF2FF" : margin ? "#15803d" : "#1A1D23" }}>
         {value}
       </p>
-      <p className="text-[9.5px]" style={{ color: accent ? "rgba(247,230,194,0.6)" : margin ? "#15803d" : "rgba(45,16,15,0.45)" }}>
+      <p className="text-[9.5px]" style={{ color: accent ? "rgba(247,230,194,0.6)" : margin ? "#15803d" : "rgba(0,0,0,0.45)" }}>
         {sub}
       </p>
     </div>
@@ -1898,7 +1898,7 @@ function RefundedBadge({ labelId }: { labelId: string }) {
                   ? "#FF3B30"
                   : stage >= n
                     ? "#22C55E"
-                    : "rgba(45,16,15,0.20)",
+                    : "rgba(0,0,0,0.20)",
               }}
             />
           ))}
@@ -2127,7 +2127,7 @@ function TrackPane(props: any) {
                     <p
                       className="text-[10px] font-black uppercase tracking-wider"
                       style={{
-                        color: errored ? "#991b1b" : reached ? "#15803d" : isCurrent ? "#1976FF" : "rgba(45,16,15,0.40)",
+                        color: errored ? "#991b1b" : reached ? "#15803d" : isCurrent ? "#1976FF" : "rgba(0,0,0,0.40)",
                       }}
                     >
                       {s.label}
@@ -2307,7 +2307,7 @@ function CarriersPane({
                           style={{
                             background: active ? "rgba(51,116,133,0.07)" : "#fff",
                             borderColor: active ? "rgba(51,116,133,0.5)" : "#e8e5e0",
-                            boxShadow: active ? "0 0 0 1px rgba(51,116,133,0.20), 0 1px 2px rgba(45,16,15,0.04)" : "0 1px 2px rgba(45,16,15,0.04)",
+                            boxShadow: active ? "0 0 0 1px rgba(51,116,133,0.20), 0 1px 2px rgba(0,0,0,0.04)" : "0 1px 2px rgba(0,0,0,0.04)",
                           }}
                         >
                           <input
@@ -2518,7 +2518,7 @@ function PresetsPane({
                 }}
               >
                 {/* Drag handle */}
-                <div className="flex items-end justify-center pb-2 select-none" style={{ cursor: "grab", color: "rgba(45,16,15,0.40)" }} title="Drag to reorder">
+                <div className="flex items-end justify-center pb-2 select-none" style={{ cursor: "grab", color: "rgba(0,0,0,0.40)" }} title="Drag to reorder">
                   <svg viewBox="0 0 16 16" className="w-4 h-4" fill="currentColor">
                     <circle cx="5" cy="3" r="1.2" /><circle cx="5" cy="8" r="1.2" /><circle cx="5" cy="13" r="1.2" />
                     <circle cx="11" cy="3" r="1.2" /><circle cx="11" cy="8" r="1.2" /><circle cx="11" cy="13" r="1.2" />
@@ -2647,7 +2647,7 @@ function RecipientNameAutocomplete({
       {open && matches.length > 0 && (
         <div
           className="absolute left-0 right-0 mt-1 rounded-md bg-white z-20 max-h-72 overflow-auto"
-          style={{ border: "1px solid #ECEEF1", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
+          style={{ border: "1px solid #ECEEF1", boxShadow: "0 8px 24px rgba(0,0,0,0.14)" }}
           role="listbox"
         >
           {matches.map((r, i) => {
@@ -2666,7 +2666,7 @@ function RecipientNameAutocomplete({
               >
                 <span
                   className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[9px] font-black"
-                  style={{ background: active ? NOHO_BLUE : "rgba(45,16,15,0.06)", color: active ? "#fff" : "#1A1D23" }}
+                  style={{ background: active ? NOHO_BLUE : "rgba(0,0,0,0.06)", color: active ? "#fff" : "#1A1D23" }}
                 >
                   {(r.toName.match(/\b\w/g) ?? []).slice(0, 2).join("").toUpperCase()}
                 </span>
@@ -2759,7 +2759,7 @@ function Card({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="rounded-2xl bg-white border border-[#e8e5e0] p-5"
-      style={{ boxShadow: "0 1px 2px rgba(45,16,15,0.04)" }}
+      style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
     >
       {children}
     </div>

@@ -223,7 +223,7 @@ export function AdminOverviewPanel({
               className="relative rounded-2xl p-3 text-center transition-all flex flex-col items-center justify-center gap-2 aspect-square"
               style={{
                 background: tile.tint,
-                border: "1px solid rgba(45,16,15,0.06)",
+                border: "1px solid rgba(0,0,0,0.06)",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "scale(1.03)";

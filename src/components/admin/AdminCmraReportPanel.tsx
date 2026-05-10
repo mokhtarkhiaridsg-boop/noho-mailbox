@@ -92,7 +92,7 @@ export default function AdminCmraReportPanel() {
           Compliance · CMRA quarterly report
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>USPS CMRA quarterly report</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Master customer roster + change log for any quarter. Hand the CSVs to your USPS contact (or your accountant) — meets the 1583 quarterly reporting requirement for CMRAs.
         </p>
       </div>
@@ -108,7 +108,7 @@ export default function AdminCmraReportPanel() {
       )}
 
       <div className="rounded-2xl bg-white border p-4 space-y-3" style={{ borderColor: "#e8e5e0" }}>
-        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
           Quarter
         </p>
         <div className="flex items-center gap-2 flex-wrap">
@@ -131,7 +131,7 @@ export default function AdminCmraReportPanel() {
             ))}
           </div>
           {summary && (
-            <span className="text-[11px] font-mono ml-2" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <span className="text-[11px] font-mono ml-2" style={{ color: "rgba(0,0,0,0.55)" }}>
               {summary.periodStartIso} → {summary.periodEndIso}
             </span>
           )}
@@ -149,7 +149,7 @@ export default function AdminCmraReportPanel() {
       </div>
 
       <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
-        <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10px] font-black uppercase tracking-wider mb-1.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           Changes this quarter
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5">
@@ -164,7 +164,7 @@ export default function AdminCmraReportPanel() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
-          <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Roster export</p>
+          <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>Roster export</p>
           <p className="text-[11.5px] mt-0.5" style={{ color: NOHO_INK }}>
             One row per active customer at quarter-end. Contains suite, name, plan, KYC status, ID expiry — everything USPS asks for in the 1583 packet.
           </p>
@@ -175,7 +175,7 @@ export default function AdminCmraReportPanel() {
           </button>
         </div>
         <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
-          <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Change log export</p>
+          <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>Change log export</p>
           <p className="text-[11.5px] mt-0.5" style={{ color: NOHO_INK }}>
             Every CMRA-relevant event during the quarter: signups, deactivations, Form 1583 re-uploads, ID renewals, ID expirations, key replacements.
           </p>
@@ -187,7 +187,7 @@ export default function AdminCmraReportPanel() {
         </div>
       </div>
 
-      <p className="text-[10.5px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+      <p className="text-[10.5px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
         Both exports are audit-logged with row counts and the exact quarter range. Per-customer quarterly statements (one PDF/print per customer) live under the existing "Quarterly" admin tab.
       </p>
     </div>
@@ -205,8 +205,8 @@ function Tile({ label, value, accent }: { label: string; value: number | string;
 
 function ChangeChip({ label, value, accent }: { label: string; value: number; accent: string }) {
   return (
-    <div className="rounded-lg px-2.5 py-1.5" style={{ background: "rgba(45,16,15,0.04)", border: "1px solid #e8e5e0" }}>
-      <p className="text-[9.5px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>{label}</p>
+    <div className="rounded-lg px-2.5 py-1.5" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid #e8e5e0" }}>
+      <p className="text-[9.5px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>{label}</p>
       <p className="text-base font-black tabular-nums" style={{ color: accent }}>{value}</p>
     </div>
   );

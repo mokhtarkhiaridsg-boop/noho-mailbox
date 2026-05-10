@@ -196,7 +196,7 @@ export default function AdminPromoBannerEditor() {
             style={
               isActive
                 ? { background: "var(--color-success-soft)", color: "#166534" }
-                : { background: "rgba(45,16,15,0.06)", color: INK_SOFT }
+                : { background: "rgba(0,0,0,0.06)", color: INK_SOFT }
             }
           >
             {isActive ? "Live" : "Hidden"}

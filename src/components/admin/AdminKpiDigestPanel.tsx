@@ -85,10 +85,10 @@ export default function AdminKpiDigestPanel() {
       <div className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}>
         <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
               Preview · {snap?.windowLabel ?? "loading…"}
             </p>
-            <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
               Same data the email will contain. Refreshes when you reopen this tab.
             </p>
           </div>
@@ -107,25 +107,25 @@ export default function AdminKpiDigestPanel() {
         </div>
 
         {!snap ? (
-          <p className="text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+          <p className="text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
         ) : snap.cards.length === 0 ? (
-          <p className="text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>No data window available.</p>
+          <p className="text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>No data window available.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {snap.cards.map((c) => {
               const arrow = c.delta?.direction === "up" ? "▲" : c.delta?.direction === "down" ? "▼" : "•";
-              const arrowColor = c.delta?.direction === "up" ? "#15803d" : c.delta?.direction === "down" ? "#991b1b" : "rgba(45,16,15,0.45)";
+              const arrowColor = c.delta?.direction === "up" ? "#15803d" : c.delta?.direction === "down" ? "#991b1b" : "rgba(0,0,0,0.45)";
               return (
                 <div key={c.key} className="rounded-xl p-3"
                   style={{ background: "#f7faff", border: "1px solid #e8f0fa" }}>
-                  <p className="text-[9.5px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.45)" }}>{c.label}</p>
+                  <p className="text-[9.5px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.45)" }}>{c.label}</p>
                   <p className="text-2xl font-black tabular-nums" style={{ color: NOHO_INK, letterSpacing: "-0.5px" }}>
-                    {c.value}{c.unit && <span className="text-[12px] font-bold ml-1" style={{ color: "rgba(45,16,15,0.55)" }}>{c.unit}</span>}
+                    {c.value}{c.unit && <span className="text-[12px] font-bold ml-1" style={{ color: "rgba(0,0,0,0.55)" }}>{c.unit}</span>}
                   </p>
                   {c.delta ? (
                     <p className="text-[10.5px] font-bold mt-1" style={{ color: arrowColor }}>{arrow} {c.delta.label}</p>
                   ) : c.detail ? (
-                    <p className="text-[10.5px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>{c.detail}</p>
+                    <p className="text-[10.5px] mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>{c.detail}</p>
                   ) : null}
                 </div>
               );
@@ -135,13 +135,13 @@ export default function AdminKpiDigestPanel() {
       </div>
 
       <div className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}>
-        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
           Cron setup
         </p>
         <p className="text-[11.5px] mt-1" style={{ color: NOHO_INK }}>
-          Schedule a daily GET to <code className="font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.06)" }}>/api/cron/kpi-digest</code> with header <code className="font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.06)" }}>Authorization: Bearer ${'${CRON_SECRET}'}</code>. Recommended cadence: every day at 7:30am PT.
+          Schedule a daily GET to <code className="font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.06)" }}>/api/cron/kpi-digest</code> with header <code className="font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.06)" }}>Authorization: Bearer ${'${CRON_SECRET}'}</code>. Recommended cadence: every day at 7:30am PT.
         </p>
-        <p className="text-[10.5px] mt-2 italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[10.5px] mt-2 italic" style={{ color: "rgba(0,0,0,0.55)" }}>
           Tip: pair this with the iter-103 webhook bridge to also push the same KPI events into your Slack channel as they happen — the digest is the daily wrap, the webhooks are the live feed.
         </p>
       </div>

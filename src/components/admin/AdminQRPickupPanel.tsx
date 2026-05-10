@@ -329,7 +329,7 @@ export function AdminQRPickupPanel() {
                     {result.user?.name}
                   </p>
                   {result.user?.suiteNumber && (
-                    <p className="text-sm" style={{ color: "rgba(45,16,15,0.6)" }}>
+                    <p className="text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>
                       Suite #{result.user.suiteNumber}
                     </p>
                   )}
@@ -341,7 +341,7 @@ export function AdminQRPickupPanel() {
                       ✓ {result.pickedUp} item{result.pickedUp !== 1 ? "s" : ""} marked Picked Up
                     </p>
                   ) : (
-                    <p className="text-sm mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <p className="text-sm mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>
                       No items awaiting pickup for this customer.
                     </p>
                   )}
@@ -420,11 +420,11 @@ export function AdminQRPickupPanel() {
                   <p className="text-sm font-black truncate" style={{ color: NOHO_INK }}>
                     {r.customerName}
                   </p>
-                  <p className="text-[11px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+                  <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>
                     {r.suiteNumber ? `Suite #${r.suiteNumber} · ` : ""}{r.count} item{r.count !== 1 ? "s" : ""}
                   </p>
                 </div>
-                <span className="text-[10px] shrink-0 font-bold" style={{ color: "rgba(45,16,15,0.4)" }}>
+                <span className="text-[10px] shrink-0 font-bold" style={{ color: "rgba(0,0,0,0.4)" }}>
                   {timeAgo(r.ts)}
                 </span>
               </li>
@@ -444,7 +444,7 @@ export function AdminQRPickupPanel() {
         <p className="font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: NOHO_BLUE_DEEP }}>
           How it works
         </p>
-        <ol className="list-decimal pl-4 space-y-1" style={{ color: "rgba(45,16,15,0.6)" }}>
+        <ol className="list-decimal pl-4 space-y-1" style={{ color: "rgba(0,0,0,0.6)" }}>
           <li>Member opens their dashboard → Express Pickup → shows QR code</li>
           <li>Admin scans the QR or types the 8-character code</li>
           <li>All pending mail is instantly marked Picked Up + audited</li>

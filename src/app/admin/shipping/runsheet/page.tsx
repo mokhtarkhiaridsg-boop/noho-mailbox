@@ -158,7 +158,7 @@ export default async function RunSheetPage({ searchParams }: { searchParams?: Pr
           margin: "0 auto",
           background: "white",
           padding: "32px 36px 48px",
-          boxShadow: "0 12px 48px rgba(45,16,15,0.10)",
+          boxShadow: "0 12px 48px rgba(0,0,0,0.10)",
           borderRadius: 12,
           border: "1px solid #2D100F1A",
         }}

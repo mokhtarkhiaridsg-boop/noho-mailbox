@@ -55,7 +55,7 @@ function kindColor(kind: OmniHit["kind"] | "nav"): { bg: string; fg: string } {
     case "dropoff":    return { bg: "rgba(13,148,136,0.12)", fg: "#0f766e" };
     case "labelOrder": return { bg: "rgba(124,58,237,0.10)", fg: "#5b21b6" };
     case "shippo":     return { bg: "rgba(22,163,74,0.12)",  fg: "#15803d" };
-    case "nav":        return { bg: "rgba(45,16,15,0.06)",   fg: NOHO_INK };
+    case "nav":        return { bg: "rgba(0,0,0,0.06)",   fg: NOHO_INK };
   }
 }
 
@@ -142,7 +142,7 @@ export function AdminCommandPalette({ open, onClose }: { open: boolean; onClose:
       aria-modal="true"
       aria-label="Admin command palette"
       className="fixed inset-0 z-[80] flex items-start justify-center pt-[12vh] px-4"
-      style={{ background: "rgba(45,16,15,0.55)", backdropFilter: "blur(6px)" }}
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)" }}
       onClick={onClose}
     >
       <div
@@ -151,7 +151,7 @@ export function AdminCommandPalette({ open, onClose }: { open: boolean; onClose:
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b" style={{ borderColor: "#e8e5e0" }}>
-          <span style={{ color: "rgba(45,16,15,0.40)", fontSize: 16 }}>⌕</span>
+          <span style={{ color: "rgba(0,0,0,0.40)", fontSize: 16 }}>⌕</span>
           <input
             ref={inputRef}
             value={query}
@@ -161,7 +161,7 @@ export function AdminCommandPalette({ open, onClose }: { open: boolean; onClose:
             className="flex-1 outline-none text-base font-medium bg-transparent"
             style={{ color: NOHO_INK }}
           />
-          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.06)", color: "rgba(45,16,15,0.55)" }}>
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.06)", color: "rgba(0,0,0,0.55)" }}>
             ESC
           </span>
         </div>
@@ -172,7 +172,7 @@ export function AdminCommandPalette({ open, onClose }: { open: boolean; onClose:
           style={{ background: "#fafaf7" }}
         >
           {rows.length === 0 ? (
-            <li className="px-4 py-12 text-center text-[12px] font-bold" style={{ color: "rgba(45,16,15,0.45)" }}>
+            <li className="px-4 py-12 text-center text-[12px] font-bold" style={{ color: "rgba(0,0,0,0.45)" }}>
               {loading ? "Searching…" : query.trim().length < 2 ? "Type at least 2 characters" : "No matches"}
             </li>
           ) : rows.map((row, idx) => {
@@ -199,10 +199,10 @@ export function AdminCommandPalette({ open, onClose }: { open: boolean; onClose:
                   <p className="text-[13px] font-black truncate" style={{ color: NOHO_INK }}>
                     {row.primary}
                   </p>
-                  <p className="text-[11px] truncate" style={{ color: "rgba(45,16,15,0.55)" }}>
+                  <p className="text-[11px] truncate" style={{ color: "rgba(0,0,0,0.55)" }}>
                     {row.secondary}
                     {row.kind !== "nav" && row.tertiary && (
-                      <span style={{ marginLeft: 6, color: "rgba(45,16,15,0.40)" }}>· {row.tertiary}</span>
+                      <span style={{ marginLeft: 6, color: "rgba(0,0,0,0.40)" }}>· {row.tertiary}</span>
                     )}
                   </p>
                 </div>
@@ -216,7 +216,7 @@ export function AdminCommandPalette({ open, onClose }: { open: boolean; onClose:
           })}
         </ul>
 
-        <div className="flex items-center justify-between px-4 py-2 text-[10.5px] border-t" style={{ borderColor: "#e8e5e0", background: "white", color: "rgba(45,16,15,0.55)" }}>
+        <div className="flex items-center justify-between px-4 py-2 text-[10.5px] border-t" style={{ borderColor: "#e8e5e0", background: "white", color: "rgba(0,0,0,0.55)" }}>
           <span>↑↓ navigate · ⏎ open · ESC close</span>
           <span>{rows.length} {rows.length === 1 ? "result" : "results"}{loading ? " · …" : ""}</span>
         </div>

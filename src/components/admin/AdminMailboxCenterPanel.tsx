@@ -1788,7 +1788,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                                   n.kind === "issue"      ? "rgba(231,0,19,0.15)" :
                                   n.kind === "billing"    ? "rgba(245,166,35,0.18)" :
                                   n.kind === "compliance" ? "rgba(51,116,133,0.15)" :
-                                  n.kind === "system"     ? "rgba(45,16,15,0.08)" :
+                                  n.kind === "system"     ? "rgba(0,0,0,0.08)" :
                                                             "rgba(51,116,133,0.10)",
                                 color:
                                   n.kind === "issue"      ? "#EF4444" :
@@ -1886,7 +1886,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                             <div className="min-w-0 flex-1">
                               <p className="font-bold truncate" style={{ color: NOHO_INK }}>
                                 <span className="text-[8px] font-black uppercase tracking-wider mr-1.5 px-1 py-0.5 rounded" style={{
-                                  background: credit ? "rgba(22,163,74,0.12)" : "rgba(45,16,15,0.08)",
+                                  background: credit ? "rgba(22,163,74,0.12)" : "rgba(0,0,0,0.08)",
                                   color: credit ? "#15803d" : NOHO_INK,
                                 }}>{t.kind}</span>
                                 {t.description}
@@ -2421,7 +2421,7 @@ export function AdminMailboxCenterPanel({ customers, renewals, pricing, notes = 
                         onClick={() => handleResend(r.id)}
                         disabled={isPending}
                         className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-                        style={{ background: "rgba(45,16,15,0.06)", color: NOHO_INK }}
+                        style={{ background: "rgba(0,0,0,0.06)", color: NOHO_INK }}
                       >
                         Resend email
                       </button>

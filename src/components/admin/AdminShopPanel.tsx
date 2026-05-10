@@ -100,7 +100,7 @@ function ShopOrderCard({
       style={{
         background: "white",
         border: "1px solid rgba(232,229,224,0.7)",
-        boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 10px rgba(45,16,15,0.04)",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 10px rgba(0,0,0,0.04)",
       }}
     >
       <div className="flex items-start gap-2.5">
@@ -122,7 +122,7 @@ function ShopOrderCard({
               <p className="text-[12px] font-black truncate" style={{ color: NOHO_INK }}>
                 {o.customerName}
               </p>
-              <p className="text-[10px]" style={{ color: "rgba(45,16,15,0.5)" }}>
+              <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.5)" }}>
                 {o.date}
               </p>
             </div>
@@ -160,7 +160,7 @@ function ShopOrderCard({
             </div>
             <p
               className="text-[11px] leading-snug line-clamp-2"
-              style={{ color: "rgba(45,16,15,0.7)" }}
+              style={{ color: "rgba(0,0,0,0.7)" }}
             >
               {o.items}
             </p>
@@ -267,8 +267,8 @@ export function AdminShopPanel({ shopOrders }: Props) {
                 className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.16em] transition-all"
                 style={{
                   background: active ? "white" : "transparent",
-                  color: active ? NOHO_INK : "rgba(45,16,15,0.55)",
-                  boxShadow: active ? "0 1px 2px rgba(45,16,15,0.08)" : undefined,
+                  color: active ? NOHO_INK : "rgba(0,0,0,0.55)",
+                  boxShadow: active ? "0 1px 2px rgba(0,0,0,0.08)" : undefined,
                 }}
                 aria-pressed={active}
               >
@@ -331,7 +331,7 @@ export function AdminShopPanel({ shopOrders }: Props) {
                       >
                         {meta.title}
                       </p>
-                      <p className="text-[9px]" style={{ color: "rgba(45,16,15,0.5)" }}>
+                      <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.5)" }}>
                         {meta.sub}
                       </p>
                     </div>
@@ -340,7 +340,7 @@ export function AdminShopPanel({ shopOrders }: Props) {
                     className="text-[11px] font-black px-2 py-0.5 rounded-full"
                     style={{
                       background: items.length > 0 ? meta.accent : "rgba(232,229,224,0.7)",
-                      color: items.length > 0 ? "white" : "rgba(45,16,15,0.55)",
+                      color: items.length > 0 ? "white" : "rgba(0,0,0,0.55)",
                       boxShadow: items.length > 0 ? `0 0 10px ${meta.accent}55` : undefined,
                     }}
                   >
@@ -354,8 +354,8 @@ export function AdminShopPanel({ shopOrders }: Props) {
                       className="rounded-xl p-4 text-center text-[11px] font-bold"
                       style={{
                         background: "rgba(255,255,255,0.5)",
-                        border: "1px dashed rgba(45,16,15,0.15)",
-                        color: "rgba(45,16,15,0.4)",
+                        border: "1px dashed rgba(0,0,0,0.15)",
+                        color: "rgba(0,0,0,0.4)",
                       }}
                     >
                       Nothing here.

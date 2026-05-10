@@ -288,7 +288,7 @@ export function AdminTenantsPanel({ tenants }: Props) {
               style={{
                 background: active ? NOHO_INK : `${NOHO_INK}0d`,
                 color: active ? NOHO_CREAM : NOHO_INK,
-                boxShadow: active ? "0 2px 8px rgba(45,16,15,0.20)" : "none",
+                boxShadow: active ? "0 2px 8px rgba(0,0,0,0.20)" : "none",
               }}
             >
               {meta && <span className="text-[12px] leading-none">{meta.emoji}</span>}
@@ -702,7 +702,7 @@ function KpiTile({
       style={{
         border: `1px solid ${accent}22`,
         boxShadow:
-          "0 1px 2px rgba(45,16,15,0.04), 0 4px 12px rgba(45,16,15,0.04)",
+          "0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)",
       }}
     >
       <div

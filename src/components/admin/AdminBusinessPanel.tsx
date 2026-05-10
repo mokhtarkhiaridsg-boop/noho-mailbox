@@ -67,7 +67,7 @@ const STAGE_META: Record<
   Paused: {
     label: "Paused",
     color: `${NOHO_INK}`,
-    tint: "rgba(45,16,15,0.08)",
+    tint: "rgba(0,0,0,0.08)",
     sub: "On hold",
     emoji: "⏸",
   },
@@ -283,7 +283,7 @@ export function AdminBusinessPanel({ setShowNewClientModal }: Props) {
           className="rounded-2xl p-4 bg-white"
           style={{
             border: `1px solid ${NOHO_INK}11`,
-            boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 12px rgba(45,16,15,0.04)",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)",
           }}
         >
           <div className="flex items-center justify-between mb-2">
@@ -759,7 +759,7 @@ function KpiTile({
       style={{
         border: `1px solid ${accent}22`,
         boxShadow:
-          "0 1px 2px rgba(45,16,15,0.04), 0 4px 12px rgba(45,16,15,0.04)",
+          "0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)",
       }}
     >
       <div

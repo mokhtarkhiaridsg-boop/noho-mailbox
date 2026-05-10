@@ -636,7 +636,7 @@ export default function AdminBillingPanel() {
                 style={{
                   background: active ? "#FFFFFF" : "transparent",
                   color: active ? "#1A1D23" : "#3B4252",
-                  boxShadow: active ? "0 1px 0 rgba(45,16,15,0.06)" : "none",
+                  boxShadow: active ? "0 1px 0 rgba(0,0,0,0.06)" : "none",
                 }}
               >
                 {s.label}
@@ -659,7 +659,7 @@ export default function AdminBillingPanel() {
 
       {/* Customer cards */}
       {loading && (
-        <div className="text-center py-12 text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
+        <div className="text-center py-12 text-sm" style={{ color: "rgba(0,0,0,0.4)" }}>
           Loading billing data…
         </div>
       )}
@@ -671,7 +671,7 @@ export default function AdminBillingPanel() {
               className="rounded-md bg-white p-8 text-center"
               style={{ border: "1px solid #ECEEF1" }}
             >
-              <p className="text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
+              <p className="text-sm" style={{ color: "rgba(0,0,0,0.4)" }}>
                 No customers in this category.
               </p>
             </div>
@@ -694,7 +694,7 @@ export default function AdminBillingPanel() {
         <p className="font-black uppercase tracking-[0.16em]" style={{ color: NOHO_BLUE_DEEP }}>
           How billing works
         </p>
-        <ul className="list-disc pl-4 space-y-1" style={{ color: "rgba(45,16,15,0.6)" }}>
+        <ul className="list-disc pl-4 space-y-1" style={{ color: "rgba(0,0,0,0.6)" }}>
           <li><strong style={{ color: NOHO_INK }}>Grace period:</strong> 10 days past due before late fee is applied</li>
           <li><strong style={{ color: NOHO_INK }}>Late fee:</strong> $15 deducted from wallet, account status set to Expired</li>
           <li><strong style={{ color: NOHO_INK }}>Auto-renewal:</strong> Charges wallet on due date, extends by plan term</li>

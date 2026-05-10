@@ -18,9 +18,9 @@ const NOHO_INK = "#1A1D23";
 function StatTile({ label, value, sub, ink }: { label: string; value: string; sub?: string; ink?: string }) {
   return (
     <div className="rounded-md p-3" style={{ border: "1px solid #ECEEF1", background: "white" }}>
-      <p className="text-[9.5px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(45,16,15,0.55)" }}>{label}</p>
+      <p className="text-[9.5px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(0,0,0,0.55)" }}>{label}</p>
       <p className="text-2xl font-black mt-1 tabular-nums leading-none" style={{ color: ink ?? NOHO_INK }}>{value}</p>
-      {sub && <p className="text-[10.5px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>{sub}</p>}
+      {sub && <p className="text-[10.5px] mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>{sub}</p>}
     </div>
   );
 }
@@ -37,13 +37,13 @@ export default function AdminReferralsPanel() {
           Money & Comms · Referrals
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Referral leaderboard</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           $10 credit to both parties on each successful signup. Track top referrers, recent conversions, and total credit liability.
         </p>
       </div>
 
       {!agg ? (
-        <p className="text-sm" style={{ color: "rgba(45,16,15,0.55)" }}>Loading…</p>
+        <p className="text-sm" style={{ color: "rgba(0,0,0,0.55)" }}>Loading…</p>
       ) : (
         <>
           {/* Roll-up tiles */}
@@ -56,12 +56,12 @@ export default function AdminReferralsPanel() {
           {/* Top referrers */}
           <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
             <div className="px-4 py-3 border-b" style={{ borderColor: "#e8e5e0" }}>
-              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
                 Top referrers
               </p>
             </div>
             {agg.topReferrers.length === 0 ? (
-              <p className="px-4 py-6 text-[12px] text-center" style={{ color: "rgba(45,16,15,0.45)" }}>
+              <p className="px-4 py-6 text-[12px] text-center" style={{ color: "rgba(0,0,0,0.45)" }}>
                 Nobody's hit a referral yet.
               </p>
             ) : (
@@ -71,8 +71,8 @@ export default function AdminReferralsPanel() {
                     <span
                       className="inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-black shrink-0"
                       style={{
-                        background: i === 0 ? "rgba(245,166,35,0.20)" : i < 3 ? "rgba(51,116,133,0.10)" : "rgba(45,16,15,0.06)",
-                        color: i === 0 ? "#92400e" : i < 3 ? NOHO_BLUE_DEEP : "rgba(45,16,15,0.55)",
+                        background: i === 0 ? "rgba(245,166,35,0.20)" : i < 3 ? "rgba(51,116,133,0.10)" : "rgba(0,0,0,0.06)",
+                        color: i === 0 ? "#92400e" : i < 3 ? NOHO_BLUE_DEEP : "rgba(0,0,0,0.55)",
                       }}
                     >
                       {i + 1}
@@ -102,12 +102,12 @@ export default function AdminReferralsPanel() {
           {/* Recent conversions */}
           <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
             <div className="px-4 py-3 border-b" style={{ borderColor: "#e8e5e0" }}>
-              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
                 Recent conversions
               </p>
             </div>
             {agg.recentConversions.length === 0 ? (
-              <p className="px-4 py-6 text-[12px] text-center" style={{ color: "rgba(45,16,15,0.45)" }}>
+              <p className="px-4 py-6 text-[12px] text-center" style={{ color: "rgba(0,0,0,0.45)" }}>
                 No conversions yet.
               </p>
             ) : (
@@ -116,10 +116,10 @@ export default function AdminReferralsPanel() {
                   <li key={c.id} className="px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
                     <p className="text-[12.5px] font-bold" style={{ color: NOHO_INK }}>
                       <strong>{c.referrerName ?? "—"}</strong>
-                      <span style={{ margin: "0 6px", color: "rgba(45,16,15,0.40)" }}>→</span>
+                      <span style={{ margin: "0 6px", color: "rgba(0,0,0,0.40)" }}>→</span>
                       {c.refereeName ?? "—"}
                     </p>
-                    <span className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <span className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
                       {c.creditedAtIso && new Date(c.creditedAtIso).toLocaleString()}
                     </span>
                   </li>

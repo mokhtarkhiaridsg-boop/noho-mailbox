@@ -76,7 +76,7 @@ export default async function DropoffReceiptPage({
           margin: "0 auto",
           background: "white",
           padding: "16px 18px",
-          boxShadow: "0 6px 18px rgba(45,16,15,0.10)",
+          boxShadow: "0 6px 18px rgba(0,0,0,0.10)",
           border: "1px solid #2D100F1A",
           borderRadius: 6,
         }}

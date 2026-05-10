@@ -87,7 +87,7 @@ export default function AdminBackupHealthPanel() {
           System · Backup health
         </p>
         <h2 className="text-xl font-black tracking-tight" style={{ color: NOHO_INK }}>Backup verification + DB health</h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
           5-check probe: connectivity, write round-trip, schema integrity, write-recency, env-var presence. Plus row counts across every critical table. Re-runs every page open + on demand. Each run is audit-logged.
         </p>
       </div>
@@ -129,7 +129,7 @@ export default function AdminBackupHealthPanel() {
       {/* Row counts */}
       {report && (
         <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
-          <p className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
             Row counts · {Object.values(report.rowCounts).reduce((a, b) => a + b, 0).toLocaleString()} total rows
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
@@ -152,7 +152,7 @@ export default function AdminBackupHealthPanel() {
       {/* Recency timeline */}
       {report && (
         <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
-          <p className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
             Last write per table
           </p>
           <ul className="space-y-1">
@@ -169,7 +169,7 @@ export default function AdminBackupHealthPanel() {
       {/* Env config matrix */}
       {report && (
         <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
-          <p className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
             Environment · presence only (values never exposed)
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5">
@@ -187,7 +187,7 @@ export default function AdminBackupHealthPanel() {
       {/* History */}
       {history.length > 0 && (
         <div className="rounded-2xl bg-white border p-4" style={{ borderColor: "#e8e5e0" }}>
-          <p className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: "rgba(0,0,0,0.55)" }}>
             Last 10 runs
           </p>
           <ul className="space-y-1">
@@ -222,7 +222,7 @@ function CheckTile({ name, check }: { name: string; check: CheckResult }) {
       <p className="text-[14px] font-black tabular-nums" style={{ color: c.fg, fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}>
         {check.kind.toUpperCase()}
       </p>
-      <p className="text-[10px] mt-1" style={{ color: "rgba(45,16,15,0.55)" }}>
+      <p className="text-[10px] mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>
         {check.durationMs > 0 ? `${check.durationMs}ms · ` : ""}{check.detail ?? "—"}
       </p>
     </div>
@@ -243,7 +243,7 @@ function Count({ label, value }: { label: string; value: number }) {
 function Recency({ label, iso, stale }: { label: string; iso: string | null; stale?: number }) {
   if (!iso) {
     return (
-      <li className="flex items-center justify-between gap-2 text-[11.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+      <li className="flex items-center justify-between gap-2 text-[11.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
         <span>{label}</span>
         <span className="italic">— never written</span>
       </li>
@@ -255,7 +255,7 @@ function Recency({ label, iso, stale }: { label: string; iso: string | null; sta
   return (
     <li className="flex items-center justify-between gap-2 text-[11.5px]" style={{ color: NOHO_INK }}>
       <span>{label}</span>
-      <span className="font-mono tabular-nums" style={{ color: isStale ? "#92400e" : "rgba(45,16,15,0.55)" }}>
+      <span className="font-mono tabular-nums" style={{ color: isStale ? "#92400e" : "rgba(0,0,0,0.55)" }}>
         {d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
         {isStale && ` · ${Math.round(days)}d stale`}
       </span>

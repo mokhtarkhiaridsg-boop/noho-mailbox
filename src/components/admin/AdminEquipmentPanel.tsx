@@ -48,13 +48,13 @@ const FRESHNESS_STYLE: Record<EquipmentRow["freshness"], { bg: string; fg: strin
   fresh:  { bg: "rgba(34,197,94,0.10)",  fg: "#15803d", label: "Fresh" },
   ok:     { bg: "rgba(51,116,133,0.10)", fg: "#23596A", label: "OK" },
   stale:  { bg: "rgba(245,158,11,0.12)", fg: "#92400e", label: "Stale" },
-  never:  { bg: "rgba(45,16,15,0.05)",   fg: T.inkFaint, label: "Never serviced" },
+  never:  { bg: "rgba(0,0,0,0.05)",   fg: T.inkFaint, label: "Never serviced" },
 };
 
 const STATUS_STYLE: Record<EquipStatus, { bg: string; fg: string; label: string }> = {
   active:        { bg: "rgba(34,197,94,0.10)",  fg: "#15803d", label: "Active" },
   needs_service: { bg: "rgba(245,158,11,0.12)", fg: "#92400e", label: "Needs service" },
-  retired:       { bg: "rgba(45,16,15,0.06)",   fg: T.inkFaint, label: "Retired" },
+  retired:       { bg: "rgba(0,0,0,0.06)",   fg: T.inkFaint, label: "Retired" },
   lost:          { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b", label: "Lost" },
 };
 

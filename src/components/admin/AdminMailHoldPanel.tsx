@@ -90,7 +90,7 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
       style={{
         background: "white",
         border: `1px solid ${meta.color}22`,
-        boxShadow: "0 1px 2px rgba(45,16,15,0.04), 0 4px 10px rgba(45,16,15,0.04)",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 10px rgba(0,0,0,0.04)",
       }}
     >
       <div className="flex items-start gap-2.5">
@@ -112,22 +112,22 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
               <p className="text-[12px] font-black truncate" style={{ color: NOHO_INK }}>
                 {item.userName}
               </p>
-              <p className="text-[10px]" style={{ color: "rgba(45,16,15,0.5)" }}>
+              <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.5)" }}>
                 {item.suiteNumber ? `Suite #${item.suiteNumber}` : item.userEmail}
               </p>
             </div>
             <span
               className="text-[9px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded-md shrink-0"
               style={{
-                background: item.type === "Package" ? "rgba(51,116,133,0.10)" : "rgba(45,16,15,0.06)",
-                color: item.type === "Package" ? NOHO_BLUE_DEEP : "rgba(45,16,15,0.6)",
+                background: item.type === "Package" ? "rgba(51,116,133,0.10)" : "rgba(0,0,0,0.06)",
+                color: item.type === "Package" ? NOHO_BLUE_DEEP : "rgba(0,0,0,0.6)",
               }}
             >
               {item.type}
             </span>
           </div>
 
-          <p className="text-[11px] truncate mt-1" style={{ color: "rgba(45,16,15,0.6)" }}>
+          <p className="text-[11px] truncate mt-1" style={{ color: "rgba(0,0,0,0.6)" }}>
             From: {item.from}
           </p>
 
@@ -137,7 +137,7 @@ function HeldCard({ item, onRefresh }: { item: HeldItem; onRefresh: () => void }
               <span className="text-[9px] font-black uppercase tracking-[0.14em]" style={{ color: meta.color }}>
                 Held {item.daysHeld} {item.daysHeld === 1 ? "day" : "days"}
               </span>
-              <span className="text-[9px] font-bold tabular-nums" style={{ color: "rgba(45,16,15,0.4)" }}>
+              <span className="text-[9px] font-bold tabular-nums" style={{ color: "rgba(0,0,0,0.4)" }}>
                 of 30
               </span>
             </div>
@@ -284,8 +284,8 @@ export function AdminMailHoldPanel() {
                   className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.16em] transition-all"
                   style={{
                     background: active ? "white" : "transparent",
-                    color: active ? NOHO_INK : "rgba(45,16,15,0.55)",
-                    boxShadow: active ? "0 1px 2px rgba(45,16,15,0.08)" : undefined,
+                    color: active ? NOHO_INK : "rgba(0,0,0,0.55)",
+                    boxShadow: active ? "0 1px 2px rgba(0,0,0,0.08)" : undefined,
                   }}
                   aria-pressed={active}
                 >
@@ -297,7 +297,7 @@ export function AdminMailHoldPanel() {
           <button
             onClick={load}
             className="text-[10px] font-black uppercase tracking-[0.14em] px-3 py-2 rounded-xl border"
-            style={{ borderColor: "rgba(232,229,224,0.7)", color: "rgba(45,16,15,0.6)" }}
+            style={{ borderColor: "rgba(232,229,224,0.7)", color: "rgba(0,0,0,0.6)" }}
           >
             Refresh
           </button>
@@ -346,7 +346,7 @@ export function AdminMailHoldPanel() {
             <h3 className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: NOHO_INK }}>
               Hold-age distribution
             </h3>
-            <p className="text-[10px] font-bold" style={{ color: "rgba(45,16,15,0.4)" }}>
+            <p className="text-[10px] font-bold" style={{ color: "rgba(0,0,0,0.4)" }}>
               {counts.total} items
             </p>
           </div>
@@ -409,7 +409,7 @@ export function AdminMailHoldPanel() {
                       <p className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: NOHO_INK }}>
                         {meta.label}
                       </p>
-                      <p className="text-[9px]" style={{ color: "rgba(45,16,15,0.5)" }}>
+                      <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.5)" }}>
                         {meta.sub}
                       </p>
                     </div>
@@ -418,7 +418,7 @@ export function AdminMailHoldPanel() {
                     className="text-[11px] font-black px-2 py-0.5 rounded-full"
                     style={{
                       background: list.length > 0 ? meta.color : "rgba(232,229,224,0.7)",
-                      color: list.length > 0 ? "white" : "rgba(45,16,15,0.55)",
+                      color: list.length > 0 ? "white" : "rgba(0,0,0,0.55)",
                       boxShadow: list.length > 0 ? `0 0 10px ${meta.color}55` : undefined,
                     }}
                   >
@@ -431,8 +431,8 @@ export function AdminMailHoldPanel() {
                       className="rounded-xl p-4 text-center text-[11px] font-bold"
                       style={{
                         background: "rgba(255,255,255,0.5)",
-                        border: "1px dashed rgba(45,16,15,0.15)",
-                        color: "rgba(45,16,15,0.4)",
+                        border: "1px dashed rgba(0,0,0,0.15)",
+                        color: "rgba(0,0,0,0.4)",
                       }}
                     >
                       Nothing here.
@@ -459,7 +459,7 @@ export function AdminMailHoldPanel() {
       )}
 
       {items === null && (
-        <p className="text-center py-10 text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
+        <p className="text-center py-10 text-sm" style={{ color: "rgba(0,0,0,0.4)" }}>
           Loading hold report…
         </p>
       )}
@@ -469,7 +469,7 @@ export function AdminMailHoldPanel() {
           className="rounded-md bg-white p-8 text-center"
           style={{ border: "1px solid #ECEEF1" }}
         >
-          <p className="text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
+          <p className="text-sm" style={{ color: "rgba(0,0,0,0.4)" }}>
             No items currently held.
           </p>
         </div>
@@ -486,7 +486,7 @@ export function AdminMailHoldPanel() {
         <p className="font-black uppercase tracking-[0.16em]" style={{ color: NOHO_BLUE_DEEP }}>
           Hold policy
         </p>
-        <ul className="list-disc pl-4 space-y-1" style={{ color: "rgba(45,16,15,0.6)" }}>
+        <ul className="list-disc pl-4 space-y-1" style={{ color: "rgba(0,0,0,0.6)" }}>
           <li><strong style={{ color: NOHO_INK }}>7 days</strong> — first warning notification sent</li>
           <li><strong style={{ color: NOHO_INK }}>14 days</strong> — second warning notification sent</li>
           <li><strong style={{ color: NOHO_INK }}>30 days</strong> — item flagged as overdue, urgent notification sent</li>
@@ -523,7 +523,7 @@ function KpiTile({
     >
       <p
         className="text-[10px] font-black uppercase tracking-[0.16em]"
-        style={{ color: isAccent || isDanger ? "rgba(255,255,255,0.55)" : "rgba(45,16,15,0.45)" }}
+        style={{ color: isAccent || isDanger ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)" }}
       >
         {label}
       </p>

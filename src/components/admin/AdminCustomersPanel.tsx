@@ -351,7 +351,7 @@ export function AdminCustomersPanel({
                   style={{
                     background: active ? T.surface : "transparent",
                     color: active ? T.ink : T.inkSoft,
-                    boxShadow: active ? "0 1px 0 rgba(45,16,15,0.06)" : "none",
+                    boxShadow: active ? "0 1px 0 rgba(0,0,0,0.06)" : "none",
                   }}
                 >
                   {v}
@@ -467,7 +467,7 @@ export function AdminCustomersPanel({
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = T.ink;
-                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(45,16,15,0.08), 0 1px 0 rgba(255,255,255,0.6) inset";
+                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6) inset";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = T.border;
@@ -488,7 +488,7 @@ export function AdminCustomersPanel({
                     style={{
                       background: avatarHue(c.name),
                       color: "#FFFFFF",
-                      boxShadow: "0 1px 0 rgba(255,255,255,0.18) inset, 0 2px 4px rgba(45,16,15,0.16)",
+                      boxShadow: "0 1px 0 rgba(255,255,255,0.18) inset, 0 2px 4px rgba(0,0,0,0.16)",
                     }}
                   >
                     {initials(c.name)}

@@ -33,7 +33,7 @@ const DNS_STATUS_STYLE = {
   ok:        { bg: "rgba(34,197,94,0.10)",  fg: "#15803d", label: "OK" },
   warn:      { bg: "rgba(245,158,11,0.12)", fg: "#92400e", label: "Warn" },
   fail:      { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b", label: "Fail" },
-  unchecked: { bg: "rgba(45,16,15,0.05)",   fg: T.inkFaint, label: "Unchecked" },
+  unchecked: { bg: "rgba(0,0,0,0.05)",   fg: T.inkFaint, label: "Unchecked" },
 };
 
 export default function AdminEmailDeliverabilityPanel() {

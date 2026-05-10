@@ -68,7 +68,7 @@ function PhotoLightbox({ src, onClose }: { src: string; onClose: () => void }) {
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center p-6"
-      style={{ background: "rgba(45,16,15,0.85)", backdropFilter: "blur(4px)" }}
+      style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -871,7 +871,7 @@ export function AdminInboundScanPanel() {
               : mode === "dropoff" ? "Carrier Dropoff"
               : "Scan & Print"}
           </h2>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
             {mode === "pickup"
               ? "Scan the carrier's barcode → confirm match → mark as handed-to-customer in person."
               : mode === "dropoff"
@@ -936,7 +936,7 @@ export function AdminInboundScanPanel() {
           className="px-2.5 py-1.5 rounded-xl text-[11px] font-bold border self-center"
           style={{
             borderColor: soundOn ? NOHO_BLUE : "#e8e5e0",
-            color: soundOn ? NOHO_BLUE_DEEP : "rgba(45,16,15,0.55)",
+            color: soundOn ? NOHO_BLUE_DEEP : "rgba(0,0,0,0.55)",
             background: "white",
           }}
           title={soundOn ? "Mute scan/pickup sounds" : "Turn on scan/pickup sounds"}
@@ -1022,7 +1022,7 @@ export function AdminInboundScanPanel() {
           >
             {ocrPending ? "Reading…" : "📷 Scan envelope (auto-fill)"}
           </button>
-          <p className="text-[10.5px] flex-1 min-w-0" style={{ color: "rgba(45,16,15,0.65)" }}>
+          <p className="text-[10.5px] flex-1 min-w-0" style={{ color: "rgba(0,0,0,0.65)" }}>
             Snap a photo of the front of the package · we extract recipient, suite, carrier, and tracking.
           </p>
         </div>
@@ -1034,7 +1034,7 @@ export function AdminInboundScanPanel() {
         {ocrResult && (
           <div className="mt-3 rounded-lg p-3" style={{ background: "white", border: "1px solid #ECEEF1" }}>
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(45,16,15,0.55)" }}>
+              <p className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(0,0,0,0.55)" }}>
                 Parsed fields ·{" "}
                 <span style={{ color: ocrResult.confidence === "high" ? "#15803d" : ocrResult.confidence === "medium" ? "#92400e" : "#991b1b" }}>
                   {ocrResult.confidence} confidence
@@ -1053,19 +1053,19 @@ export function AdminInboundScanPanel() {
                   type="button"
                   onClick={() => setOcrResult(null)}
                   className="text-[10.5px] font-bold px-2.5 py-1 rounded-md"
-                  style={{ background: "rgba(45,16,15,0.05)", color: "rgba(45,16,15,0.55)", border: "1px solid #ECEEF1" }}
+                  style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.55)", border: "1px solid #ECEEF1" }}
                 >
                   Discard
                 </button>
               </div>
             </div>
             <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-[11.5px]" style={{ color: "#1A1D23" }}>
-              <li><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>Recipient:</span>{" "}{ocrResult.recipientName ?? <em style={{ color: "rgba(45,16,15,0.40)" }}>—</em>}</li>
-              <li><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>Suite #:</span>{" "}<span className="font-mono">{ocrResult.suiteNumber ?? <em style={{ color: "rgba(45,16,15,0.40)" }}>—</em>}</span></li>
-              <li><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>Tracking:</span>{" "}<span className="font-mono">{ocrResult.trackingNumber ?? <em style={{ color: "rgba(45,16,15,0.40)" }}>—</em>}</span></li>
-              <li><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>Carrier:</span>{" "}{ocrResult.carrier ?? <em style={{ color: "rgba(45,16,15,0.40)" }}>—</em>}</li>
-              {ocrResult.recipientCo && <li className="sm:col-span-2"><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>c/o:</span> {ocrResult.recipientCo}</li>}
-              {ocrResult.senderName && <li className="sm:col-span-2"><span style={{ color: "rgba(45,16,15,0.55)", fontWeight: 700 }}>Sender:</span> {ocrResult.senderName}</li>}
+              <li><span style={{ color: "rgba(0,0,0,0.55)", fontWeight: 700 }}>Recipient:</span>{" "}{ocrResult.recipientName ?? <em style={{ color: "rgba(0,0,0,0.40)" }}>—</em>}</li>
+              <li><span style={{ color: "rgba(0,0,0,0.55)", fontWeight: 700 }}>Suite #:</span>{" "}<span className="font-mono">{ocrResult.suiteNumber ?? <em style={{ color: "rgba(0,0,0,0.40)" }}>—</em>}</span></li>
+              <li><span style={{ color: "rgba(0,0,0,0.55)", fontWeight: 700 }}>Tracking:</span>{" "}<span className="font-mono">{ocrResult.trackingNumber ?? <em style={{ color: "rgba(0,0,0,0.40)" }}>—</em>}</span></li>
+              <li><span style={{ color: "rgba(0,0,0,0.55)", fontWeight: 700 }}>Carrier:</span>{" "}{ocrResult.carrier ?? <em style={{ color: "rgba(0,0,0,0.40)" }}>—</em>}</li>
+              {ocrResult.recipientCo && <li className="sm:col-span-2"><span style={{ color: "rgba(0,0,0,0.55)", fontWeight: 700 }}>c/o:</span> {ocrResult.recipientCo}</li>}
+              {ocrResult.senderName && <li className="sm:col-span-2"><span style={{ color: "rgba(0,0,0,0.55)", fontWeight: 700 }}>Sender:</span> {ocrResult.senderName}</li>}
             </ul>
             {ocrResult.routedTopMatch && (
               <p className="mt-2 text-[11px]" style={{ color: "#15803d", fontWeight: 700 }}>
@@ -1073,7 +1073,7 @@ export function AdminInboundScanPanel() {
               </p>
             )}
             {ocrResult.notes && (
-              <p className="mt-1 text-[10.5px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+              <p className="mt-1 text-[10.5px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
                 Note: {ocrResult.notes}
               </p>
             )}
@@ -1085,7 +1085,7 @@ export function AdminInboundScanPanel() {
       <div
         className="rounded-md bg-white p-4" style={{ border: "1px solid #ECEEF1" }}
       >
-        <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+        <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
           Tracking number
         </p>
         <div className="mt-2 flex items-stretch gap-2">
@@ -1169,7 +1169,7 @@ export function AdminInboundScanPanel() {
 
         {tracking && (
           <div className="mt-3 flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.55)" }}>
               Carrier
             </span>
             <select
@@ -1279,13 +1279,13 @@ export function AdminInboundScanPanel() {
         style={{ border: "1px solid #ECEEF1" }}
       >
         <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
             Customer (suite # / name / email)
           </p>
           <label
             className="inline-flex items-center gap-1.5 cursor-pointer text-[10.5px] font-bold"
             title="Keep this customer picked across the next scan — for batch-receiving multiple packages for the same suite"
-            style={{ color: keepCustomer ? NOHO_BLUE_DEEP : "rgba(45,16,15,0.55)" }}
+            style={{ color: keepCustomer ? NOHO_BLUE_DEEP : "rgba(0,0,0,0.55)" }}
           >
             <input
               type="checkbox"
@@ -1340,7 +1340,7 @@ export function AdminInboundScanPanel() {
                       i === 0 && smartRoute.autoPick ? "#16A34A"
                       : c.confidence === "high" ? "rgba(22,163,74,0.40)"
                       : c.confidence === "med"  ? "rgba(245,158,11,0.40)"
-                      : "rgba(45,16,15,0.20)"
+                      : "rgba(0,0,0,0.20)"
                     }`,
                   }}
                 >
@@ -1352,8 +1352,8 @@ export function AdminInboundScanPanel() {
                   <span
                     className="text-[9px] font-black px-1 rounded"
                     style={{
-                      background: i === 0 && smartRoute.autoPick ? "rgba(255,255,255,0.20)" : "rgba(45,16,15,0.06)",
-                      color: i === 0 && smartRoute.autoPick ? "white" : "rgba(45,16,15,0.55)",
+                      background: i === 0 && smartRoute.autoPick ? "rgba(255,255,255,0.20)" : "rgba(0,0,0,0.06)",
+                      color: i === 0 && smartRoute.autoPick ? "white" : "rgba(0,0,0,0.55)",
                     }}
                   >
                     {c.score}%
@@ -1369,7 +1369,7 @@ export function AdminInboundScanPanel() {
           </div>
         )}
         {!pickedCustomer && smartLooking && customerQuery.trim().split(/\s+/).length >= 2 && (
-          <div className="mt-2 text-[10.5px] font-semibold" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <div className="mt-2 text-[10.5px] font-semibold" style={{ color: "rgba(0,0,0,0.55)" }}>
             ✨ Smart-matching “{customerQuery.trim()}”…
           </div>
         )}
@@ -1377,7 +1377,7 @@ export function AdminInboundScanPanel() {
         {customerMatches.length > 0 && !pickedCustomer && (
           <div
             className="absolute left-4 right-4 mt-1 rounded-md bg-white z-20 max-h-64 overflow-auto"
-            style={{ border: "1px solid #ECEEF1", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
+            style={{ border: "1px solid #ECEEF1", boxShadow: "0 8px 24px rgba(0,0,0,0.14)" }}
           >
             {customerMatches.map((c) => (
               <button
@@ -1388,7 +1388,7 @@ export function AdminInboundScanPanel() {
               >
                 <span>
                   <strong style={{ color: NOHO_INK }}>{c.name ?? "(no name)"}</strong>
-                  <span style={{ color: "rgba(45,16,15,0.55)", marginLeft: 6 }}>{c.email}</span>
+                  <span style={{ color: "rgba(0,0,0,0.55)", marginLeft: 6 }}>{c.email}</span>
                 </span>
                 <span className="text-[10px] font-black px-2 py-0.5 rounded" style={{ background: "rgba(51,116,133,0.10)", color: NOHO_BLUE_DEEP }}>
                   Suite #{c.suiteNumber ?? "—"}
@@ -1400,7 +1400,7 @@ export function AdminInboundScanPanel() {
 
         {pickedCustomer && (
           <div className="mt-3">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
               Addressed to (optional override)
             </p>
             {/* iter-119: chip row of past recipient names for this customer.
@@ -1457,10 +1457,10 @@ export function AdminInboundScanPanel() {
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
                 Exterior photo (optional)
               </p>
-              <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+              <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                 {photoUrl ? "Photo attached. Customer sees this in their dashboard + email." : "Snap an exterior photo so the customer can confirm it's their package."}
               </p>
               <div className="mt-2 flex items-center gap-2 flex-wrap">
@@ -1489,7 +1489,7 @@ export function AdminInboundScanPanel() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
               Weight (optional)
             </p>
             <input
@@ -1511,7 +1511,7 @@ export function AdminInboundScanPanel() {
             })()}
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
               Dimensions (optional)
             </p>
             <input
@@ -1536,7 +1536,7 @@ export function AdminInboundScanPanel() {
                 Oversize · charge $6.50 fee at pickup
               </p>
             ) : (
-              <p className="mt-1 text-[10px]" style={{ color: "rgba(45,16,15,0.45)" }}>
+              <p className="mt-1 text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>
                 Used for oversize fees (per Terms)
               </p>
             )}
@@ -1704,10 +1704,10 @@ function DropoffForm({
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
-          <p className={labelStyle} style={{ color: "rgba(45,16,15,0.40)" }}>
+          <p className={labelStyle} style={{ color: "rgba(0,0,0,0.40)" }}>
             Optional details
           </p>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-[11px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
             All fields below are optional. Tracking + carrier above is enough for a fast drop.
           </p>
         </div>
@@ -1750,7 +1750,7 @@ function DropoffForm({
               Remove
             </button>
           )}
-          <span className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <span className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
             Useful for high-value dropoffs as proof of intake.
           </span>
         </div>
@@ -1758,7 +1758,7 @@ function DropoffForm({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <p className={labelStyle} style={{ color: "rgba(45,16,15,0.40)" }}>
+          <p className={labelStyle} style={{ color: "rgba(0,0,0,0.40)" }}>
             Sender name (optional)
           </p>
           <input
@@ -1768,7 +1768,7 @@ function DropoffForm({
           />
         </div>
         <div>
-          <p className={labelStyle} style={{ color: "rgba(45,16,15,0.40)" }}>
+          <p className={labelStyle} style={{ color: "rgba(0,0,0,0.40)" }}>
             Sender phone (optional)
           </p>
           <input
@@ -1778,7 +1778,7 @@ function DropoffForm({
           />
         </div>
         <div>
-          <p className={labelStyle} style={{ color: "rgba(45,16,15,0.40)" }}>
+          <p className={labelStyle} style={{ color: "rgba(0,0,0,0.40)" }}>
             Receiver name (optional)
           </p>
           <input
@@ -1788,7 +1788,7 @@ function DropoffForm({
           />
         </div>
         <div>
-          <p className={labelStyle} style={{ color: "rgba(45,16,15,0.40)" }}>
+          <p className={labelStyle} style={{ color: "rgba(0,0,0,0.40)" }}>
             Destination (optional)
           </p>
           <input
@@ -1800,7 +1800,7 @@ function DropoffForm({
       </div>
 
       <div>
-        <p className={labelStyle} style={{ color: "rgba(45,16,15,0.40)" }}>
+        <p className={labelStyle} style={{ color: "rgba(0,0,0,0.40)" }}>
           Notes (optional)
         </p>
         <textarea
@@ -1854,7 +1854,7 @@ function DropoffForm({
           Clear
         </button>
       </div>
-      <p className="text-[10.5px] mt-1" style={{ color: "rgba(45,16,15,0.45)" }}>
+      <p className="text-[10.5px] mt-1" style={{ color: "rgba(0,0,0,0.45)" }}>
         Carrier <strong style={{ color: NOHO_INK }}>{carrier}</strong> auto-detected from tracking format. Override above if wrong.
       </p>
     </div>
@@ -1898,8 +1898,8 @@ function DailyIntakeStatsCard({
         const delta = hasDelta ? it.value - (it.deltaVs ?? 0) : 0;
         // Treat 0 delta as flat (gray); positive = up arrow; negative = down.
         const trend = !hasDelta ? null : delta === 0 ? "flat" : delta > 0 ? "up" : "down";
-        const trendBg = trend === "up" ? "rgba(22,163,74,0.14)" : trend === "down" ? "rgba(231,0,19,0.10)" : "rgba(45,16,15,0.06)";
-        const trendFg = trend === "up" ? "#15803d" : trend === "down" ? "#991b1b" : "rgba(45,16,15,0.55)";
+        const trendBg = trend === "up" ? "rgba(22,163,74,0.14)" : trend === "down" ? "rgba(231,0,19,0.10)" : "rgba(0,0,0,0.06)";
+        const trendFg = trend === "up" ? "#15803d" : trend === "down" ? "#991b1b" : "rgba(0,0,0,0.55)";
         const trendArrow = trend === "up" ? "▲" : trend === "down" ? "▼" : "·";
         return (
           <div
@@ -1968,7 +1968,7 @@ function CustomerPickupCard({
                 Suite #{customer.suiteNumber}
               </span>
             )}
-            <span className="text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <span className="text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
               {customer.email}
             </span>
           </div>
@@ -2008,7 +2008,7 @@ function CustomerPickupCard({
                 <p className="text-[12px] font-black truncate" style={{ color: NOHO_INK }}>
                   {carrierLabel} · {p.trackingNumber || "—"}
                 </p>
-                <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                   <ScanStatusPill status={p.status} />
                   <span className="ml-1.5">Logged {new Date(p.createdAtIso).toLocaleString()}</span>
                 </p>
@@ -2089,7 +2089,7 @@ function PickupMatchPanel({
         <p className="text-[12px] font-black uppercase tracking-[0.2em]" style={{ color: NOHO_BLUE_DEEP }}>
           Pickup mode
         </p>
-        <p className="text-[12px] mt-1.5" style={{ color: "rgba(45,16,15,0.65)" }}>
+        <p className="text-[12px] mt-1.5" style={{ color: "rgba(0,0,0,0.65)" }}>
           Scan the tracking number — or the customer's <strong>QR Pickup code</strong> from their phone — or type their name. One tap confirms the in-person handoff.
         </p>
       </div>
@@ -2138,11 +2138,11 @@ function PickupMatchPanel({
             <p className="text-lg font-black mt-0.5" style={{ color: NOHO_INK }}>
               {guestAuth.guestName}
             </p>
-            <p className="text-[11.5px] mt-1" style={{ color: "rgba(45,16,15,0.65)" }}>
+            <p className="text-[11.5px] mt-1" style={{ color: "rgba(0,0,0,0.65)" }}>
               {guestAuth.guestEmail && <span>{guestAuth.guestEmail}</span>}
               {guestAuth.guestPhone && <span style={{ marginLeft: 8 }}>· {guestAuth.guestPhone}</span>}
               {guestAuth.expiresAtIso && (
-                <span style={{ marginLeft: 8, color: "rgba(45,16,15,0.55)" }}>
+                <span style={{ marginLeft: 8, color: "rgba(0,0,0,0.55)" }}>
                   · expires {new Date(guestAuth.expiresAtIso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                 </span>
               )}
@@ -2265,7 +2265,7 @@ function PickupMatchPanel({
             {match.carrier} · {match.trackingNumber}
           </p>
           {match.email && (
-            <p className="text-[10.5px] mt-0.5 truncate" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <p className="text-[10.5px] mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.55)" }}>
               {match.email}
             </p>
           )}
@@ -2307,7 +2307,7 @@ function PickupMatchPanel({
           so admin can press these without taking their hand off the
           scanner. */}
       <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
-        <p className="text-[10px] font-bold" style={{ color: "rgba(45,16,15,0.45)" }}>
+        <p className="text-[10px] font-bold" style={{ color: "rgba(0,0,0,0.45)" }}>
           Tip · press <kbd style={{ padding: "1px 4px", borderRadius: 3, border: "1px solid #e8e5e0", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>Enter</kbd> to confirm or <kbd style={{ padding: "1px 4px", borderRadius: 3, border: "1px solid #e8e5e0", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>Esc</kbd> to clear.
         </p>
         {/* iter-72: Quick reassign — admin spots wrong-suite mid-handoff
@@ -2317,7 +2317,7 @@ function PickupMatchPanel({
           type="button"
           onClick={() => setReassignOpen(true)}
           className="text-[10.5px] font-bold underline-offset-2 hover:underline"
-          style={{ color: "rgba(45,16,15,0.55)" }}
+          style={{ color: "rgba(0,0,0,0.55)" }}
           title="Wrong customer? Reassign this package to a different suite."
         >
           Wrong customer? Reassign →
@@ -2406,7 +2406,7 @@ function RecentDropoffsList({
         <div className="flex items-center gap-2">
           <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "#15803d", boxShadow: "0 0 6px #15803d" }} />
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
               External dropoffs · last 48h
             </p>
             <p className="text-[12px] font-black mt-0.5" style={{ color: NOHO_INK }}>
@@ -2530,7 +2530,7 @@ function RecentDropoffRow({ row: r, onChanged }: { row: RecentDropoff; onChanged
         <p className="text-sm font-black truncate flex items-center gap-1.5 flex-wrap" style={{ color: NOHO_INK }}>
           <span className="truncate">{r.senderName ?? "(no sender)"}</span>
           {r.receiverName && (
-            <span className="text-[10px] font-bold" style={{ color: "rgba(45,16,15,0.55)" }}>
+            <span className="text-[10px] font-bold" style={{ color: "rgba(0,0,0,0.55)" }}>
               → {r.receiverName}
             </span>
           )}
@@ -2562,9 +2562,9 @@ function RecentDropoffRow({ row: r, onChanged }: { row: RecentDropoff; onChanged
         </p>
         <p className="text-[10.5px] mt-0.5 font-mono truncate" style={{ color: NOHO_BLUE_DEEP }}>
           {r.trackingNumber}
-          <span style={{ color: "rgba(45,16,15,0.40)", marginLeft: 6 }}>· {ago}</span>
+          <span style={{ color: "rgba(0,0,0,0.40)", marginLeft: 6 }}>· {ago}</span>
           {r.destination && (
-            <span style={{ color: "rgba(45,16,15,0.55)", marginLeft: 6 }}>· {r.destination}</span>
+            <span style={{ color: "rgba(0,0,0,0.55)", marginLeft: 6 }}>· {r.destination}</span>
           )}
         </p>
       </div>
@@ -2653,7 +2653,7 @@ function AwaitingShelfList({
         <div className="flex items-center gap-2">
           <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: dotColor, boxShadow: `0 0 6px ${dotColor}` }} />
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
               On the shelf · oldest first
             </p>
             <p className="text-[12px] font-black mt-0.5" style={{ color: NOHO_INK }}>
@@ -2702,7 +2702,7 @@ function RecentScansList({ rows, onRefresh }: { rows: RecentScan[]; onRefresh: (
     <div className="rounded-2xl bg-white border" style={{ borderColor: "#e8e5e0" }}>
       <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "#e8e5e0" }}>
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
             Recent scans · last 48h
           </p>
           <p className="text-[12px] font-black mt-0.5" style={{ color: NOHO_INK }}>
@@ -2878,12 +2878,12 @@ function RecentScanRow({ row: r, onChanged }: { row: RecentScan; onChanged: () =
         </p>
         <p className="text-[10.5px] mt-0.5 font-mono truncate" style={{ color: NOHO_BLUE_DEEP }}>
           {r.trackingNumber || "—"}
-          <span style={{ color: "rgba(45,16,15,0.40)", marginLeft: 6 }}>· {ago}</span>
+          <span style={{ color: "rgba(0,0,0,0.40)", marginLeft: 6 }}>· {ago}</span>
           {r.weightOz != null && (
-            <span style={{ color: "rgba(45,16,15,0.55)", marginLeft: 6 }}>· {(r.weightOz / 16).toFixed(2)} lb</span>
+            <span style={{ color: "rgba(0,0,0,0.55)", marginLeft: 6 }}>· {(r.weightOz / 16).toFixed(2)} lb</span>
           )}
           {r.dimensions && (
-            <span style={{ color: "rgba(45,16,15,0.55)", marginLeft: 6 }}>· {r.dimensions}</span>
+            <span style={{ color: "rgba(0,0,0,0.55)", marginLeft: 6 }}>· {r.dimensions}</span>
           )}
         </p>
       </div>
@@ -2946,7 +2946,7 @@ function RecentScanRow({ row: r, onChanged }: { row: RecentScan; onChanged: () =
               className="px-2 py-1.5 rounded-lg text-[11px] font-bold border disabled:opacity-50"
               style={{
                 borderColor: "#e8e5e0",
-                color: "rgba(45,16,15,0.65)",
+                color: "rgba(0,0,0,0.65)",
                 background: "white",
               }}
             >
@@ -3060,7 +3060,7 @@ function ReassignCustomerModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(45,16,15,0.55)", backdropFilter: "blur(4px)" }}
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -3093,7 +3093,7 @@ function ReassignCustomerModal({
           </button>
         </div>
         <div className="mt-4 relative">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.40)" }}>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.40)" }}>
             New customer (suite # / name / email)
           </p>
           <input
@@ -3108,7 +3108,7 @@ function ReassignCustomerModal({
           {matches.length > 0 && !picked && (
             <div
               className="absolute left-0 right-0 mt-1 rounded-md bg-white z-10 max-h-64 overflow-auto"
-              style={{ border: "1px solid #ECEEF1", boxShadow: "0 8px 24px rgba(45,16,15,0.14)" }}
+              style={{ border: "1px solid #ECEEF1", boxShadow: "0 8px 24px rgba(0,0,0,0.14)" }}
             >
               {matches.map((c) => (
                 <button
@@ -3123,7 +3123,7 @@ function ReassignCustomerModal({
                 >
                   <span>
                     <strong style={{ color: NOHO_INK }}>{c.name ?? "(no name)"}</strong>
-                    <span style={{ color: "rgba(45,16,15,0.55)", marginLeft: 6 }}>{c.email}</span>
+                    <span style={{ color: "rgba(0,0,0,0.55)", marginLeft: 6 }}>{c.email}</span>
                   </span>
                   <span className="text-[10px] font-black px-2 py-0.5 rounded" style={{ background: "rgba(51,116,133,0.10)", color: NOHO_BLUE_DEEP }}>
                     Suite #{c.suiteNumber ?? "—"}
@@ -3247,8 +3247,8 @@ function ScanModal({
         onClick={(e) => e.stopPropagation()}
         className="rounded-2xl w-full max-w-md bg-white p-3"
         style={{
-          border: "1px solid rgba(45,16,15,0.18)",
-          boxShadow: "0 24px 60px rgba(45,16,15,0.30)",
+          border: "1px solid rgba(0,0,0,0.18)",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.30)",
         }}
       >
         <div className="flex items-center justify-between gap-2 px-1 pb-2">
@@ -3265,7 +3265,7 @@ function ScanModal({
           </button>
         </div>
         <video ref={videoRef} className="w-full rounded-xl bg-black" muted playsInline style={{ aspectRatio: "16/10" }} />
-        <p className="mt-2 px-1 text-[10.5px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="mt-2 px-1 text-[10.5px]" style={{ color: "rgba(0,0,0,0.55)" }}>
           Hold the barcode 4–8 inches from the camera. Auto-captures on read.
         </p>
       </div>
@@ -3286,7 +3286,7 @@ function ScanStatusPill({ status }: { status: string }) {
     "Returned":         { bg: "rgba(231,0,19,0.10)",    fg: "#991b1b", label: "Returned" },
     "Discarded":        { bg: "rgba(231,0,19,0.10)",    fg: "#991b1b", label: "Discarded" },
   };
-  const c = map[status] ?? { bg: "rgba(45,16,15,0.06)", fg: "rgba(45,16,15,0.55)", label: status };
+  const c = map[status] ?? { bg: "rgba(0,0,0,0.06)", fg: "rgba(0,0,0,0.55)", label: status };
   return (
     <span
       className="text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
@@ -3376,7 +3376,7 @@ function PhotoCaptureModal({
       <div
         onClick={(e) => e.stopPropagation()}
         className="rounded-2xl w-full max-w-md bg-white p-3"
-        style={{ border: "1px solid rgba(45,16,15,0.18)", boxShadow: "0 24px 60px rgba(45,16,15,0.30)" }}
+        style={{ border: "1px solid rgba(0,0,0,0.18)", boxShadow: "0 24px 60px rgba(0,0,0,0.30)" }}
       >
         <div className="flex items-center justify-between gap-2 px-1 pb-2">
           <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: NOHO_BLUE }}>

@@ -29,7 +29,7 @@ const C = {
   amber: "#F5A623",
   green: "#16A34A",
   body: "#EBF2FA",
-  shadow: "rgba(45,16,15,0.10)",
+  shadow: "rgba(0,0,0,0.10)",
 } as const;
 
 // Shared stroke defaults — strokes snap to pixel grid for crisp Retina

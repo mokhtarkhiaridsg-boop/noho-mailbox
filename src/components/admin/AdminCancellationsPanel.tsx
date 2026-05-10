@@ -140,7 +140,7 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
                 {row.user.suiteNumber && (
                   <span
                     className="text-[10px] font-black px-2 py-0.5 rounded-md"
-                    style={{ background: "rgba(45,16,15,0.06)", color: NOHO_INK, fontFamily: "var(--font-baloo), sans-serif" }}
+                    style={{ background: "rgba(0,0,0,0.06)", color: NOHO_INK, fontFamily: "var(--font-baloo), sans-serif" }}
                   >
                     #{row.user.suiteNumber}
                   </span>
@@ -149,21 +149,21 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
                 {row.user.plan && (
                   <span
                     className="text-[9px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded-md"
-                    style={{ background: "rgba(232,229,224,0.6)", color: "rgba(45,16,15,0.55)" }}
+                    style={{ background: "rgba(232,229,224,0.6)", color: "rgba(0,0,0,0.55)" }}
                   >
                     {row.user.plan}
                   </span>
                 )}
               </div>
-              <p className="text-[11px] mt-1 truncate" style={{ color: "rgba(45,16,15,0.5)" }}>
+              <p className="text-[11px] mt-1 truncate" style={{ color: "rgba(0,0,0,0.5)" }}>
                 {row.user.email}
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <span className="text-[10px]" style={{ color: "rgba(45,16,15,0.4)" }}>
+              <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
                 {new Date(row.requestedAt).toLocaleDateString()}
               </span>
-              <span style={{ color: "rgba(45,16,15,0.35)" }}>{expanded ? "▲" : "▼"}</span>
+              <span style={{ color: "rgba(0,0,0,0.35)" }}>{expanded ? "▲" : "▼"}</span>
             </div>
           </div>
 
@@ -206,7 +206,7 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
           style={{ borderTop: "1px solid rgba(232,229,224,0.5)" }}
         >
           <div className="pt-3">
-            <p className="text-[9px] font-black uppercase tracking-[0.16em] mb-1" style={{ color: "rgba(45,16,15,0.4)" }}>
+            <p className="text-[9px] font-black uppercase tracking-[0.16em] mb-1" style={{ color: "rgba(0,0,0,0.4)" }}>
               Reason
             </p>
             <p className="text-sm" style={{ color: NOHO_INK }}>
@@ -231,17 +231,17 @@ function CancelCard({ row, onRefresh }: { row: CancelRow; onRefresh: () => void 
 
           {row.adminNotes && (
             <div>
-              <p className="text-[9px] font-black uppercase tracking-[0.16em] mb-1" style={{ color: "rgba(45,16,15,0.4)" }}>
+              <p className="text-[9px] font-black uppercase tracking-[0.16em] mb-1" style={{ color: "rgba(0,0,0,0.4)" }}>
                 Admin notes
               </p>
-              <p className="text-sm" style={{ color: "rgba(45,16,15,0.7)" }}>
+              <p className="text-sm" style={{ color: "rgba(0,0,0,0.7)" }}>
                 {row.adminNotes}
               </p>
             </div>
           )}
 
           {row.completedAt && (
-            <p className="text-xs" style={{ color: "rgba(45,16,15,0.5)" }}>
+            <p className="text-xs" style={{ color: "rgba(0,0,0,0.5)" }}>
               Completed: {new Date(row.completedAt).toLocaleDateString()}
             </p>
           )}
@@ -400,7 +400,7 @@ export function AdminCancellationsPanel() {
         className="rounded-md p-4 bg-white"
         style={{ border: "1px solid #ECEEF1" }}
       >
-        <h3 className="text-[10px] font-black uppercase tracking-[0.18em] mb-4" style={{ color: "rgba(45,16,15,0.5)" }}>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.18em] mb-4" style={{ color: "rgba(0,0,0,0.5)" }}>
           Lifecycle
         </h3>
         <div className="flex items-center gap-2">
@@ -420,7 +420,7 @@ export function AdminCancellationsPanel() {
                       className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0"
                       style={{
                         background: c > 0 ? step.color : "white",
-                        color: c > 0 ? "white" : "rgba(45,16,15,0.5)",
+                        color: c > 0 ? "white" : "rgba(0,0,0,0.5)",
                         boxShadow: c > 0 ? `0 0 10px ${step.color}55` : undefined,
                       }}
                     >
@@ -430,14 +430,14 @@ export function AdminCancellationsPanel() {
                       <p className="text-[11px] font-black" style={{ color: NOHO_INK }}>
                         {step.label}
                       </p>
-                      <p className="text-[9px]" style={{ color: "rgba(45,16,15,0.5)" }}>
+                      <p className="text-[9px]" style={{ color: "rgba(0,0,0,0.5)" }}>
                         {step.sub}
                       </p>
                     </div>
                     <span
                       className="ml-auto text-[14px] font-black tabular-nums"
                       style={{
-                        color: c > 0 ? step.color : "rgba(45,16,15,0.4)",
+                        color: c > 0 ? step.color : "rgba(0,0,0,0.4)",
                         fontFamily: "var(--font-baloo), sans-serif",
                       }}
                     >
@@ -446,7 +446,7 @@ export function AdminCancellationsPanel() {
                   </div>
                 </div>
                 {i < LIFECYCLE.length - 1 && (
-                  <span aria-hidden="true" className="text-[18px] font-black shrink-0" style={{ color: "rgba(45,16,15,0.25)" }}>
+                  <span aria-hidden="true" className="text-[18px] font-black shrink-0" style={{ color: "rgba(0,0,0,0.25)" }}>
                     →
                   </span>
                 )}
@@ -479,7 +479,7 @@ export function AdminCancellationsPanel() {
       </div>
 
       {rows === null && (
-        <p className="text-center py-10 text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
+        <p className="text-center py-10 text-sm" style={{ color: "rgba(0,0,0,0.4)" }}>
           Loading…
         </p>
       )}
@@ -489,7 +489,7 @@ export function AdminCancellationsPanel() {
           className="rounded-md bg-white p-8 text-center"
           style={{ border: "1px solid #ECEEF1" }}
         >
-          <p className="text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
+          <p className="text-sm" style={{ color: "rgba(0,0,0,0.4)" }}>
             No {filter !== "All" ? filter.toLowerCase() : ""} cancellation requests
           </p>
         </div>
@@ -512,7 +512,7 @@ export function AdminCancellationsPanel() {
         <p className="font-black mb-1.5 uppercase tracking-[0.16em]" style={{ color: NOHO_BLUE_DEEP }}>
           How cancellations work
         </p>
-        <ol className="list-decimal pl-4 space-y-1" style={{ color: "rgba(45,16,15,0.6)" }}>
+        <ol className="list-decimal pl-4 space-y-1" style={{ color: "rgba(0,0,0,0.6)" }}>
           <li><strong style={{ color: NOHO_INK }}>Member requests</strong> cancellation via dashboard settings</li>
           <li><strong style={{ color: NOHO_INK }}>Admin approves</strong> — member gets a 30-day grace window to collect mail</li>
           <li><strong style={{ color: NOHO_INK }}>Admin completes</strong> after grace — mailbox released, status → Cancelled</li>

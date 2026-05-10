@@ -217,7 +217,7 @@ function Flyer({ zip, cityLabel }: { zip: string; cityLabel: string }) {
         width: "min(100%, 540px)",
         aspectRatio: "8.5 / 11",
         background: NOHO_CREAM,
-        boxShadow: "0 18px 50px rgba(45,16,15,0.25)",
+        boxShadow: "0 18px 50px rgba(0,0,0,0.25)",
         position: "relative",
         padding: 0,
         color: NOHO_INK,

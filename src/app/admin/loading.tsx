@@ -14,22 +14,22 @@ export default function AdminLoading() {
         style={{
           background:
             "linear-gradient(180deg, rgba(247,230,194,0.96) 0%, rgba(244,236,219,0.94) 100%)",
-          borderBottom: "1px solid rgba(45,16,15,0.12)",
+          borderBottom: "1px solid rgba(0,0,0,0.12)",
         }}
       >
         {/* Logo placeholder */}
         <div
           className="h-6 w-24 rounded animate-pulse"
-          style={{ background: "rgba(45,16,15,0.08)" }}
+          style={{ background: "rgba(0,0,0,0.08)" }}
         />
         <span
           className="hidden sm:inline-block w-px h-4"
-          style={{ background: "rgba(45,16,15,0.18)" }}
+          style={{ background: "rgba(0,0,0,0.18)" }}
         />
         {/* Breadcrumb placeholder */}
         <div
           className="h-3 w-32 rounded animate-pulse hidden sm:block"
-          style={{ background: "rgba(45,16,15,0.08)" }}
+          style={{ background: "rgba(0,0,0,0.08)" }}
         />
 
         <span className="flex-1" />
@@ -38,7 +38,7 @@ export default function AdminLoading() {
           className="h-7 w-48 rounded-lg animate-pulse hidden md:block"
           style={{
             background: "rgba(255,255,255,0.65)",
-            border: "1px solid rgba(45,16,15,0.12)",
+            border: "1px solid rgba(0,0,0,0.12)",
           }}
         />
         <span className="flex-1" />
@@ -48,12 +48,12 @@ export default function AdminLoading() {
           className="h-7 w-20 rounded-lg animate-pulse hidden sm:block"
           style={{
             background: "rgba(255,255,255,0.55)",
-            border: "1px solid rgba(45,16,15,0.1)",
+            border: "1px solid rgba(0,0,0,0.1)",
           }}
         />
         <div
           className="w-7 h-7 rounded-full animate-pulse"
-          style={{ background: "rgba(45,16,15,0.12)" }}
+          style={{ background: "rgba(0,0,0,0.12)" }}
         />
       </div>
 
@@ -107,9 +107,9 @@ export default function AdminLoading() {
             className="mx-auto max-w-[1400px] rounded-2xl overflow-hidden"
             style={{
               background: "#FFFFFF",
-              border: "1px solid rgba(45,16,15,0.08)",
+              border: "1px solid rgba(0,0,0,0.08)",
               boxShadow:
-                "0 1px 0 rgba(255,255,255,0.6) inset, 0 8px 28px rgba(45,16,15,0.06), 0 1px 3px rgba(45,16,15,0.04)",
+                "0 1px 0 rgba(255,255,255,0.6) inset, 0 8px 28px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
             }}
           >
             <div className="px-3 sm:px-5 py-4 sm:py-6 space-y-6">
@@ -121,17 +121,17 @@ export default function AdminLoading() {
                     className="rounded-lg p-4 animate-pulse"
                     style={{
                       background: "#FFFFFF",
-                      border: "1px solid rgba(45,16,15,0.08)",
+                      border: "1px solid rgba(0,0,0,0.08)",
                       animationDelay: `${i * 50}ms`,
                     }}
                   >
                     <div
                       className="h-2.5 w-20 rounded mb-3"
-                      style={{ background: "rgba(45,16,15,0.08)" }}
+                      style={{ background: "rgba(0,0,0,0.08)" }}
                     />
                     <div
                       className="h-8 w-16 rounded"
-                      style={{ background: "rgba(45,16,15,0.12)" }}
+                      style={{ background: "rgba(0,0,0,0.12)" }}
                     />
                   </div>
                 ))}
@@ -143,12 +143,12 @@ export default function AdminLoading() {
                   className="md:col-span-2 rounded-lg p-5 animate-pulse"
                   style={{
                     background: "#FFFFFF",
-                    border: "1px solid rgba(45,16,15,0.08)",
+                    border: "1px solid rgba(0,0,0,0.08)",
                   }}
                 >
                   <div
                     className="h-2.5 w-32 rounded mb-4"
-                    style={{ background: "rgba(45,16,15,0.08)" }}
+                    style={{ background: "rgba(0,0,0,0.08)" }}
                   />
                   <div className="space-y-3">
                     {Array.from({ length: 3 }).map((_, i) => (
@@ -160,20 +160,20 @@ export default function AdminLoading() {
                         <div className="flex-1 space-y-1.5">
                           <div
                             className="h-3 w-32 rounded"
-                            style={{ background: "rgba(45,16,15,0.08)" }}
+                            style={{ background: "rgba(0,0,0,0.08)" }}
                           />
                           <div
                             className="h-2.5 w-44 rounded"
-                            style={{ background: "rgba(45,16,15,0.05)" }}
+                            style={{ background: "rgba(0,0,0,0.05)" }}
                           />
                         </div>
                         <div
                           className="h-6 w-8 rounded"
-                          style={{ background: "rgba(45,16,15,0.08)" }}
+                          style={{ background: "rgba(0,0,0,0.08)" }}
                         />
                         <div
                           className="h-7 w-14 rounded"
-                          style={{ background: "rgba(45,16,15,0.06)" }}
+                          style={{ background: "rgba(0,0,0,0.06)" }}
                         />
                       </div>
                     ))}
@@ -183,12 +183,12 @@ export default function AdminLoading() {
                   className="rounded-lg p-5 animate-pulse"
                   style={{
                     background: "#FFFFFF",
-                    border: "1px solid rgba(45,16,15,0.08)",
+                    border: "1px solid rgba(0,0,0,0.08)",
                   }}
                 >
                   <div
                     className="h-2.5 w-24 rounded mb-4"
-                    style={{ background: "rgba(45,16,15,0.08)" }}
+                    style={{ background: "rgba(0,0,0,0.08)" }}
                   />
                   <div className="space-y-2">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -196,7 +196,7 @@ export default function AdminLoading() {
                         key={i}
                         className="h-9 rounded"
                         style={{
-                          background: "rgba(45,16,15,0.04)",
+                          background: "rgba(0,0,0,0.04)",
                           animationDelay: `${i * 60}ms`,
                         }}
                       />
@@ -213,17 +213,17 @@ export default function AdminLoading() {
                     className="rounded-lg p-5 animate-pulse"
                     style={{
                       background: "#FFFFFF",
-                      border: "1px solid rgba(45,16,15,0.08)",
+                      border: "1px solid rgba(0,0,0,0.08)",
                     }}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div
                         className="h-2.5 w-24 rounded"
-                        style={{ background: "rgba(45,16,15,0.08)" }}
+                        style={{ background: "rgba(0,0,0,0.08)" }}
                       />
                       <div
                         className="h-3 w-14 rounded"
-                        style={{ background: "rgba(45,16,15,0.06)" }}
+                        style={{ background: "rgba(0,0,0,0.06)" }}
                       />
                     </div>
                     <div className="space-y-3">
@@ -236,16 +236,16 @@ export default function AdminLoading() {
                           <div className="flex-1 space-y-1.5">
                             <div
                               className="h-3 w-28 rounded"
-                              style={{ background: "rgba(45,16,15,0.08)" }}
+                              style={{ background: "rgba(0,0,0,0.08)" }}
                             />
                             <div
                               className="h-2.5 w-40 rounded"
-                              style={{ background: "rgba(45,16,15,0.05)" }}
+                              style={{ background: "rgba(0,0,0,0.05)" }}
                             />
                           </div>
                           <div
                             className="h-5 w-16 rounded"
-                            style={{ background: "rgba(45,16,15,0.06)" }}
+                            style={{ background: "rgba(0,0,0,0.06)" }}
                           />
                         </div>
                       ))}

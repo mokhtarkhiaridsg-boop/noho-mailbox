@@ -39,7 +39,7 @@ const T = {
   surfaceAlt: "#F4EEE3",
   border: "#E5DACA",
   borderStrong: "#CFC2AC",
-  hairline: "rgba(45,16,15,0.10)",
+  hairline: "rgba(0,0,0,0.10)",
   ink: "#2D100F",
   inkSoft: "#5C4540",
   inkFaint: "#7A6050",
@@ -236,7 +236,7 @@ export default function AdminMailerPanel() {
               background: T.cream,
               color: T.ink,
               border: `1px solid ${T.borderStrong}`,
-              boxShadow: "0 4px 14px rgba(45,16,15,0.10), 0 1px 0 rgba(255,255,255,0.7) inset",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.7) inset",
             }}
           >
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
@@ -586,7 +586,7 @@ function FolderItem({
         background: active ? "rgba(51,116,133,0.12)" : "transparent",
         color: active ? T.blueDeep : "#2D100F",
       }}
-      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "rgba(45,16,15,0.05)"; }}
+      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "rgba(0,0,0,0.05)"; }}
       onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent"; }}
     >
       <span className="shrink-0 w-5 h-5 inline-flex items-center justify-center" style={{ color: active ? T.blue : "#7A6050" }}>
@@ -665,7 +665,7 @@ function ComposeFloater({
         width: minimized ? 320 : 480,
         background: T.surface,
         border: `1px solid ${T.borderStrong}`,
-        boxShadow: "0 20px 60px rgba(45,16,15,0.30), 0 1px 0 rgba(255,255,255,0.7) inset",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.30), 0 1px 0 rgba(255,255,255,0.7) inset",
       }}
       role="dialog"
       aria-label="Compose new message"

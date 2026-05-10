@@ -96,7 +96,7 @@ export default function AdminCustomerOfMonthPanel() {
               <p className="text-[11px] font-black uppercase tracking-[0.16em] mb-2" style={{ color: T.inkFaint }}>{year}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {awards.map((r) => (
-                  <article key={r.id} className="rounded-2xl p-4" style={{ background: T.surface, border: `1px solid ${T.border}`, boxShadow: "0 2px 8px rgba(45,16,15,0.04)" }}>
+                  <article key={r.id} className="rounded-2xl p-4" style={{ background: T.surface, border: `1px solid ${T.border}`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
                     <div className="flex items-start justify-between gap-2">
                       <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider" style={{ background: "linear-gradient(135deg,#F5A623,#F5C242)", color: T.goldDeep }}>
                         🌟 {r.monthName}

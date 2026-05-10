@@ -142,7 +142,7 @@ export default function AdminMailerAutoReplyPanel() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[12px] font-black" style={{ color: T.ink }}>{r.label}</span>
-                      <span className="text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: r.active ? "rgba(34,197,94,0.10)" : "rgba(45,16,15,0.06)", color: r.active ? "#15803d" : T.inkFaint }}>
+                      <span className="text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: r.active ? "rgba(34,197,94,0.10)" : "rgba(0,0,0,0.06)", color: r.active ? "#15803d" : T.inkFaint }}>
                         {r.active ? "active" : "paused"}
                       </span>
                       <span className="text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(51,116,133,0.08)", color: "#23596A" }}>

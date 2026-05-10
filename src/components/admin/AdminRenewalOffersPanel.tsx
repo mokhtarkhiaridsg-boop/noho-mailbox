@@ -37,7 +37,7 @@ function deriveStatus(r: AdminRenewalOfferRow): Status {
 const STATUS_STYLE: Record<Status, { bg: string; fg: string; label: string }> = {
   active:   { bg: "rgba(51,116,133,0.10)", fg: "#23596A", label: "Active" },
   redeemed: { bg: "rgba(34,197,94,0.10)",  fg: "#15803d", label: "Redeemed" },
-  expired:  { bg: "rgba(45,16,15,0.06)",   fg: T.inkFaint, label: "Expired" },
+  expired:  { bg: "rgba(0,0,0,0.06)",   fg: T.inkFaint, label: "Expired" },
 };
 
 export default function AdminRenewalOffersPanel() {

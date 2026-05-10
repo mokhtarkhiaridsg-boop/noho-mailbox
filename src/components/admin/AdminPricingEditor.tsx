@@ -68,11 +68,11 @@ export function AdminPricingEditor() {
       <div
         className="rounded-md bg-white p-5"
         style={{
-          border: "1px solid rgba(45,16,15,0.1)",
-          boxShadow: "0 1px 0 rgba(51,116,133,0.04), 0 4px 12px rgba(45,16,15,0.05)",
+          border: "1px solid rgba(0,0,0,0.1)",
+          boxShadow: "0 1px 0 rgba(51,116,133,0.04), 0 4px 12px rgba(0,0,0,0.05)",
         }}
       >
-        <p className="text-sm" style={{ color: "rgba(45,16,15,0.5)" }}>
+        <p className="text-sm" style={{ color: "rgba(0,0,0,0.5)" }}>
           Loading…
         </p>
       </div>
@@ -94,7 +94,7 @@ export function AdminPricingEditor() {
           >
             Pricing Page Editor
           </h3>
-          <p className="text-xs mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
             Live-edit every section of <code style={{ color: "#1976FF" }}>/pricing</code>: plans, comparison table, fee schedule, policies.
           </p>
         </div>
@@ -138,7 +138,7 @@ export function AdminPricingEditor() {
             onClick={() => setTab(t.id)}
             className="px-3.5 py-1.5 rounded-full text-xs font-black transition-colors"
             style={{
-              background: tab === t.id ? "#1A1D23" : "rgba(45,16,15,0.06)",
+              background: tab === t.id ? "#1A1D23" : "rgba(0,0,0,0.06)",
               color: tab === t.id ? "#EBF2FF" : "#1A1D23",
             }}
           >
@@ -216,7 +216,7 @@ function Field({
     <label className={`block ${className}`}>
       <span
         className="block text-[10px] font-bold uppercase tracking-wider mb-1"
-        style={{ color: "rgba(45,16,15,0.45)" }}
+        style={{ color: "rgba(0,0,0,0.45)" }}
       >
         {label}
       </span>
@@ -305,7 +305,7 @@ function PlansEditor({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-[11px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>
           Each plan card on /pricing comes from this list. Use the popular flag to highlight the recommended plan.
         </p>
         <button
@@ -321,10 +321,10 @@ function PlansEditor({
         <div
           key={p.id + "-" + i}
           className="rounded-xl p-4 space-y-3"
-          style={{ background: "#FAFAF8", border: "1px solid rgba(45,16,15,0.08)" }}
+          style={{ background: "#FAFAF8", border: "1px solid rgba(0,0,0,0.08)" }}
         >
           <div className="flex items-start justify-between gap-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.45)" }}>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.45)" }}>
               Plan #{i + 1}
             </p>
             <MoveButtons
@@ -370,7 +370,7 @@ function PlansEditor({
           </div>
 
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "rgba(45,16,15,0.45)" }}>
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "rgba(0,0,0,0.45)" }}>
               Features (one per line)
             </p>
             <textarea
@@ -425,7 +425,7 @@ function ComparisonEditor({
           onClick={() => onSet(true)}
           className="w-7 h-7 rounded-md text-[12px] font-black"
           style={{
-            background: val === true ? "#22C55E" : "rgba(45,16,15,0.06)",
+            background: val === true ? "#22C55E" : "rgba(0,0,0,0.06)",
             color: val === true ? "white" : "#1A1D23",
           }}
           aria-label="Included"
@@ -437,7 +437,7 @@ function ComparisonEditor({
           onClick={() => onSet(false)}
           className="w-7 h-7 rounded-md text-[12px] font-bold"
           style={{
-            background: val === false ? "#1A1D23" : "rgba(45,16,15,0.06)",
+            background: val === false ? "#1A1D23" : "rgba(0,0,0,0.06)",
             color: val === false ? "#EBF2FF" : "#1A1D23",
           }}
           aria-label="Not included"
@@ -446,7 +446,7 @@ function ComparisonEditor({
         </button>
         <input
           className="rounded-md border px-2 py-1 text-xs font-semibold w-28"
-          style={{ borderColor: "rgba(45,16,15,0.18)" }}
+          style={{ borderColor: "rgba(0,0,0,0.18)" }}
           placeholder={isBool ? "Custom text…" : ""}
           value={isBool ? "" : val}
           onChange={(e) => onSet(e.target.value)}
@@ -463,7 +463,7 @@ function ComparisonEditor({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-[11px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>
           Drives the comparison table on /pricing. Use ✓ for included, — for not included, or type a custom value (e.g. "30 days") in the box for that cell.
         </p>
         <button
@@ -475,7 +475,7 @@ function ComparisonEditor({
         </button>
       </div>
 
-      <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 px-2 text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.45)" }}>
+      <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 px-2 text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(0,0,0,0.45)" }}>
         <span>Feature</span>
         <span>{planLabels[0] ?? "Basic"}</span>
         <span>{planLabels[1] ?? "Business"}</span>
@@ -487,7 +487,7 @@ function ComparisonEditor({
         <div
           key={i}
           className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 p-2 rounded-xl"
-          style={{ background: "#FAFAF8", border: "1px solid rgba(45,16,15,0.08)" }}
+          style={{ background: "#FAFAF8", border: "1px solid rgba(0,0,0,0.08)" }}
         >
           <div className="space-y-1">
             <input className={inputCls} value={r.feature} onChange={(e) => set(i, { feature: e.target.value })} placeholder="Feature name" />
@@ -528,7 +528,7 @@ function FeesEditor({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-[11px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>
           Fee schedule that appears under the plans. Amount is free-form (e.g. <code>$2 / page</code>, <code>Postage + $5</code>).
         </p>
         <button
@@ -544,7 +544,7 @@ function FeesEditor({
         <div
           key={i}
           className="grid grid-cols-1 md:grid-cols-[2fr_1fr_2fr_auto] gap-2 p-2 rounded-xl"
-          style={{ background: "#FAFAF8", border: "1px solid rgba(45,16,15,0.08)" }}
+          style={{ background: "#FAFAF8", border: "1px solid rgba(0,0,0,0.08)" }}
         >
           <input className={inputCls} value={f.label} onChange={(e) => set(i, { label: e.target.value })} placeholder="Late payment" />
           <input className={inputCls} value={f.amount} onChange={(e) => set(i, { amount: e.target.value })} placeholder="$15" />
@@ -581,7 +581,7 @@ function PoliciesEditor({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-[11px]" style={{ color: "rgba(45,16,15,0.55)" }}>
+        <p className="text-[11px]" style={{ color: "rgba(0,0,0,0.55)" }}>
           Each policy renders as a collapsible accordion on /pricing.
         </p>
         <button
@@ -597,7 +597,7 @@ function PoliciesEditor({
         <div
           key={i}
           className="p-3 rounded-xl space-y-2"
-          style={{ background: "#FAFAF8", border: "1px solid rgba(45,16,15,0.08)" }}
+          style={{ background: "#FAFAF8", border: "1px solid rgba(0,0,0,0.08)" }}
         >
           <div className="flex items-start justify-between gap-2">
             <input className={inputCls + " font-bold"} value={p.title} onChange={(e) => set(i, { title: e.target.value })} placeholder="Policy title" />

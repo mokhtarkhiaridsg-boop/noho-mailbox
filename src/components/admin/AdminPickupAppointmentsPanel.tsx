@@ -108,9 +108,9 @@ export default function AdminPickupAppointmentsPanel() {
       {/* Queue */}
       <div className="rounded-md bg-white" style={{ border: "1px solid #ECEEF1" }}>
         {!data ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>Loading queue…</p>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>Loading queue…</p>
         ) : filteredRows.length === 0 ? (
-          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(45,16,15,0.55)" }}>
+          <p className="px-4 py-6 text-[12px] italic" style={{ color: "rgba(0,0,0,0.55)" }}>
             No appointments in this view.
           </p>
         ) : (
@@ -131,12 +131,12 @@ export default function AdminPickupAppointmentsPanel() {
                       </span>
                     )}
                   </p>
-                  <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(45,16,15,0.55)" }}>
+                  <p className="text-[10.5px] mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                     {r.userEmail}
                     {r.packageCount != null && ` · ${r.packageCount} pkg`}
                     {r.guestName && ` · guest: ${r.guestName}`}
                   </p>
-                  {r.notes && <p className="text-[10.5px] mt-0.5 italic" style={{ color: "rgba(45,16,15,0.55)" }}>"{r.notes}"</p>}
+                  {r.notes && <p className="text-[10.5px] mt-0.5 italic" style={{ color: "rgba(0,0,0,0.55)" }}>"{r.notes}"</p>}
                 </div>
                 <div className="flex items-center gap-1">
                   {r.status === "Scheduled" && (
@@ -174,7 +174,7 @@ function StatusChip({ status }: { status: string }) {
     "Checked-In": { bg: "rgba(245,166,35,0.14)", fg: "#92400e" },
     "Completed":  { bg: "rgba(22,163,74,0.14)",  fg: "#15803d" },
     "No-Show":    { bg: "rgba(231,0,19,0.10)",   fg: "#991b1b" },
-    "Cancelled":  { bg: "rgba(45,16,15,0.06)",   fg: "rgba(45,16,15,0.55)" },
+    "Cancelled":  { bg: "rgba(0,0,0,0.06)",   fg: "rgba(0,0,0,0.55)" },
   };
   const c = map[status] ?? map["Cancelled"];
   return (
@@ -189,7 +189,7 @@ function ActionBtn({ label, tone, onClick, disabled }: { label: string; tone: "b
     blue:   { bg: "white", fg: NOHO_BLUE_DEEP, border: NOHO_BLUE },
     green:  { bg: "linear-gradient(135deg,#22C55E,#15803d)", fg: "white", border: "#15803d" },
     danger: { bg: "white", fg: "#991b1b", border: "rgba(231,0,19,0.40)" },
-    muted:  { bg: "white", fg: "rgba(45,16,15,0.55)", border: "#e8e5e0" },
+    muted:  { bg: "white", fg: "rgba(0,0,0,0.55)", border: "#e8e5e0" },
   };
   const s = styles[tone];
   return (

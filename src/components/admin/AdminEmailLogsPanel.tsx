@@ -259,7 +259,7 @@ export function AdminEmailLogsPanel() {
               className="text-[10px] font-black uppercase tracking-[0.16em] px-3 py-1.5 rounded-lg transition-all"
               style={{
                 background: filter === f ? NOHO_BLUE : "white",
-                color: filter === f ? "white" : "rgba(45,16,15,0.6)",
+                color: filter === f ? "white" : "rgba(0,0,0,0.6)",
                 border: filter === f ? `1px solid ${NOHO_BLUE_DEEP}` : "1px solid rgba(232,229,224,0.7)",
                 boxShadow: filter === f ? `0 4px 12px ${NOHO_BLUE}33` : undefined,
               }}
@@ -294,7 +294,7 @@ export function AdminEmailLogsPanel() {
         <div
           className="rounded-md bg-white px-5 py-12 text-center text-sm"
           style={{
-            color: "rgba(45,16,15,0.4)",
+            color: "rgba(0,0,0,0.4)",
             border: "1px solid #ECEEF1",
           }}
         >
@@ -304,7 +304,7 @@ export function AdminEmailLogsPanel() {
         <div
           className="rounded-md bg-white px-5 py-12 text-center text-sm"
           style={{
-            color: "rgba(45,16,15,0.4)",
+            color: "rgba(0,0,0,0.4)",
             border: "1px solid #ECEEF1",
           }}
         >
@@ -324,7 +324,7 @@ export function AdminEmailLogsPanel() {
                   >
                     {relativeDay(firstDate)}
                   </h3>
-                  <span className="text-[10px]" style={{ color: "rgba(45,16,15,0.4)" }}>
+                  <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
                     · {items.length} email{items.length === 1 ? "" : "s"} · {dayLabel}
                   </span>
                 </div>
@@ -391,14 +391,14 @@ export function AdminEmailLogsPanel() {
                                   </p>
                                   <p
                                     className="text-[11px] truncate"
-                                    style={{ color: "rgba(45,16,15,0.5)" }}
+                                    style={{ color: "rgba(0,0,0,0.5)" }}
                                   >
                                     To {r.toEmail}
                                   </p>
                                 </div>
                                 <span
                                   className="shrink-0 text-[10px] font-bold"
-                                  style={{ color: "rgba(45,16,15,0.4)", fontVariantNumeric: "tabular-nums" }}
+                                  style={{ color: "rgba(0,0,0,0.4)", fontVariantNumeric: "tabular-nums" }}
                                 >
                                   {fmtTime(r.sentAt ?? r.createdAt)}
                                 </span>
@@ -426,7 +426,7 @@ export function AdminEmailLogsPanel() {
                                     className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md"
                                     style={{
                                       background: "rgba(232,229,224,0.6)",
-                                      color: "rgba(45,16,15,0.55)",
+                                      color: "rgba(0,0,0,0.55)",
                                     }}
                                   >
                                     via {r.provider}

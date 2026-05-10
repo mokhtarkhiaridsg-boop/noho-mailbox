@@ -164,7 +164,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
           <h3 className="font-black text-sm uppercase tracking-wide" style={{ color: NOHO_INK }}>
             Last 12 months
           </h3>
-          <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(45,16,15,0.45)" }}>
+          <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: "rgba(0,0,0,0.45)" }}>
             <span aria-hidden="true" className="w-2 h-2 rounded-full" style={{ background: NOHO_BLUE, boxShadow: `0 0 6px ${NOHO_BLUE}` }} />
             Completed
           </div>
@@ -187,7 +187,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
                 </div>
                 <p
                   className="text-[9px] font-black tracking-wide"
-                  style={{ color: isCurrent ? NOHO_INK : "rgba(45,16,15,0.5)" }}
+                  style={{ color: isCurrent ? NOHO_INK : "rgba(0,0,0,0.5)" }}
                 >
                   {m.label.toUpperCase()}
                 </p>
@@ -207,7 +207,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
             Payment sources
           </h3>
           {sourceMix.length === 0 ? (
-            <p className="text-sm text-center py-8" style={{ color: "rgba(45,16,15,0.4)" }}>
+            <p className="text-sm text-center py-8" style={{ color: "rgba(0,0,0,0.4)" }}>
               No data yet.
             </p>
           ) : (
@@ -224,7 +224,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
                     <span className="text-[12px] font-black truncate flex-1" style={{ color: NOHO_INK }}>
                       {s.label}
                     </span>
-                    <span className="text-[11px] font-bold" style={{ color: "rgba(45,16,15,0.55)" }}>
+                    <span className="text-[11px] font-bold" style={{ color: "rgba(0,0,0,0.55)" }}>
                       ${(s.valueCents / 100).toFixed(0)} ·{" "}
                       <span className="font-black" style={{ color: NOHO_INK }}>
                         {(s.pct * 100).toFixed(0)}%
@@ -245,7 +245,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
             Top customers
           </h3>
           {topCustomers.length === 0 ? (
-            <p className="text-sm text-center py-8" style={{ color: "rgba(45,16,15,0.4)" }}>
+            <p className="text-sm text-center py-8" style={{ color: "rgba(0,0,0,0.4)" }}>
               No data yet.
             </p>
           ) : (
@@ -263,7 +263,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
                       className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0"
                       style={{
                         background: i === 0 ? NOHO_AMBER : "#F4F5F7",
-                        color: i === 0 ? "white" : "rgba(45,16,15,0.7)",
+                        color: i === 0 ? "white" : "rgba(0,0,0,0.7)",
                         border: `1px solid ${i === 0 ? NOHO_AMBER : "#ECEEF1"}`,
                       }}
                     >
@@ -309,13 +309,13 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
           <h3 className="font-black text-sm uppercase tracking-wide" style={{ color: NOHO_INK }}>
             Recent payments
           </h3>
-          <span className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(45,16,15,0.4)" }}>
+          <span className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: "rgba(0,0,0,0.4)" }}>
             {recentPayments.length} synced
           </span>
         </div>
         {recentPayments.length === 0 ? (
           <div className="px-5 py-12 text-center">
-            <p className="text-sm" style={{ color: "rgba(45,16,15,0.4)" }}>
+            <p className="text-sm" style={{ color: "rgba(0,0,0,0.4)" }}>
               {squareStatus.configured ? "No payments synced yet. Go to Square tab to sync." : "Connect Square to see payment data."}
             </p>
           </div>
@@ -328,7 +328,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
                     aria-hidden="true"
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{
-                      background: p.status === "COMPLETED" ? "#22C55E" : p.status === "PENDING" ? NOHO_AMBER : "rgba(45,16,15,0.3)",
+                      background: p.status === "COMPLETED" ? "#22C55E" : p.status === "PENDING" ? NOHO_AMBER : "rgba(0,0,0,0.3)",
                       boxShadow: p.status === "COMPLETED" ? "0 0 6px #22C55E" : undefined,
                     }}
                   />
@@ -336,7 +336,7 @@ export function AdminRevenuePanel({ squareStatus, recentPayments, customers }: P
                     <p className="text-sm font-bold truncate" style={{ color: NOHO_INK }}>
                       {p.userName ?? "Guest"}
                     </p>
-                    <p className="text-[10px]" style={{ color: "rgba(45,16,15,0.4)" }}>
+                    <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.4)" }}>
                       {p.sourceType ?? "N/A"} &middot; {new Date(p.squareCreatedAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -487,7 +487,7 @@ function DonutChart({
         textAnchor="middle"
         fontSize="6"
         fontWeight="800"
-        fill="rgba(45,16,15,0.5)"
+        fill="rgba(0,0,0,0.5)"
         letterSpacing="1"
       >
         SOURCES

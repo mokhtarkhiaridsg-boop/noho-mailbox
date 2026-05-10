@@ -90,7 +90,7 @@ export default function AdminOnboardingVideosPanel() {
                       /{r.slug}
                     </span>
                     {!r.isActive && (
-                      <span className="text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(45,16,15,0.06)", color: T.inkFaint }}>
+                      <span className="text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.06)", color: T.inkFaint }}>
                         paused
                       </span>
                     )}
