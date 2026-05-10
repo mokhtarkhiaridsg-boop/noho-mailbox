@@ -20,9 +20,12 @@ import {
 import { AiEnvelope } from "@/components/AnimatedIcons";
 import OnboardingChecklistCard from "./OnboardingChecklistCard";
 import CustomerOfMonthBadge from "./CustomerOfMonthBadge";
+import CotmSpotlightOptInCard from "./CotmSpotlightOptInCard";
+import LoyaltyTierCard from "./LoyaltyTierCard";
 import RenewalDiscountCard from "./RenewalDiscountCard";
 import ReferralLeaderboardCard from "./ReferralLeaderboardCard";
 import PlanUpgradeNudgeCard from "./PlanUpgradeNudgeCard";
+import SenderNotesCard from "./SenderNotesCard";
 
 // Animated number counter — counts up from 0 to value over 600ms with a
 // spring-damped tween. Used in the metric cards so big numbers feel earned
@@ -317,6 +320,16 @@ export default function OverviewPanel({
           so it's the first thing they see. */}
       <CustomerOfMonthBadge />
 
+      {/* iter-169: CotM marketing spotlight opt-in. Renders only for
+          members who've won at least one CotM award; lets them submit
+          a homepage spotlight (admin reviews + publishes). */}
+      <CotmSpotlightOptInCard />
+
+      {/* iter-175: Loyalty tier card. Always renders for active members
+          (defaults to Bronze on first compute). Shows current tier +
+          benefits + path to the next tier. */}
+      <LoyaltyTierCard />
+
       {/* iter-153: Renewal discount card. Renders nothing for members
           without an active offer; for at-risk members near renewal,
           shows the limited-time discount + countdown. */}
@@ -326,6 +339,11 @@ export default function OverviewPanel({
           member's recent volume justifies it. 7-day dismiss grace
           via localStorage so we never spam. */}
       <PlanUpgradeNudgeCard />
+
+      {/* iter-168: Sender thank-you notes inbox. Renders ONLY when at
+          least one sender has dropped a note via the public share link.
+          Lazy-loaded so quiet mailboxes don't pay for an empty card. */}
+      <SenderNotesCard />
 
       {/* iter-114: Onboarding checklist — top of the overview so new
           members see "what's next" before anything else. Self-collapses

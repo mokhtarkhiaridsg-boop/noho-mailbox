@@ -77,6 +77,15 @@ export const DICT = {
   // i18n switcher
   "i18n.language":      { en: "Language",        fr: "Langue",            ar: "اللغة" },
   "i18n.switched":      { en: "Language updated", fr: "Langue mise à jour", ar: "تم تحديث اللغة" },
+  // iter-183 — locale settings card
+  "i18n.dashboard_language":   { en: "Dashboard language",    fr: "Langue du tableau de bord", ar: "لغة لوحة التحكم" },
+  "i18n.choose_language_help": {
+    en: "We'll show your dashboard in this language. Emails follow your choice too. Set once — syncs across all your devices.",
+    fr: "Votre tableau de bord s'affichera dans cette langue. Les e-mails suivront aussi votre choix. À configurer une seule fois — synchronisé sur tous vos appareils.",
+    ar: "ستظهر لوحة التحكم بهذه اللغة. ستتبع رسائل البريد الإلكتروني اختيارك أيضًا. إعداد مرة واحدة — متزامن عبر جميع أجهزتك.",
+  },
+  "i18n.synced_across_devices":   { en: "Synced across all your devices", fr: "Synchronisé sur tous vos appareils", ar: "متزامن عبر جميع أجهزتك" },
+  "i18n.cookie_only":             { en: "Saved on this device only — sign in to sync", fr: "Enregistré uniquement sur cet appareil — connectez-vous pour synchroniser", ar: "محفوظ على هذا الجهاز فقط — سجل الدخول للمزامنة" },
 } as const;
 
 export type DictKey = keyof typeof DICT;

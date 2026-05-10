@@ -7,6 +7,7 @@
  */
 import { useEffect, useState, useTransition } from "react";
 import { getPricingConfig, updatePricingConfig } from "@/app/actions/pricing";
+import { DEFAULT_PRICING } from "@/lib/pricing-config";
 import type {
   PricingConfig,
   PricingPlan,
@@ -32,7 +33,19 @@ export function AdminPricingEditor() {
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    getPricingConfig().then(setConfig);
+    // Defensive: never let "Loading..." stick. Fall back to defaults
+    // after 4s if the action throws or hangs.
+    let cancelled = false;
+    const fallback = setTimeout(() => {
+      if (!cancelled) setConfig((c) => c ?? { ...DEFAULT_PRICING });
+    }, 4000);
+    getPricingConfig()
+      .then((r) => { if (!cancelled) setConfig(r); })
+      .catch(() => { if (!cancelled) setConfig({ ...DEFAULT_PRICING }); });
+    return () => {
+      cancelled = true;
+      clearTimeout(fallback);
+    };
   }, []);
 
   function patch<K extends keyof PricingConfig>(key: K, value: PricingConfig[K]) {

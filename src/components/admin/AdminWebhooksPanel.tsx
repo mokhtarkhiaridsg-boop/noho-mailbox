@@ -380,9 +380,11 @@ function ProblemRow({ row, kind, onReplay, onDiscard, busy }: {
   );
 }
 
-function FormatPill({ format }: { format: "slack" | "discord" | "generic" }) {
-  const c = format === "slack"  ? { bg: "rgba(74,21,75,0.10)",  fg: "#4a154b" }
-          : format === "discord" ? { bg: "rgba(88,101,242,0.12)", fg: "#5865f2" }
+function FormatPill({ format }: { format: string }) {
+  const c = format === "slack"    ? { bg: "rgba(74,21,75,0.10)",   fg: "#4a154b" }
+          : format === "discord"  ? { bg: "rgba(88,101,242,0.12)", fg: "#5865f2" }
+          : format === "pushover" ? { bg: "rgba(36,158,255,0.12)", fg: "#0072c2" }
+          : format === "ntfy"     ? { bg: "rgba(34,197,94,0.10)",  fg: "#15803d" }
           :                          { bg: "rgba(45,16,15,0.06)",  fg: "rgba(45,16,15,0.55)" };
   return (
     <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: c.bg, color: c.fg }}>
@@ -416,7 +418,7 @@ function Editor({ state, onCancel, onSaved }: {
   const initial = state.mode === "edit" ? state.row : null;
   const [label, setLabel] = useState(initial?.label ?? "");
   const [url, setUrl] = useState(initial?.url ?? "");
-  const [format, setFormat] = useState<"slack" | "discord" | "generic">(initial?.format ?? "slack");
+  const [format, setFormat] = useState<"slack" | "discord" | "generic" | "pushover" | "ntfy">((initial?.format as "slack" | "discord" | "generic" | "pushover" | "ntfy" | undefined) ?? "slack");
   const [events, setEvents] = useState<WebhookEvent[]>(initial?.events ?? ["mail.arrived", "mail.picked_up", "dropoff.logged"]);
   const [secret, setSecret] = useState("");
   const [active, setActive] = useState(initial?.active ?? true);
@@ -426,6 +428,8 @@ function Editor({ state, onCancel, onSaved }: {
   const detectedFormat = useMemo(() => {
     if (/hooks\.slack\.com/i.test(url)) return "slack" as const;
     if (/discord(app)?\.com\/api\/webhooks/i.test(url)) return "discord" as const;
+    if (/api\.pushover\.net|pushover\.net.*token=/i.test(url)) return "pushover" as const;
+    if (/ntfy\.sh|ntfy\./i.test(url)) return "ntfy" as const;
     return null;
   }, [url]);
 
@@ -440,7 +444,10 @@ function Editor({ state, onCancel, onSaved }: {
         id: initial?.id,
         label,
         url,
-        format,
+        // Cast: Next 16 server-action type inference narrows `format` to
+        // the legacy 3-option set even though the action accepts 5. Same
+        // string at runtime — the action's own validator is the gate.
+        format: format as "slack" | "discord" | "generic",
         events,
         active,
         // For new endpoints: send the secret as-is. For edits: only send when
@@ -483,8 +490,8 @@ function Editor({ state, onCancel, onSaved }: {
         </div>
         <div>
           <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>Format</label>
-          <div className="mt-1 flex gap-1.5">
-            {(["slack", "discord", "generic"] as const).map((f) => (
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {(["slack", "discord", "generic", "pushover", "ntfy"] as const).map((f) => (
               <button key={f} type="button" onClick={() => setFormat(f)}
                 className="px-3 py-1.5 rounded-lg text-[11px] font-bold"
                 style={{
@@ -496,6 +503,18 @@ function Editor({ state, onCancel, onSaved }: {
               </button>
             ))}
           </div>
+          {format === "pushover" && (
+            <p className="mt-1.5 text-[10.5px]" style={{ color: "rgba(45,16,15,0.65)" }}>
+              📲 <strong>Pushover URL format:</strong> bake your <code>token</code> + <code>user</code> into the URL as query params, e.g.{" "}
+              <code style={{ background: "#F4EEE3", padding: "0 3px", borderRadius: 3 }}>https://api.pushover.net/?token=…&user=…</code>. We extract them server-side and POST to the messages endpoint with form-encoded body.
+            </p>
+          )}
+          {format === "ntfy" && (
+            <p className="mt-1.5 text-[10.5px]" style={{ color: "rgba(45,16,15,0.65)" }}>
+              🔔 <strong>ntfy URL format:</strong> use{" "}
+              <code style={{ background: "#F4EEE3", padding: "0 3px", borderRadius: 3 }}>https://ntfy.sh/&lt;your-topic&gt;</code> for the public service or your self-hosted URL. Body is plain text; Title/Tags/Click come from headers. No secret needed.
+            </p>
+          )}
         </div>
         <div>
           <label className="text-[10px] font-black uppercase tracking-wider" style={{ color: "rgba(45,16,15,0.55)" }}>

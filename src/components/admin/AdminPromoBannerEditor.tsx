@@ -102,9 +102,22 @@ export default function AdminPromoBannerEditor() {
   const [now, setNow] = useState<Date>(() => new Date());
 
   useEffect(() => {
-    getPromoBanner().then(setCfg);
+    // Defensive: fall back to defaults if the server action throws or
+    // hangs. The Settings panel was getting stuck on "Loading..."
+    // forever when the action errored silently.
+    let cancelled = false;
+    const fallback = setTimeout(() => {
+      if (!cancelled) setCfg((c) => c ?? { ...DEFAULT_PROMO_BANNER });
+    }, 4000);
+    getPromoBanner()
+      .then((r) => { if (!cancelled) setCfg(r); })
+      .catch(() => { if (!cancelled) setCfg({ ...DEFAULT_PROMO_BANNER }); });
     const t = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(t);
+    return () => {
+      cancelled = true;
+      clearTimeout(fallback);
+      clearInterval(t);
+    };
   }, []);
 
   function update<K extends keyof PromoBannerConfig>(

@@ -182,103 +182,66 @@ export function AdminBusinessPanel({ setShowNewClientModal }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Hero strip — Command Tower variant matching the Overview shell. */}
-      <div
-        className="relative overflow-hidden rounded-2xl px-5 sm:px-6 py-5"
-        style={{
-          background:
-            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
-          boxShadow:
-            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 pointer-events-none opacity-[0.13]"
+      {/* iPad-OS title row — Baloo + Pacifico script accent. */}
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
           style={{
-            backgroundImage:
-              "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
-            maskImage:
-              "radial-gradient(ellipse at center, black 30%, transparent 80%)",
-            transform:
-              "perspective(800px) rotateX(58deg) translateY(20%) scale(1.4)",
-            transformOrigin: "center bottom",
+            color: NOHO_INK,
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
           }}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full opacity-15 blur-3xl pointer-events-none"
-          style={{ background: NOHO_AMBER }}
-        />
-
-        <div className="relative">
-          <p
-            className="text-[10px] font-black uppercase tracking-[0.28em] mb-1"
-            style={{ color: "rgba(247,230,194,0.6)" }}
-          >
-            <span
-              aria-hidden
-              className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle"
-              style={{
-                background: NOHO_AMBER,
-                boxShadow: `0 0 8px ${NOHO_AMBER}`,
-              }}
-            />
-            Business solutions · LLC formation
-          </p>
-          <h2
-            className="font-bold tracking-tight"
+        >
+          Business Solutions
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          client pipeline
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · LLC formation · filings · consultancy projects
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => setShowNewClientModal(true)}
+            className="inline-flex items-center gap-2 px-3 h-9 rounded-md text-[12px] font-semibold transition-colors"
             style={{
-              fontSize: "clamp(1.4rem, 2.8vw, 1.8rem)",
+              background: NOHO_INK,
               color: "#FFFFFF",
+              border: `1px solid ${NOHO_INK}`,
             }}
           >
-            Client pipeline
-          </h2>
-          <p
-            className="text-[12px] mt-1 max-w-md"
-            style={{ color: "rgba(247,230,194,0.7)" }}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            New client
+          </button>
+          <div
+            className="inline-flex items-center gap-1 rounded-md p-0.5"
+            style={{ background: "#F4F5F7", border: "1px solid #ECEEF1" }}
           >
-            Track LLC formation, business filing, and consultancy projects.
-            Move clients through stages, log payments, monitor delivery
-            progress.
-          </p>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setShowNewClientModal(true)}
-              className="inline-flex items-center gap-2 px-3 h-9 rounded-md text-[12px] font-bold uppercase tracking-[0.10em] transition-colors"
-              style={{
-                background: NOHO_CREAM,
-                color: NOHO_INK,
-                border: `1px solid ${NOHO_CREAM}`,
-              }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              New client
-            </button>
-            <div
-              className="inline-flex items-center gap-1 rounded-xl p-1"
-              style={{ background: `${NOHO_CREAM}1a` }}
-            >
-              {(["board", "list"] as const).map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setView(v)}
-                  className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg transition-all"
-                  style={{
-                    background: view === v ? "white" : "transparent",
-                    color: view === v ? NOHO_INK : NOHO_CREAM,
-                  }}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
+            {(["board", "list"] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className="text-[10px] font-semibold uppercase tracking-[0.10em] px-2.5 py-1 rounded transition-all"
+                style={{
+                  background: view === v ? "#FFFFFF" : "transparent",
+                  color: view === v ? NOHO_INK : "#7A8290",
+                  boxShadow: view === v ? "0 1px 2px rgba(0,0,0,0.04)" : "none",
+                }}
+              >
+                {v}
+              </button>
+            ))}
           </div>
         </div>
       </div>

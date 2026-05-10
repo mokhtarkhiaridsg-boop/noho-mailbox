@@ -99,11 +99,14 @@ async function deliver(
   event: WebhookEvent,
   payload: WebhookPayload,
 ): Promise<void> {
-  const body = formatBody(ep.format, event, payload);
-  const bodyJson = JSON.stringify(body);
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (ep.secret) {
-    const sig = createHmac("sha256", ep.secret).update(bodyJson).digest("hex");
+  // iter-185 — Pushover + ntfy use provider-specific request shapes
+  // (form-encoded for Pushover, plain-text for ntfy). Both swap the
+  // standard JSON body + headers for their own. Slack/Discord/generic
+  // keep the iter-103 JSON path.
+  const built = buildRequest(ep.format, ep.url, event, payload);
+  const headers: Record<string, string> = { ...built.headers };
+  if (ep.secret && built.signableBody) {
+    const sig = createHmac("sha256", ep.secret).update(built.signableBody).digest("hex");
     headers["X-NOHO-Signature"] = `sha256=${sig}`;
   }
 
@@ -113,10 +116,10 @@ async function deliver(
   let error: string | null = null;
 
   try {
-    const res = await fetch(ep.url, {
+    const res = await fetch(built.url, {
       method: "POST",
       headers,
-      body: bodyJson,
+      body: built.body,
       signal: AbortSignal.timeout(8000),
     });
     httpStatus = res.status;
@@ -145,7 +148,7 @@ async function deliver(
         data: {
           endpointId: ep.id,
           event,
-          payload: bodyJson.slice(0, 4000),
+          payload: (built.persistableBody ?? "").slice(0, 4000),
           status,
           httpStatus,
           error,
@@ -210,8 +213,21 @@ export async function retryDelivery(deliveryId: string): Promise<{
   }
 
   const ep = row.endpoint;
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (ep.secret) {
+  // iter-185 — On retry we replay the persisted body with the format-
+  // appropriate URL + headers. For Pushover/ntfy `row.payload` is
+  // already in their wire format (form-string for pushover, plain
+  // text for ntfy) — the persistence path stored the right shape.
+  const isPushover = ep.format === "pushover";
+  const isNtfy = ep.format === "ntfy";
+  const headers: Record<string, string> = isPushover
+    ? { "Content-Type": "application/x-www-form-urlencoded" }
+    : isNtfy
+      ? { "Content-Type": "text/plain; charset=utf-8" }
+      : { "Content-Type": "application/json" };
+  // ntfy retry: rebuild headers from the raw event/payload would be
+  // ideal but we don't keep those — payload is the body only. Slack/
+  // Discord/generic + Pushover sign with the secret if set; ntfy doesn't.
+  if (ep.secret && !isNtfy) {
     const sig = createHmac("sha256", ep.secret).update(row.payload).digest("hex");
     headers["X-NOHO-Signature"] = `sha256=${sig}`;
   }
@@ -310,31 +326,102 @@ export async function drainWebhookRetries(): Promise<{
   return { processed: due.length, succeeded, failed, deadLettered, skipped };
 }
 
-function formatBody(format: string, event: WebhookEvent, payload: WebhookPayload): unknown {
+// iter-185 — Build the per-provider request shape (URL + headers + body).
+// Slack / Discord / generic share JSON-POST conventions. Pushover uses
+// form-encoded with `token`+`user`+`message` fields. ntfy uses raw
+// text-body POST with `Title:` / `Tags:` / `Priority:` headers.
+//
+// Return contract:
+//   - `body` is what gets POSTed (string, type-aligned to headers).
+//   - `signableBody` is what we HMAC-sign with the secret (if set).
+//     ntfy is signature-less by spec, so this is null for ntfy.
+//   - `persistableBody` is what we write to WebhookDelivery.payload
+//     for retry replay — same as body for all formats.
+type BuiltRequest = {
+  url: string;
+  headers: Record<string, string>;
+  body: string;
+  signableBody: string | null;
+  persistableBody: string;
+};
+
+function buildRequest(format: string, url: string, event: WebhookEvent, payload: WebhookPayload): BuiltRequest {
   const text = payload.emoji ? `${payload.emoji} ${payload.text}` : payload.text;
+
+  if (format === "pushover") {
+    // Pushover expects token + user in the form body. Admin pre-bakes
+    // them into the URL as ?token=…&user=… and we lift them out so
+    // the actual POST goes to the canonical endpoint.
+    let token = "", userKey = "", parsedHost = "https://api.pushover.net";
+    try {
+      const u = new URL(url);
+      token = u.searchParams.get("token") ?? "";
+      userKey = u.searchParams.get("user") ?? "";
+      parsedHost = `${u.protocol}//${u.host}`;
+    } catch { /* swallow */ }
+    const form = new URLSearchParams();
+    form.set("token", token);
+    form.set("user", userKey);
+    form.set("title", `NOHO Mailbox · ${event}`);
+    form.set("message", text.slice(0, 1024));
+    if (payload.url) form.set("url", payload.url);
+    if (payload.url) form.set("url_title", "Open in dashboard");
+    const body = form.toString();
+    return {
+      url: `${parsedHost}/1/messages.json`,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+      signableBody: body,
+      persistableBody: body,
+    };
+  }
+
+  if (format === "ntfy") {
+    // ntfy: plain text body, headers carry title/priority/tags/click.
+    const headers: Record<string, string> = {
+      "Content-Type": "text/plain; charset=utf-8",
+      Title: `NOHO Mailbox · ${event}`,
+      Tags: payload.emoji ? "mailbox," + payload.emoji.replace(/[^\x20-\x7E]/g, "").trim() || "mailbox" : "mailbox",
+      Priority: "default",
+    };
+    if (payload.url) headers.Click = payload.url;
+    return {
+      url,
+      headers,
+      body: text,
+      signableBody: null,            // ntfy is signature-less
+      persistableBody: text,
+    };
+  }
+
+  // ── JSON-body formats (slack / discord / generic) ──────────────
+  let bodyObj: unknown;
   if (format === "slack") {
-    // Slack incoming-webhook format with optional context block for URL.
-    const blocks: unknown[] = [
-      { type: "section", text: { type: "mrkdwn", text } },
-    ];
+    const blocks: unknown[] = [{ type: "section", text: { type: "mrkdwn", text } }];
     if (payload.url) {
       blocks.push({ type: "context", elements: [{ type: "mrkdwn", text: `<${payload.url}|Open in dashboard>` }] });
     }
-    return { text, blocks, username: "NOHO Mailbox", icon_emoji: ":mailbox_with_mail:" };
-  }
-  if (format === "discord") {
-    return {
+    bodyObj = { text, blocks, username: "NOHO Mailbox", icon_emoji: ":mailbox_with_mail:" };
+  } else if (format === "discord") {
+    bodyObj = {
       content: text,
       username: "NOHO Mailbox",
       embeds: payload.url ? [{ url: payload.url, title: "Open in dashboard", color: 0x337485 }] : undefined,
     };
+  } else {
+    bodyObj = {
+      event, text,
+      url: payload.url ?? null,
+      detail: payload.detail ?? {},
+      sentAt: new Date().toISOString(),
+    };
   }
-  // Generic JSON.
+  const bodyJson = JSON.stringify(bodyObj);
   return {
-    event,
-    text,
-    url: payload.url ?? null,
-    detail: payload.detail ?? {},
-    sentAt: new Date().toISOString(),
+    url,
+    headers: { "Content-Type": "application/json" },
+    body: bodyJson,
+    signableBody: bodyJson,
+    persistableBody: bodyJson,
   };
 }

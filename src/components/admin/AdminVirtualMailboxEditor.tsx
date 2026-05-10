@@ -45,7 +45,19 @@ export default function AdminVirtualMailboxEditor() {
   const [tab, setTab] = useState<TabKey>("plans");
 
   useEffect(() => {
-    getVirtualMailbox().then(setCfg);
+    // Defensive: never let "Loading..." stick. Fall back to defaults
+    // after 4s if the action throws or hangs.
+    let cancelled = false;
+    const fallback = setTimeout(() => {
+      if (!cancelled) setCfg((c) => c ?? { ...DEFAULT_VIRTUAL_MAILBOX });
+    }, 4000);
+    getVirtualMailbox()
+      .then((r) => { if (!cancelled) setCfg(r); })
+      .catch(() => { if (!cancelled) setCfg({ ...DEFAULT_VIRTUAL_MAILBOX }); });
+    return () => {
+      cancelled = true;
+      clearTimeout(fallback);
+    };
   }, []);
 
   function update<K extends keyof VirtualMailboxConfig>(

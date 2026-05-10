@@ -163,87 +163,62 @@ export function AdminChatPanel({ meId, customers }: Props) {
 
   return (
     <div className="space-y-3">
-      {/* Hero strip — Command Tower variant. */}
-      <div
-        className="relative overflow-hidden rounded-2xl"
-        style={{
-          background:
-            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
-          boxShadow:
-            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
-        <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+      {/* iPad-OS title row — Baloo + Pacifico script accent. */}
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
           style={{
-            backgroundImage:
-              "radial-gradient(circle at 25% 30%, white 1.2px, transparent 1.2px)",
-            backgroundSize: "28px 28px",
+            color: NOHO_INK,
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
           }}
-        />
-        <div className="absolute right-6 top-4 opacity-15 pointer-events-none">
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke={NOHO_CREAM} strokeWidth="1.2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-        </div>
-
-        <div className="relative px-5 py-4 flex items-center gap-4 flex-wrap">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <div
-                className="w-1.5 h-1.5 rounded-full animate-pulse"
-                style={{ background: NOHO_GREEN }}
-              />
-              <span
-                className="text-[10px] font-black uppercase tracking-[0.2em]"
-                style={{ color: NOHO_CREAM }}
-              >
-                Live · {chats.length} threads
-              </span>
-            </div>
-            <h2
-              className="font-black tracking-tight"
+        >
+          Customer Chat
+        </h2>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          live threads
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {chats.length} threads · {unreadCount} unread · {recentCount} active in last 24h
+        </span>
+        <div className="ml-auto flex flex-wrap gap-1.5 items-center">
+          {(
+            [
+              ["all", "All", chats.length],
+              ["unread", "Unread", unreadCount],
+              ["recent", "24h", recentCount],
+            ] as const
+          ).map(([key, label, n]) => (
+            <button
+              key={key}
+              onClick={() => setFilter(key)}
+              className="text-[10px] font-semibold uppercase tracking-[0.10em] px-2.5 py-1.5 rounded-md transition-all inline-flex items-center gap-1.5"
               style={{
-                fontFamily: "var(--font-baloo, system-ui)",
-                fontSize: "1.5rem",
-                color: "white",
-                textShadow: "0 2px 8px rgba(0,0,0,0.30)",
+                background: filter === key ? NOHO_INK : "transparent",
+                color: filter === key ? "#FFFFFF" : NOHO_INK,
+                border: `1px solid ${filter === key ? NOHO_INK : "#ECEEF1"}`,
               }}
             >
-              Customer Chat
-            </h2>
-          </div>
-
-          <div className="ml-auto flex flex-wrap gap-1.5 items-center">
-            {(
-              [
-                ["all", "All", chats.length],
-                ["unread", "Unread", unreadCount],
-                ["recent", "24h", recentCount],
-              ] as const
-            ).map(([key, label, n]) => (
-              <button
-                key={key}
-                onClick={() => setFilter(key)}
-                className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg transition-all inline-flex items-center gap-1.5"
+              {label}
+              <span
+                className="px-1.5 py-0.5 rounded text-[9px]"
                 style={{
-                  background: filter === key ? "white" : `${NOHO_CREAM}1a`,
-                  color: filter === key ? NOHO_INK : NOHO_CREAM,
+                  background: filter === key ? "rgba(255,255,255,0.20)" : "#F4F5F7",
+                  color: filter === key ? "#FFFFFF" : NOHO_INK,
                 }}
               >
-                {label}
-                <span
-                  className="px-1.5 py-0.5 rounded-md text-[9px]"
-                  style={{
-                    background: filter === key ? `${NOHO_INK}11` : `${NOHO_CREAM}22`,
-                    color: filter === key ? NOHO_INK : NOHO_CREAM,
-                  }}
-                >
-                  {n}
-                </span>
-              </button>
-            ))}
-          </div>
+                {n}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 

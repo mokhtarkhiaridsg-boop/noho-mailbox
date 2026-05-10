@@ -962,3 +962,47 @@ export async function sendMailboxRenewalReceipt(data: {
     userId: data.userId,
   });
 }
+
+// iter-170 — Recurring scheduled-forwarding batch confirmation. Sent
+// after the cron sweep ships a batch. Includes the address used + item
+// count + next-run date so the member knows when the next batch lands.
+export async function sendScheduledForwardingBatchEmail(data: {
+  toEmail: string;
+  userId: string;
+  name: string;
+  itemCount: number;
+  addressLabel: string;
+  addressBody: string;
+  nextRunDate: string;            // YYYY-MM-DD
+  notes?: string | null;
+  source?: "cron" | "manual" | "test";
+}) {
+  const firstName = data.name.split(" ")[0] || "there";
+  const subject = `📬 ${data.itemCount} item${data.itemCount === 1 ? "" : "s"} forwarded to ${data.addressLabel}`;
+  const next = new Date(`${data.nextRunDate}T00:00:00`);
+  const nextLabel = next.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+  const sourceTag = data.source === "manual" ? "manually triggered" : data.source === "test" ? "test run" : "scheduled batch";
+  const html = layout(subject, `
+    ${h1(`Your forwarding batch is on its way 📬`)}
+    ${p(`Hi ${firstName}, your <strong>${sourceTag}</strong> just shipped — <strong>${data.itemCount} item${data.itemCount === 1 ? "" : "s"}</strong> from your mailbox went out to <strong>${data.addressLabel}</strong>.`)}
+
+    <div style="margin:18px 0;padding:14px 16px;border-radius:12px;background:#F4EEE3;border:1px solid #E8DDD0;">
+      <p style="margin:0 0 8px;font-size:11px;font-weight:900;letter-spacing:0.18em;text-transform:uppercase;color:#7A6050;">Shipped to</p>
+      <p style="margin:0;font-size:14px;font-weight:700;color:#2D100F;">${data.addressLabel}</p>
+      <p style="margin:4px 0 0;font-size:12px;color:#5C4540;line-height:1.55;white-space:pre-line;">${data.addressBody.replace(/</g, "&lt;")}</p>
+    </div>
+
+    ${data.notes ? `<div style="margin:0 0 14px;padding:10px 12px;border-left:3px solid #337485;background:#f7faff;font-size:12.5px;color:#3A1816;font-style:italic;">${data.notes.replace(/</g, "&lt;")}</div>` : ""}
+
+    ${p(`Your next batch is scheduled for <strong>${nextLabel}</strong>. You can change frequency, pause for vacation, or trigger a manual run anytime from your dashboard.`)}
+    ${btn(`${BASE_URL}/dashboard?tab=settings`, "Open forwarding settings")}
+    ${p(`<span style="font-size:12px;color:#94a3b8;">Want to skip a future batch? Pause from the dashboard before the next run date.</span>`)}
+  `);
+  return sendEmail({
+    to: data.toEmail,
+    subject,
+    html,
+    kind: "scheduled_forward_batch",
+    userId: data.userId,
+  });
+}

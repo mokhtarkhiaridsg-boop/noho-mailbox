@@ -22,7 +22,7 @@ export type WebhookRow = {
   id: string;
   label: string;
   url: string;
-  format: "slack" | "discord" | "generic";
+  format: "slack" | "discord" | "generic" | "pushover" | "ntfy";
   events: WebhookEvent[];
   active: boolean;
   hasSecret: boolean;
@@ -33,7 +33,7 @@ export type WebhookRow = {
   recentFailures: number;
 };
 
-const VALID_FORMATS = new Set(["slack", "discord", "generic"]);
+const VALID_FORMATS = new Set(["slack", "discord", "generic", "pushover", "ntfy"]);
 const VALID_EVENTS = new Set(ALL_WEBHOOK_EVENTS.map((e) => e.key));
 
 function parseEvents(raw: string): WebhookEvent[] {
@@ -74,7 +74,7 @@ export async function listWebhooks(): Promise<WebhookRow[]> {
       id: e.id,
       label: e.label,
       url: e.url,
-      format: (VALID_FORMATS.has(e.format) ? e.format : "generic") as "slack" | "discord" | "generic",
+      format: (VALID_FORMATS.has(e.format) ? e.format : "generic") as "slack" | "discord" | "generic" | "pushover" | "ntfy",
       events: parseEvents(e.events),
       active: e.active,
       hasSecret: Boolean(e.secret),
@@ -91,7 +91,7 @@ type UpsertInput = {
   id?: string;
   label: string;
   url: string;
-  format: "slack" | "discord" | "generic";
+  format: "slack" | "discord" | "generic" | "pushover" | "ntfy";
   events: WebhookEvent[];
   active?: boolean;
   secret?: string | null; // pass empty string to clear

@@ -41,25 +41,45 @@ export function AdminSquarePanel({ squareStatus, syncResults, setSyncResults }: 
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-black text-lg uppercase tracking-wide" style={{ color: NOHO_INK }}>
-          Square Integration
+      {/* iPad-OS title row — Baloo + Pacifico script accent. */}
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: NOHO_INK,
+            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+          }}
+        >
+          Square
         </h2>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(45,16,15,0.5)" }}>
-          Sync customers, payments, and catalog items between NOHO and Square
-        </p>
+        <span
+          className="text-[15px] hidden sm:inline"
+          style={{
+            color: "#1976FF",
+            fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+            transform: "translateY(-1px)",
+            display: "inline-block",
+          }}
+        >
+          payments &amp; sync
+        </span>
+        <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+          · {isConnected
+            ? squareStatus.environment === "production"
+              ? "Connected · Live"
+              : "Connected · Sandbox (test data only)"
+            : "Not connected"}
+          {lastSuccess && ` · last sync ${relTime(lastSuccess.startedAt)} · ${lastSuccess.itemsSynced} items`}
+          {failedRecent > 0 && ` · ${failedRecent} recent failure${failedRecent !== 1 ? "s" : ""}`}
+        </span>
       </div>
 
-      {/* ─── Connection status hero — Command Tower variant ─────────── */}
+      {/* Hidden — replaced by the title row above. Kept compiler-happy
+          if any nested block expected the old structure. */}
       <div
-        className="rounded-2xl p-5 sm:p-6 relative overflow-hidden"
-        style={{
-          background:
-            "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
-          boxShadow:
-            "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-          color: "#EBF2FF",
-        }}
+        className="hidden"
+        style={{ color: "#EBF2FF" }}
       >
         {/* Decorative dot pattern */}
         <div

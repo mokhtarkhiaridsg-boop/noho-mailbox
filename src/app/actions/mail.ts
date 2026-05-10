@@ -9,6 +9,8 @@ import { sendMailArrivedSms, sendMailPickedUpSms } from "@/lib/sms";
 import { parsePrefs, getChannelPrefs } from "@/lib/notifPrefs";
 import { notifyMailArrived, notifyMailPickedUp, notifyOversizePackage } from "@/app/actions/notifications";
 import { fireWebhooks } from "@/lib/webhooks";
+import { fireMemberWebhooks } from "@/lib/memberWebhooks";
+import { getActivePinsForSuite } from "@/app/actions/suitePinNotes";
 import { analyzeMailItemPhoto } from "@/app/actions/aiPhotoAnalysis";
 
 // ─── Scan-and-log inbound package ────────────────────────────────────────────
@@ -166,9 +168,49 @@ export async function logScannedInbound(input: {
     },
   });
 
+  // iter-167: member-registered webhook bridge. Fires per the OWNER's
+  // own webhook subscriptions — privacy-scoped to userId, never
+  // broadcasts cross-tenant. Both `package.arrived` (specific) AND
+  // `mail.arrived` (generic) so members can subscribe at either
+  // granularity.
+  void fireMemberWebhooks(userId, "package.arrived", {
+    text: `📦 Package arrived from ${input.carrier} (${input.trackingNumber})`,
+    url: "https://nohomailbox.org/dashboard?tab=packages",
+    detail: {
+      mailItemId: created.id,
+      type: "Package",
+      carrier: input.carrier,
+      trackingNumber: input.trackingNumber,
+      recipientName: input.recipientName ?? user.name ?? null,
+      suiteNumber: user.suiteNumber ?? null,
+    },
+  });
+  void fireMemberWebhooks(userId, "mail.arrived", {
+    text: `📦 New ${input.carrier} package arrived`,
+    url: "https://nohomailbox.org/dashboard?tab=packages",
+    detail: {
+      mailItemId: created.id,
+      type: "Package",
+      carrier: input.carrier,
+      trackingNumber: input.trackingNumber,
+    },
+  });
+
+  // iter-182 — Surface sticky pins for this suite so admin sees
+  // "hold for K. on Tues" or "verify ID before release" the moment
+  // they finish the scan. Cheap query + best-effort: if it fails the
+  // intake still succeeds.
+  let suitePins: Array<{ id: string; body: string; color: string }> = [];
+  if (user.suiteNumber) {
+    try {
+      const pins = await getActivePinsForSuite(user.suiteNumber);
+      suitePins = pins.map((p) => ({ id: p.id, body: p.body, color: p.color }));
+    } catch { /* swallow */ }
+  }
+
   revalidatePath("/admin");
   revalidatePath("/dashboard");
-  return { success: true, mailItemId: created.id };
+  return { success: true, mailItemId: created.id, suitePins };
 }
 
 // Recent scans — last N inbound packages logged via the Scan workflow,
@@ -1439,6 +1481,31 @@ export async function updateMailStatus(mailItemId: string, newStatus: string) {
           },
         });
       } catch (e) { console.error("[updateMailStatus] fireWebhooks failed:", e); }
+      // iter-167: member-registered webhook bridge. Fires to the
+      // OWNER's own webhooks (privacy-scoped). Both
+      // `package.picked_up` (specific) AND `mail.picked_up` (generic).
+      try {
+        const isPackage = item.type === "Package";
+        if (isPackage) {
+          void fireMemberWebhooks(item.userId, "package.picked_up", {
+            text: `✅ Package picked up · ${item.carrier ?? ""} ${item.trackingNumber ?? ""}`.trim(),
+            url: "https://nohomailbox.org/dashboard?tab=packages",
+            detail: {
+              mailItemId: item.id,
+              carrier: item.carrier ?? null,
+              trackingNumber: item.trackingNumber ?? null,
+            },
+          });
+        }
+        void fireMemberWebhooks(item.userId, "mail.picked_up", {
+          text: `✅ ${item.type} picked up`,
+          url: "https://nohomailbox.org/dashboard",
+          detail: {
+            mailItemId: item.id,
+            type: item.type,
+          },
+        });
+      } catch (e) { console.error("[updateMailStatus] fireMemberWebhooks failed:", e); }
     })();
   }
 

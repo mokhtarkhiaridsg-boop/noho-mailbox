@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { HomepageClient } from "./homepage-client";
+import MarketingSpotlightSection from "./MarketingSpotlightSection";
 import { OpenClosedSign } from "@/components/OpenClosedSign";
 import { StatsCounter } from "@/components/StatsCounter";
 import { HeroMailbox } from "@/components/HeroMailbox";
@@ -1175,6 +1176,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ─── iter-169: MEMBER SPOTLIGHT (renders nothing until a member opts in) ─── */}
+      <MarketingSpotlightSection />
 
       {/* ─── VISIT US (walk-in conversion) ─── */}
       <section

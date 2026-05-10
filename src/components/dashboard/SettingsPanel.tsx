@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { TransitionStartFunction } from "react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -13,8 +13,13 @@ import PickupAppointmentCard from "./PickupAppointmentCard";
 import AutoRenewCard from "./AutoRenewCard";
 import WalletAutoTopUpCard from "./WalletAutoTopUpCard";
 import PlanUpgradeCard from "./PlanUpgradeCard";
+import PlanDowngradeCard from "./PlanDowngradeCard";
 import SuiteTransferCard from "./SuiteTransferCard";
 import TimeZoneCard from "./TimeZoneCard";
+import LocaleSettingCard from "./LocaleSettingCard";
+import ApiTokensCard from "./ApiTokensCard";
+import MemberWebhooksCard from "./MemberWebhooksCard";
+import AchPaymentCard from "./AchPaymentCard";
 import {
   IconSettings,
   IconKey,
@@ -31,6 +36,16 @@ import { setVacationHold, cancelVacationHold, getMyVacationHold, getMyJunkSender
 import { addGuestPickup, revokeGuestPickup, getMyGuestPickups } from "@/app/actions/guestPickup";
 import { grantSharedAccess, revokeSharedAccess, getMySharedAccess } from "@/app/actions/sharedMailbox";
 import { setScheduledForwarding, cancelScheduledForwarding, getMyScheduledForwarding } from "@/app/actions/scheduledForwarding";
+import {
+  setRecurringForwarding,
+  pauseMyForwarding,
+  resumeMyForwarding,
+  runMyForwardingNow,
+  listMyForwardingBatches,
+  getMyForwardingStatus,
+  type ForwardingBatchRow,
+} from "@/app/actions/scheduledForwardingBatch";
+import { ALL_FREQUENCIES, FREQUENCY_LABELS, type ForwardingFrequency } from "@/lib/scheduledForwarding";
 
 type Props = {
   user: DashboardUser;
@@ -406,24 +421,53 @@ function GuestPickupCard({ setToast }: { setToast: (s: string) => void }) {
   );
 }
 
+// iter-170 — Recurring forwarding card. Replaces the iter-129 minimal
+// version with a full lifecycle: frequency picker + notes + vacation
+// pause + manual "Run now" + batch-history reveal. Falls back to the
+// legacy `setScheduledForwarding` only if the new
+// `setRecurringForwarding` server action errors out (defense-in-depth
+// during the schema rollout window).
 function ScheduledForwardingCard({ addresses, setToast }: { addresses: ForwardingAddress[]; setToast: (s: string) => void }) {
-  const [sf, setSf] = useState<any | null | undefined>(undefined);
+  type Status = Awaited<ReturnType<typeof getMyForwardingStatus>>;
+  const [sf, setSf] = useState<Status | null | undefined>(undefined);
   const [pending, startTransition] = useTransition();
   const [showForm, setShowForm] = useState(false);
-  const [freq, setFreq] = useState<"weekly" | "biweekly" | "monthly">("weekly");
+  const [freq, setFreq] = useState<ForwardingFrequency>("weekly");
   const [addrId, setAddrId] = useState("");
+  const [notes, setNotes] = useState("");
+  const [pauseUntil, setPauseUntil] = useState("");
+  const [batches, setBatches] = useState<ForwardingBatchRow[] | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   async function load() {
-    const data = await getMyScheduledForwarding();
+    const data = await getMyForwardingStatus();
     setSf(data);
+    if (data) {
+      setFreq(data.frequency);
+      setAddrId(data.addressId ?? "");
+      setNotes(data.notes ?? "");
+    }
   }
+  useEffect(() => {
+    if (sf === undefined && !pending) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  if (sf === undefined && !pending) load();
+  useEffect(() => {
+    if (showHistory && batches == null) {
+      void listMyForwardingBatches({ limit: 12 }).then(setBatches).catch(() => setBatches([]));
+    }
+  }, [showHistory, batches]);
 
   function save() {
     startTransition(async () => {
-      await setScheduledForwarding({ frequency: freq, addressId: addrId || undefined });
-      setToast("Scheduled forwarding saved!");
+      const res = await setRecurringForwarding({ frequency: freq, addressId: addrId || undefined, notes: notes.trim() || undefined });
+      if (res.error) {
+        // Defense-in-depth: fall back to the iter-129 path if the new
+        // schema columns aren't pushed for some reason.
+        await setScheduledForwarding({ frequency: freq, addressId: addrId || undefined });
+      }
+      setToast("Forwarding schedule saved");
       setShowForm(false);
       load();
     });
@@ -433,54 +477,156 @@ function ScheduledForwardingCard({ addresses, setToast }: { addresses: Forwardin
     startTransition(async () => {
       await cancelScheduledForwarding();
       setToast("Scheduled forwarding cancelled");
+      setSf(null);
+    });
+  }
+
+  function runNow() {
+    if (!confirm("Ship every eligible mail item right now? Your next-batch date will be reset.")) return;
+    startTransition(async () => {
+      const res = await runMyForwardingNow();
+      if (res.error) { setToast(`Failed: ${res.error}`); return; }
+      setToast(res.itemCount ? `📬 Shipped ${res.itemCount} item${res.itemCount === 1 ? "" : "s"}` : "Nothing eligible to ship right now");
+      setBatches(null);
       load();
     });
   }
 
+  function pause() {
+    if (!pauseUntil) { setToast("Pick a resume date first"); return; }
+    startTransition(async () => {
+      const res = await pauseMyForwarding({ untilDate: pauseUntil });
+      if (res.error) { setToast(`Failed: ${res.error}`); return; }
+      setToast(`Paused until ${pauseUntil}`);
+      load();
+    });
+  }
+  function resume() {
+    startTransition(async () => {
+      const res = await resumeMyForwarding();
+      if (res.error) { setToast(`Failed: ${res.error}`); return; }
+      setToast("Resumed — next batch on schedule");
+      load();
+    });
+  }
+
+  const isPaused = !!sf?.pauseUntil && sf.pauseUntil > new Date().toISOString().slice(0, 10);
+
   return (
     <div className="rounded-2xl p-4 space-y-3" style={{ background: BRAND.blueSoft, border: `1px solid ${BRAND.border}` }}>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] inline-flex items-center gap-1.5" style={{ color: BRAND.blueDeep }}>
             <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="12" height="11" rx="1.5" /><path d="M2 6 L14 6 M5 1.5 L5 4 M11 1.5 L11 4" /><circle cx="8" cy="10" r="0.8" fill="currentColor" /></svg>
-            Scheduled Forwarding
+            Recurring Forwarding
           </p>
-          <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>Auto-forward all mail on a regular schedule</p>
+          <p className="text-[11px] mt-0.5" style={{ color: BRAND.inkSoft }}>
+            Auto-ship every eligible mail item on a schedule. Pause for vacations, fire one off manually anytime.
+          </p>
         </div>
         {sf?.frequency && (
-          <span className="text-[10px] font-black px-2 py-0.5 rounded-full capitalize" style={{ background: "rgba(51,116,133,0.15)", color: BRAND.blueDeep }}>
-            {sf.frequency}
+          <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: "rgba(51,116,133,0.15)", color: BRAND.blueDeep }}>
+            {FREQUENCY_LABELS[sf.frequency]}
           </span>
         )}
       </div>
 
-      {sf?.frequency ? (
+      {sf?.frequency && !showForm ? (
         <div className="space-y-2">
-          <p className="text-xs" style={{ color: BRAND.inkSoft }}>
-            Next run: <strong>{sf.nextRunDate}</strong>
-            {sf.lastRunDate ? ` · Last: ${sf.lastRunDate}` : ""}
-          </p>
-          <div className="flex gap-2">
-            <button onClick={() => setShowForm(!showForm)} className="text-xs font-black px-3 py-1.5 rounded-lg" style={{ background: "white", border: `1px solid ${BRAND.border}`, color: BRAND.blueDeep }}>
+          <div className="rounded-xl p-3 grid grid-cols-2 gap-2 text-[11px]" style={{ background: "white", border: `1px solid ${BRAND.border}` }}>
+            <div>
+              <p className="font-black uppercase tracking-[0.14em] text-[9px]" style={{ color: BRAND.inkFaint }}>Next batch</p>
+              <p className="mt-0.5 font-bold" style={{ color: BRAND.ink }}>{sf.nextRunDate}{sf.isDueNow && !isPaused ? " · DUE NOW" : ""}</p>
+            </div>
+            <div>
+              <p className="font-black uppercase tracking-[0.14em] text-[9px]" style={{ color: BRAND.inkFaint }}>Last batch</p>
+              <p className="mt-0.5 font-bold" style={{ color: BRAND.ink }}>
+                {sf.lastBatchAtIso
+                  ? `${sf.lastBatchSize ?? 0} item${sf.lastBatchSize === 1 ? "" : "s"} · ${new Date(sf.lastBatchAtIso).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                  : "Never run yet"}
+              </p>
+            </div>
+            {sf.notes && (
+              <div className="col-span-2">
+                <p className="font-black uppercase tracking-[0.14em] text-[9px]" style={{ color: BRAND.inkFaint }}>Note</p>
+                <p className="mt-0.5 italic" style={{ color: BRAND.ink }}>“{sf.notes}”</p>
+              </div>
+            )}
+            {isPaused && (
+              <div className="col-span-2 rounded p-1.5 mt-1" style={{ background: "rgba(245,158,11,0.10)", color: "#92400e" }}>
+                ⏸ Paused — resumes {sf.pauseUntil}
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => setShowForm(true)} className="text-xs font-black px-3 py-1.5 rounded-lg" style={{ background: "white", border: `1px solid ${BRAND.border}`, color: BRAND.blueDeep }}>
               Edit
             </button>
+            <button disabled={pending} onClick={runNow} className="text-xs font-black px-3 py-1.5 rounded-lg text-white disabled:opacity-50" style={{ background: BRAND.blue }}>
+              📬 Run now
+            </button>
+            {isPaused ? (
+              <button disabled={pending} onClick={resume} className="text-xs font-black px-3 py-1.5 rounded-lg" style={{ background: "white", border: `1px solid ${BRAND.border}`, color: BRAND.ink }}>
+                Resume
+              </button>
+            ) : (
+              <details>
+                <summary className="text-xs font-black px-3 py-1.5 rounded-lg cursor-pointer inline-block" style={{ background: "white", border: `1px solid ${BRAND.border}`, color: BRAND.inkSoft, listStyle: "none" }}>
+                  Pause for vacation
+                </summary>
+                <div className="mt-2 flex gap-2">
+                  <input type="date" value={pauseUntil} onChange={(e) => setPauseUntil(e.target.value)} className="rounded-lg px-2 py-1 text-xs" style={{ background: "white", border: `1px solid ${BRAND.border}` }} />
+                  <button disabled={pending} onClick={pause} className="text-xs font-black px-3 py-1 rounded-lg text-white" style={{ background: "#92400e" }}>
+                    Pause until then
+                  </button>
+                </div>
+              </details>
+            )}
             <button disabled={pending} onClick={cancel} className="text-xs font-black px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-40">
               Cancel
             </button>
+            <button onClick={() => setShowHistory(!showHistory)} className="ml-auto text-xs font-bold px-2 py-1 rounded-lg" style={{ background: "white", border: `1px solid ${BRAND.border}`, color: BRAND.inkSoft }}>
+              {showHistory ? "Hide" : "Show"} batch history
+            </button>
           </div>
+
+          {showHistory && (
+            <div className="rounded-xl p-2.5" style={{ background: "white", border: `1px solid ${BRAND.border}` }}>
+              {batches == null ? (
+                <p className="text-[11px]" style={{ color: BRAND.inkSoft }}>Loading…</p>
+              ) : batches.length === 0 ? (
+                <p className="text-[11px] italic" style={{ color: BRAND.inkSoft }}>No batches shipped yet.</p>
+              ) : (
+                <ul className="space-y-1">
+                  {batches.map((b) => (
+                    <li key={b.id} className="text-[11px] flex items-center gap-2" style={{ color: BRAND.ink }}>
+                      <span className="font-black tabular-nums" style={{ color: b.itemCount > 0 ? "#15803d" : BRAND.inkFaint }}>
+                        {b.itemCount} item{b.itemCount === 1 ? "" : "s"}
+                      </span>
+                      <span style={{ color: BRAND.inkSoft }}>→ {b.addressLabel}</span>
+                      <span className="ml-auto" style={{ color: BRAND.inkFaint }}>
+                        {new Date(b.shippedAtIso).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {b.source}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
       ) : null}
 
       {(!sf?.frequency || showForm) && (
-        <div className="space-y-2">
+        <div className="space-y-2 rounded-xl p-3" style={{ background: "white", border: `1px solid ${BRAND.border}` }}>
           <div>
             <p className="text-[10px] font-black mb-1.5" style={{ color: BRAND.inkFaint }}>Frequency</p>
-            <div className="flex gap-2">
-              {(["weekly", "biweekly", "monthly"] as const).map((f) => (
-                <button key={f} onClick={() => setFreq(f)}
-                  className="text-xs font-black px-3 py-1.5 rounded-xl capitalize"
+            <div className="flex gap-2 flex-wrap">
+              {ALL_FREQUENCIES.map((f) => (
+                <button key={f} onClick={() => setFreq(f)} type="button"
+                  className="text-xs font-black px-3 py-1.5 rounded-xl"
                   style={{ background: freq === f ? BRAND.blue : "white", color: freq === f ? "white" : BRAND.ink, border: `1px solid ${BRAND.border}` }}>
-                  {f}
+                  {FREQUENCY_LABELS[f]}
                 </button>
               ))}
             </div>
@@ -490,19 +636,25 @@ function ScheduledForwardingCard({ addresses, setToast }: { addresses: Forwardin
               <p className="text-[10px] font-black mb-1" style={{ color: BRAND.inkFaint }}>Forward to</p>
               <select value={addrId} onChange={(e) => setAddrId(e.target.value)}
                 className="w-full rounded-xl px-3 py-2 text-sm" style={{ background: "white", border: `1px solid ${BRAND.border}` }}>
-                <option value="">Default address</option>
+                <option value="">Default (first saved address)</option>
                 {addresses.map((a) => (
                   <option key={a.id} value={a.id}>{a.label} — {a.address}</option>
                 ))}
               </select>
             </div>
           )}
+          <div>
+            <p className="text-[10px] font-black mb-1" style={{ color: BRAND.inkFaint }}>Note (optional · appears in batch emails)</p>
+            <input value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={200}
+              placeholder="e.g. everything to my snowbird condo for the winter"
+              className="w-full rounded-xl px-3 py-2 text-[12.5px]" style={{ background: "white", border: `1px solid ${BRAND.border}` }} />
+          </div>
           <div className="flex gap-2">
-            <button disabled={pending} onClick={save}
+            <button disabled={pending} onClick={save} type="button"
               className="text-xs font-black px-4 py-1.5 rounded-xl text-white disabled:opacity-50" style={{ background: BRAND.blue }}>
-              {pending ? "Saving…" : "Save Schedule"}
+              {pending ? "Saving…" : "Save schedule"}
             </button>
-            {sf?.frequency && <button onClick={() => setShowForm(false)} className="text-xs" style={{ color: BRAND.inkFaint }}>Cancel</button>}
+            {sf?.frequency && <button type="button" onClick={() => setShowForm(false)} className="text-xs" style={{ color: BRAND.inkFaint }}>Cancel</button>}
           </div>
         </div>
       )}
@@ -1041,10 +1193,22 @@ export default function SettingsPanel({
     <WalletAutoTopUpCard />
     {/* iter-116: Plan upgrade — prorated diff for remaining months. */}
     <PlanUpgradeCard />
+    {/* iter-179: Plan downgrade — schedules for next renewal. Renders
+        nothing for members not on a paid plan above Basic. */}
+    <PlanDowngradeCard />
     {/* iter-122: Suite transfer — request a different suite #. */}
     <SuiteTransferCard />
     {/* iter-123: Time zone — emails render times in your TZ. */}
     <TimeZoneCard />
+    {/* iter-183: Dashboard language — persists across devices via User.locale. */}
+    <LocaleSettingCard />
+    {/* iter-166: API tokens — read-only bearer tokens for /api/v1/* */}
+    <ApiTokensCard />
+    {/* iter-167: Member-registered webhooks — push events to your URL */}
+    <MemberWebhooksCard />
+    {/* iter-177: ACH bank-debit setup + history — renders nothing
+        when Stripe isn't configured AND there's no historical activity */}
+    <AchPaymentCard />
     </div>
   );
 }

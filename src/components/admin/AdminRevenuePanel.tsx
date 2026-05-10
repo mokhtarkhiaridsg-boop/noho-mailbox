@@ -366,11 +366,16 @@ function KpiTile({
         {label}
       </p>
       <p
-        className="text-2xl sm:text-3xl font-bold tracking-tight mt-1"
+        className="font-bold tracking-tight mt-1 truncate"
         style={{
           color: accent ? "#EBF2FF" : NOHO_INK,
           fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
           fontVariantNumeric: "tabular-nums",
+          // clamp() so big numbers like $7,856.18/mo don't overflow on
+          // narrow viewports while still feeling like a hero number on
+          // wide screens. truncate keeps the worst-case from clipping.
+          fontSize: "clamp(1.125rem, 2.4vw, 1.75rem)",
+          letterSpacing: "-0.02em",
         }}
       >
         {value}

@@ -66,6 +66,10 @@ model User {
   // When set, time-sensitive emails ("delivered today", "expires Friday")
   // render dates in this TZ instead of the bureau's. Null = use bureau TZ.
   timeZone                  String?
+  // iter-183: Member-preferred dashboard locale. "en" | "fr" | "ar".
+  // When set, takes precedence over the iter-110 cookie on dashboard
+  // load so device changes (phone vs laptop) preserve the choice.
+  locale                    String?
 
   // Box ownership type — required for CMRA compliance.
   // A company cannot exist as an individual; if Business, an Owner must be on file.
@@ -117,6 +121,19 @@ model User {
   doorAccessCodes         DoorAccessCode[]      @relation("DoorCodeUser")
   onboardingViews         OnboardingVideoView[] @relation("OnboardingVideoUser")
   cotmAwards              CustomerOfMonthAward[] @relation("CotmUser")
+  apiTokens               ApiToken[]            // iter-166
+  memberWebhooks          MemberWebhook[]       // iter-167
+  cotmMarketingSlots      CotmMarketingSlot[] @relation("CotmMarketingSlotUser") // iter-169
+  // iter-175 — Loyalty tier (Tier 11 #84). Computed by the cron sweep.
+  // `loyaltyTier` is the snapshot of the most-recent compute; the
+  // history is in `LoyaltyTierAssignment` so admin can see promotions
+  // over time. Separate cols so dashboards can render the tile without
+  // a join.
+  loyaltyTier            String?               // "Bronze" | "Silver" | "Gold" | "Platinum"
+  loyaltyTierAt          DateTime?             // when this tier was assigned (most-recent promotion)
+  loyaltyAssignments     LoyaltyTierAssignment[]
+  stripeAchMandates      StripeAchMandate[]    // iter-177
+  planDowngradeRequests  PlanDowngradeRequest[] // iter-179
   renewalOffers           RenewalDiscountOffer[] @relation("RenewalOfferUser")
   idExpiryAlerts          IdExpiryAlert[]
   webhookEndpointsCreated WebhookEndpoint[] @relation("WebhookCreatedBy")
@@ -156,17 +173,60 @@ model GuestPickupAuth {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// iter-170 — Recurring scheduled forwarding (Tier 11 #79).
+// iter-129 shipped a one-time / ad-hoc version. This iter promotes it
+// to a true recurring sweep with cron-driven batches, per-shipment
+// audit, vacation-mode pause window, and member-visible batch history.
+//
+// Frequency math + next-run computation moved to lib/scheduledForwarding.ts.
+// The cron (`/api/cron/scheduled-forwarding-sweep`) walks rows where
+// `enabled = true AND pauseUntil < today AND nextRunDate <= today`,
+// batches every eligible MailItem, atomically transitions them to
+// Forwarded + creates one ScheduledForwardingBatch row per shipment +
+// audit `mail.scheduled_forward_batch` + sends a member email + fires
+// the iter-167 `mail.forwarded` webhook.
 model ScheduledForwarding {
   id              String   @id @default(cuid())
   userId          String
   addressId       String?  // ForwardingAddress.id (null = default address)
   frequency       String   @default("weekly") // "weekly" | "biweekly" | "monthly"
-  nextRunDate     String   // "2025-07-01"
+  nextRunDate     String   // YYYY-MM-DD
   active          Boolean  @default(true)
   lastRunDate     String?
   createdAt       DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // iter-170 additions:
+  enabled         Boolean  @default(true)        // separate from `active` — `enabled=false` is a soft pause; `active=false` is a hard cancel
+  pauseUntil      String?                         // YYYY-MM-DD — vacation mode; cron skips if today < pauseUntil
+  notes           String?                         // member-supplied note rendered in batch emails ("everything to my snowbird condo")
+  lastBatchSize   Int?                            // count of items shipped in the most recent batch (snapshot)
+  lastBatchAt     DateTime?                       // ISO timestamp of last batch (separate from `lastRunDate` which is YYYY-MM-DD)
+
+  user            User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batches         ScheduledForwardingBatch[]    // iter-170
+
+  @@index([enabled, active, nextRunDate])
+}
+
+// iter-170 — Per-shipment record. One row per cron sweep that actually
+// shipped at least one item. Members see their batch history; admins
+// can audit "did Fatma's last batch include her IRS letter?".
+model ScheduledForwardingBatch {
+  id            String   @id @default(cuid())
+  forwardingId  String
+  userId        String                          // denormalized for member-side queries
+  addressLabel  String                          // snapshot of the destination at batch time
+  addressBody   String                          // full address string at batch time
+  itemCount     Int                             // how many MailItems shipped
+  itemIdsJson   String                          // JSON array of MailItem.ids included
+  notes         String?                         // copied from forwarding.notes at run time
+  source        String   @default("cron")       // "cron" | "manual" | "test"
+  shippedAt     DateTime @default(now())
+
+  forwarding    ScheduledForwarding @relation(fields: [forwardingId], references: [id], onDelete: Cascade)
+
+  @@index([userId, shippedAt])
+  @@index([forwardingId, shippedAt])
 }
 
 model MailItem {
@@ -227,6 +287,7 @@ model MailItem {
   user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   requests MailRequest[]
   storageAlerts StorageThresholdAlert[]
+  senderThankYous SenderThankYou[]    // iter-168
 
   // Hot-path indexes — dashboard reads /admin reads scan by these constantly.
   @@index([userId, status])
@@ -557,6 +618,7 @@ model CustomerOfMonthAward {
   createdAt    DateTime @default(now())
 
   user User @relation("CotmUser", fields: [userId], references: [id], onDelete: Cascade)
+  marketingSlot CotmMarketingSlot?              // iter-169 — opt-in spotlight
 
   @@unique([year, month])                       // one winner per month
   @@index([userId, awardedAt])
@@ -694,6 +756,399 @@ model OnboardingTouch {
 
   @@unique([userId, touchKey])
   @@index([sentAt])
+}
+
+// iter-184 — Carrier label rate shopping (Tier 12 #93).
+// Admin types destination zip + weight → we quote USPS / UPS / FedEx /
+// DHL side-by-side and stash the snapshot here so future audits can
+// see "we picked UPS Ground at $9.40 over USPS Priority at $12.10 on
+// May 8". Heuristic engine for now (zone × weight), upgradable to
+// real carrier APIs in a future iter without UI/schema churn.
+model RateQuote {
+  id              String   @id @default(cuid())
+  originZip       String                              // bureau origin (defaults to 91601 NoHo)
+  destZip         String                              // 5-digit US zip
+  weightOz        Int                                 // total weight
+  dimensions      String?                             // "12x9x4" optional
+  declaredValueCents Int?                             // optional insurance basis
+  ratesJson       String                              // JSON: [{carrier, service, etaDays, totalCents, hasInsurance, ...}, …]
+  selectedCarrier String?                             // "USPS" | "UPS" | "FedEx" | "DHL"
+  selectedService String?                             // service-class snapshot
+  selectedTotalCents Int?
+  mailItemId      String?                             // optional link to a MailItem we're shipping
+  createdById     String?                             // admin user id
+  createdAt       DateTime @default(now())
+
+  @@index([destZip, createdAt])
+  @@index([createdById, createdAt])
+  @@index([mailItemId])
+}
+
+// iter-182 — Per-mailbox sticky pin notes (Tier 12 #91).
+// Different from iter-120 PinnedNotes (which is per-customer): this
+// is per-SUITE — surfaces on every intake + pickup workflow that
+// touches that suite #, so staff see "Box 042: hold rent check for
+// K. on Tues" the moment they scan a package addressed to suite 042.
+// Auto-expire optional (use for time-bounded notes); manual dismiss
+// removes from active list but keeps row for audit.
+model SuitePinNote {
+  id            String    @id @default(cuid())
+  suiteNumber   String                              // suite # this pin applies to
+  body          String                              // ≤500 chars; admin-typed
+  color         String    @default("amber")         // "amber" | "red" | "blue" | "green" — visual urgency
+  expiresAt     DateTime?                           // optional auto-expire
+  dismissedAt   DateTime?                           // manual dismiss
+  dismissedById String?
+  createdById   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([suiteNumber, dismissedAt])
+  @@index([expiresAt])
+}
+
+// iter-181 — Drop-in mailbox tour booking (Tier 12 #90).
+// Public marketing-site form lets prospects request a 15-min
+// walkthrough of the bureau before signing up. Admin reviews the
+// queue, confirms (sends prospect an email), or marks as
+// completed/no-show after the visit. `becameMember` flips on the row
+// when a confirmed tour converts to a real account so we can compute
+// tour→signup conversion rate later.
+model MailboxTour {
+  id             String    @id @default(cuid())
+  name           String                              // prospect's name
+  email          String
+  phone          String?
+  requestedDate  String                              // YYYY-MM-DD
+  requestedTime  String                              // "HH:MM" 24-hour preferred slot
+  partySize      Int       @default(1)               // # of people coming
+  reason         String?                             // free-text "what brought you in"
+  status         String    @default("Pending")       // "Pending" | "Confirmed" | "Completed" | "No Show" | "Cancelled"
+  source         String    @default("web")           // "web" | "phone" | "walkin"
+  ip             String?                             // diagnostic-only — used for rate-limit
+  userAgent      String?
+  confirmedAt    DateTime?
+  confirmedById  String?
+  completedAt    DateTime?
+  completedById  String?
+  becameMember   Boolean   @default(false)           // admin flips when prospect signs up
+  becameUserId   String?                             // resolved User.id when becameMember=true
+  noShowAt       DateTime?
+  cancelledAt    DateTime?
+  cancelReason   String?
+  adminNotes     String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status, requestedDate])
+  @@index([requestedDate, requestedTime])
+  @@index([email])
+}
+
+// iter-179 — Customer self-serve plan downgrade (Tier 12 #88).
+// Counterpart to iter-116's prorate-on-upgrade. Downgrade DOESN'T
+// prorate (we don't refund — that opens a customer-service nightmare),
+// instead the new lower price applies starting at the next renewal.
+//
+// Status machine:
+//   pending  → member just requested
+//   approved → admin reviewed (or auto-approval cron)
+//   applied  → cron flipped User.plan on the renewal date
+//   cancelled → member changed their mind before applied
+//   denied   → admin rejected with a reason (member sees it)
+model PlanDowngradeRequest {
+  id            String    @id @default(cuid())
+  userId        String
+  fromPlan      String                            // current plan at request time
+  toPlan        String                            // requested target
+  effectiveAt   String                            // YYYY-MM-DD when it should apply (= current planDueDate snapshot)
+  reason        String?                           // optional member-supplied reason
+  status        String    @default("pending")     // "pending" | "approved" | "applied" | "cancelled" | "denied"
+  appliedAt     DateTime?
+  cancelledAt   DateTime?
+  cancelledBy   String?                           // "member" | userId
+  deniedAt      DateTime?
+  deniedReason  String?
+  approvedAt    DateTime?
+  approvedById  String?                           // admin who approved
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status, effectiveAt])
+}
+
+// iter-177 — Stripe ACH renewal payments (Tier 12 #86).
+// ACH bank-debit option alongside the iter-89 Square card-only path.
+// Materially lower fees on big-ticket Business renewals (0.8% capped
+// at $5 vs Square's 2.9% + $0.30).
+//
+// Two-step flow: (1) member or admin sets up a SetupIntent → Stripe
+// hosted bank-link page returns mandateId + bank metadata → we store
+// `StripeAchMandate`. (2) For each renewal, admin (or future cron)
+// calls `chargeStripeAch(mandateId, amount)` → records
+// `StripeAchPayment` row.
+//
+// Secrets: STRIPE_SECRET_KEY env var. Lib gracefully no-ops when the
+// key isn't set so non-Stripe environments still build/run.
+model StripeAchMandate {
+  id                  String   @id @default(cuid())
+  userId              String
+  stripeCustomerId    String                              // cus_*
+  stripePaymentMethod String                              // pm_*
+  stripeMandateId     String?                             // mandate_* — set after first successful charge
+  bankName            String?                             // "Wells Fargo"
+  bankLast4           String?                             // "4567"
+  status              String   @default("pending")        // "pending" | "active" | "revoked" | "failed"
+  setupCompletedAt    DateTime?
+  revokedAt           DateTime?
+  revokedReason       String?
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments            StripeAchPayment[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+// One row per ACH charge attempt. Stripe ACH settles in 4-5 business
+// days, so `status` may stay "pending" for a while before flipping
+// "succeeded" or "failed" via webhook.
+model StripeAchPayment {
+  id                       String   @id @default(cuid())
+  mandateId                String
+  userId                   String
+  amountCents              Int
+  description              String
+  stripePaymentIntentId    String?  @unique
+  stripeChargeId           String?
+  status                   String   @default("processing") // "processing" | "succeeded" | "failed" | "cancelled"
+  failureCode              String?
+  failureMessage           String?
+  initiatedById            String?                          // admin who fired the charge (null for cron)
+  settledAt                DateTime?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  mandate                  StripeAchMandate @relation(fields: [mandateId], references: [id], onDelete: Cascade)
+
+  @@index([mandateId, createdAt])
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+// iter-176 — In-person dropoff barcode kiosk (Tier 11 #85).
+// Members generate a printable 12-char Code 128 barcode at home (or
+// at the kiosk in the bureau lobby) BEFORE arriving with a package.
+// At the front desk, admin scans the barcode and the intake form
+// auto-fills the customer + sender + tracking. Cuts ~60s off every
+// dropoff intake.
+//
+// `code` is 12 alphanumeric chars (uppercase, no ambiguous 0/O/1/I) —
+// short enough for a 4×6 receipt to print at large size, unique enough
+// for thousands of codes per year. claimedAt freezes the row when
+// admin scans + intakes; we keep claimed rows for audit.
+model DropoffBarcode {
+  id                String    @id @default(cuid())
+  code              String    @unique                 // 12-char human-typeable, scannable as Code 128
+  userId            String?                            // resolved when the code generator was logged in
+  suiteNumber       String                             // member typed
+  expectedSender    String                             // who's the package from
+  expectedTracking  String?                            // optional carrier tracking #
+  expectedCarrier   String?                            // "USPS" | "UPS" | "FedEx" | "DHL" | etc
+  photoUrl          String?                            // optional Vercel Blob preview the member uploaded
+  notes             String?                            // free-form member note
+  expiresAt         DateTime                           // codes auto-expire 14 days after generation
+  claimedAt         DateTime?                          // when admin scanned + intake completed
+  claimedById       String?                            // admin user id
+  claimedMailItemId String?                            // resulting MailItem.id
+  createdAt         DateTime  @default(now())
+
+  @@index([code])
+  @@index([userId, createdAt])
+  @@index([claimedAt])
+  @@index([expiresAt])
+}
+
+// iter-175 — Member loyalty tier history (Tier 11 #84).
+// One row per tier transition (promote / demote / re-affirm). Cron
+// computes from tenure × payment punctuality × upsells (iter-153
+// health score axes), writes to User.loyaltyTier + appends here.
+// `reasonsJson` snapshots the qualifying axes so a future audit can
+// see "Sami got Gold in May 2026 because tenure=14mo + 12 on-time +
+// Premium plan + active autopay".
+model LoyaltyTierAssignment {
+  id          String   @id @default(cuid())
+  userId      String
+  tier        String                              // "Bronze" | "Silver" | "Gold" | "Platinum"
+  previousTier String?                            // null on first assignment
+  reasonsJson String                              // JSON array of {key, label, met:true/false}
+  scoreSnapshot Int?                              // health score at time of assignment
+  triggeredBy String   @default("system")         // "system" | "admin" | "manual"
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([tier, createdAt])
+}
+
+// iter-173 — Carrier-pickup scheduling (Tier 11 #82).
+// Admin creates a pickup request for USPS/UPS/FedEx/DHL via this
+// table. The actual upstream API call (USPS PUL, UPS pickup request,
+// FedEx pickup) is admin-driven outside the app for now — admin enters
+// the confirmation # returned by the carrier portal once. We track the
+// pickup window, package counts, and a status state-machine so a
+// no-show cron can flag missed pickups + alert admin.
+//
+// Status machine:
+//   draft → scheduled (admin entered confirmation #)
+//          ↘
+//           cancelled
+//   scheduled → completed (carrier showed up, packages handed off)
+//   scheduled → missed (cron auto-marked after the pickup window
+//                       closed with no completion stamp)
+model CarrierPickup {
+  id                  String    @id @default(cuid())
+  carrier             String                              // "USPS" | "UPS" | "FedEx" | "DHL" | "Other"
+  pickupDate          String                              // YYYY-MM-DD
+  pickupWindowOpen    String                              // "HH:MM" 24-hour
+  pickupWindowClose   String                              // "HH:MM" 24-hour
+  packageCount        Int       @default(0)
+  totalWeightOz       Int?                                // total weight (snapshot)
+  locationNote        String?                             // "Front desk" / "Back loading dock"
+  instructions        String?                             // free-form for the driver
+  confirmationNumber  String?                             // returned by the carrier portal once admin schedules it
+  status              String    @default("draft")         // "draft" | "scheduled" | "completed" | "missed" | "cancelled"
+  scheduledById       String?                             // admin who scheduled it
+  scheduledAt         DateTime?                           // when status flipped to scheduled
+  completedAt         DateTime?
+  completedActualCount Int?                               // packages actually picked up (might differ from estimate)
+  cancelledAt         DateTime?
+  cancelReason        String?
+  missedAt            DateTime?                           // cron-set when no completion past window+grace
+  driverName          String?                             // optional, captured at completion
+  notes               String?                             // free-form admin note
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([status, pickupDate])
+  @@index([carrier, pickupDate])
+  @@index([pickupDate])
+}
+
+// iter-172 — ESP audience sync (Tier 11 #81).
+// One-click sync of opted-in members to a configured email service
+// provider (Mailchimp, ConvertKit, Buttondown) — or a CSV download for
+// any provider not natively supported. Honors per-member newsletter
+// opt-in (notifPrefs.marketing.email).
+//
+// Secrets: provider API keys are stored plaintext in `apiKey`. We rely
+// on Turso/libsql at-rest encryption + admin-only access to this
+// model. A future iter could move secrets to env-only references.
+model EspAudienceSync {
+  id              String    @id @default(cuid())
+  provider        String                              // "mailchimp" | "convertkit" | "buttondown" | "csv"
+  label           String                              // human-readable (e.g. "Main marketing list")
+  audienceId      String?                             // Mailchimp list ID, ConvertKit form ID, etc — null for CSV
+  apiKey          String?                             // provider API key — null for CSV
+  apiServer       String?                             // Mailchimp data center suffix (e.g. "us21")
+  isActive        Boolean   @default(true)
+  marketingOptInOnly Boolean @default(true)           // when true, only members with notifPrefs.marketing.email = true
+  doubleOptIn     Boolean   @default(false)           // pass through to providers that support it
+
+  lastSyncAt      DateTime?
+  lastSyncCount   Int?                                // number of contacts pushed in the last successful sync
+  lastSyncFailed  Int?                                // number that failed
+  lastSyncError   String?
+  lastSyncBy      String?                             // admin user id
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  syncs           EspSyncRun[]
+
+  @@index([isActive])
+}
+
+// One row per sync run. Captures the count + sample of who got pushed
+// + the per-provider response so admin can audit "did we accidentally
+// add a cancelled customer to our newsletter list yesterday?".
+model EspSyncRun {
+  id            String   @id @default(cuid())
+  audienceId    String                                // FK to EspAudienceSync.id
+  source        String   @default("manual")           // "manual" | "scheduled" | "test"
+  total         Int                                   // resolved candidate count
+  added         Int                                   // contacts pushed successfully
+  skipped       Int                                   // already-on-list / no-email / opt-out
+  failed        Int                                   // provider returned error
+  error         String?                               // first error if any
+  durationMs    Int?
+  startedAt     DateTime @default(now())
+  finishedAt    DateTime?
+  startedBy     String?                               // admin user id
+
+  audience      EspAudienceSync @relation(fields: [audienceId], references: [id], onDelete: Cascade)
+
+  @@index([audienceId, startedAt])
+}
+
+// iter-171 — Lockbox keypad live status board (Tier 11 #80).
+// Physical lockbox in the storefront. One row per box; a `state` flips
+// to `open` when admin (or future hardware) records an unlock, then
+// back to `closed` after the door is shut. The admin tablet board
+// polls `getLockboxBoard()` every 5s and renders a live grid:
+// who opened which box, when, and for how long. After-hours opens past
+// `expectedCloseBy` light up red and fire an admin webhook.
+model Lockbox {
+  id                 String    @id @default(cuid())
+  label              String    @unique         // "Box 14" — short, fits on the keypad sticker
+  location           String?                   // "Front room east wall, top row"
+  serial             String?                   // physical serial / model
+  isActive           Boolean   @default(true)
+  state              String    @default("closed") // "closed" | "open" | "ajar" | "fault"
+  openedAt           DateTime?                 // when the most-recent open event fired
+  openedByUserId     String?                   // resolved member id, when known
+  openedByEntryId    String?                   // DoorAccessEntry.id that triggered the open
+  openedReason       String?                   // "pickup" | "drop_off" | "admin_manual" | "service" — free-form
+  expectedCloseBy    DateTime?                 // when we expect the door shut — overdue past this
+  lastClosedAt       DateTime?                 // when the door most-recently shut
+  notes              String?                   // free-form admin note
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  events             LockboxEvent[]
+
+  @@index([state, isActive])
+  @@index([openedAt])
+}
+
+// One row per state-change event — every open/close/fault. Member-side
+// webhook can subscribe to "your lockbox opened" by joining
+// LockboxEvent.openedByUserId. Admins can audit "did box 14 sit open
+// for 4 hours overnight?" by scanning this table.
+model LockboxEvent {
+  id              String    @id @default(cuid())
+  lockboxId       String
+  kind            String                            // "opened" | "closed" | "fault" | "manual_override"
+  userId          String?                           // resolved member, when this open is tied to a code
+  doorEntryId     String?                           // DoorAccessEntry.id, when keypad-driven
+  reason          String?                           // free-form admin note
+  durationSec     Int?                              // populated on closed events: how long the door was open
+  expectedCloseBy DateTime?                         // snapshot of the deadline at open time, for overdue analysis
+  recordedAt      DateTime  @default(now())
+
+  lockbox Lockbox @relation(fields: [lockboxId], references: [id], onDelete: Cascade)
+
+  @@index([lockboxId, recordedAt])
+  @@index([kind, recordedAt])
+  @@index([userId, recordedAt])
 }
 
 // iter-147 — Door-access keypad codes (Tier 9 #57).
@@ -861,6 +1316,12 @@ model RecurringDelivery {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// iter-29 notary booking + iter-160 calendar slots + iter-174 check-in workflow.
+// Check-in fields snapshot the in-person verification: timestamp, ID
+// type presented, witness name (if applicable), and a URL to a scan
+// of the signed document for after-the-fact audit. Once
+// `completedAt` is set the row freezes — admin can still view but no
+// further state changes are allowed except admin override.
 model NotaryBooking {
   id        String   @id @default(cuid())
   userId    String
@@ -869,8 +1330,25 @@ model NotaryBooking {
   type      String
   status    String   @default("Pending")
   createdAt DateTime @default(now())
+  notes     String?                                  // member-supplied at booking time
+
+  // iter-174 — Witness check-in workflow.
+  checkedInAt          DateTime?                     // when admin tapped "Check in" at the counter
+  checkedInById        String?                       // admin who tapped check-in
+  idPresented          String?                       // "DL" | "Passport" | "State ID" | "Military" | "Other"
+  idPresentedNumber    String?                       // last 4 digits or full number — admin discretion
+  signedDocumentUrl    String?                       // Vercel Blob URL of the post-notarization scan
+  completedAt          DateTime?                     // when admin tapped "Complete"
+  completedById        String?
+  witnessName          String?                       // typed when a witness was present
+  noShowAt             DateTime?                     // when admin or cron flagged the no-show
+  noShowReason         String?
+  adminNotes           String?                       // admin-only notes captured at check-in / completion
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, date])
+  @@index([date, time])
 }
 
 model DeliveryOrder {
@@ -1914,4 +2392,178 @@ model AgentMemory {
 
   @@index([scope, key])
   @@index([pinned])
+}
+
+// iter-169 — CotM marketing spotlight (Tier 11 #78).
+// When a member is awarded Customer of the Month (iter-152), they can
+// opt in to a homepage spotlight card on nohomailbox.org showcasing
+// their business + a 1-sentence quote + photo. Powerful social proof
+// for marketing without ever publishing PII the member didn't provide
+// themselves.
+//
+// Lifecycle: award created → member sees opt-in CTA → fills 3-field
+// form → row created with `status="pending"` → admin reviews + flips
+// to "published" → marketing homepage shows the card → member can
+// retract anytime via `status="retracted"`. Only ONE published slot
+// shows on the homepage at a time (most recent published).
+model CotmMarketingSlot {
+  id              String   @id @default(cuid())
+  awardId         String   @unique               // 1:1 with the award row — can't have two spotlights for one win
+  userId          String                          // denormalized for member-side queries + display name
+  status          String   @default("pending")    // "pending" | "published" | "retracted" | "rejected"
+  businessName    String                          // member-supplied display name (can differ from User.name)
+  quote           String                          // 1 sentence, ≤200 chars
+  photoUrl        String?                         // member-uploaded headshot/logo
+  websiteUrl      String?                         // optional link to their site
+  publishedAt     DateTime?                       // when admin flipped to published
+  publishedById   String?                         // admin who approved
+  retractedAt     DateTime?                       // when member opted out
+  rejectedAt      DateTime?                       // when admin rejected
+  rejectionReason String?                         // shown to member if rejected
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  award           CustomerOfMonthAward @relation(fields: [awardId], references: [id], onDelete: Cascade)
+  user            User                 @relation("CotmMarketingSlotUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, publishedAt])
+  @@index([userId])
+}
+
+// iter-168 — Sender thank-you notes (Tier 11 #77).
+// Anyone with the public-share link from iter-93 can scan the QR on a
+// package's exterior + leave a short note that lands in the recipient's
+// dashboard. No auth required; rate-limited per IP via the action.
+//
+// Sender details (name/email) are optional — packages have no
+// guaranteed sender PII at intake, so the sender themselves fills in
+// who they are. The recipient sees the note under their package detail
+// + gets a notification ping the moment it lands.
+model SenderThankYou {
+  id           String   @id @default(cuid())
+  mailItemId   String
+  senderName   String?              // free-text, optional
+  senderEmail  String?              // optional, validated when present
+  message      String               // 1-500 chars
+  ip           String?              // diagnostic only — never displayed
+  userAgent    String?              // diagnostic only
+  hidden       Boolean  @default(false)  // recipient can hide spammy notes
+  createdAt    DateTime @default(now())
+
+  mailItem     MailItem @relation(fields: [mailItemId], references: [id], onDelete: Cascade)
+
+  @@index([mailItemId, createdAt])
+  @@index([createdAt])
+}
+
+// iter-167 — Member-registered webhooks (Tier 11 #76).
+// Counterpart to iter-104 admin-side `WebhookEndpoint`. Each member can
+// register their OWN URL to receive their OWN events (mail arrived,
+// package picked up, ID expiring). HMAC-signed via per-webhook `secret`
+// so the receiver can verify authenticity.
+//
+// Critical privacy rule: a member webhook only ever fires for events
+// scoped to that member's userId. The dispatcher in lib/memberWebhooks.ts
+// hard-filters on userId match — never broadcasts cross-tenant.
+model MemberWebhook {
+  id            String   @id @default(cuid())
+  userId        String
+  label         String                      // "Zapier", "My homelab", "QuickBooks ingest"
+  url           String                      // POST target — member-supplied
+  secret        String                      // HMAC-SHA256 shared secret (member sees it once on creation)
+  events        String                      // JSON array of MemberWebhookEvent keys
+  active        Boolean  @default(true)
+  failureCount  Int      @default(0)        // consecutive failures since last success — auto-disables at 50
+  lastFiredAt   DateTime?
+  lastStatus    String?                     // "ok" | "failed:<httpStatus>"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  revokedAt     DateTime?
+
+  user          User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries    MemberWebhookDelivery[]
+
+  @@index([userId, active])
+  @@index([revokedAt])
+}
+
+// One row per delivery attempt. Same retry shape as iter-134
+// WebhookDelivery so we can reuse the cron sweep pattern at /api/cron/
+// retry-member-webhooks. Capped per-webhook (most-recent 200 successes
+// + every failed/dead-lettered row preserved).
+model MemberWebhookDelivery {
+  id           String   @id @default(cuid())
+  webhookId    String
+  event        String                       // event key
+  payload      String                       // JSON snapshot
+  status       String                       // "ok" | "failed"
+  httpStatus   Int?
+  error        String?
+  durationMs   Int?
+  attempt      Int      @default(1)
+  nextRetryAt  DateTime?
+  deadLettered Boolean  @default(false)
+  lastTriedAt  DateTime?
+  sentAt       DateTime @default(now())
+
+  webhook      MemberWebhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, sentAt])
+  @@index([nextRetryAt])
+  @@index([deadLettered, sentAt])
+}
+
+// iter-166 — Customer-facing API tokens (Tier 10 #75).
+// Power-user members (especially business clients) can mint read-only
+// tokens to programmatically pull their own mail history. Tokens are
+// shown ONCE on creation; only their SHA-256 hash + first-8 prefix are
+// stored, so the full plaintext can never leak from the database.
+//
+// Scopes are JSON-serialized strings like "mail:read", "packages:read",
+// "profile:read" — additive permission set evaluated at request time.
+//
+// Lookup pattern in middleware: parse `Bearer noho_<prefix><body>` →
+// fetch by tokenPrefix (cheap unique index) → constant-time compare
+// the SHA-256 of the body against tokenHash → check revokedAt /
+// expiresAt → bump lastUsedAt + lastUsedIp.
+model ApiToken {
+  id            String    @id @default(cuid())
+  userId        String
+  name          String                              // "Zapier integration" / "QuickBooks sync" — admin-friendly label
+  tokenPrefix   String    @unique                   // first 8 plaintext chars used as the lookup key
+  tokenHash     String    @unique                   // SHA-256 hex of the FULL plaintext token
+  scopesJson    String    @default("[]")            // JSON array of strings: ["mail:read", "packages:read", "profile:read"]
+  lastUsedAt    DateTime?
+  lastUsedIp    String?
+  expiresAt     DateTime?                           // null = never
+  revokedAt     DateTime?
+  revokedReason String?                             // optional admin/member explanation
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usages        ApiTokenUsage[]
+
+  @@index([userId, createdAt])
+  @@index([revokedAt])
+}
+
+// Per-request usage log so members + admins can audit "did Zapier fire
+// last Tuesday at 3am?". Bounded to last N entries via cleanup or
+// pagination — every API request writes one row.
+model ApiTokenUsage {
+  id          String   @id @default(cuid())
+  tokenId     String
+  endpoint    String                                // "/api/v1/mail"
+  method      String                                // "GET" / "POST"
+  status      Int                                   // HTTP status code returned
+  ip          String?
+  userAgent   String?
+  durationMs  Int?
+  createdAt   DateTime @default(now())
+
+  token       ApiToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+
+  @@index([tokenId, createdAt])
+  @@index([createdAt])
 }

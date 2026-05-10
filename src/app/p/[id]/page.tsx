@@ -7,6 +7,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMailPublicShareView } from "@/app/actions/mail";
+import { getSenderNoteCountForPublic } from "@/app/actions/senderThankYou";
+import SenderThankYouForm from "./SenderThankYouForm";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +51,12 @@ export default async function PublicPackagePage({
   const res = await getMailPublicShareView(id, t ?? "");
   if ((res as { error?: string }).error || !(res as { view?: unknown }).view) return notFound();
   const v = (res as { view: NonNullable<Awaited<ReturnType<typeof getMailPublicShareView>>["view"]> }).view;
+  // iter-168 — Sender thank-you note count (social proof + initial state).
+  const noteCount = await getSenderNoteCountForPublic({ mailItemId: id, shareToken: t ?? "" });
+  // Recipient's first name for the form copy. Fall back to initials if
+  // the customerInitials look like the actual recipient's name (e.g.
+  // single first name).
+  const firstName = (v.recipientName ?? "").trim().split(" ")[0] || null;
 
   const statusStyle = STATUS_STYLE[v.status] ?? { bg: "rgba(45,16,15,0.06)", fg: NOHO_INK, label: v.status };
   const carrierUrl = carrierTrackingUrl(v.carrier, v.trackingNumber);
@@ -246,6 +254,20 @@ export default async function PublicPackagePage({
             </ol>
           </div>
         )}
+
+        {/* iter-168 — Sender thank-you note form. Lets anyone with the
+            share link drop a short message that lands in the recipient's
+            dashboard + fires their member webhooks. Only shown for
+            non-terminal statuses (no point sending a thank-you for a
+            package that was returned/discarded). */}
+        {!STATUS_STYLE[v.status]?.complete || v.status === "Picked Up" || v.status === "Forwarded" ? (
+          <SenderThankYouForm
+            mailItemId={v.id}
+            shareToken={t ?? ""}
+            recipientFirstName={firstName}
+            initialNoteCount={noteCount}
+          />
+        ) : null}
 
         <p style={{ marginTop: 20, fontSize: 11, color: "rgba(45,16,15,0.45)", textAlign: "center" }}>
           NOHO Mailbox · 5062 Lankershim Blvd · NoHo, CA 91601 · (818) 506-7744<br />

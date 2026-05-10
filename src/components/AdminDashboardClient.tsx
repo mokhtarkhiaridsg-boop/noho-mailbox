@@ -88,11 +88,16 @@ const navGroups: NavGroup[] = [
       { id: "keys",            label: "Keys",            Icon: IconKey },
       { id: "deliveries",      label: "Deliveries",      Icon: IconTruck },
       { id: "qrpickup",        label: "QR Pickup",       Icon: IconQR },
+      { id: "lockboxboard",    label: "Lockbox Board",   Icon: IconBox },
+      { id: "carrierpickup",   label: "Carrier Pickups", Icon: IconTruck },
+      { id: "dropoffscan",     label: "Dropoff Scan",    Icon: IconQR },
+      { id: "suitepins",       label: "Suite Pins",      Icon: IconClipboard },
       { id: "labelprinter",    label: "Label Printer",   Icon: IconReceipt },
       { id: "pickupvelocity",  label: "Pickup Velocity", Icon: IconCalendar },
       { id: "bulkforward",     label: "Bulk Forward",    Icon: IconShipping },
       { id: "notary",          label: "Notary",          Icon: IconNotary },
       { id: "shippingcenter",  label: "Shipping",        Icon: IconShipping },
+      { id: "rateshop",        label: "Rate Shop",       Icon: IconReceipt },
       { id: "shop",            label: "Shop",            Icon: IconShop },
     ],
   },
@@ -132,6 +137,7 @@ const hiddenNav: NavItem[] = [
   { id: "cmrareport",      label: "CMRA Report",     Icon: IconCompliance },
   { id: "csvonboard",      label: "Bulk Onboard",    Icon: IconCustomers },
   // Operations fold-ins
+  { id: "notarycheckin",   label: "Notary Check-in", Icon: IconNotary },
   { id: "mailhold",        label: "Mail Hold",       Icon: IconHold },
   { id: "vacationholds",   label: "Vacation Holds",  Icon: IconHold },
   { id: "keyledger",       label: "Key Ledger",      Icon: IconKey },
@@ -163,11 +169,14 @@ const hiddenNav: NavItem[] = [
   { id: "supplies",        label: "Supplies",        Icon: IconShop },
   { id: "emaildeliv",      label: "Email Health",    Icon: IconEmail },
   { id: "cotm",            label: "Customer of Month", Icon: IconReport },
+  { id: "cotmspotlight",   label: "CotM Spotlights",  Icon: IconReport },
   { id: "renewaloffers",   label: "Renewal Offers",  Icon: IconCredit },
   { id: "referralleader",  label: "Referral Leaderboard", Icon: IconReport },
   { id: "marketingflyer",  label: "Marketing Flyer", Icon: IconReport },
+  { id: "mailboxtours",    label: "Tour Bookings",   Icon: IconCalendar },
   { id: "weeklynewsletter", label: "Weekly Newsletter", Icon: IconEmail },
   { id: "bulksms",          label: "Bulk SMS",          Icon: IconChat },
+  { id: "espsync",          label: "Mailing-list export", Icon: IconEmail },
 ];
 
 // Flat list for mobile pills + label lookup. Includes hidden items so
@@ -599,6 +608,15 @@ import AdminReferralLeaderboardPanel from "@/components/admin/AdminReferralLeade
 import AdminMarketingFlyerPanel from "@/components/admin/AdminMarketingFlyerPanel";
 import AdminWeeklyNewsletterPanel from "@/components/admin/AdminWeeklyNewsletterPanel";
 import AdminBulkSmsPanel from "@/components/admin/AdminBulkSmsPanel";
+import AdminCotmSpotlightPanel from "@/components/admin/AdminCotmSpotlightPanel";
+import AdminLockboxBoardPanel from "@/components/admin/AdminLockboxBoardPanel";
+import AdminEspSyncPanel from "@/components/admin/AdminEspSyncPanel";
+import AdminCarrierPickupPanel from "@/components/admin/AdminCarrierPickupPanel";
+import AdminNotaryCheckInPanel from "@/components/admin/AdminNotaryCheckInPanel";
+import AdminDropoffBarcodePanel from "@/components/admin/AdminDropoffBarcodePanel";
+import AdminMailboxToursPanel from "@/components/admin/AdminMailboxToursPanel";
+import AdminSuitePinsPanel from "@/components/admin/AdminSuitePinsPanel";
+import AdminRateShopPanel from "@/components/admin/AdminRateShopPanel";
 import { AdminQRPickupPanel } from "@/components/admin/AdminQRPickupPanel";
 import { LogMailModal } from "@/components/admin/LogMailModal";
 import { AddCustomerModal } from "@/components/admin/AddCustomerModal";
@@ -1778,13 +1796,20 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
             <AdminShopPanel shopOrders={shopOrders} />
           )}
           {tab === "notary" && (
-            <AdminNotaryPanel
-              notaryQueue={notaryQueue}
-              isPending={isPending}
-              handleNotaryAction={handleNotaryAction}
-              setShowNewApptModal={setShowNewApptModal}
-            />
+            <PanelWithTools
+              tools={[{ label: "Check-in counter", id: "notarycheckin" }]}
+              setTab={setTab}
+            >
+              <AdminNotaryPanel
+                notaryQueue={notaryQueue}
+                isPending={isPending}
+                handleNotaryAction={handleNotaryAction}
+                setShowNewApptModal={setShowNewApptModal}
+              />
+            </PanelWithTools>
           )}
+          {tab === "notarycheckin" && <AdminNotaryCheckInPanel />}
+          {tab === "dropoffscan" && <AdminDropoffBarcodePanel />}
           {tab === "messages" && (
             <PanelWithTools
               tools={[
@@ -1866,6 +1891,13 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
           {tab === "supplies" && <AdminSuppliesPanel />}
           {tab === "emaildeliv" && <AdminEmailDeliverabilityPanel />}
           {tab === "cotm" && <AdminCustomerOfMonthPanel />}
+          {tab === "cotmspotlight" && <AdminCotmSpotlightPanel />}
+          {tab === "mailboxtours" && <AdminMailboxToursPanel />}
+          {tab === "suitepins" && <AdminSuitePinsPanel />}
+          {tab === "rateshop" && <AdminRateShopPanel />}
+          {tab === "lockboxboard" && <AdminLockboxBoardPanel />}
+          {tab === "espsync" && <AdminEspSyncPanel />}
+          {tab === "carrierpickup" && <AdminCarrierPickupPanel />}
           {tab === "renewaloffers" && <AdminRenewalOffersPanel />}
           {tab === "referralleader" && <AdminReferralLeaderboardPanel />}
           {tab === "marketingflyer" && <AdminMarketingFlyerPanel />}
@@ -1956,78 +1988,44 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
               <div className="-mx-1 px-1 pb-2 space-y-4">
               {/* iter-155 — Per-station printer prefs (this device only). */}
               <AdminPrintStationPicker />
-              {/* Settings header — Command Tower variant matching the rest
-                  of the polished admin chrome. */}
-              <div
-                className="relative overflow-hidden rounded-2xl px-5 sm:px-6 py-5"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at top right, #1A2E3A 0%, #0E1820 60%, #0A1218 100%)",
-                  boxShadow:
-                    "0 18px 50px rgba(10,18,24,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-                }}
-              >
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 pointer-events-none opacity-[0.13]"
+              {/* iPad-OS title row — Baloo + Pacifico script accent. */}
+              <div className="flex items-baseline gap-3 flex-wrap">
+                <h2
+                  className="text-2xl font-bold"
                   style={{
-                    backgroundImage:
-                      "linear-gradient(rgba(247,230,194,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,230,194,0.5) 1px, transparent 1px)",
-                    backgroundSize: "44px 44px",
-                    maskImage:
-                      "radial-gradient(ellipse at center, black 30%, transparent 80%)",
-                    transform:
-                      "perspective(800px) rotateX(58deg) translateY(20%) scale(1.4)",
-                    transformOrigin: "center bottom",
+                    color: "#1A1D23",
+                    letterSpacing: "-0.01em",
+                    fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
                   }}
-                />
-                <div className="relative flex items-center justify-between gap-3 flex-wrap">
-                  <div>
-                    <p
-                      className="text-[10px] font-black uppercase tracking-[0.28em] mb-1"
-                      style={{ color: "rgba(247,230,194,0.6)" }}
-                    >
-                      <span
-                        aria-hidden
-                        className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle"
-                        style={{
-                          background: "#F5A623",
-                          boxShadow: "0 0 8px #F5A623",
-                        }}
-                      />
-                      Store configuration
-                    </p>
-                    <h2
-                      className="font-bold tracking-tight"
-                      style={{
-                        fontSize: "clamp(1.4rem, 2.8vw, 1.8rem)",
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      Settings
-                    </h2>
-                    <p
-                      className="text-[12px] mt-1 max-w-md"
-                      style={{ color: "rgba(247,230,194,0.7)" }}
-                    >
-                      Pricing, virtual mailbox tiers, promo banner copy, and
-                      store information. All edits persist to the SiteConfig
-                      database.
-                    </p>
-                  </div>
-                  {settingsSaved && (
-                    <span
-                      className="text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md inline-flex items-center"
-                      style={{
-                        background: "rgba(22,163,74,0.20)",
-                        color: "#7CE7A4",
-                        border: "1px solid rgba(22,163,74,0.4)",
-                      }}
-                    >
-                      ✓ Saved to database
-                    </span>
-                  )}
-                </div>
+                >
+                  Settings
+                </h2>
+                <span
+                  className="text-[15px] hidden sm:inline"
+                  style={{
+                    color: "#1976FF",
+                    fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+                    transform: "translateY(-1px)",
+                    display: "inline-block",
+                  }}
+                >
+                  store configuration
+                </span>
+                <span className="text-[12px] ml-1 hidden md:inline" style={{ color: "#7A8290" }}>
+                  · pricing · mailbox tiers · promo banner · store info — all persisted to SiteConfig
+                </span>
+                {settingsSaved && (
+                  <span
+                    className="ml-auto text-[10px] font-bold uppercase tracking-[0.10em] px-2.5 h-7 rounded-md inline-flex items-center"
+                    style={{
+                      background: "rgba(34,197,94,0.10)",
+                      color: "#16A34A",
+                      border: "1px solid rgba(34,197,94,0.30)",
+                    }}
+                  >
+                    ✓ Saved to database
+                  </span>
+                )}
               </div>
 
               <AdminPricingEditor />
