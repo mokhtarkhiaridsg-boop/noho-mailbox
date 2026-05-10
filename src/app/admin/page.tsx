@@ -13,36 +13,15 @@ import { DEFAULT_PRICING, type PricingConfig } from "@/lib/pricing-config";
 // admin workflows like bulk renewal or batch late-fee runs.
 export const maxDuration = 60;
 
-export default async function AdminPage() {
-  const admin = await verifyAdmin();
-
-  // Square auto-sync — fire-and-forget if the last completed sync is
-  // older than 10 min (or none exists). Cron handles the regular cadence
-  // every 15 min; this catches the case where an admin opens the page
-  // expecting today's transactions to be there before the next cron run.
-  // Awaited:false so it doesn't block the page render — sync runs in
-  // the background and the next page load (or this same page after
-  // refresh) will pick up the fresh rows.
-  void (async () => {
-    try {
-      const lastSync = await prisma.squareSyncLog.findFirst({
-        where: { syncType: "payments", status: "completed" },
-        orderBy: { completedAt: "desc" },
-      });
-      const stale =
-        !lastSync?.completedAt ||
-        Date.now() - lastSync.completedAt.getTime() > 10 * 60 * 1000;
-      if (stale) {
-        const { runSyncSquarePayments, runSyncSquareCustomers } = await import("@/lib/square-sync");
-        // Run customers first then payments so user-link map is fresh.
-        await runSyncSquareCustomers();
-        await runSyncSquarePayments();
-      }
-    } catch {
-      // Background sync failure is non-fatal — admin will see stale
-      // sync log timestamp and can retry manually.
-    }
-  })();
+// Square auto-sync used to live here as a `void (async () => …)()`
+// fire-and-forget IIFE inside the page render. That was the bug behind
+// the "rows stuck in 'running' forever" symptom: as soon as React's
+// response stream finished, Vercel terminated the serverless function
+// and the IIFE's pending Prisma writes were dropped on the floor — the
+// `finally` finalizer in square-sync.ts never got a chance to mark the
+// row complete. Auto-sync now lives in /api/admin/auto-square-sync,
+// invoked from AdminDashboardClient's useEffect after mount, so the
+// HTTP request keeps the function alive for its full maxDuration.
 
   // Owner label — emails listed in OWNER_EMAILS env get the "Owner"
   // role label in the admin chrome. Functionally identical to ADMIN

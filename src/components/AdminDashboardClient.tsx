@@ -1197,6 +1197,30 @@ export default function AdminDashboardClient({ customers, recentMail, notaryQueu
     } catch { /* localStorage unavailable */ }
   }, [sidebarHidden]);
 
+  // iter-225 — Square auto-sync trigger.
+  //
+  // Used to live as `void (async () => …)()` inside the admin/page.tsx
+  // server-component render. That broke in production because Vercel
+  // terminated the serverless function as soon as the React response
+  // stream finished, killing the IIFE mid-`getSquareCustomers()` and
+  // leaving SquareSyncLog rows stuck in `running` forever.
+  //
+  // Now: fired from the client on dashboard mount via fetch(), so the
+  // request keeps the route-handler function alive for its full
+  // maxDuration (60s on Hobby). The handler itself re-checks staleness
+  // (last completed sync >10 min ago) so multiple admin tabs won't
+  // duplicate sync work.
+  //
+  // Empty dep array — fires once per mount. Errors are swallowed so a
+  // network blip doesn't surface to admin; the SYNC HISTORY pane is
+  // the source of truth.
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetch("/api/admin/auto-square-sync", { method: "POST", signal: ctrl.signal })
+      .catch(() => { /* non-fatal */ });
+    return () => ctrl.abort();
+  }, []);
+
   // When the URL changes (back/forward/external link), pull the tab back in.
   useEffect(() => {
     const next = normalizeTabSlug(searchParams.get("tab"));
