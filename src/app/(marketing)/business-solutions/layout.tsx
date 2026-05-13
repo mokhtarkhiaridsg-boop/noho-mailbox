@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "$2,000 LLC + Brand + Website Bundle | NOHO Mailbox",
+  title: "$2,000 LLC + Brand + Website Bundle",
   description:
-    "Complete California LLC formation, EIN, brand book, 5-page website, and 12 months of mail at our LA street address — $2,000 flat. Real shop in NoHo, not a LegalZoom hand-off.",
+    "California LLC + EIN + brand book + 5-page website + 12 months of mail at our LA address — $2,000 flat. Real shop in NoHo, not a LegalZoom hand-off.",
   openGraph: {
     title: "$2,000 Business Launch Bundle — NOHO Mailbox",
     description:

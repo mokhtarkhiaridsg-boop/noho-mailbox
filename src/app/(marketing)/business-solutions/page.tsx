@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { MailboxIcon } from "@/components/BrandIcons";
 import { AiHeart, AiSparkle } from "@/components/AnimatedIcons";
 import { useState } from "react";
 
@@ -311,58 +310,567 @@ const serviceMenu = {
 const filterTabs = ["All", "Formation", "Branding", "Digital", "Mail"];
 const serviceCategories = Object.keys(serviceMenu);
 
+/* ── Fiverr-style category tiles (top of page browse) ────────── */
+const CAT_TILES = [
+  { key: "Business & Legal",   sub: "LLC · EIN · Compliance",  Icon: IconFormation,   from: 49 },
+  { key: "Branding & Design",  sub: "Logo · Book · Assets",    Icon: IconBrandCircle, from: 79 },
+  { key: "Web & Digital",      sub: "Sites · Apps · SEO",      Icon: IconCode,        from: 99 },
+  { key: "Marketing & SEO",    sub: "Local · Social · Ads",    Icon: IconShare,       from: 59 },
+  { key: "Content & Media",    sub: "Copy · Video · Photo",    Icon: IconPrintLarge,  from: 39 },
+  { key: "Mail & Address",     sub: "Mailbox · Scanning",      Icon: IconMail12,      from: 50 },
+];
+
+/* ── Featured "gigs" (Fiverr seller card data) ───────────────── */
+const FEATURED_GIGS: Array<{
+  title: string;
+  cat: string;
+  delivery: string;
+  rating: number;
+  reviews: number;
+  from: number;
+  Icon: (p: { className?: string }) => React.ReactElement;
+  bullets: string[];
+}> = [
+  { title: "LLC formation — filed end-to-end",                 cat: "Business & Legal", delivery: "5–7 days", rating: 5.0, reviews: 87, from: 99,  Icon: IconLLC,        bullets: ["State filing", "EIN included", "Operating agreement"] },
+  { title: "Custom brand book — logo, color, type",             cat: "Branding & Design",delivery: "10 days",  rating: 4.9, reviews: 64, from: 350, Icon: IconBrandBook,  bullets: ["Logo + variants", "Type system", "Color palette"] },
+  { title: "Mobile-first website with hosting",                 cat: "Web & Digital",    delivery: "2 weeks",  rating: 5.0, reviews: 52, from: 600, Icon: IconWebsite,    bullets: ["Domain + hosting", "5 sections", "SEO basics"] },
+  { title: "Local SEO + Google Business Profile",               cat: "Marketing & SEO",  delivery: "3–5 days", rating: 4.9, reviews: 41, from: 220, Icon: IconSEO,        bullets: ["GMB verified", "Meta + schema", "First-page targets"] },
+  { title: "Real street address + 12 months of mail",           cat: "Mail & Address",   delivery: "Same day", rating: 5.0, reviews: 312,from: 50,  Icon: IconMail12,     bullets: ["Real NoHo address", "Scanning + forward", "Pickup 6 days/wk"] },
+  { title: "Social presence: profiles, branding, first posts",  cat: "Marketing & SEO",  delivery: "5 days",   rating: 4.8, reviews: 38, from: 180, Icon: IconSocial,     bullets: ["All major platforms", "Branded covers", "Starter content"] },
+];
+
+/* ── Tiny atoms ─────────────────────────────────────────────── */
+function StarRow({ rating, reviews }: { rating: number; reviews: number }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold" style={{ color: "#2D100F" }}>
+      <svg viewBox="0 0 20 20" className="w-3.5 h-3.5" fill="#F5A623" aria-hidden="true">
+        <path d="M10 1.5l2.7 5.5 6.1.9-4.4 4.3 1 6.1L10 15.4l-5.4 2.9 1-6.1L1.2 7.9l6.1-.9z" />
+      </svg>
+      <span className="tabular-nums">{rating.toFixed(1)}</span>
+      <span className="font-normal" style={{ color: "#7A6B57" }}>({reviews})</span>
+    </span>
+  );
+}
+
+function NohoAvatar({ size = 36 }: { size?: number }) {
+  return (
+    <span
+      className="inline-flex items-center justify-center rounded-full font-extrabold"
+      style={{
+        width: size, height: size, background: "#2D100F", color: "#F7E6C2",
+        fontFamily: "var(--font-baloo), 'Baloo 2', sans-serif",
+        fontSize: Math.round(size * 0.42), letterSpacing: "-0.02em",
+        boxShadow: "0 0 0 2px #FFFFFF, 0 0 0 3px #F0DBA9",
+      }}
+      aria-hidden="true"
+    >
+      N
+    </span>
+  );
+}
+
+function SearchIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" />
+      <path d="m18 18-4.5-4.5" />
+    </svg>
+  );
+}
+
 export default function BusinessSolutionsPage() {
   const [filter, setFilter] = useState("All");
   const [activeServiceCat, setActiveServiceCat] = useState(serviceCategories[0]);
+  const [query, setQuery] = useState("");
   const filtered = filter === "All" ? packageServices : packageServices.filter((s) => s.cat === filter);
 
+  // Live search across the full service menu — flattens the categories
+  // into a single searchable list so the cream-banner search bar above
+  // the fold actually finds something. Empty query = no results panel.
+  const searchResults = query.trim().length > 0
+    ? Object.entries(serviceMenu).flatMap(([cat, items]) =>
+        items
+          .filter((it) => it.toLowerCase().includes(query.trim().toLowerCase()))
+          .map((it) => ({ cat, label: it }))
+      ).slice(0, 8)
+    : [];
+
   return (
-    <div className="perspective-container">
-      {/* ─── HERO ─── */}
-      <section className="relative py-32 md:py-40 px-4 overflow-hidden bg-bg-dark">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[120px] pointer-events-none bg-accent" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
+    <div className="perspective-container" style={{ background: "#FFFDF8" }}>
+      {/* ─── HERO — Fiverr-style search shelf, cream + brown ─── */}
+      <section
+        className="relative px-5 sm:px-6 pt-12 pb-14 sm:pt-20 sm:pb-20 overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse at top, #F7E6C2 0%, #F0DBA9 45%, #E8DDD0 100%)",
+        }}
+      >
+        {/* subtle dot pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(#2D100F 1px, transparent 1px)", backgroundSize: "22px 22px" }}
+          aria-hidden="true"
+        />
 
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* Family-owned heritage pill — Tunisian red, restrained */}
-          <div className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 mb-4 animate-fade-up text-[11px] font-bold uppercase tracking-[0.14em]"
-               style={{ background: "rgba(231,0,19,0.12)", color: "#FFB4BB", border: "1px solid rgba(231,0,19,0.28)" }}>
-            <AiHeart className="w-3.5 h-3.5" />
-            Family-owned in NoHo
-          </div>
-
-          <div className="inline-flex items-center gap-2 glass-dark rounded-full px-5 py-2 mb-8 animate-fade-up delay-100">
-            <span className="w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
-            <span className="text-text-dark-muted text-xs font-bold uppercase tracking-widest">
-              Formation &middot; Branding &middot; Launch
-            </span>
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          {/* Family-owned chip */}
+          <div
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 mb-5 text-[10.5px] font-bold uppercase tracking-[0.14em]"
+            style={{ background: "rgba(231,0,19,0.10)", color: "#B11D26", border: "1px solid rgba(231,0,19,0.28)" }}
+          >
+            <AiHeart className="w-3 h-3" />
+            Family-owned in NoHo · since 2017
           </div>
 
           <h1
-            className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-transparent bg-clip-text animate-gradient animate-scale-in leading-[1.05]"
-            style={{ backgroundImage: "linear-gradient(135deg, #EBF2FA 0%, #fff 30%, #337485 55%, #fff 80%, #EBF2FA 100%)", backgroundSize: "200% 200%" }}
+            className="font-extrabold tracking-tight"
+            style={{
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+              color: "#2D100F",
+              fontSize: "clamp(2rem, 6vw, 3.75rem)",
+              lineHeight: 1.05,
+            }}
           >
-            Your Business,
-            <br />
-            Built by Us
+            Find the right service for your{" "}
+            <span
+              style={{
+                fontFamily: "var(--font-pacifico), 'Pacifico', cursive",
+                color: "#337485",
+                fontWeight: 400,
+              }}
+            >
+              business
+            </span>
           </h1>
 
-          <p className="text-text-dark-muted max-w-xl mx-auto text-lg mt-8 mb-5 animate-fade-up delay-200 leading-relaxed">
-            From LLC formation to a live website and 12 months of mail — one flat fee, one team,
-            zero loose ends. Or book any service as a standalone consultation.
+          <p
+            className="mt-3 sm:mt-4 max-w-xl mx-auto text-[14.5px] sm:text-base"
+            style={{ color: "#5C4540" }}
+          >
+            Real local team, not a marketplace. LLC formation, branding, websites,
+            mail & more — handled by us, billed once.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4 mt-10 animate-fade-up delay-400">
-            <Link
-              href="#package"
-              className="group inline-flex items-center gap-2 font-bold px-8 py-4 rounded-xl text-white transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-accent to-accent-hover shadow-xl"
+          {/* Search bar */}
+          <div className="mt-6 sm:mt-8 mx-auto max-w-2xl">
+            <div
+              className="relative flex items-center rounded-full overflow-hidden bg-white"
+              style={{ border: "1px solid #E8DDD0", boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 14px 36px rgba(45,16,15,0.10)" }}
             >
-              See the Full Package
-              <svg viewBox="0 0 16 16" className="w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none"><path d="M8 3 L8 13 M4 9 L8 13 L12 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <span className="absolute left-4 sm:left-5 pointer-events-none" style={{ color: "#7A6B57" }}>
+                <SearchIcon />
+              </span>
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Try “LLC”, “logo”, “website”, “mailbox”…"
+                className="flex-1 pl-11 sm:pl-12 pr-2 sm:pr-3 py-3 sm:py-4 text-[15px] sm:text-base bg-transparent focus:outline-none"
+                style={{ color: "#2D100F", fontFamily: "var(--font-inter), system-ui, sans-serif" }}
+                aria-label="Search services"
+              />
+              <Link
+                href="/contact"
+                className="hidden sm:inline-flex shrink-0 items-center gap-2 px-5 py-3 mr-1.5 rounded-full font-bold text-[13px] uppercase tracking-wider text-white transition-colors"
+                style={{ background: "#2D100F" }}
+              >
+                Search
+              </Link>
+            </div>
+
+            {/* Live result drop */}
+            {searchResults.length > 0 && (
+              <ul
+                className="mt-2 text-left rounded-2xl bg-white overflow-hidden"
+                style={{ border: "1px solid #E8DDD0", boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 16px 40px rgba(45,16,15,0.10)" }}
+              >
+                {searchResults.map((r) => (
+                  <li key={`${r.cat}-${r.label}`}>
+                    <Link
+                      href="/contact"
+                      className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-[#FFF9F3]"
+                    >
+                      <span className="flex items-center gap-3 min-w-0">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#337485" }} />
+                        <span className="font-semibold truncate" style={{ color: "#2D100F" }}>{r.label}</span>
+                      </span>
+                      <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] shrink-0" style={{ color: "#7A6B57" }}>
+                        {r.cat}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Popular pills */}
+            <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 mt-4 sm:mt-5">
+              <span className="text-[11px] font-bold uppercase tracking-wider self-center" style={{ color: "#7A6B57" }}>
+                Popular:
+              </span>
+              {["LLC formation", "Logo design", "Website build", "Google Business", "Mailbox + scanning"].map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setQuery(p.split(" ")[0])}
+                  className="text-[12px] font-semibold px-3 py-1.5 rounded-full transition-colors hover:bg-[#FFFDF8]"
+                  style={{ background: "rgba(255,255,255,0.6)", color: "#2D100F", border: "1px solid #E8DDD0" }}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Trust strip */}
+          <div className="mt-8 sm:mt-10 inline-flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px]" style={{ color: "#5C4540" }}>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#22C55E" }} />
+              500+ services delivered
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <StarRow rating={4.9} reviews={312} />
+              local reviews
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#337485" }} />
+              One team, one invoice
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CATEGORY TILES — Fiverr-style big browse cards ─── */}
+      <section className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#FFFDF8" }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-baseline gap-3 flex-wrap mb-6 sm:mb-8">
+            <h2
+              className="font-bold tracking-tight"
+              style={{
+                fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+                color: "#2D100F",
+                fontSize: "clamp(1.5rem, 4vw, 2rem)",
+              }}
+            >
+              Browse by category
+            </h2>
+            <span
+              className="text-[16px]"
+              style={{ fontFamily: "var(--font-pacifico), 'Pacifico', cursive", color: "#337485" }}
+            >
+              pick the help you need
+            </span>
+            <span className="text-[12px] ml-auto self-end" style={{ color: "#7A6B57" }}>
+              {Object.values(serviceMenu).flat().length}+ services · NoHo-based delivery
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            {CAT_TILES.map((t) => (
+              <Link
+                key={t.key}
+                href="#menu"
+                onClick={() => {
+                  const k = t.key === "Mail & Address" ? "Business & Legal" : t.key;
+                  if (serviceCategories.includes(k)) setActiveServiceCat(k);
+                }}
+                className="group flex flex-col items-center text-center rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:-translate-y-1"
+                style={{
+                  background: "#FFFFFF",
+                  border: "1px solid #E8DDD0",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 22px rgba(45,16,15,0.06)",
+                }}
+              >
+                <span
+                  className="mb-3 inline-flex items-center justify-center rounded-2xl transition-transform group-hover:scale-110"
+                  style={{ width: 64, height: 64, background: "#F7E6C2" }}
+                >
+                  <t.Icon className="w-9 h-9" />
+                </span>
+                <p
+                  className="text-[13px] sm:text-sm font-extrabold"
+                  style={{ color: "#2D100F", fontFamily: "var(--font-baloo), 'Baloo 2', sans-serif" }}
+                >
+                  {t.key}
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: "#7A6B57" }}>{t.sub}</p>
+                <p className="text-[11px] mt-2 font-bold" style={{ color: "#337485" }}>
+                  from ${t.from}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── TOP GIGS — Fiverr-style seller cards ─── */}
+      <section className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#FFF9F3" }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-baseline gap-3 flex-wrap mb-6 sm:mb-8">
+            <h2
+              className="font-bold tracking-tight"
+              style={{
+                fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+                color: "#2D100F",
+                fontSize: "clamp(1.5rem, 4vw, 2rem)",
+              }}
+            >
+              Most-booked gigs
+            </h2>
+            <span
+              className="text-[16px]"
+              style={{ fontFamily: "var(--font-pacifico), 'Pacifico', cursive", color: "#337485" }}
+            >
+              what locals order
+            </span>
+            <Link href="#menu" className="ml-auto text-[13px] font-bold inline-flex items-center gap-1" style={{ color: "#337485" }}>
+              See all
+              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none"><path d="M3 8 H13 M10 5 L13 8 L10 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </Link>
-            <Link href="#brand-management" className="glass-dark text-text-dark font-bold px-8 py-4 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:bg-bg-light/10">
-              Brand Management
-            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            {FEATURED_GIGS.map((g) => (
+              <Link
+                key={g.title}
+                href="/contact"
+                className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-1"
+                style={{
+                  background: "#FFFFFF",
+                  border: "1px solid #E8DDD0",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 22px rgba(45,16,15,0.06)",
+                }}
+              >
+                {/* Gig "cover" — illustrated tile */}
+                <div
+                  className="relative aspect-[16/9] flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, #F7E6C2 0%, #FFFDF8 100%)" }}
+                >
+                  <g.Icon className="w-20 h-20 sm:w-24 sm:h-24 transition-transform group-hover:scale-110" />
+                  <span
+                    className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9.5px] font-extrabold uppercase tracking-[0.14em]"
+                    style={{ background: "#2D100F", color: "#F7E6C2" }}
+                  >
+                    NoHo
+                  </span>
+                  <span
+                    className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9.5px] font-bold uppercase tracking-[0.14em]"
+                    style={{ background: "rgba(255,255,255,0.92)", color: "#337485", border: "1px solid #E8DDD0" }}
+                  >
+                    {g.cat.split(" & ")[0]}
+                  </span>
+                </div>
+
+                {/* Body */}
+                <div className="flex-1 flex flex-col p-4 sm:p-5">
+                  {/* Seller chip */}
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <NohoAvatar size={32} />
+                    <div className="min-w-0">
+                      <p className="text-[12.5px] font-extrabold truncate" style={{ color: "#2D100F" }}>
+                        NOHO Mailbox
+                      </p>
+                      <p className="text-[10.5px] font-bold uppercase tracking-[0.14em]" style={{ color: "#337485" }}>
+                        Local · Verified
+                      </p>
+                    </div>
+                  </div>
+
+                  <p
+                    className="text-[14.5px] sm:text-[15px] font-bold leading-snug line-clamp-2 mb-3"
+                    style={{ color: "#2D100F", fontFamily: "var(--font-inter), system-ui, sans-serif" }}
+                  >
+                    {g.title}
+                  </p>
+
+                  <ul className="space-y-1 mb-3">
+                    {g.bullets.map((b) => (
+                      <li key={b} className="flex items-start gap-1.5 text-[12px]" style={{ color: "#5C4540" }}>
+                        <svg viewBox="0 0 16 16" className="w-3 h-3 shrink-0 mt-1" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 8 L7 12 L13 4" />
+                        </svg>
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="flex items-center justify-between mt-auto pt-3" style={{ borderTop: "1px solid #F0DBA9" }}>
+                    <StarRow rating={g.rating} reviews={g.reviews} />
+                    <span className="text-[10.5px] font-bold uppercase tracking-[0.14em]" style={{ color: "#7A6B57" }}>
+                      {g.delivery}
+                    </span>
+                  </div>
+
+                  <div className="flex items-baseline justify-between mt-3">
+                    <span className="text-[10.5px] font-bold uppercase tracking-[0.14em]" style={{ color: "#7A6B57" }}>
+                      Starting at
+                    </span>
+                    <span
+                      className="font-extrabold tabular-nums"
+                      style={{
+                        color: "#2D100F",
+                        fontFamily: "var(--font-baloo), 'Baloo 2', sans-serif",
+                        fontSize: "clamp(1.25rem, 4vw, 1.5rem)",
+                      }}
+                    >
+                      ${g.from}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── ALL-INCLUSIVE PACKAGE — featured gig bundle ─── */}
+      <section id="package" className="px-5 sm:px-6 py-14 sm:py-20" style={{ background: "#FFFDF8" }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8 sm:mb-10">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.18em]"
+              style={{ background: "#2D100F", color: "#F7E6C2" }}
+            >
+              <AiSparkle className="w-3 h-3" />
+              Featured bundle
+            </span>
+            <h2
+              className="mt-3 font-extrabold tracking-tight"
+              style={{
+                fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+                color: "#2D100F",
+                fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
+              }}
+            >
+              The all-in-one launch bundle
+            </h2>
+            <p className="mt-2 max-w-xl mx-auto text-[14.5px] sm:text-base" style={{ color: "#5C4540" }}>
+              Ten services. One invoice. Everything you need from day one to launch day.
+            </p>
+          </div>
+
+          <div
+            className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 sm:gap-6 rounded-3xl overflow-hidden"
+            style={{
+              background: "#FFFFFF",
+              border: "1px solid #E8DDD0",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 18px 46px rgba(45,16,15,0.10)",
+            }}
+          >
+            {/* Left — what's inside, gig-detail-style */}
+            <div className="p-5 sm:p-7">
+              <div className="flex items-center gap-3 mb-4">
+                <NohoAvatar size={44} />
+                <div>
+                  <p className="text-[13px] font-extrabold" style={{ color: "#2D100F" }}>
+                    NOHO Mailbox · Local team
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <StarRow rating={5.0} reviews={87} />
+                    <span className="text-[10.5px] font-bold uppercase tracking-[0.14em]" style={{ color: "#337485" }}>
+                      Top rated
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters (kept from old page so all-cats can be browsed) */}
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {filterTabs.map((t) => (
+                  <button
+                    type="button"
+                    key={t}
+                    onClick={() => setFilter(t)}
+                    className="text-[11.5px] font-bold px-3 py-1.5 rounded-full transition-colors"
+                    style={{
+                      background: filter === t ? "#2D100F" : "#FFF9F3",
+                      color: filter === t ? "#F7E6C2" : "#2D100F",
+                      border: `1px solid ${filter === t ? "#2D100F" : "#E8DDD0"}`,
+                    }}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {filtered.map((s) => (
+                  <li
+                    key={s.label}
+                    className="flex items-start gap-3 rounded-xl p-3"
+                    style={{ background: "#FFF9F3", border: "1px solid #F0DBA9" }}
+                  >
+                    <span
+                      className="shrink-0 inline-flex items-center justify-center rounded-lg"
+                      style={{ width: 40, height: 40, background: "#FFFFFF", border: "1px solid #E8DDD0" }}
+                    >
+                      {s.icon}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[10.5px] font-bold uppercase tracking-[0.14em]" style={{ color: "#337485" }}>
+                        {s.cat}
+                      </p>
+                      <p className="text-[12.5px] leading-snug mt-0.5" style={{ color: "#2D100F" }}>
+                        {s.label}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right — price column */}
+            <aside
+              className="p-5 sm:p-7 flex flex-col justify-between"
+              style={{
+                background: "linear-gradient(160deg, #F7E6C2 0%, #F0DBA9 100%)",
+                borderLeft: "1px solid #E8DDD0",
+              }}
+            >
+              <div>
+                <p className="text-[10.5px] font-bold uppercase tracking-[0.18em]" style={{ color: "#5C4540" }}>
+                  Bundle · 10 services
+                </p>
+                <p
+                  className="font-extrabold tracking-tight tabular-nums leading-none mt-2"
+                  style={{
+                    color: "#2D100F",
+                    fontFamily: "var(--font-baloo), 'Baloo 2', sans-serif",
+                    fontSize: "clamp(2.75rem, 9vw, 4.25rem)",
+                  }}
+                >
+                  $2,000
+                </p>
+                <p className="text-[12.5px] mt-2" style={{ color: "#5C4540" }}>
+                  One-time flat fee · No subscriptions
+                </p>
+
+                <ul className="mt-5 space-y-2 text-[13px]" style={{ color: "#2D100F" }}>
+                  {[
+                    "2-week delivery, end-to-end",
+                    "Unlimited revisions during build",
+                    "100% local team — no offshoring",
+                    "12 months of mailbox included",
+                  ].map((b) => (
+                    <li key={b} className="flex items-start gap-2">
+                      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 mt-1 shrink-0" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 8 L7 12 L13 4" />
+                      </svg>
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <Link
+                href="/contact"
+                className="mt-6 inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-xl text-white transition-colors"
+                style={{ background: "#2D100F" }}
+              >
+                Order this bundle
+                <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none"><path d="M4 10 H16 M12 6 L16 10 L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </Link>
+            </aside>
           </div>
         </div>
       </section>
@@ -402,7 +910,7 @@ export default function BusinessSolutionsPage() {
           {/* Filters */}
           <div className="flex flex-wrap justify-center gap-2 mb-10 animate-fade-up delay-400">
             {filterTabs.map((t) => (
-              <button key={t} onClick={() => setFilter(t)}
+              <button type="button" key={t} onClick={() => setFilter(t)}
                 className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 ${filter === t ? "bg-bg-dark text-text-dark shadow-lg scale-105" : "bg-surface-light/80 text-text-light-muted hover:bg-surface-light hover:text-text-light hover:scale-105"}`}
               >{t}</button>
             ))}
@@ -430,191 +938,315 @@ export default function BusinessSolutionsPage() {
         </div>
       </section>
 
-      {/* ─── BRAND MANAGEMENT ─── */}
-      <section id="brand-management" className="py-28 px-4 relative overflow-hidden bg-bg-dark">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[120px] pointer-events-none bg-accent" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
-
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 glass-dark rounded-full px-5 py-2 mb-6 animate-fade-up">
-              <span className="text-accent text-xs font-bold uppercase tracking-widest">Standalone or Bundled</span>
-            </div>
-            <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text animate-gradient animate-slide-up-3d" style={{ backgroundImage: "linear-gradient(135deg, #EBF2FA, #fff, #337485, #EBF2FA)", backgroundSize: "200% 200%" }}>
-              Brand Management
-            </h2>
-            <p className="text-text-dark-muted/60 max-w-xl mx-auto mt-6 animate-fade-up delay-200">
-              A strong brand isn&apos;t a logo — it&apos;s a system. We build, protect, run, and evolve yours
-              every month so you can focus on the work.
-            </p>
-          </div>
-
-          {/* Price Card */}
-          <div className="flex justify-center mb-16">
-            <div className="card-3d neon-edge rounded-[2rem] px-14 md:px-16 py-10 md:py-12 text-center animate-scale-in delay-300 relative"
-              style={{ background: "linear-gradient(160deg, var(--color-bg-dark) 0%, var(--color-bg-dark) 100%)", boxShadow: "0 30px 80px rgba(51,116,133,0.25), 0 0 0 1px rgba(247,230,194,0.15) inset" }}
+      {/* ─── BRAND MANAGEMENT — monthly subscription gig ─── */}
+      <section id="brand-management" className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#FFF9F3" }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-baseline gap-3 flex-wrap mb-6 sm:mb-8">
+            <h2
+              className="font-bold tracking-tight"
+              style={{
+                fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+                color: "#2D100F",
+                fontSize: "clamp(1.5rem, 4vw, 2rem)",
+              }}
             >
-              <div className="absolute inset-0 rounded-[2rem] overflow-hidden"><div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-accent/15 to-transparent rotate-12" /></div>
-              <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 bg-accent/20 rounded-full px-4 py-1.5 mb-5">
-                  <span className="text-xs font-bold text-text-dark uppercase tracking-wider">Monthly Retainer</span>
+              Brand on retainer
+            </h2>
+            <span
+              className="text-[16px]"
+              style={{ fontFamily: "var(--font-pacifico), 'Pacifico', cursive", color: "#337485" }}
+            >
+              we run it, you focus
+            </span>
+            <span className="text-[12px] ml-auto self-end" style={{ color: "#7A6B57" }}>
+              Monthly · cancel anytime
+            </span>
+          </div>
+
+          <div
+            className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 sm:gap-6 rounded-3xl overflow-hidden"
+            style={{
+              background: "#FFFFFF",
+              border: "1px solid #E8DDD0",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 18px 46px rgba(45,16,15,0.10)",
+            }}
+          >
+            <div className="p-5 sm:p-7">
+              <div className="flex items-center gap-3 mb-4">
+                <NohoAvatar size={40} />
+                <div>
+                  <p className="text-[13px] font-extrabold" style={{ color: "#2D100F" }}>
+                    NOHO Mailbox · Studio
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <StarRow rating={4.9} reviews={26} />
+                    <span className="text-[10.5px] font-bold uppercase tracking-[0.14em]" style={{ color: "#337485" }}>
+                      Retainer
+                    </span>
+                  </div>
                 </div>
-                <p className="text-xs uppercase tracking-[0.2em] font-bold text-text-dark-muted/60 mb-2">Full Brand Management</p>
-                <p className="text-7xl md:text-8xl font-extrabold text-text-dark tracking-tight">$1,200</p>
-                <p className="text-text-dark-muted/60 text-sm mt-3">per month &middot; cancel anytime</p>
-                <p className="text-text-dark-muted text-xs mt-4 max-w-sm mx-auto leading-relaxed">
-                  Website management, brand prints, seasonal &amp; holiday adaptations, and full marketing strategy execution — all handled.
+              </div>
+              <p className="text-[14.5px] font-bold leading-snug mb-2" style={{ color: "#2D100F" }}>
+                Full brand management — website, prints, seasonal adaptations, marketing execution
+              </p>
+              <p className="text-[12.5px] mb-4" style={{ color: "#5C4540" }}>
+                A strong brand isn&apos;t a logo — it&apos;s a system. We build, protect, run, and evolve yours every
+                month so you can focus on the work.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {brandMgmt.map((svc) => (
+                  <div
+                    key={svc.title}
+                    className="flex items-start gap-3 rounded-xl p-3"
+                    style={{ background: "#FFF9F3", border: "1px solid #F0DBA9" }}
+                  >
+                    <span className="shrink-0">{svc.icon}</span>
+                    <div className="min-w-0">
+                      <p className="text-[12.5px] font-extrabold leading-tight" style={{ color: "#2D100F" }}>
+                        {svc.title}
+                      </p>
+                      <p className="text-[11.5px] leading-snug mt-0.5" style={{ color: "#5C4540" }}>
+                        {svc.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <aside
+              className="p-5 sm:p-7 flex flex-col justify-between"
+              style={{
+                background: "linear-gradient(160deg, #2D100F 0%, #1F0807 100%)",
+                color: "#F7E6C2",
+              }}
+            >
+              <div>
+                <p className="text-[10.5px] font-bold uppercase tracking-[0.18em]" style={{ color: "#F0DBA9" }}>
+                  Monthly retainer
                 </p>
+                <p
+                  className="font-extrabold tracking-tight tabular-nums leading-none mt-2"
+                  style={{
+                    fontFamily: "var(--font-baloo), 'Baloo 2', sans-serif",
+                    fontSize: "clamp(2.5rem, 8vw, 3.75rem)",
+                    color: "#F7E6C2",
+                  }}
+                >
+                  $1,200
+                </p>
+                <p className="text-[12.5px] mt-2" style={{ color: "#F0DBA9" }}>
+                  per month · cancel anytime
+                </p>
+                <ul className="mt-5 space-y-2 text-[12.5px]" style={{ color: "#F7E6C2" }}>
+                  {["Dedicated brand operator", "Quarterly performance review", "Priority lane support"].map((b) => (
+                    <li key={b} className="flex items-start gap-2">
+                      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 mt-1 shrink-0" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 8 L7 12 L13 4" />
+                      </svg>
+                      {b}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {brandMgmt.map((svc, i) => (
-              <div key={svc.title} className={`bg-surface-dark border border-border-dark rounded-2xl p-8 flex flex-col hover-lift shadow-xl animate-fade-up delay-${((i % 3) + 1) * 100}`}>
-                <div className="mb-4">{svc.icon}</div>
-                <h3 className="font-extrabold tracking-tight text-text-dark text-lg mb-2">{svc.title}</h3>
-                <p className="text-text-dark-muted/60 text-sm leading-relaxed flex-1">{svc.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-14 animate-fade-up delay-500">
-            <p className="text-text-dark-muted/60 text-sm mb-6">No subscription needed &middot; One-time consultation or ongoing management</p>
-            <Link href="/contact" className="group inline-flex items-center gap-3 font-bold px-10 py-4 rounded-xl text-white transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-accent to-accent-hover shadow-xl">
-              Book a Brand Consultation
-              <svg viewBox="0 0 20 20" className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none"><path d="M4 10 H16 M12 6 L16 10 L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── BOOK ANY SERVICE ─── */}
-      <section className="py-24 px-4 bg-bg-light">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-accent/10 rounded-full px-5 py-2 mb-6 animate-fade-up">
-              <span className="text-accent text-xs font-bold uppercase tracking-widest">No Package Required</span>
-            </div>
-            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-text-light mb-4 animate-slide-up-3d delay-100">
-              Book Any Service Solo
-            </h2>
-            <p className="text-text-light-muted max-w-xl mx-auto animate-fade-up delay-200">
-              Only need one thing? Every service is available as a standalone consultation.
-              No bundles, no upsells — just the help you actually need.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {([
-              { icon: <IconFormation />, title: "Business Formation", desc: "LLC, DBA, S-Corp, EIN, compliance — filed and delivered." },
-              { icon: <IconBrandCircle />, title: "Brand Identity", desc: "Logo, brand book, assets, and guidelines — ready to use everywhere." },
-              { icon: <IconCode />, title: "Website Build", desc: "Designed, developed, and deployed — mobile-first with SEO baked in." },
-              { icon: <IconShare />, title: "Social & Google", desc: "Profiles created, branded, verified — ready for your first post." },
-              { icon: <IconPrintLarge />, title: "Print & Packaging", desc: "Cards, flyers, signage, packaging — designed for production." },
-              { icon: <MailboxIcon className="w-14 h-14" />, title: "Mail & Forwarding", desc: "Real street address. Scanning, organizing, forwarding — handled." },
-            ]).map((svc, i) => (
-              <div key={svc.title} className={`bg-surface-light border border-border-light rounded-2xl p-8 flex flex-col hover-lift shadow-[var(--shadow-md)] animate-fade-up delay-${((i % 3) + 1) * 100}`}>
-                <div className="mb-5 p-3 bg-bg-light/50 rounded-2xl inline-block self-start">{svc.icon}</div>
-                <h3 className="font-extrabold tracking-tight text-text-light text-lg mb-2">{svc.title}</h3>
-                <p className="text-text-light-muted text-sm leading-relaxed flex-1">{svc.desc}</p>
-                <Link href="/contact" className="mt-6 group inline-flex items-center gap-2 text-accent text-sm font-bold hover:gap-3 transition-all">
-                  Book a Consultation
-                  <svg viewBox="0 0 16 16" className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none"><path d="M3 8 H13 M10 5 L13 8 L10 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── FULL SERVICE MENU ─── */}
-      <section className="py-24 px-4 relative overflow-hidden bg-bg-dark">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[120px] pointer-events-none bg-accent" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
-
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 glass-dark rounded-full px-5 py-2 mb-6 animate-fade-up">
-              <span className="text-accent text-xs font-bold uppercase tracking-widest">50+ Services</span>
-            </div>
-            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text animate-gradient animate-slide-up-3d" style={{ backgroundImage: "linear-gradient(135deg, #EBF2FA, #fff, #EBF2FA)", backgroundSize: "200% 200%" }}>
-              Full Service Menu
-            </h2>
-            <p className="text-text-dark-muted/60 max-w-lg mx-auto mt-4 animate-fade-up delay-200">
-              Everything we offer, in one place. Pick what you need — we&apos;ll handle the rest.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-2 mb-10">
-            {serviceCategories.map((cat) => (
-              <button key={cat} onClick={() => setActiveServiceCat(cat)}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 ${activeServiceCat === cat ? "bg-accent text-white shadow-lg shadow-accent/30 scale-105" : "glass-dark text-text-dark-muted hover:text-text-dark hover:scale-105"}`}
-              >{cat}</button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {serviceMenu[activeServiceCat as keyof typeof serviceMenu].map((svc, i) => (
-              <Link key={svc} href="/contact"
-                className={`glass-dark card-3d group flex items-center gap-4 rounded-xl px-5 py-4 transition-all duration-300 hover:bg-accent/20 animate-fade-up delay-${Math.min((i % 6 + 1) * 100, 600)}`}
+              <Link
+                href="/contact"
+                className="mt-6 inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-xl transition-colors"
+                style={{ background: "#F7E6C2", color: "#2D100F" }}
               >
-                <span className="w-2 h-2 rounded-full bg-accent shrink-0 group-hover:scale-150 transition-transform" />
-                <span className="text-text-dark-muted text-sm font-medium group-hover:text-text-dark transition-colors">{svc}</span>
-                <svg viewBox="0 0 16 16" className="w-4 h-4 ml-auto text-text-dark/20 group-hover:text-accent transition-colors shrink-0" fill="none"><path d="M3 8 H13 M10 5 L13 8 L10 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                Start retainer
+                <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none"><path d="M4 10 H16 M12 6 L16 10 L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </Link>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FULL SERVICE MENU — Fiverr-style category browse ─── */}
+      <section id="menu" className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#FFFDF8" }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-baseline gap-3 flex-wrap mb-6">
+            <h2
+              className="font-bold tracking-tight"
+              style={{
+                fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+                color: "#2D100F",
+                fontSize: "clamp(1.5rem, 4vw, 2rem)",
+              }}
+            >
+              All services
+            </h2>
+            <span
+              className="text-[16px]"
+              style={{ fontFamily: "var(--font-pacifico), 'Pacifico', cursive", color: "#337485" }}
+            >
+              fifty+ ways we can help
+            </span>
+            <span className="text-[12px] ml-auto self-end" style={{ color: "#7A6B57" }}>
+              {Object.values(serviceMenu).flat().length} services · tap to book
+            </span>
+          </div>
+
+          {/* Category tabs */}
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-1 -mx-1 px-1">
+            {serviceCategories.map((cat) => {
+              const active = activeServiceCat === cat;
+              return (
+                <button
+                  type="button"
+                  key={cat}
+                  onClick={() => setActiveServiceCat(cat)}
+                  className="shrink-0 text-[11.5px] sm:text-[12px] font-bold uppercase tracking-wider px-3.5 sm:px-4 py-2 rounded-full transition-colors"
+                  style={{
+                    background: active ? "#2D100F" : "#FFFFFF",
+                    color: active ? "#F7E6C2" : "#2D100F",
+                    border: `1px solid ${active ? "#2D100F" : "#E8DDD0"}`,
+                  }}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+            {serviceMenu[activeServiceCat as keyof typeof serviceMenu].map((svc) => (
+              <Link
+                key={svc}
+                href="/contact"
+                className="group flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 transition-all duration-200 hover:-translate-y-0.5"
+                style={{
+                  background: "#FFFFFF",
+                  border: "1px solid #E8DDD0",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                }}
+              >
+                <span className="flex items-center gap-3 min-w-0">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "#337485" }} />
+                  <span className="text-[13.5px] sm:text-sm font-semibold truncate" style={{ color: "#2D100F" }}>
+                    {svc}
+                  </span>
+                </span>
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider shrink-0" style={{ color: "#337485" }}>
+                  Quote
+                  <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none">
+                    <path d="M3 8 H13 M10 5 L13 8 L10 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
               </Link>
             ))}
           </div>
 
-          <p className="text-center text-text-dark-muted/60 text-sm mt-10">
-            Don&apos;t see what you need? <Link href="/contact" className="text-accent hover:underline">Contact us</Link> — we likely offer it.
+          <p className="text-center text-[12.5px] mt-8" style={{ color: "#5C4540" }}>
+            Don&apos;t see what you need?{" "}
+            <Link href="/contact" className="font-bold underline" style={{ color: "#337485" }}>
+              Contact us
+            </Link>{" "}
+            — we likely offer it.
           </p>
         </div>
       </section>
 
-      {/* ─── HOW IT WORKS ─── */}
-      <section className="py-24 px-4 bg-bg-light relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(#1A1714 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-        <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-text-light mb-14 text-center animate-slide-up-3d">Three Steps to Launch</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* ─── HOW IT WORKS — Fiverr 3-step ─── */}
+      <section className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#FFF9F3" }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8 sm:mb-10">
+            <h2
+              className="font-extrabold tracking-tight"
+              style={{
+                fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+                color: "#2D100F",
+                fontSize: "clamp(1.5rem, 4vw, 2rem)",
+              }}
+            >
+              How it works
+            </h2>
+            <p className="mt-1 text-[14px]" style={{ color: "#5C4540" }}>
+              Three steps from "I have an idea" to launch day.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
             {[
-              { step: "01", icon: <IconQuestion />, title: "Free Consultation", desc: "Tell us where you are and where you want to be. We scope the work and send a clear quote — no obligation.", delay: "delay-100" },
-              { step: "02", icon: <IconChecklist />, title: "We Execute", desc: "Our team handles formation, branding, development, and every filing in between. You stay in the loop, not in the weeds.", delay: "delay-300" },
-              { step: "03", icon: <IconRocket />, title: "You Launch", desc: "Receive your brand assets, live website, activated mail, and everything you need to open for business.", delay: "delay-500" },
+              { step: "01", icon: <IconQuestion />,  title: "Free consultation", desc: "Tell us where you are and where you want to be. We scope it and send a clear quote — no obligation." },
+              { step: "02", icon: <IconChecklist />, title: "We execute",         desc: "Formation, branding, development, every filing — handled by our local team. You stay in the loop, not in the weeds." },
+              { step: "03", icon: <IconRocket />,    title: "You launch",         desc: "Receive your brand assets, live website, activated mail, and everything you need to open for business." },
             ].map((s) => (
-              <div key={s.step} className={`text-center p-10 bg-surface-light border border-border-light rounded-2xl hover-lift shadow-[var(--shadow-md)] animate-fade-up ${s.delay}`}>
+              <div
+                key={s.step}
+                className="text-center p-6 sm:p-7 rounded-2xl"
+                style={{
+                  background: "#FFFFFF",
+                  border: "1px solid #E8DDD0",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 8px 22px rgba(45,16,15,0.06)",
+                }}
+              >
                 {s.icon}
-                <p className="text-6xl font-extrabold tracking-tight text-accent/15 mb-2">{s.step}</p>
-                <p className="font-extrabold tracking-tight text-text-light text-sm mb-3">{s.title}</p>
-                <p className="text-text-light-muted text-sm leading-relaxed">{s.desc}</p>
+                <p
+                  className="font-extrabold tabular-nums"
+                  style={{
+                    fontFamily: "var(--font-baloo), 'Baloo 2', sans-serif",
+                    color: "#F0DBA9",
+                    fontSize: "clamp(2.25rem, 6vw, 3rem)",
+                    lineHeight: 1,
+                  }}
+                >
+                  {s.step}
+                </p>
+                <p className="font-extrabold text-[15px] mt-2" style={{ color: "#2D100F" }}>
+                  {s.title}
+                </p>
+                <p className="text-[12.5px] leading-relaxed mt-1.5" style={{ color: "#5C4540" }}>
+                  {s.desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── CTA ─── */}
-      <section className="py-28 px-4 relative overflow-hidden bg-bg-dark">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[120px] pointer-events-none bg-accent" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
-
-        <div className="max-w-3xl mx-auto relative z-10 text-center">
-          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text animate-gradient" style={{ backgroundImage: "linear-gradient(135deg, #EBF2FA, #fff, #337485, #EBF2FA)", backgroundSize: "200% 200%" }}>
-            Let&apos;s Build Something
+      {/* ─── CTA — final ─── */}
+      <section
+        className="px-5 sm:px-6 py-14 sm:py-20"
+        style={{ background: "linear-gradient(160deg, #2D100F 0%, #1F0807 100%)", color: "#F7E6C2" }}
+      >
+        <div className="max-w-3xl mx-auto text-center">
+          <h2
+            className="font-extrabold tracking-tight"
+            style={{
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+              color: "#F7E6C2",
+              fontSize: "clamp(1.875rem, 6vw, 3rem)",
+              lineHeight: 1.05,
+            }}
+          >
+            Let&apos;s build something{" "}
+            <span style={{ fontFamily: "var(--font-pacifico), 'Pacifico', cursive", color: "#F0DBA9", fontWeight: 400 }}>
+              together
+            </span>
           </h2>
-          <p className="text-text-dark-muted/60 mt-6 mb-3 max-w-md mx-auto">
-            Full package, brand management, or a single service — the first conversation is always free.
+          <p className="mt-3 text-[14.5px] sm:text-base" style={{ color: "#F0DBA9" }}>
+            Full bundle, brand retainer, or a single service — the first conversation is always free.
           </p>
-          <p className="text-text-dark-muted/60 text-sm mb-12">No commitment &middot; Custom quote within 24 hours</p>
+          <p className="mt-2 text-[12px]" style={{ color: "rgba(247,230,194,0.7)" }}>
+            No commitment · Custom quote within 24 hours
+          </p>
 
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/contact" className="group inline-flex items-center gap-3 font-bold px-12 py-5 rounded-xl text-white transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-accent to-accent-hover shadow-xl">
-              Book a Free Consultation
-              <svg viewBox="0 0 20 20" className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none"><path d="M4 10 H16 M12 6 L16 10 L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          <div className="flex flex-wrap justify-center gap-3 mt-7">
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 font-bold px-6 py-3.5 rounded-xl transition-colors"
+              style={{ background: "#F7E6C2", color: "#2D100F" }}
+            >
+              Book a free consultation
+              <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none"><path d="M4 10 H16 M12 6 L16 10 L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </Link>
-            <Link href="/pricing" className="glass-dark text-text-dark font-bold px-10 py-5 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:bg-bg-light/10">
-              View Mailbox Plans
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-2 font-bold px-6 py-3.5 rounded-xl transition-colors"
+              style={{ background: "rgba(247,230,194,0.10)", color: "#F7E6C2", border: "1px solid rgba(247,230,194,0.30)" }}
+            >
+              View mailbox plans
             </Link>
           </div>
         </div>

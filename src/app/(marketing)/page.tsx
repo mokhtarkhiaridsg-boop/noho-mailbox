@@ -8,9 +8,13 @@ import { StatsCounter } from "@/components/StatsCounter";
 import { HeroMailbox } from "@/components/HeroMailbox";
 import { AiShield, AiBolt, AiTruck, AiClock, AiPin, AiEnvelope, AiHeart } from "@/components/AnimatedIcons";
 import { prisma } from "@/lib/prisma";
+import { laStartOfToday, laEndOfToday } from "@/lib/laDay";
+import { getOperatingHours } from "@/app/actions/operatingHours";
 
 export const metadata: Metadata = {
-  title: "NOHO Mailbox — Private Mailbox Rental in North Hollywood, CA",
+  // `absolute` bypasses the root layout's "%s | NOHO Mailbox" template
+  // so the homepage doesn't render as "NOHO Mailbox … | NOHO Mailbox".
+  title: { absolute: "NOHO Mailbox — Private Mailbox Rental in North Hollywood, CA" },
   description:
     "Real street address, mail scanning, same-day delivery, notary & business formation. Plans from $50 · North Hollywood, CA.",
   openGraph: {
@@ -399,15 +403,17 @@ const stats = [
 // ──────────────────────────────────────────────────────────────────────────
 
 async function getShippedTodayCount(): Promise<number> {
-  // Live count of NOHO labels shipped today (local time). Pulled into the
+  // Live count of NOHO labels shipped today (LA local time). Pulled into the
   // landing-page strip as a small social-proof signal: real shipments are
   // moving through the storefront. Best-effort — Prisma errors fall through
   // to 0 so the strip still renders.
+  //
+  // We must use LA day-bounds, not server local time. Vercel runs serverless
+  // in UTC, so `setHours(0,0,0,0)` would compute UTC midnight — the count
+  // would visibly reset to 0 at 5pm PT when UTC rolls over to the next day.
   try {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
+    const start = laStartOfToday();
+    const end = laEndOfToday();
     return await prisma.shippoLabel.count({
       where: {
         createdAt: { gte: start, lte: end },
@@ -420,7 +426,19 @@ async function getShippedTodayCount(): Promise<number> {
 }
 
 export default async function Home() {
-  const shippedTodayCount = await getShippedTodayCount();
+  // Fetch in parallel — both are best-effort with their own try/catch fallbacks.
+  const [shippedTodayCount, hours] = await Promise.all([
+    getShippedTodayCount(),
+    getOperatingHours(),
+  ]);
+
+  // Render the "Mon–Fri X · Sat Y" summary from the live config so the
+  // marketing copy can never drift from what the admin saves in /admin/hours.
+  // Falls back to the DEFAULT_HOURS strings when a day row is malformed.
+  const monHours = hours.weekly[1]?.hours ?? "9:30am–5:30pm (lunch 1:30–2:00pm)";
+  const satHours = hours.weekly[6]?.hours ?? "10:00am–1:30pm";
+  const weekdaySummary = `Mon–Fri ${monHours} · Sat ${satHours}`;
+
   return (
     <>
       <script
@@ -457,7 +475,7 @@ export default async function Home() {
 
       {/* ─── HERO ─── */}
       <section
-        className="relative overflow-hidden flex flex-col items-center justify-center text-center px-5 pt-16 pb-12 sm:pt-20 sm:pb-0 min-h-[88vh] sm:min-h-[92vh]"
+        className="relative overflow-hidden flex flex-col items-center justify-center text-center px-5 sm:px-6 pt-10 pb-10 sm:pt-20 sm:pb-0 min-h-[88vh] sm:min-h-[92vh]"
         style={{ background: "#F7E6C2" }}
       >
         {/* Dot grid */}
@@ -483,24 +501,24 @@ export default async function Home() {
         />
 
         <div className="relative z-10 max-w-2xl mx-auto">
-          <div className="animate-bounce-in mb-6">
-            <Logo className="mx-auto w-[280px] sm:w-[340px] drop-shadow-lg" />
+          <div className="animate-bounce-in mb-4 sm:mb-6">
+            <Logo className="mx-auto w-[240px] sm:w-[340px] drop-shadow-lg" />
           </div>
 
-          <div className="animate-fade-up delay-100 inline-flex items-center gap-2 mb-6">
+          <div className="animate-fade-up delay-100 inline-flex items-center gap-2 mb-5 sm:mb-6 max-w-full">
             <span
-              className="text-[10px] font-black uppercase tracking-[0.24em] px-4 py-2 rounded-full inline-flex items-center gap-1.5"
+              className="text-[10px] font-black uppercase tracking-[0.18em] sm:tracking-[0.24em] px-3 sm:px-4 py-2 rounded-full inline-flex items-center gap-1.5 leading-tight"
               style={{ background: "#2D100F", color: "#F7E6C2" }}
             >
-              <PinIcon className="w-3 h-3" />
-              5062 Lankershim · North Hollywood, CA
+              <PinIcon className="w-3 h-3 shrink-0" />
+              <span>5062 Lankershim · North Hollywood, CA</span>
             </span>
           </div>
 
           <h1
-            className="animate-fade-up delay-200 font-extrabold leading-[1.05] tracking-tight mb-5"
+            className="animate-fade-up delay-200 font-extrabold leading-[1.05] tracking-tight mb-4 sm:mb-5"
             style={{
-              fontSize: "clamp(2.6rem, 6.5vw, 5rem)",
+              fontSize: "clamp(2.25rem, 6.5vw, 5rem)",
               color: "#2D100F",
               fontFamily: "var(--font-baloo), sans-serif",
             }}
@@ -511,8 +529,8 @@ export default async function Home() {
           </h1>
 
           <p
-            className="animate-fade-up delay-300 leading-relaxed mb-8 max-w-md mx-auto"
-            style={{ fontSize: "17px", color: "rgba(45,16,15,0.62)" }}
+            className="animate-fade-up delay-300 leading-relaxed mb-6 sm:mb-8 max-w-md mx-auto"
+            style={{ fontSize: "16px", color: "rgba(45,16,15,0.62)" }}
           >
             Private mailbox rental with mail scanning, same-day delivery,
             walk-in notary, and full business formation — all from one
@@ -556,7 +574,7 @@ export default async function Home() {
               primary "Request a Mailbox" pair so it doesn't compete, but
               still above the fold for above-the-fold discovery. */}
           <div
-            className="animate-fade-up delay-500 mx-auto mb-7 inline-flex items-center gap-2 px-2 py-1.5 rounded-full"
+            className="animate-fade-up delay-500 mx-auto mb-7 inline-flex flex-wrap justify-center items-center gap-2 px-2 py-1.5 rounded-2xl sm:rounded-full max-w-full"
             style={{
               background: "#F7E6C2",
               border: "1px solid rgba(45,16,15,0.12)",
@@ -567,14 +585,14 @@ export default async function Home() {
             </span>
             <Link
               href="/shipping"
-              className="text-[12px] font-black px-3 py-1.5 rounded-full text-white transition-all hover:scale-[1.03]"
+              className="text-[12px] font-black px-3 py-2 rounded-full text-white transition-all hover:scale-[1.03] inline-flex items-center min-h-[36px]"
               style={{ background: "#337485", boxShadow: "0 2px 8px rgba(51,116,133,0.30)" }}
             >
               Get a quote →
             </Link>
             <Link
               href="/track"
-              className="text-[12px] font-bold px-3 py-1.5 rounded-full transition-colors hover:bg-white/40"
+              className="text-[12px] font-bold px-3 py-2 rounded-full transition-colors hover:bg-white/40 inline-flex items-center min-h-[36px]"
               style={{ color: "#2D100F" }}
             >
               Track a shipment →
@@ -649,7 +667,7 @@ export default async function Home() {
 
       {/* ─── STATS ─── */}
       <section
-        className="py-16 px-5 relative overflow-hidden"
+        className="py-12 sm:py-16 px-5 sm:px-6 relative overflow-hidden"
         style={{ background: "#2D100F" }}
       >
         <div
@@ -710,11 +728,11 @@ export default async function Home() {
       {/* ─── PLANS (postage stamps) ─── */}
       <section
         id="plans"
-        className="py-20 px-5 overflow-hidden"
+        className="py-14 sm:py-20 px-7 sm:px-6 overflow-hidden"
         style={{ background: "#F7E6C2" }}
       >
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 sm:mb-14">
             <p
               className="font-black mb-2"
               style={{
@@ -887,11 +905,11 @@ export default async function Home() {
 
       {/* ─── HOW IT WORKS ─── */}
       <section
-        className="py-20 px-5 relative overflow-hidden"
+        className="py-14 sm:py-20 px-5 sm:px-6 relative overflow-hidden"
         style={{ background: "#F7E6C2" }}
       >
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 sm:mb-14">
             <p
               className="font-black mb-2"
               style={{
@@ -1037,11 +1055,11 @@ export default async function Home() {
 
       {/* ─── TESTIMONIALS ─── */}
       <section
-        className="py-20 px-5 relative overflow-hidden"
+        className="py-14 sm:py-20 px-5 sm:px-6 relative overflow-hidden"
         style={{ background: "#F7E6C2" }}
       >
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 sm:mb-14">
             {/* Family-owned heritage pill — Tunisian red, restrained Apple-minimal */}
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-4 text-[11px] font-bold uppercase tracking-[0.14em]"
@@ -1094,7 +1112,7 @@ export default async function Home() {
               {
                 Icon: AiTruck,
                 title: "$5 same-day delivery in NoHo",
-                body: "Courier-dropped to your door. Flat $5 in NoHo, $10–$24 elsewhere in LA. Tracked the whole way.",
+                body: "Courier-dropped to your door. Flat $5 in NoHo, $9–$28 across LA (7-zone tier). Tracked the whole way.",
               },
               {
                 Icon: AiEnvelope,
@@ -1109,7 +1127,10 @@ export default async function Home() {
               {
                 Icon: AiClock,
                 title: "We answer the phone",
-                body: "Mon–Fri 9:30am–5:30pm (lunch 1:30–2pm) · Sat 10am–1:30pm. Call (818) 506-7744 — a person picks up, not a robot.",
+                // Hours string is pulled from the live operating-hours config
+                // (single source of truth shared with the footer + open-now badge)
+                // so admin edits in /admin/hours flow through here automatically.
+                body: `${weekdaySummary}. Call (818) 506-7744 — a person picks up, not a robot.`,
               },
             ].map((b, i) => (
               <div
@@ -1138,7 +1159,7 @@ export default async function Home() {
                     >
                       {b.title}
                     </h3>
-                    <p className="text-[14px] leading-relaxed" style={{ color: "rgba(45,16,15,0.65)" }}>
+                    <p className="text-[15px] leading-relaxed" style={{ color: "rgba(45,16,15,0.65)" }}>
                       {b.body}
                     </p>
                   </div>
@@ -1182,10 +1203,10 @@ export default async function Home() {
 
       {/* ─── VISIT US (walk-in conversion) ─── */}
       <section
-        className="py-20 px-5 relative overflow-hidden"
+        className="py-14 sm:py-20 px-5 sm:px-6 relative overflow-hidden"
         style={{ background: "#F7E6C2" }}
       >
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 md:gap-10 items-center">
           <div className="animate-fade-up">
             <p
               className="font-black mb-2"
@@ -1218,16 +1239,16 @@ export default async function Home() {
             <ul className="space-y-2.5 mb-7">
               {[
                 "5062 Lankershim Blvd, North Hollywood, CA 91601",
-                "Mon–Fri 9:30am–5:30pm (break 1:30–2pm) · Sat 10–1:30",
+                weekdaySummary,
                 "(818) 506-7744",
               ].map((line) => (
                 <li
                   key={line}
-                  className="flex items-center gap-3 text-[14px]"
+                  className="flex items-start gap-3 text-[15px] leading-snug"
                   style={{ color: "#2D100F" }}
                 >
                   <span
-                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    className="w-1.5 h-1.5 rounded-full shrink-0 mt-[8px]"
                     style={{ background: "#337485" }}
                   />
                   {line}
@@ -1285,7 +1306,7 @@ export default async function Home() {
 
       {/* ─── BUSINESS CTA ─── */}
       <section
-        className="py-20 px-5 relative overflow-hidden"
+        className="py-14 sm:py-20 px-5 sm:px-6 relative overflow-hidden"
         style={{ background: "#2D100F" }}
       >
         <div
@@ -1322,8 +1343,10 @@ export default async function Home() {
               color: "#F7E6C2",
             }}
           >
-            Launch Your Business
-            <br />
+            {/* Trailing space before <br /> so linearized text + screen
+                readers + SEO crawlers read "Business Under" not
+                "BusinessUnder" — same gotcha fixed on /how-it-works H1. */}
+            Launch Your Business{" "}<br />
             Under One Roof
           </h2>
           <p
@@ -1358,9 +1381,9 @@ export default async function Home() {
       </section>
 
       {/* ─── FINAL CTA ─── */}
-      <section className="py-16 px-5" style={{ background: "#F7E6C2" }}>
+      <section className="py-12 sm:py-16 px-5 sm:px-6 pb-24 sm:pb-16" style={{ background: "#F7E6C2" }}>
         <div
-          className="max-w-3xl mx-auto rounded-3xl p-8 sm:p-12 text-center"
+          className="max-w-3xl mx-auto rounded-3xl p-6 sm:p-12 text-center"
           style={{
             background: "white",
             boxShadow: "0 24px 60px rgba(45,16,15,0.15)",
@@ -1450,7 +1473,7 @@ export default async function Home() {
       </div>
 
       <HomepageClient />
-      <OpenClosedSign />
+      <OpenClosedSign hours={hours} />
     </>
   );
 }
