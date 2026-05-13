@@ -58,25 +58,49 @@ const numbers = [
 
 export default function AboutPage() {
   return (
-    <div className="perspective-container">
-      <section className="relative py-24 px-5 overflow-hidden bg-bg-dark">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[120px] pointer-events-none bg-accent" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
+    <div className="perspective-container" style={{ background: "#FFFDF8" }}>
+      {/* Hero — cream + brown iPad-OS */}
+      <section
+        className="relative px-5 sm:px-6 pt-12 pb-10 sm:pt-20 sm:pb-14 overflow-hidden"
+        style={{
+          background: "radial-gradient(ellipse at top, #F7E6C2 0%, #F0DBA9 45%, #E8DDD0 100%)",
+        }}
+      >
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(#2D100F 1px, transparent 1px)", backgroundSize: "22px 22px" }}
+          aria-hidden="true"
+        />
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <span
-            className="inline-block px-3 py-1 text-[11px] font-bold tracking-wider rounded-full mb-5"
+            className="inline-flex px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.18em] rounded-full mb-4"
             style={{
-              background: "rgba(245,166,35,0.15)",
-              color: "#F5A623",
-              border: "1px solid rgba(245,166,35,0.3)",
+              background: "rgba(51,116,133,0.10)",
+              color: "#337485",
+              border: "1px solid rgba(51,116,133,0.28)",
             }}
           >
-            ABOUT US
+            About us
           </span>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-text-dark mb-6">
-            We&apos;re an operating CMRA. Not a platform. Not a network.
+          <h1
+            className="font-extrabold tracking-tight"
+            style={{
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+              color: "#2D100F",
+              fontSize: "clamp(1.875rem, 5.5vw, 3rem)",
+              lineHeight: 1.1,
+            }}
+          >
+            We&apos;re an operating CMRA.{" "}
+            <span style={{ fontFamily: "var(--font-pacifico), 'Pacifico', cursive", color: "#337485", fontWeight: 400 }}>
+              not a platform
+            </span>
+            . Not a network.
           </h1>
-          <p className="text-text-dark-muted max-w-2xl mx-auto text-lg">
+          <p
+            className="mt-3 sm:mt-4 max-w-2xl mx-auto text-[14.5px] sm:text-base"
+            style={{ color: "#5C4540" }}
+          >
             5062 Lankershim Blvd, North Hollywood. ~500 active mailboxes. A
             walk-in counter. Same-day delivery drivers. A software stack we
             built to run our own business — and now license to other CMRA
@@ -86,14 +110,14 @@ export default function AboutPage() {
       </section>
 
       <div
-        className="py-3 px-4 text-center text-sm font-semibold"
-        style={{ background: "#F7E6C2", color: "#6B3F1A" }}
+        className="py-3 px-5 sm:px-6 text-center text-[12.5px] sm:text-sm font-semibold"
+        style={{ background: "#2D100F", color: "#F7E6C2" }}
       >
-        Real building · Real staff · Real customers · Real walk-in counter
+        Real building &middot; Real staff &middot; Real customers &middot; Real walk-in counter
       </div>
 
       {/* Numbers */}
-      <section className="py-16 px-4 bg-bg-light">
+      <section className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#FFFDF8" }}>
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-text-light text-center mb-10">
             What we run today
@@ -125,7 +149,7 @@ export default function AboutPage() {
       </section>
 
       {/* Why we exist */}
-      <section className="py-16 px-4" style={{ background: "#FFF9F3" }}>
+      <section className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#FFF9F3" }}>
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-text-light mb-6">
             Why we exist
@@ -160,7 +184,7 @@ export default function AboutPage() {
       </section>
 
       {/* Timeline */}
-      <section className="py-16 px-4 bg-bg-light">
+      <section className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#FFFDF8" }}>
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-text-light mb-10">
             How we got here
@@ -189,7 +213,7 @@ export default function AboutPage() {
       </section>
 
       {/* What we sell */}
-      <section className="py-16 px-4" style={{ background: "#FFF9F3" }}>
+      <section className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#FFF9F3" }}>
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-text-light mb-6">
             Five things we sell
@@ -249,35 +273,51 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Visit / contact */}
-      <section className="py-16 px-4 bg-bg-dark">
+      {/* Visit / contact — dark brown CTA */}
+      <section
+        className="px-5 sm:px-6 py-12 sm:py-16"
+        style={{ background: "linear-gradient(160deg, #2D100F 0%, #1F0807 100%)" }}
+      >
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-text-dark mb-4">
-            Come by.
+          <h2
+            className="font-extrabold tracking-tight"
+            style={{
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+              color: "#F7E6C2",
+              fontSize: "clamp(1.5rem, 5vw, 2.25rem)",
+              lineHeight: 1.05,
+            }}
+          >
+            Come by{" "}
+            <span style={{ fontFamily: "var(--font-pacifico), 'Pacifico', cursive", color: "#F0DBA9", fontWeight: 400 }}>
+              and say hi
+            </span>
           </h2>
-          <p className="text-text-dark-muted mb-6 leading-relaxed">
-            5062 Lankershim Blvd, North Hollywood CA 91601. Mon-Sat. We&apos;re
-            on the west side of Lankershim, between Magnolia and Otsego. 4
-            parking spots in front, free street parking after 6pm.
+          <p className="mt-3 text-[14px] sm:text-base leading-relaxed" style={{ color: "#F0DBA9" }}>
+            5062 Lankershim Blvd, North Hollywood CA 91601. Mon&ndash;Sat. We&apos;re on
+            the west side of Lankershim, between Magnolia and Otsego. 4 parking spots
+            in front, free street parking after 6pm.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
             <a
-              href="tel:8185067744"
-              className="text-white font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-1"
-              style={{ background: "#337485", boxShadow: "var(--shadow-md)" }}
+              href="tel:18185067744"
+              className="font-bold px-6 py-3.5 rounded-xl transition-colors inline-flex items-center justify-center gap-2"
+              style={{ background: "#F7E6C2", color: "#2D100F", minHeight: 48 }}
             >
               Call (818) 506-7744
             </a>
             <Link
               href="/contact"
-              className="font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-1"
+              className="font-bold px-6 py-3.5 rounded-xl transition-colors inline-flex items-center justify-center gap-2"
               style={{
-                background: "rgba(255,255,255,0.06)",
-                color: "#F8F2EA",
-                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(247,230,194,0.10)",
+                color: "#F7E6C2",
+                border: "1px solid rgba(247,230,194,0.30)",
+                minHeight: 48,
               }}
             >
               Send a message
+              <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none"><path d="M4 10 H16 M12 6 L16 10 L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </Link>
           </div>
         </div>

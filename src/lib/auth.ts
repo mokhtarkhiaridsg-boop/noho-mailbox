@@ -18,8 +18,14 @@ const providers: any[] = [
     async authorize(credentials) {
       if (!credentials?.email || !credentials?.password) return null;
 
+      // Normalize the submitted email — signup stores `.trim().toLowerCase()`
+      // via the Zod schema, so an uppercase/whitespace-padded login email
+      // would never match. This was silently rejecting valid customers with
+      // "Invalid email or password" whenever their browser autofilled
+      // the email in title case (common on iOS Mail-suggested credentials).
+      const normalizedEmail = (credentials.email as string).trim().toLowerCase();
       const user = await prisma.user.findUnique({
-        where: { email: credentials.email as string },
+        where: { email: normalizedEmail },
       });
 
       // OAuth-only users have an unguessable hash that no submitted password will match
@@ -85,7 +91,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user, account }) {
       // For OAuth providers, upsert the user record into our database
       if (account && account.provider !== "credentials" && user.email) {
-        const existing = await prisma.user.findUnique({ where: { email: user.email } });
+        // Normalize the provider-supplied email so we match the lowercase
+        // address signup stores, regardless of how Google/Apple cased it.
+        // Without this, a customer who signed up with credentials as
+        // `jane@example.com` and later clicks "Sign in with Google" — where
+        // Google may hand us `Jane@Example.com` — would hit a P2002 unique
+        // collision on email and be locked out of OAuth login forever.
+        const normalizedEmail = user.email.trim().toLowerCase();
+        const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
         if (!existing) {
           // Create a new free-member account with an unguessable password hash
           // (OAuth-only users can never sign in via password)
@@ -93,8 +106,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const placeholderHash = await bcrypt.hash(randomSecret, 12);
           const created = await prisma.user.create({
             data: {
-              name: user.name ?? user.email.split("@")[0],
-              email: user.email,
+              name: user.name ?? normalizedEmail.split("@")[0],
+              email: normalizedEmail,
               image: user.image ?? null,
               oauthProvider: account.provider,
               passwordHash: placeholderHash,

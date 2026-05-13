@@ -18,6 +18,13 @@ import { randomBytes } from "crypto";
 // rendering. These match what the UI inputs allow, so legitimate signups
 // pass through unchanged.
 const PHONE_REGEX = /^[\d\s\-+()]{7,30}$/; // permissive: handles +1 (818) 506-7744 and 8185067744
+// Plan IDs accepted by the signup form. Must stay in sync with `planChoices`
+// in src/app/(auth)/signup/page.tsx — if a new tier is added to the UI it
+// MUST be appended here or the form silently rejects the submission with a
+// cryptic Zod error and the customer's signup never reaches the admin
+// dashboard. (This is exactly how "virtual" customers were dead-ending
+// for weeks before this fix.)
+const VALID_PLAN_IDS = ["basic", "business", "premium", "virtual", "not_sure"] as const;
 const requestSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(120, "Name is too long"),
   email: z.string().trim().toLowerCase().email("Please enter a valid email").max(254, "Email is too long"),
@@ -28,9 +35,15 @@ const requestSchema = z.object({
     .regex(PHONE_REGEX, "Please enter a valid phone number")
     .optional()
     .or(z.literal("")),
-  plan: z.enum(["basic", "business", "premium", "not_sure"]).optional(),
+  // Unknown plan values get coerced to `not_sure` rather than rejected so a
+  // stale UI option (or a manual URL param tweak) never blocks signup. Admin
+  // still sees the raw plan in kycNotes via the audit trail upstream if needed.
+  plan: z
+    .enum(VALID_PLAN_IDS)
+    .catch("not_sure" as (typeof VALID_PLAN_IDS)[number])
+    .optional(),
   notes: z.string().trim().max(2000, "Notes are too long (max 2000 chars)").optional(),
-  signupMode: z.enum(["in_store", "online"]).optional(),
+  signupMode: z.enum(["in_store", "online"]).catch("in_store").optional(),
   referralCode: z.string().trim().toUpperCase().max(40, "Referral code is too long").optional(),
 });
 
@@ -150,30 +163,36 @@ export async function requestMailbox(
     throw e;
   }
 
-  // Send admin notification + customer confirmation in parallel. Both go
-  // through `sendEmail` which never throws — failures are logged to EmailLog
-  // for the admin to see and don't block the signup response. Was missing
-  // entirely before this iteration: customer would submit the form, see a
-  // success screen, and the admin would never know.
+  // Send admin notification + customer confirmation in parallel. `sendEmail`
+  // catches provider errors internally, but the EmailLog.create() that runs
+  // BEFORE the try/catch can still throw on transient DB issues. Wrap the
+  // whole batch so a flaky DB write never bubbles up to the signup form and
+  // shows the customer a 500 page after their data has already been saved.
   // Narrow signupMode to the literal union the email helpers expect.
   const mode: "in_store" | "online" = signupMode === "online" ? "online" : "in_store";
-  await Promise.all([
-    sendNewSignupAlert({
-      name,
-      email,
-      phone: phone ?? null,
-      plan: planCapitalized,
-      signupMode: mode,
-      notes: notes ?? null,
-      userId: created.id,
-    }),
-    sendSignupConfirmation({
-      name,
-      email,
-      signupMode: mode,
-      userId: created.id,
-    }),
-  ]);
+  try {
+    await Promise.all([
+      sendNewSignupAlert({
+        name,
+        email,
+        phone: phone ?? null,
+        plan: planCapitalized,
+        signupMode: mode,
+        notes: notes ?? null,
+        userId: created.id,
+      }),
+      sendSignupConfirmation({
+        name,
+        email,
+        signupMode: mode,
+        userId: created.id,
+      }),
+    ]);
+  } catch (err) {
+    // Log so the admin can see the email failed; don't fail the signup —
+    // the customer record is already created and recoverable manually.
+    console.error("[requestMailbox] email dispatch failed", err);
+  }
 
   // NOTE: referral wallet credit was previously fired here on signup. That
   // converted the referral bonus into free wallet credit for any attacker who
@@ -191,7 +210,11 @@ export async function login(
   prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
-  const email = formData.get("email") as string;
+  // Normalize email exactly the way signup does so case-mismatched logins
+  // (e.g. autofill that capitalizes) resolve to the same User row that
+  // signup created. This was previously case-sensitive and silently failed
+  // for any customer whose autofill or keyboard introduced caps.
+  const email = ((formData.get("email") as string) ?? "").trim().toLowerCase();
   const password = formData.get("password") as string;
   const totpToken = (formData.get("totpToken") as string | null)?.trim() || "";
 
