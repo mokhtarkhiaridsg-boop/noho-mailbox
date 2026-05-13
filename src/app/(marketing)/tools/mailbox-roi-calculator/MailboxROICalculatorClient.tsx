@@ -103,7 +103,7 @@ export default function MailboxROICalculatorClient() {
       {/* Packages per month */}
       <div>
         <div className="flex items-baseline justify-between mb-2">
-          <label className="text-sm font-bold text-text-light">
+          <label htmlFor="roi-packages" className="text-sm font-bold text-text-light">
             Packages per month
           </label>
           <span className="text-2xl font-extrabold" style={{ color: "#337485" }}>
@@ -111,6 +111,7 @@ export default function MailboxROICalculatorClient() {
           </span>
         </div>
         <input
+          id="roi-packages"
           type="range"
           min={1}
           max={50}
@@ -128,7 +129,7 @@ export default function MailboxROICalculatorClient() {
       {/* Avg value */}
       <div>
         <div className="flex items-baseline justify-between mb-2">
-          <label className="text-sm font-bold text-text-light">
+          <label htmlFor="roi-avg-value" className="text-sm font-bold text-text-light">
             Average package value
           </label>
           <span className="text-2xl font-extrabold" style={{ color: "#337485" }}>
@@ -136,6 +137,7 @@ export default function MailboxROICalculatorClient() {
           </span>
         </div>
         <input
+          id="roi-avg-value"
           type="range"
           min={10}
           max={300}
@@ -154,7 +156,7 @@ export default function MailboxROICalculatorClient() {
       {/* Hourly rate */}
       <div>
         <div className="flex items-baseline justify-between mb-2">
-          <label className="text-sm font-bold text-text-light">
+          <label htmlFor="roi-hourly-rate" className="text-sm font-bold text-text-light">
             Your hourly rate (for time-cost math)
           </label>
           <span className="text-2xl font-extrabold" style={{ color: "#337485" }}>
@@ -162,6 +164,7 @@ export default function MailboxROICalculatorClient() {
           </span>
         </div>
         <input
+          id="roi-hourly-rate"
           type="range"
           min={15}
           max={200}

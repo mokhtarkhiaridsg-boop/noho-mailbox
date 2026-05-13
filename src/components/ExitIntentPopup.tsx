@@ -169,6 +169,7 @@ function ExitIntentDialog({ onDismiss }: { onDismiss: () => void }) {
               type="email"
               name="email"
               required
+              aria-label="Email address for $5 delivery credit"
               placeholder="you@example.com"
               autoComplete="email"
               className="w-full text-sm rounded-xl px-4 py-3 focus:outline-none"

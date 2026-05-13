@@ -6,7 +6,7 @@ const serviceJsonLd = {
   "@type": "Service",
   name: "Florist Overflow Delivery — Same-Day Courier for Flower Shops",
   description:
-    "Same-day overflow delivery for florists during Mother's Day, Valentine's, Christmas, and last-minute sympathy arrangements. $5 per stop in NoHo, $9.75–$14 across the Valley.",
+    "Same-day overflow delivery for florists during Mother's Day, Valentine's, Christmas, and last-minute sympathy arrangements. $5 per stop in NoHo, $9–$13 across the Valley.",
   serviceType: "Floral Delivery",
   provider: {
     "@type": "LocalBusiness",
@@ -43,7 +43,7 @@ const serviceJsonLd = {
 export const metadata: Metadata = {
   title: "Same-Day Florist Overflow Delivery — North Hollywood",
   description:
-    "Mother&apos;s Day, Valentine&apos;s, holidays — when your truck can&apos;t keep up, we&apos;ll take 5–20 deliveries off your hands at $5 each in NoHo. No commitment. (818) 506-7744.",
+    "Mother's Day, Valentine's, holidays — when your truck can't keep up we take 5–20 overflow deliveries at $5 each in NoHo. No commitment, no contract.",
   openGraph: {
     title: "Florist Overflow Delivery — NOHO Mailbox",
     description:
@@ -101,7 +101,7 @@ const how = [
     n: "4",
     title: "Settle up",
     body:
-      "$5/stop in NoHo, $9.75–$14 across the Valley. Square invoice end of day, paid however you&apos;re used to.",
+      "$5/stop in NoHo, $9–$13 across the Valley. Square invoice end of day, paid however you&apos;re used to.",
   },
 ];
 
@@ -164,7 +164,7 @@ export default function DeliveryForFloristsPage() {
         className="py-3 px-4 text-center text-sm font-semibold"
         style={{ background: "#F7E6C2", color: "#6B3F1A" }}
       >
-        $5 in NoHo · $9.75–$14 across the Valley · Pay only what we deliver
+        $5 in NoHo · $9–$13 across the Valley · Pay only what we deliver
       </div>
 
       {/* Peak days */}

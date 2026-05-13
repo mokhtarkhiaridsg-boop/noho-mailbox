@@ -44,7 +44,7 @@ const serviceJsonLd = {
 export const metadata: Metadata = {
   title: "Same-Day Delivery for Etsy / Shopify Sellers — North Hollywood",
   description:
-    "Local Etsy, Shopify, Amazon Handmade sellers: turn same-zip orders into same-day deliveries for $5 flat. Beat Amazon Prime on speed inside NoHo / Burbank / Studio City.",
+    "Local Etsy, Shopify, Amazon Handmade sellers: turn same-zip orders into same-day deliveries for $5. Beat Prime on speed in NoHo / Burbank / Studio City.",
   openGraph: {
     title: "Local Same-Day for Boutique E-com — NOHO Mailbox",
     description:
@@ -90,7 +90,7 @@ const flow = [
     n: "2",
     title: "Text us the address",
     body:
-      "(818) 506-7744. Photo of the package + recipient address. We quote you in 5 minutes — usually $5 inside NoHo, $9.75–$14 across the Valley.",
+      "(818) 506-7744. Photo of the package + recipient address. We quote you in 5 minutes — usually $5 inside NoHo, $9–$13 across the Valley.",
   },
   {
     n: "3",

@@ -90,7 +90,11 @@ export default function PromoBanner({ config }: Props) {
             {" "}
             <Link
               href={ctaHref}
-              className="underline font-bold hover:no-underline"
+              // `inline-block` + vertical padding gives the link a 44px-tall
+              // touch target on mobile while keeping the visual flow inline.
+              // Without this the underlined text is only ~17px tall — below
+              // WCAG 2.5.8 minimum and hard to thumb-tap.
+              className="inline-block py-2 -my-1 underline font-bold hover:no-underline"
               style={{ color: "#FFFFFF" }}
             >
               {ctaText} →

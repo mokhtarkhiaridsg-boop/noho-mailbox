@@ -10,7 +10,7 @@ import LobbyBoard from "./LobbyBoard";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Lobby · NOHO Mailbox",
+  title: "Lobby",
   description: "Live waiting-list, tours, and open-status display for the NOHO Mailbox lobby.",
 };
 

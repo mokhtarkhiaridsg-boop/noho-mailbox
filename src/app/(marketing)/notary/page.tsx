@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Notary Services",
+  title: "Walk-In Notary Public — North Hollywood",
   description:
-    "Walk-in notary public in North Hollywood — legal documents, real estate, affidavits, power of attorney, and more. No appointment needed.",
+    "Walk-in notary in North Hollywood for legal docs, real estate, affidavits, POA, contracts, and loans. No appointment. Free Form 1583 for Business + Premium members.",
   openGraph: {
     title: "Notary Services — NOHO Mailbox",
     description: "Walk-in notary services for legal documents, real estate, contracts, and more in North Hollywood, CA.",

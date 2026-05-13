@@ -164,7 +164,9 @@ export async function generateDropoffBarcode(input: GenerateInput): Promise<Gene
 export async function getDropoffBarcodeByCode(input: { code: string }): Promise<DropoffBarcodeRow | null> {
   const code = normalizeDropoffCode(input.code);
   if (code.length < 6) return null;
-  const row = await prisma.dropoffBarcode.findUnique({ where: { code } });
+  // try/catch so missing-table errors render as soft 404 on
+  // /dropoff/[code] instead of crashing the public page.
+  const row = await prisma.dropoffBarcode.findUnique({ where: { code } }).catch(() => null);
   if (!row) return null;
   return toRow(row);
 }

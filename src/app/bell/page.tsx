@@ -9,7 +9,7 @@ import BellClient from "./BellClient";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Ring the bell · NOHO Mailbox",
+  title: "Ring the bell",
   description: "Tell the front desk you're here for a pickup.",
 };
 

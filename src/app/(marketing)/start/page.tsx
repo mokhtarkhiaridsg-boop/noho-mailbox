@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Start with NOHO Mailbox — Pick Your Path",
   description:
-    "Are you a customer, a business owner needing an LLC, a CMRA operator, an affiliate, or a franchise candidate? Pick your path and we&apos;ll get you to the right page.",
+    "Customer, LLC owner, CMRA operator, affiliate, or franchise candidate? Pick your path and we'll get you to the right page.",
   openGraph: {
     title: "Start with NOHO Mailbox",
     description: "Pick your path: customer, business, operator, affiliate, franchise.",

@@ -13,6 +13,7 @@
 import Link from "next/link";
 import LandingClient from "./LandingClient";
 import { lookupReferralLanding } from "@/app/actions/referralLanding";
+import { getOperatingHours } from "@/app/actions/operatingHours";
 
 export const dynamic = "force-dynamic";
 
@@ -22,18 +23,27 @@ export async function generateMetadata({ params }: Props) {
   const { code } = await params;
   const data = await lookupReferralLanding({ code });
   if (!data.ok) {
-    return { title: "Invitation · NOHO Mailbox", description: "Join NOHO Mailbox — your local virtual mailbox in Studio City." };
+    return { title: { absolute: "Invitation · NOHO Mailbox" }, description: "Join NOHO Mailbox — your local virtual mailbox in North Hollywood." };
   }
   return {
-    title: `${data.referrerFirstName} invited you · $${data.creditDollars} credit · NOHO Mailbox`,
+    // `absolute` to avoid "… NOHO Mailbox | NOHO Mailbox" — brand is in the title already.
+    title: { absolute: `${data.referrerFirstName} invited you · $${data.creditDollars} credit · NOHO Mailbox` },
     description: `${data.referrerFirstName} thinks you'd love NOHO Mailbox. Sign up with code ${data.code} and you both get $${data.creditDollars} in wallet credit.`,
   };
 }
 
 export default async function ReferralLandingPage({ params }: Props) {
   const { code } = await params;
-  const data = await lookupReferralLanding({ code });
+  const [data, hours] = await Promise.all([
+    lookupReferralLanding({ code }),
+    getOperatingHours(),
+  ]);
   const upperCode = code.toUpperCase();
+  // Build the same Mon–Fri/Sat summary the rest of the marketing site uses,
+  // so the referral landing page stays consistent if admin shifts hours.
+  const monHours = hours.weekly[1]?.hours ?? "9:30am–5:30pm";
+  const satHours = hours.weekly[6]?.hours ?? "10am–1:30pm";
+  const hoursSummary = `Mon–Fri ${monHours} · Sat ${satHours}`;
 
   if (!data.ok) {
     return (
@@ -53,7 +63,7 @@ export default async function ReferralLandingPage({ params }: Props) {
     );
   }
 
-  return <LandingClient code={upperCode} referrerFirstName={data.referrerFirstName} referrerSuiteNumber={data.referrerSuiteNumber} creditDollars={data.creditDollars} visitCount={data.visitCount} />;
+  return <LandingClient code={upperCode} referrerFirstName={data.referrerFirstName} referrerSuiteNumber={data.referrerSuiteNumber} creditDollars={data.creditDollars} visitCount={data.visitCount} hoursSummary={hoursSummary} />;
 }
 
 const S: Record<string, React.CSSProperties> = {

@@ -330,7 +330,7 @@ export default function DeliveryPage() {
                 </div>
                 <p className="text-xs mb-1" style={{ color: "#AFA08F" }}>{zone.label}</p>
                 <p className="text-[10px]" style={{ color: zone.id === 1 ? "rgba(147,196,255,0.5)" : "rgba(175,160,143,0.5)" }}>
-                  {zone.id === 7 ? "Call (818) 765-1539 for a custom quote" : `ETA ${zone.etaWindow}`}
+                  {zone.id === 7 ? "Call (818) 506-7744 for a custom quote" : `ETA ${zone.etaWindow}`}
                 </p>
               </div>
             ))}
@@ -352,8 +352,9 @@ export default function DeliveryPage() {
           >
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-text-light mb-1">Delivery Address</label>
+                <label htmlFor="delivery-estimator-address" className="block text-sm font-bold text-text-light mb-1">Delivery Address</label>
                 <input
+                  id="delivery-estimator-address"
                   type="text"
                   value={addressInput}
                   onChange={(e) => handleAddressChange(e.target.value)}
@@ -365,7 +366,7 @@ export default function DeliveryPage() {
                   <p className="text-xs mt-1.5" style={{ color: "#B07030" }}>Include a 5-digit zip code in the address for an instant quote</p>
                 )}
               </div>
-              <button
+              <button type="button"
                 onClick={handleEstimate}
                 disabled={zip.length !== 5}
                 className="w-full text-white font-bold py-3 rounded-xl transition-all hover:-translate-y-1 disabled:opacity-40 disabled:hover:translate-y-0"
@@ -378,7 +379,7 @@ export default function DeliveryPage() {
             {zip.length === 5 && quoteResult === null && (
               <div className="mt-6 rounded-xl p-5 text-center animate-fade-up" style={{ background: "#FFF0F0", border: "1px solid #FECACA" }}>
                 <p className="font-bold text-sm" style={{ color: "#B91C1C" }}>Zip {zip} is outside our delivery area</p>
-                <p className="text-xs mt-1" style={{ color: "#B91C1C" }}>Call us at (818) 765-1539 for a custom quote on longer distances.</p>
+                <p className="text-xs mt-1" style={{ color: "#B91C1C" }}>Call us at (818) 506-7744 for a custom quote on longer distances.</p>
               </div>
             )}
 
@@ -397,7 +398,7 @@ export default function DeliveryPage() {
                 <p className="text-4xl font-extrabold tracking-tight mb-1">${quoteResult.price.toFixed(2)}</p>
                 <p className="text-sm opacity-80">{quoteResult.zone.label}</p>
                 <p className="text-xs mt-2 opacity-60">ETA: {quoteResult.zone.etaWindow} · Standard rate</p>
-                <button
+                <button type="button"
                   onClick={() => setShowForm(true)}
                   className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5"
                   style={
@@ -667,7 +668,7 @@ export default function DeliveryPage() {
             <>
               {!showForm ? (
                 <div className="text-center animate-fade-up">
-                  <button
+                  <button type="button"
                     onClick={() => setShowForm(true)}
                     className="text-white font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-1 hover:shadow-lg"
                     style={{ background: "#337485" }}
@@ -686,17 +687,17 @@ export default function DeliveryPage() {
                   )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-bold text-text-light mb-1">Full Name</label>
-                      <input required name="customerName" type="text" placeholder="John Doe" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
+                      <label htmlFor="delivery-customer-name" className="block text-sm font-bold text-text-light mb-1">Full Name</label>
+                      <input id="delivery-customer-name" required name="customerName" type="text" placeholder="John Doe" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-text-light mb-1">Phone</label>
-                      <input required name="phone" type="tel" placeholder="(818) 765-1539" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
+                      <label htmlFor="delivery-phone" className="block text-sm font-bold text-text-light mb-1">Phone</label>
+                      <input id="delivery-phone" required name="phone" type="tel" placeholder="(818) 506-7744" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-text-light mb-1">Email</label>
-                    <input required name="email" type="email" placeholder="you@example.com" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
+                    <label htmlFor="delivery-email" className="block text-sm font-bold text-text-light mb-1">Email</label>
+                    <input id="delivery-email" required name="email" type="email" placeholder="you@example.com" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                   </div>
                   {/* Pickup Type */}
                   <div>
@@ -727,6 +728,8 @@ export default function DeliveryPage() {
                       <div className="mt-3">
                         <input
                           required
+                          id="delivery-pickup-addr"
+                          aria-label="Pickup address"
                           name="pickupAddr"
                           type="text"
                           value={pickupAddress}
@@ -740,8 +743,9 @@ export default function DeliveryPage() {
                   </div>
                   {/* Delivery Address */}
                   <div>
-                    <label className="block text-sm font-bold text-text-light mb-1">Delivery Address</label>
+                    <label htmlFor="delivery-destination" className="block text-sm font-bold text-text-light mb-1">Delivery Address</label>
                     <input
+                      id="delivery-destination"
                       required
                       name="destination"
                       type="text"
@@ -758,8 +762,8 @@ export default function DeliveryPage() {
                     <p className="text-[11px] mt-1" style={{ color: "rgba(122,96,80,0.5)" }}>Include zip code for automatic pricing (e.g. &ldquo;Los Angeles, CA 90028&rdquo;)</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-text-light mb-1">Item Type</label>
-                    <select required name="itemType" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}>
+                    <label htmlFor="delivery-item-type" className="block text-sm font-bold text-text-light mb-1">Item Type</label>
+                    <select id="delivery-item-type" required name="itemType" className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }}>
                       <option value="">Select type</option>
                       <option value="Letter">Letter / Envelope</option>
                       <option value="Package">Package</option>
@@ -768,8 +772,8 @@ export default function DeliveryPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-text-light mb-1">Special Instructions <span className="font-normal" style={{ color: "rgba(122,96,80,0.4)" }}>(optional)</span></label>
-                    <textarea name="instructions" rows={3} placeholder="Any details about the delivery..." className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none resize-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
+                    <label htmlFor="delivery-instructions" className="block text-sm font-bold text-text-light mb-1">Special Instructions <span className="font-normal" style={{ color: "rgba(122,96,80,0.4)" }}>(optional)</span></label>
+                    <textarea id="delivery-instructions" name="instructions" rows={3} placeholder="Any details about the delivery..." className="w-full rounded-xl px-4 py-3 text-sm text-text-light focus:outline-none resize-none" style={{ border: "1px solid #D8C8B4", background: "#F8F2EA" }} />
                   </div>
                   <input type="hidden" name="zip" value={zip} />
                   <button

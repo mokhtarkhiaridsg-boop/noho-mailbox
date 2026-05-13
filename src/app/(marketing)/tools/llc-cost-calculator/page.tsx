@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import LLCCostCalculatorClient from "./LLCCostCalculatorClient";
 
 export const metadata: Metadata = {
-  title: "LLC Cost Calculator — Compare All 50 States + DC | NOHO Mailbox",
+  title: "LLC Cost Calculator — Compare All 50 States + DC",
   description:
-    "Free interactive calculator comparing LLC formation cost across all 50 states + DC. Filing fees, franchise tax, annual reports, registered agent — total Year 1 + 5-year projection. No email required.",
+    "Free calculator comparing LLC formation cost across all 50 states + DC. Filing fees, franchise tax, annual reports, registered agent. Year 1 + 5-year projection.",
   openGraph: {
     title: "Free LLC Cost Calculator — All 50 States",
     description:
@@ -114,10 +114,9 @@ export default function LLCCostCalculatorPage() {
                 }}
               >
                 <h3 className="font-bold text-text-light text-sm mb-1">{r.t}</h3>
-                <p
-                  className="text-xs text-text-light-muted leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: r.b }}
-                />
+                <p className="text-xs text-text-light-muted leading-relaxed">
+                  {r.b}
+                </p>
               </li>
             ))}
           </ul>

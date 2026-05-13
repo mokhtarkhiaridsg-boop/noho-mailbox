@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   if (!id || id.length < 6) {
     return {
-      title: "NOHO Mailbox · Tracking",
+      title: { absolute: "NOHO Mailbox · Tracking" },
       description: "Track your shipment from NOHO Mailbox.",
       robots: { index: false, follow: false },
     };
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   }).catch(() => null);
   if (!row) {
     return {
-      title: "NOHO Mailbox · Tracking",
+      title: { absolute: "NOHO Mailbox · Tracking" },
       description: "Track your shipment from NOHO Mailbox.",
       robots: { index: false, follow: false },
     };
@@ -52,7 +52,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     ? `Refunded ${row.carrier} ${row.servicelevel} shipment to ${dest}. Shipped via NOHO Mailbox in NoHo, CA.`
     : `Track this ${row.carrier} ${row.servicelevel} shipment to ${dest}. Shipped via NOHO Mailbox in NoHo, CA.`;
   return {
-    title,
+    // `absolute` bypasses the root "%s | NOHO Mailbox" template — the
+    // brand is already in the title; appending it again would render as
+    // "… — NOHO Mailbox | NOHO Mailbox" in browser tabs and share cards.
+    title: { absolute: title },
     description,
     openGraph: {
       title,

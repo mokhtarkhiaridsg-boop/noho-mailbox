@@ -4,6 +4,7 @@
  * still renders cleanly.
  */
 import { prisma } from "@/lib/prisma";
+import { laStartOfToday } from "@/lib/laDay";
 
 export type FooterStats = {
   todayIntake: number | null;
@@ -12,10 +13,10 @@ export type FooterStats = {
 
 export async function getFooterStats(): Promise<FooterStats> {
   try {
-    // "Today" is bounded to the local day in California — close enough since
-    // we only show the count for ambient flavor.
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
+    // "Today" is bounded to the LA wall-clock day. Using `setHours(0,0,0,0)`
+    // would compute the server's local midnight — that's UTC on Vercel, so
+    // the counter would visibly reset to 0 at 5pm PT.
+    const start = laStartOfToday();
 
     const [todayIntake, lastDelivery] = await Promise.all([
       prisma.mailItem.count({ where: { createdAt: { gte: start } } }),

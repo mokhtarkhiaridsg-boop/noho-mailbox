@@ -17,7 +17,7 @@ import { verifyAdmin, verifySession } from "@/lib/dal";
 import { revalidatePath } from "next/cache";
 import { randomBytes } from "node:crypto";
 
-const BUREAU_NAME = "NOHO Mailbox · Studio City";
+const BUREAU_NAME = "NOHO Mailbox · North Hollywood";
 
 export type ShipmentReceiptRow = {
   id: string;
@@ -203,7 +203,10 @@ export type ReceiptView = {
 export async function getShipmentReceiptByToken(input: { token: string }): Promise<ReceiptView> {
   const token = input.token.trim();
   if (!token) return { ok: false, reason: "not_found" };
-  const row = await prisma.shipmentReceipt.findUnique({ where: { verifyToken: token } });
+  // try/catch so missing-table or DB outage renders the friendly "not
+  // found" branch on /receipt/[token] instead of crashing the public
+  // page into the global error boundary.
+  const row = await prisma.shipmentReceipt.findUnique({ where: { verifyToken: token } }).catch(() => null);
   if (!row) return { ok: false, reason: "not_found" };
   // Bump scan count + timestamp + audit. Throttle to once per minute
   // to avoid double-counting from React StrictMode + curl probes.

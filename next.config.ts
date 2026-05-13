@@ -18,8 +18,15 @@ const nextConfig: NextConfig = {
             value: "max-age=63072000; includeSubDomains; preload",
           },
           {
+            // Allow camera + microphone on same-origin only — needed by the
+            // admin ID-scan + envelope-scan + intake-camera flows
+            // (IdScanButton, AdminInboundScanPanel, LogMailModal) which call
+            // navigator.mediaDevices.getUserMedia. Previously set to `()`
+            // which is the empty allowlist (blocks all origins INCLUDING
+            // self) — silently broke admin scanning. `(self)` allows only
+            // first-party use; no third-party iframe can capture.
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
+            value: "camera=(self), microphone=(self), geolocation=()",
           },
         ],
       },

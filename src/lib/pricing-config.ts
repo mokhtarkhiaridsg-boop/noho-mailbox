@@ -114,7 +114,7 @@ export const DEFAULT_PRICING: PricingConfig = {
     { label: "Mail scanning", amount: "$2 / page" },
     { label: "Mail forwarding", amount: "Postage + $5", sub: "Plus carrier surcharge for oversized" },
     { label: "Notary services", amount: "$15 / signature", sub: "Free on USPS Form 1583 for Business / Premium" },
-    { label: "Same-day delivery (NoHo)", amount: "$5 flat", sub: "$10–$24 elsewhere in LA" },
+    { label: "Same-day delivery (NoHo)", amount: "$5 flat", sub: "$9–$28 across LA (7-zone tier)" },
   ],
   policies: [
     {

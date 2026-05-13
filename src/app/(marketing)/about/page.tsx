@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "About NOHO Mailbox — A Real LA CMRA, Built by Operators",
   description:
-    "We&apos;re an operating CMRA at 5062 Lankershim Blvd in North Hollywood. We process ~500 active mailboxes + run same-day delivery + license our software stack to other operators.",
+    "Operating CMRA at 5062 Lankershim Blvd in NoHo: ~500 active mailboxes, same-day delivery across LA, and a software stack we license to other operators.",
   openGraph: {
     title: "About NOHO Mailbox",
     description:
@@ -208,7 +208,7 @@ export default function AboutPage() {
               },
               {
                 t: "Same-day delivery",
-                b: "$5 flat in NoHo, $9.75-$24 across LA. For solo attorneys, florists, real estate, medical practices, print shops.",
+                b: "$5 flat in NoHo, $9–$28 across LA (7-zone tier). For solo attorneys, florists, real estate, medical practices, print shops.",
                 href: "/delivery",
               },
               {

@@ -4,9 +4,9 @@ import { PricingPlansInteractive } from "./PricingPlansInteractive";
 import { PolicyAccordion } from "./PolicyAccordion";
 
 export const metadata: Metadata = {
-  title: "Mailbox Rental Pricing — $50–$95 / 3 mo · NOHO Mailbox",
+  title: "Mailbox Rental Pricing — $50–$95 / 3 mo",
   description:
-    "Transparent mailbox rental pricing in North Hollywood — Basic from $50/3mo, Business from $80/3mo, Premium from $95/3mo. Real Lankershim Blvd address, free Form 1583 notary on Business+, no hidden fees.",
+    "NOHO Mailbox pricing: Basic $50, Business $80, Premium $95 (per 3 mo). Real LA street address, mail scanning, free Form 1583 notary on Business+. No hidden fees.",
   openGraph: {
     title: "Mailbox Rental Pricing $50–$95 — NOHO Mailbox",
     description:
@@ -211,7 +211,7 @@ export default async function PricingPage() {
 
       {/* ─── Fees ─── */}
       {config.fees.length > 0 && (
-        <section className="py-16 px-5" style={{ background: "#FAFAF8" }}>
+        <section id="fees" className="py-16 px-5" style={{ background: "#FAFAF8" }}>
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10">
               <p

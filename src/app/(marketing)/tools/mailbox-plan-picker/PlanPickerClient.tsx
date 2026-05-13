@@ -152,8 +152,8 @@ const RESULTS: Record<Plan, Result> = {
   premium: {
     plan: "premium",
     title: "Premium plan is your fit.",
-    price: "$295 / 3 months",
-    monthly: "$98.33/mo",
+    price: "$95 / 3 months",
+    monthly: "$31.67/mo",
     highlights: [
       "Everything in Business, plus:",
       "UNLIMITED mail scans (no per-page fee)",

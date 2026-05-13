@@ -61,7 +61,7 @@ const SERVICES = [
     id: "delivery",
     svg: <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke="#337485" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"><rect x="2" y="9" width="13" height="9" rx="1" /><path d="M15 12 L19 12 L21 14 L21 18 L15 18" /><circle cx="6" cy="19" r="1.5" /><circle cx="18" cy="19" r="1.5" /></svg>,
     title: "Same-day local delivery",
-    price: "$5 NoHo · $10–$24 elsewhere in LA",
+    price: "$5 NoHo · $9–$28 across LA (7-zone tier)",
     desc: "Curated courier drops your mail at home or office today.",
     cta: "Order delivery",
     href: "deliveries",

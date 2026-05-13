@@ -83,6 +83,7 @@ export default function QuoteForm() {
           type="text"
           name="name"
           required
+          aria-label="Your name"
           placeholder="Your name"
           className="text-sm rounded-xl px-3 py-2.5 focus:outline-none"
           style={{
@@ -95,6 +96,7 @@ export default function QuoteForm() {
           type="text"
           name="firm"
           required
+          aria-label="Firm name"
           placeholder="Firm name"
           className="text-sm rounded-xl px-3 py-2.5 focus:outline-none"
           style={{
@@ -110,6 +112,7 @@ export default function QuoteForm() {
           type="tel"
           name="phone"
           required
+          aria-label="Mobile phone number"
           placeholder="Mobile (we'll text)"
           autoComplete="tel"
           className="text-sm rounded-xl px-3 py-2.5 focus:outline-none"
@@ -123,6 +126,7 @@ export default function QuoteForm() {
           type="email"
           name="email"
           required
+          aria-label="Email address"
           placeholder="Email"
           autoComplete="email"
           className="text-sm rounded-xl px-3 py-2.5 focus:outline-none"
@@ -138,6 +142,7 @@ export default function QuoteForm() {
         type="text"
         name="destination"
         required
+        aria-label="Destination — court, opposing counsel, etc."
         placeholder="Destination (court, opposing counsel, etc.)"
         className="w-full text-sm rounded-xl px-3 py-2.5 focus:outline-none"
         style={{
@@ -151,6 +156,7 @@ export default function QuoteForm() {
         name="urgency"
         required
         defaultValue=""
+        aria-label="How urgent is the run?"
         className="w-full text-sm rounded-xl px-3 py-2.5 focus:outline-none"
         style={{
           border: "1px solid #D8C8B4",
@@ -168,6 +174,7 @@ export default function QuoteForm() {
       <textarea
         name="notes"
         rows={2}
+        aria-label="Anything else — deadline, fragility, recipient name"
         placeholder="Anything else? (deadline, fragility, recipient name)"
         className="w-full text-sm rounded-xl px-3 py-2.5 focus:outline-none resize-none"
         style={{

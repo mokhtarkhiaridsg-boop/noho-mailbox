@@ -2,87 +2,127 @@
 
 /**
  * Real-time Open / Closed sign for the public landing.
- * Computes the live state from the customer's local clock against our hours
- * (interpreted as Los Angeles time). Updates every minute.
  *
- * Hours:
- *   Mon–Fri  9:30am–5:30pm (with 1:30–2:00pm lunch break)
- *   Saturday 10:00am–1:30pm
- *   Sunday   Closed
+ * iter-238 (round 84): now reads from the live operating-hours config that
+ * the admin can edit, instead of hardcoded windows. Server-component wrapper
+ * fetches the config and passes it as a prop. We re-derive status every
+ * minute from the customer's local clock against the bureau timezone.
+ *
+ * Holiday closures + custom day windows + lunch breaks all flow through
+ * `isOpenNow()` from the operating-hours lib (same path the footer uses).
  */
 import { useEffect, useState } from "react";
+import type { OperatingHoursConfig } from "@/lib/operating-hours";
+import { isOpenNow, nextOpenDate, DEFAULT_HOURS } from "@/lib/operating-hours";
 
-type Status = "open" | "lunch" | "closed";
+// Defensive: HMR / SSR-stream edge cases occasionally hand the client
+// component an undefined prop before hydration completes. We accept undefined
+// and fall back to DEFAULT_HOURS so the badge stays rendered (just shows
+// stock hours) instead of throwing into the error boundary.
+type Props = { hours?: OperatingHoursConfig };
 
-function nowInLA(): { day: number; hour: number; minute: number } {
-  // Render a Date in LA tz then read parts.
-  const fmt = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Los_Angeles",
-    weekday: "short",
-    hour: "numeric",
-    minute: "numeric",
-    hour12: false,
+type SignState = {
+  status: "open" | "lunch" | "closed";
+  headline: string;
+  next: string;
+};
+
+/** Format a Date as "Mon 9:30 am" or "9:30 am tomorrow" or "9:30 am" depending on
+ * how far out the next-open instant is. Keeps the badge compact. */
+function nextOpenLabel(next: Date, now: Date, tz: string): string {
+  const fmtTime = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hour: "numeric", minute: "2-digit", hour12: true,
   });
-  const parts = fmt.formatToParts(new Date());
-  const get = (k: string) => parts.find((p) => p.type === k)?.value ?? "";
-  const dayMap: Record<string, number> = {
-    Sun: 0,
-    Mon: 1,
-    Tue: 2,
-    Wed: 3,
-    Thu: 4,
-    Fri: 5,
-    Sat: 6,
-  };
-  const day = dayMap[get("weekday")] ?? 0;
-  const hour = parseInt(get("hour"), 10);
-  const minute = parseInt(get("minute"), 10);
-  return { day, hour, minute };
+  const time = fmtTime.format(next).toLowerCase().replace(/\s+/g, " ");
+  // Compute calendar-day delta in bureau TZ
+  const dayFmt = new Intl.DateTimeFormat("en-US", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" });
+  const todayKey = dayFmt.format(now);
+  const nextKey = dayFmt.format(next);
+  if (todayKey === nextKey) return `Opens ${time}`;
+  // Tomorrow check
+  const tomorrow = new Date(now.getTime() + 24 * 3600 * 1000);
+  if (dayFmt.format(tomorrow) === nextKey) return `Opens ${time} tomorrow`;
+  // Otherwise show weekday name
+  const wkFmt = new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "short" });
+  return `Opens ${wkFmt.format(next)} ${time}`;
 }
 
-function compute(): { status: Status; nextChange: string } {
-  const { day, hour, minute } = nowInLA();
-  const minutes = hour * 60 + minute;
-
-  // Mon–Fri (1–5): 9:30 (570) – 17:30 (1050) with lunch break 13:30 (810) – 14:00 (840)
-  if (day >= 1 && day <= 5) {
-    if (minutes < 570) return { status: "closed", nextChange: "Opens 9:30 am" };
-    if (minutes < 810) return { status: "open", nextChange: "Lunch 1:30–2:00 pm" };
-    if (minutes < 840) return { status: "lunch", nextChange: "Reopens 2:00 pm" };
-    if (minutes < 1050) return { status: "open", nextChange: "Closes 5:30 pm" };
-    return { status: "closed", nextChange: day === 5 ? "Opens Sat 10:00 am" : "Opens 9:30 am tomorrow" };
-  }
-  // Saturday: 10:00 (600) – 13:30 (810)
-  if (day === 6) {
-    if (minutes < 600) return { status: "closed", nextChange: "Opens 10:00 am" };
-    if (minutes < 810) return { status: "open", nextChange: "Closes 1:30 pm" };
-    return { status: "closed", nextChange: "Opens Mon 9:30 am" };
-  }
-  // Sunday
-  return { status: "closed", nextChange: "Opens Mon 9:30 am" };
+/** Read today's break-end HH:MM from the live config, using bureau TZ to pick
+ * the weekday. Returns null when today has no break window configured. */
+function todaysBreakEnd(hours: OperatingHoursConfig, now: Date): string | null {
+  const wkFmt = new Intl.DateTimeFormat("en-US", { timeZone: hours.timezone, weekday: "short" });
+  const weekdayShort = wkFmt.format(now).toLowerCase().slice(0, 3);
+  const dayIdx = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"].indexOf(weekdayShort);
+  if (dayIdx < 0) return null;
+  return hours.weekly[dayIdx]?.breakHHMM?.[1] ?? null;
 }
 
-export function OpenClosedSign() {
-  const [{ status, nextChange }, setState] = useState<{ status: Status; nextChange: string }>({
-    status: "closed",
-    nextChange: "",
-  });
+/** Format a 24-hour HH:MM as a compact "2:00 pm" / "9:30 am" string. */
+function format12h(hhmm: string): string {
+  const [hh, mm] = hhmm.split(":").map((s) => parseInt(s, 10));
+  if (!Number.isFinite(hh) || !Number.isFinite(mm)) return hhmm;
+  const ampm = hh >= 12 ? "pm" : "am";
+  const h12 = hh % 12 === 0 ? 12 : hh % 12;
+  return mm === 0 ? `${h12}:00 ${ampm}` : `${h12}:${String(mm).padStart(2, "0")} ${ampm}`;
+}
+
+function compute(hours: OperatingHoursConfig): SignState {
+  const now = new Date();
+  const r = isOpenNow(hours, now);
+  const headline =
+    r.status === "open" ? "Open Now"
+    : r.status === "closing_soon" ? "Closing Soon"
+    : r.status === "break" ? "On Lunch"
+    : r.status === "closed_holiday" ? `Closed · ${r.holiday?.label ?? "holiday"}`
+    : "Closed";
+  let next: string;
+  if (r.status === "open" || r.status === "closing_soon") {
+    next = r.minutesUntilClose != null ? `Closes in ${r.minutesUntilClose} min` : r.todayLabel;
+  } else if (r.status === "break") {
+    // Read the live break-end time off the config instead of hardcoding "2:00 pm"
+    // — admin can shift the lunch window via /admin/hours, and the badge needs
+    // to stay in sync with the same source the footer pulls from.
+    const be = todaysBreakEnd(hours, now);
+    next = be ? `Back at ${format12h(be)}` : "Back soon";
+  } else {
+    // Forward-looking: when do we reopen? Falls back to todayLabel if no next.
+    const nd = nextOpenDate(hours, now);
+    next = nd ? nextOpenLabel(nd, now, hours.timezone) : `Today: ${r.todayLabel}`;
+  }
+  const status =
+    r.status === "open" || r.status === "closing_soon" ? "open"
+    : r.status === "break" ? "lunch"
+    : "closed";
+  return { status, headline, next };
+}
+
+export function OpenClosedSign({ hours }: Props) {
+  // Resolve once per render — falls back to DEFAULT_HOURS if prop missing.
+  const safeHours = hours ?? DEFAULT_HOURS;
+  // Initial state computed from the SSR config — server-rendered status
+  // matches the user's first paint, so no "Closed" flash before hydration.
+  const [state, setState] = useState<SignState>(() => compute(safeHours));
 
   useEffect(() => {
     function tick() {
-      setState(compute());
+      setState(compute(safeHours));
     }
     tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
-  }, []);
+  }, [safeHours]);
 
+  const { status, headline, next } = state;
   const isOpen = status === "open";
   const isLunch = status === "lunch";
 
   return (
     <div
-      className="fixed z-40 right-4 bottom-4 sm:right-6 sm:bottom-6"
+      // Hidden on mobile because MobileStickyCTA already occupies the bottom-3
+      // band with its own Call button — overlapping floats look broken. Sign
+      // re-appears at tablet+ where there's room for both bottom-right corner
+      // and a separate sticky CTA (which is itself md:hidden-only).
+      className="hidden sm:block fixed z-40 right-6 bottom-6"
       aria-live="polite"
     >
       <a
@@ -118,9 +158,9 @@ export function OpenClosedSign() {
 
         <div className="leading-tight">
           <p className="text-[12px] font-black uppercase tracking-[0.18em]">
-            {isOpen ? "Open Now" : isLunch ? "On Lunch" : "Closed"}
+            {headline}
           </p>
-          <p className="text-[10px] font-semibold opacity-80">{nextChange}</p>
+          <p className="text-[10px] font-semibold opacity-80">{next}</p>
         </div>
 
         {/* Hover-only phone hint */}

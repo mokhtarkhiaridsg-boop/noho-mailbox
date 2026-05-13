@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
+  title: "Privacy Policy — CCPA, CMRA, Data Security",
   description:
     "NOHO Mailbox privacy policy — how we collect, use, and protect your personal information including CMRA compliance, CCPA rights, and data security practices.",
   openGraph: {
@@ -236,7 +236,7 @@ export default function PrivacyPolicyPage() {
                   hello@nohomailbox.org
                 </a>{" "}
                 or call{" "}
-                <a href="tel:+18187651539" className="text-accent hover:underline">(818) 765-1539</a>.
+                <a href="tel:+18185067744" className="text-accent hover:underline">(818) 506-7744</a>.
                 We will respond to your request within 30 days.
               </p>
             </div>
@@ -322,7 +322,7 @@ export default function PrivacyPolicyPage() {
                 <p>5062 Lankershim Blvd, North Hollywood, CA 91601</p>
                 <p>
                   Phone:{" "}
-                  <a href="tel:+18187651539" className="text-accent hover:underline">(818) 765-1539</a>
+                  <a href="tel:+18185067744" className="text-accent hover:underline">(818) 506-7744</a>
                 </p>
                 <p>
                   Email:{" "}

@@ -15,8 +15,7 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Suite info · NOHO Mailbox",
-};
+  title: "Suite info",};
 
 type Props = { params: Promise<{ suiteNumber: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
 
@@ -78,7 +77,7 @@ export default async function SuiteInfoPage({ params, searchParams }: Props) {
 
         {info.photoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={info.photoUrl} alt="" style={S.avatar} />
+          <img src={info.photoUrl} alt={`${info.firstName} — suite #${info.suiteNumber}`} style={S.avatar} />
         ) : (
           <div style={S.avatarFallback}>{info.firstName.slice(0, 1).toUpperCase()}</div>
         )}

@@ -175,13 +175,20 @@ export async function getLobbyPlaylist(input: { limit?: number; sort?: "top" | "
 // member display names + suite #).
 export async function getLobbyPlaylistPublic(input: { limit?: number } = {}): Promise<Array<{ id: string; title: string; artist: string; link: string | null; suggestedByName: string | null; suggestedBySuite: string | null; votesCount: number }>> {
   const limit = Math.min(50, Math.max(5, input.limit ?? 25));
-  const rows = await prisma.lobbyPlaylistSong.findMany({
-    where: { hiddenAt: null },
-    orderBy: [{ votesCount: "desc" }, { createdAt: "asc" }],
-    take: limit,
-    select: { id: true, title: true, artist: true, link: true, suggestedByName: true, suggestedBySuite: true, votesCount: true },
-  });
-  return rows;
+  // try/catch so missing-table errors (dev DB without iter-235 schema
+  // applied) render the empty-state UI instead of crashing the public
+  // /lobby/playlist page into the global error boundary.
+  try {
+    const rows = await prisma.lobbyPlaylistSong.findMany({
+      where: { hiddenAt: null },
+      orderBy: [{ votesCount: "desc" }, { createdAt: "asc" }],
+      take: limit,
+      select: { id: true, title: true, artist: true, link: true, suggestedByName: true, suggestedBySuite: true, votesCount: true },
+    });
+    return rows;
+  } catch {
+    return [];
+  }
 }
 
 // ─── Admin moderation ─────────────────────────────────────────────────

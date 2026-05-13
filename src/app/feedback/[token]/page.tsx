@@ -4,12 +4,22 @@
 // email's "★★★★★ Rate your pickup" button. SSR fetches the survey row
 // + a small client island handles the star picker + submit.
 
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSurveyByToken } from "@/app/actions/pickupSurvey";
 import FeedbackForm from "./FeedbackForm";
 
 export const dynamic = "force-dynamic";
+
+// Token-gated per-survey URL. SERPs leaking these would expose
+// who picked up which package + when, plus the survey-token entry-
+// point for fraudulent submissions on someone else's behalf.
+export const metadata: Metadata = {
+  title: "Rate your pickup",
+  description: "Quick 1-question survey about your recent NOHO Mailbox pickup.",
+  robots: { index: false, follow: false },
+};
 
 export default async function FeedbackPage({
   params,

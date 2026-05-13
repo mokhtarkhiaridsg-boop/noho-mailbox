@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!meta) return { title: "Not found" };
 
   return {
-    title: `Real Address for ${meta.persona} — NOHO Mailbox LA`,
+    title: `Real LA Street Address for ${meta.persona}`,
     description: `${meta.hero.sub.replace(/&apos;/g, "'").slice(0, 155)}`,
     openGraph: {
       title: `Real Address for ${meta.persona}`,

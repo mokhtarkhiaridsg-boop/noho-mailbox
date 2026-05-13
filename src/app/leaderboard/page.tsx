@@ -9,7 +9,7 @@ import { getPublicReferralLeaderboard } from "@/app/actions/publicLeaderboard";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Member referral leaderboard · NOHO Mailbox",
+  title: "Member referral leaderboard",
   description: "Top NOHO Mailbox members by referrals. Top 3 each quarter earn a free month + Founder Ambassador badge.",
 };
 

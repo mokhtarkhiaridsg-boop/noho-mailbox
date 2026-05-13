@@ -15,7 +15,7 @@ const PRESETS: { name: string; config: Partial<PromoBannerConfig> }[] = [
     config: {
       audience: "Florists",
       message:
-        "{daysLeft} days to Mother's Day — reserve overflow drivers now. $5/stop in NoHo, $9.75–$14 across the Valley.",
+        "{daysLeft} days to Mother's Day — reserve overflow drivers now. $5/stop in NoHo, $9–$13 across the Valley.",
       ctaText: "Reserve",
       ctaHref: "/delivery/for-florists",
       iconEmoji: "🌹",
@@ -29,7 +29,7 @@ const PRESETS: { name: string; config: Partial<PromoBannerConfig> }[] = [
     config: {
       audience: "Florists",
       message:
-        "{daysLeft} days to Valentine's Day — reserve overflow drivers. $5/stop in NoHo, $9.75–$14 across the Valley.",
+        "{daysLeft} days to Valentine's Day — reserve overflow drivers. $5/stop in NoHo, $9–$13 across the Valley.",
       ctaText: "Reserve",
       ctaHref: "/delivery/for-florists",
       iconEmoji: "🌹",

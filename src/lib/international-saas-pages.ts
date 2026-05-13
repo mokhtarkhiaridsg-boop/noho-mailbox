@@ -8,6 +8,14 @@
 export type IntlCMRAPage = {
   slug: string;
   country: string;
+  /**
+   * Country name as it appears after a preposition like "in" / "to" / "from".
+   * Defaults to `country` when missing — only set this when the country needs
+   * a definite article ("the United Kingdom", "the Netherlands") or when the
+   * label isn't a real country ("any country" instead of "Other countries").
+   * Without this, copy renders as "in United Kingdom" which is ungrammatical.
+   */
+  countryAfterPrep?: string;
   countryAbbr: string;
   flag: string;
   marketDescription: string;
@@ -25,6 +33,7 @@ export const INTL_SAAS_PAGES: IntlCMRAPage[] = [
   {
     slug: "united-kingdom",
     country: "United Kingdom",
+    countryAfterPrep: "the United Kingdom",
     countryAbbr: "UK",
     flag: "🇬🇧",
     marketDescription:
@@ -172,6 +181,7 @@ export const INTL_SAAS_PAGES: IntlCMRAPage[] = [
   {
     slug: "global",
     country: "Other countries",
+    countryAfterPrep: "any other country",
     countryAbbr: "GLOBAL",
     flag: "🌐",
     marketDescription:

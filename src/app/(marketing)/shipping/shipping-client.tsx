@@ -534,7 +534,7 @@ export function ShippingQuoteClient() {
               </div>
             )}
 
-            <button
+            <button type="button"
               onClick={handleQuote}
               disabled={isPending}
               className="w-full font-bold py-3.5 rounded-xl text-sm text-white transition-all duration-200 disabled:opacity-60"
@@ -564,7 +564,7 @@ export function ShippingQuoteClient() {
                 const isFastest = fastestEta != null && r.estimatedDays === fastestEta;
                 const isChosen = chosenRate?.rateObjectId === r.rateObjectId;
                 return (
-                  <button
+                  <button type="button"
                     key={r.rateObjectId}
                     onClick={() => {
                       setChosenRate(r);
@@ -641,7 +641,7 @@ export function ShippingQuoteClient() {
                 </div>
                 <div className="text-right">
                   <p className="text-2xl font-extrabold tracking-tight" style={{ color: "#337485" }}>{fmtMoney(chosenRate.customerPriceCents)}</p>
-                  <button
+                  <button type="button"
                     onClick={() => setChosenRate(null)}
                     className="text-[11px] font-bold underline mt-1"
                     style={{ color: "#7A6050" }}
@@ -686,7 +686,7 @@ export function ShippingQuoteClient() {
                   </p>
                 )}
 
-                <button
+                <button type="button"
                   onClick={handleSubmitOrder}
                   disabled={isPending || orderState.status === "submitting"}
                   className="w-full font-bold py-3.5 rounded-xl text-sm text-white transition-all duration-200 disabled:opacity-60"

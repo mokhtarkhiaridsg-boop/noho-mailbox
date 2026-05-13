@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AiBolt, AiClock } from "@/components/AnimatedIcons";
+import { getOperatingHours } from "@/app/actions/operatingHours";
 
 export const metadata: Metadata = {
   title: "How It Works — From Signup to Suite in 15 Minutes",
   description:
-    "Step-by-step guide to renting a private mailbox at NOHO Mailbox: pick a plan, sign up online, verify your ID with USPS Form 1583, and get your real street address suite — all in about 15 minutes.",
+    "Step-by-step: pick a plan, sign up online, verify your ID with USPS Form 1583, and get your real LA street address suite — all in about 15 minutes.",
   openGraph: {
     title: "How NOHO Mailbox Works — Real Address in 15 Minutes",
     description: "Pick a plan, sign up online, verify ID, get your suite #. Everything you need to know.",
@@ -78,7 +79,7 @@ const steps = [
     bullets: [
       "Scan request — $2 per page, delivered to your dashboard within 2 hours",
       "Forwarding — postage + $5 handling, scheduled or on-demand",
-      "Same-day local delivery — $5 flat in NoHo, $10–$24 elsewhere in LA",
+      "Same-day local delivery — $5 flat in NoHo, $9–$28 across LA (7-zone tier)",
       "Vacation Mode — auto-hold mail, daily digest, batch resume",
       "Add a second user — give a family member or business partner read access",
       "Junk mail block — opt out of senders you don't want to see again",
@@ -105,7 +106,10 @@ const faq = [
   },
   {
     q: "What if I don't get my password reset email?",
-    a: "Call or text us at (818) 506-7744 and we'll send you a reset link directly within minutes. Mon–Fri 9:30am–5:30pm (lunch 1:30–2pm), Sat 10am–1:30pm.",
+    // `{HOURS_LINE}` is swapped at render time for the live operating-hours
+    // summary so this FAQ entry can never go stale when the admin shifts
+    // the lunch window or weekend hours via /admin/hours.
+    a: "Call or text us at (818) 506-7744 and we'll send you a reset link directly within minutes. {HOURS_LINE}.",
   },
   {
     q: "Can I add a second user to my mailbox?",
@@ -125,7 +129,14 @@ const faq = [
   },
 ];
 
-export default function HowItWorksPage() {
+export default async function HowItWorksPage() {
+  // Pull live operating-hours so the FAQ + footer hours line stay in sync
+  // with the admin-editable config (same source the homepage + footer use).
+  const hours = await getOperatingHours();
+  const monHours = hours.weekly[1]?.hours ?? "9:30am–5:30pm (lunch 1:30–2:00pm)";
+  const satHours = hours.weekly[6]?.hours ?? "10:00am–1:30pm";
+  const weekdaySummary = `Mon–Fri ${monHours} · Sat ${satHours}`;
+
   return (
     <div className="perspective-container">
       {/* Hero */}
@@ -148,7 +159,9 @@ export default function HowItWorksPage() {
               color: "#2D100F",
             }}
           >
-            From Signup to Suite #<br />
+            {/* Trailing space before <br /> so linearized text + screen
+                readers + SEO crawlers read "Suite # in" not "Suite #in". */}
+            From Signup to Suite #{" "}<br />
             <span style={{ color: "#337485" }}>in About 15 Minutes</span>
           </h1>
           <p className="text-[16px] leading-relaxed max-w-xl mx-auto" style={{ color: "rgba(45,16,15,0.6)" }}>
@@ -328,7 +341,7 @@ export default function HowItWorksPage() {
                   </span>
                 </summary>
                 <div className="px-5 pb-5 text-[14px] leading-relaxed" style={{ color: "rgba(45,16,15,0.72)" }}>
-                  {f.a}
+                  {f.a.replace("{HOURS_LINE}", weekdaySummary)}
                 </div>
               </details>
             ))}
@@ -377,7 +390,7 @@ export default function HowItWorksPage() {
             <a href="tel:+18185067744" className="font-bold hover:underline" style={{ color: "#F7E6C2" }}>
               (818) 506-7744
             </a>{" "}
-            · Mon–Fri 9:30am–5:30pm (lunch 1:30–2pm) · Sat 10am–1:30pm
+            · {weekdaySummary}
           </p>
         </div>
       </section>

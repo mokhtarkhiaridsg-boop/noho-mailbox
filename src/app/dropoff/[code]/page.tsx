@@ -3,6 +3,7 @@
 // member typed at the kiosk, with a print stylesheet that hides chrome
 // and centers the receipt on a single sheet.
 
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getDropoffBarcodeByCode } from "@/app/actions/dropoffBarcode";
@@ -11,6 +12,13 @@ import { formatDropoffCode } from "@/lib/dropoff-barcode";
 import PrintButton from "./PrintButton";
 
 export const dynamic = "force-dynamic";
+
+// One-shot tokenized barcode receipt — nothing to index in SERPs.
+export const metadata: Metadata = {
+  title: "Dropoff receipt",
+  description: "Printable barcode receipt for a NOHO Mailbox dropoff.",
+  robots: { index: false, follow: false },
+};
 
 export default async function DropoffReceiptPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;

@@ -16,9 +16,12 @@ import {
 } from "@/lib/pricing-config";
 
 export async function getPricingConfig(): Promise<PricingConfig> {
-  const row = await prisma.siteConfig.findUnique({ where: { key: PRICING_KEY } });
-  if (!row?.value) return DEFAULT_PRICING;
+  // Wrap the prisma read AND the parse in the same try/catch — without this,
+  // any DB hiccup tears down /pricing entirely. `DEFAULT_PRICING` is a safe
+  // fallback that keeps the page rendering with stock plans.
   try {
+    const row = await prisma.siteConfig.findUnique({ where: { key: PRICING_KEY } });
+    if (!row?.value) return DEFAULT_PRICING;
     const parsed = JSON.parse(row.value) as Partial<PricingConfig>;
     return {
       headline: parsed.headline ?? DEFAULT_PRICING.headline,

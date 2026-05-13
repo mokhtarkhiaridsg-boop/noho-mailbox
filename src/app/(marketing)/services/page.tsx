@@ -3,9 +3,9 @@ import Link from "next/link";
 import { AiMailbox, AiEnvelope, AiHeart, AiBox } from "@/components/AnimatedIcons";
 
 export const metadata: Metadata = {
-  title: "Services",
+  title: "Services — Mail Scanning, Notary, Same-Day Delivery",
   description:
-    "Mail scanning, forwarding, package handling, same-day delivery, notary, and more — every service NOHO Mailbox offers under one roof.",
+    "Mail scanning, forwarding, package handling, same-day delivery, notary, and LLC formation — every NOHO Mailbox service under one roof in North Hollywood.",
   openGraph: {
     title: "Services — NOHO Mailbox",
     description: "Explore all mailbox, delivery, notary, and business services at NOHO Mailbox in North Hollywood.",

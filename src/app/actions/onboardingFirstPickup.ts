@@ -225,7 +225,7 @@ function firstPickupEmailHtml(data: {
           Can't make it during open hours? <a href="${BASE_URL}/dashboard?tab=settings" style="color:#23596A;">Schedule a pickup time</a> or set up <a href="${BASE_URL}/dashboard?tab=settings" style="color:#23596A;">guest pickup</a> for someone else.
         </p>
         <p style="margin:14px 0 0;font-size:11px;color:rgba(45,16,15,.45);line-height:1.5;">
-          📍 11288 Ventura Blvd #1006, Studio City, CA 91604 · ${escapeHtml(data.timezone)}<br>
+          📍 5062 Lankershim Blvd, North Hollywood, CA 91601 · ${escapeHtml(data.timezone)}<br>
           ☎️ <a href="tel:+18185067744" style="color:#23596A;">(818) 506-7744</a>
         </p>
       </td></tr>

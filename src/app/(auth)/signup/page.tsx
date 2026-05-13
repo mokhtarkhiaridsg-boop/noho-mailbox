@@ -217,10 +217,11 @@ function SignUpInner() {
 
               <form action={formAction} className="space-y-3.5">
                 <div>
-                  <label className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
+                  <label htmlFor="signup-name" className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
                     Your name
                   </label>
                   <input
+                    id="signup-name"
                     type="text"
                     name="name"
                     required
@@ -232,10 +233,11 @@ function SignUpInner() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
+                  <label htmlFor="signup-email" className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
                     Email
                   </label>
                   <input
+                    id="signup-email"
                     type="email"
                     name="email"
                     required
@@ -247,10 +249,11 @@ function SignUpInner() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
+                  <label htmlFor="signup-phone" className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
                     Phone <span className="font-normal" style={{ color: INK_FAINT }}>(we&apos;ll text you)</span>
                   </label>
                   <input
+                    id="signup-phone"
                     type="tel"
                     name="phone"
                     autoComplete="tel"
@@ -354,10 +357,11 @@ function SignUpInner() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
+                  <label htmlFor="signup-notes" className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
                     Anything we should know? <span className="font-normal" style={{ color: INK_FAINT }}>(optional)</span>
                   </label>
                   <textarea
+                    id="signup-notes"
                     name="notes"
                     rows={2}
                     placeholder="Business mail volume, forwarding needs, etc."
@@ -367,10 +371,11 @@ function SignUpInner() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
+                  <label htmlFor="signup-referral" className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
                     Referral code <span className="font-normal" style={{ color: INK_FAINT }}>(optional · $10 for both of you)</span>
                   </label>
                   <input
+                    id="signup-referral"
                     type="text"
                     name="referralCode"
                     value={referralCode}

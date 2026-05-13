@@ -71,11 +71,12 @@ export default async function DeliveryZipPage({ params }: Params) {
       url: "https://nohomailbox.org",
     },
     areaServed: {
-      "@type": "PostalCodeArea",
-      name: meta.neighborhood,
-      postalCode: zip,
-      addressRegion: "CA",
-      addressCountry: "US",
+      // Schema.org doesn't have a "PostalCodeArea" type — that throws an
+      // "Unknown type" warning in Google's Rich Results validator.
+      // AdministrativeArea is the canonical Service.areaServed value for
+      // a geographic region; we keep the postal code in the name.
+      "@type": "AdministrativeArea",
+      name: `${meta.neighborhood}, CA ${zip}`,
     },
     offers: zone.basePrice > 0 ? {
       "@type": "Offer",

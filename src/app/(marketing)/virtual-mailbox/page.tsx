@@ -8,9 +8,18 @@ import {
 import VirtualMailboxPlansInteractive from "./VirtualMailboxPlansInteractive";
 
 export const metadata: Metadata = {
-  title: "Virtual Mailbox — NOHO Mailbox",
+  title: "Virtual Mailbox",
   description:
     "Get a real Lankershim Blvd street address, an online dashboard, and unlimited mail forwarding — without ever leaving home. From $9.99/mo.",
+  openGraph: {
+    title: "Virtual Mailbox — NOHO Mailbox",
+    description:
+      "Real LA street address, mail scanning dashboard, and unlimited forwarding for remote workers, travelers, and digital nomads. From $9.99/mo.",
+    url: "https://nohomailbox.org/virtual-mailbox",
+  },
+  // Without an explicit canonical the root layout's `https://nohomailbox.org`
+  // wins and search engines collapse this page into the homepage.
+  alternates: { canonical: "https://nohomailbox.org/virtual-mailbox" },
 };
 
 const CREAM = "#F7E6C2";

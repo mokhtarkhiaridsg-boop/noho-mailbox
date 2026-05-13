@@ -145,6 +145,7 @@ export default function SenderThankYouForm({
             type="text"
             value={senderName}
             onChange={(e) => setSenderName(e.target.value)}
+            aria-label="Your name (optional)"
             placeholder="Your name (optional)"
             maxLength={80}
             style={{
@@ -158,6 +159,7 @@ export default function SenderThankYouForm({
             type="email"
             value={senderEmail}
             onChange={(e) => setSenderEmail(e.target.value)}
+            aria-label="Your email (optional)"
             placeholder="Your email (optional)"
             maxLength={120}
             style={{

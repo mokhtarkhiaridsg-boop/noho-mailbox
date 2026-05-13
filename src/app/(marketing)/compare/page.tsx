@@ -3,7 +3,7 @@ import Link from "next/link";
 import { HeartBubbleIcon, DeliveryTruckIcon, MailboxIcon } from "@/components/BrandIcons";
 
 export const metadata: Metadata = {
-  title: "Compare Mailbox Providers",
+  title: "Compare Mailbox Providers — NOHO vs PO Box vs Virtual vs UPS Store",
   description:
     "See how NOHO Mailbox stacks up against PO Boxes, virtual mailboxes, and UPS Store — same-day delivery, notary, and business formation included.",
   openGraph: {

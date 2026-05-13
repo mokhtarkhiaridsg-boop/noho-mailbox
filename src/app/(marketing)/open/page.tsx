@@ -12,7 +12,7 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Are we open? · NOHO Mailbox",
+  title: "Are we open?",
   description: "Live status for NOHO Mailbox in North Hollywood, CA. Check if we're open now and see today's hours.",
 };
 

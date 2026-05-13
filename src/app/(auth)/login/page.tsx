@@ -174,12 +174,14 @@ export default function LoginPage() {
               )}
               <div>
                 <label
+                  htmlFor="login-email"
                   className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5"
                   style={{ color: INK_SOFT }}
                 >
                   Email
                 </label>
                 <input
+                  id="login-email"
                   type="email"
                   name="email"
                   required
@@ -191,12 +193,14 @@ export default function LoginPage() {
               </div>
               <div>
                 <label
+                  htmlFor="login-password"
                   className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5"
                   style={{ color: INK_SOFT }}
                 >
                   Password
                 </label>
                 <input
+                  id="login-password"
                   type="password"
                   name="password"
                   required
@@ -210,12 +214,14 @@ export default function LoginPage() {
               {state.twoFactorRequired && (
                 <div>
                   <label
+                    htmlFor="login-totp"
                     className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5"
                     style={{ color: INK_SOFT }}
                   >
                     2FA Code
                   </label>
                   <input
+                    id="login-totp"
                     type="text"
                     name="totpToken"
                     inputMode="numeric"

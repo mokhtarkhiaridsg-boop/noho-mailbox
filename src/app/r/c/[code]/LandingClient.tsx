@@ -33,9 +33,12 @@ type Props = {
   referrerSuiteNumber: string | null;
   creditDollars: number;
   visitCount: number;
+  // Weekday/Saturday hours summary string, derived from live config in the
+  // server wrapper. Falls back at the call site if config is unavailable.
+  hoursSummary: string;
 };
 
-export default function LandingClient({ code, referrerFirstName, referrerSuiteNumber, creditDollars, visitCount }: Props) {
+export default function LandingClient({ code, referrerFirstName, referrerSuiteNumber, creditDollars, visitCount, hoursSummary }: Props) {
   const [plan, setPlan] = useState<PlanId>("basic");
 
   useEffect(() => {
@@ -97,10 +100,10 @@ export default function LandingClient({ code, referrerFirstName, referrerSuiteNu
 
           <div style={S.locationBox}>
             <p style={S.locationEyebrow}>📍 Your local mailbox</p>
-            <p style={S.locationName}>NOHO Mailbox · Studio City, CA</p>
-            <p style={S.locationAddr}>11288 Ventura Blvd #1006 · 91604</p>
-            <p style={S.locationHours}>Mon–Fri 9:30am–5:30pm · Sat 10am–1:30pm</p>
-            <a href="https://maps.google.com/?q=11288+Ventura+Blvd+1006+Studio+City+CA+91604" target="_blank" rel="noopener noreferrer" style={S.mapsBtn}>
+            <p style={S.locationName}>NOHO Mailbox · North Hollywood, CA</p>
+            <p style={S.locationAddr}>5062 Lankershim Blvd · 91601</p>
+            <p style={S.locationHours}>{hoursSummary}</p>
+            <a href="https://maps.google.com/?q=5062+Lankershim+Blvd+North+Hollywood+CA+91601" target="_blank" rel="noopener noreferrer" style={S.mapsBtn}>
               Open in Maps ↗
             </a>
           </div>

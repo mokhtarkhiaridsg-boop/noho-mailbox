@@ -85,10 +85,11 @@ export default function FeedbackForm({ token }: { token: string }) {
         </p>
       )}
 
-      <label style={{ display: "block", fontSize: 11, fontWeight: 800, letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(45,16,15,0.55)", marginBottom: 6 }}>
+      <label htmlFor="feedback-comment" style={{ display: "block", fontSize: 11, fontWeight: 800, letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(45,16,15,0.55)", marginBottom: 6 }}>
         Anything to add? (optional)
       </label>
       <textarea
+        id="feedback-comment"
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         rows={3}

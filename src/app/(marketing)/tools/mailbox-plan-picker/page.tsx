@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import PlanPickerClient from "./PlanPickerClient";
 
 export const metadata: Metadata = {
-  title: "Find Your Mailbox Plan — Free Picker Quiz | NOHO Mailbox",
+  title: "Find Your Mailbox Plan — Free Picker Quiz",
   description:
-    "5-question quiz finds the right NOHO Mailbox plan: Basic ($50/3mo), Business ($80/3mo), or Premium ($295/3mo). Honest fit, not the most expensive option.",
+    "5-question quiz finds the right NOHO Mailbox plan: Basic ($50/3mo), Business ($80/3mo), or Premium ($95/3mo). Honest fit, not the most expensive option.",
   openGraph: {
     title: "Find Your NOHO Mailbox Plan",
     description: "5 questions, honest plan recommendation. Free.",
@@ -89,7 +89,7 @@ export default function MailboxPlanPickerPage() {
                 b: "Everything in Basic, PLUS free notarized Form 1583 (saves $25), priority scanning (same-day for mail received before 2pm), unlimited cards on profile (multiple businesses on one box). Best for: LLCs, S-corps, e-commerce brands.",
               },
               {
-                t: "Premium — $295 / 3 months ($98.33/mo)",
+                t: "Premium — $95 / 3 months ($31.67/mo)",
                 b: "Everything in Business, PLUS unlimited mail scans, $5 same-day local delivery (NoHo + Burbank + Studio City zone), one international forward/month at no markup, priority support. Best for: high-volume operators, busy founders, anyone who values speed.",
               },
             ].map((r) => (

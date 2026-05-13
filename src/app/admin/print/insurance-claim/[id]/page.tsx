@@ -137,7 +137,7 @@ export default async function PrintInsuranceClaimPage({
 
         <footer style={S.footer}>
           <p>
-            NOHO Mailbox · 11288 Ventura Blvd #1006, Studio City, CA 91604 · (818) 506-7744 · nohomailbox.org
+            NOHO Mailbox · 5062 Lankershim Blvd, North Hollywood, CA 91601 · (818) 506-7744 · nohomailbox.org
           </p>
           {portalUrl && <p style={S.footerLink}>Carrier portal: {portalUrl}</p>}
           <p style={S.footerStamp}>Package generated {generatedAt} · NOHO Mailbox claim {row.id}</p>

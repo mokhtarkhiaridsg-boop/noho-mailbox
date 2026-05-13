@@ -44,7 +44,7 @@ export const POSTS: BlogPost[] = [
         paragraphs: [
           "The big regional couriers — ClockWork Express, California Courier Services, Jet Delivery, Ways Messenger — almost all use zone-based pricing with a minimum, usually $25–$40 for a single run inside Los Angeles County. That model exists because they&apos;re built for enterprise medical and corporate accounts running 50+ packages a day. They need to feed dispatchers, drivers in vans, 24/7 phone lines, and HIPAA training.",
           "If you only need 1–5 runs a week, you&apos;re subsidizing all of that overhead.",
-          "Local storefront couriers (us included) can offer flat rates because we&apos;re not running enterprise dispatch. Inside North Hollywood our flat rate is <strong>$5</strong>. Across the Valley it climbs by zone — $9.75 to $24 for a Burbank or Sherman Oaks run. No minimum, no membership, no monthly retainer.",
+          "Local storefront couriers (us included) can offer flat rates because we&apos;re not running enterprise dispatch. Inside North Hollywood our flat rate is <strong>$5</strong>. Across the Valley it climbs by zone — $9 (Inner Valley: Studio City / Sherman Oaks / Burbank) to $13 (Mid Valley: Van Nuys / Glendale). No minimum, no membership, no monthly retainer.",
         ],
       },
       {
@@ -112,7 +112,7 @@ export const POSTS: BlogPost[] = [
         heading: "TL;DR for North Hollywood businesses",
         paragraphs: [
           "If you do 1–10 deliveries a week and most of them are inside the NoHo–Studio City–Burbank triangle, you&apos;re probably overpaying anyone with &quot;Express&quot; or &quot;Courier&quot; in their corporate name. A walk-in storefront with flat-rate zone pricing is almost always cheaper, and the accountability is built in.",
-          "We exist for that exact use case. $5 in NoHo, $9.75–$24 across the Valley, no membership, first run on us. Walk in (5062 Lankershim) or call (818) 506-7744.",
+          "We exist for that exact use case. $5 in NoHo, $9–$28 across LA (7-zone tier), no membership, first run on us. Walk in (5062 Lankershim) or call (818) 506-7744.",
         ],
       },
     ],

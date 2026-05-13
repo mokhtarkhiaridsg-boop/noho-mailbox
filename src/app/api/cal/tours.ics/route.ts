@@ -28,7 +28,7 @@ import { buildIcs, type IcsEvent } from "@/lib/ical";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const BUREAU_LOCATION = "NOHO Mailbox · 11288 Ventura Blvd #1006, Studio City, CA 91604";
+const BUREAU_LOCATION = "NOHO Mailbox · 5062 Lankershim Blvd, North Hollywood, CA 91601";
 const BASE_URL = process.env.AUTH_URL ?? "https://nohomailbox.org";
 const HISTORY_DAYS = 14;
 const FUTURE_CAP = 200;

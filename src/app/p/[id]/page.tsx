@@ -4,6 +4,7 @@
 // recipient, family). Renders photo, status, timeline, and a deeplink
 // to the carrier's own tracking site.
 
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMailPublicShareView } from "@/app/actions/mail";
@@ -11,6 +12,14 @@ import { getSenderNoteCountForPublic } from "@/app/actions/senderThankYou";
 import SenderThankYouForm from "./SenderThankYouForm";
 
 export const dynamic = "force-dynamic";
+
+// Token-protected per-package share. Crawling these would expose
+// member mailing patterns + photos to anyone scraping public SERPs.
+export const metadata: Metadata = {
+  title: "Package",
+  description: "View a shared package via NOHO Mailbox.",
+  robots: { index: false, follow: false },
+};
 
 const NOHO_BLUE = "#337485";
 const NOHO_BLUE_DEEP = "#23596A";

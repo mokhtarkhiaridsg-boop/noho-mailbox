@@ -6,7 +6,7 @@ import { listRoadmapItems } from "@/app/actions/publicRoadmap";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Public roadmap · NOHO Mailbox",
+  title: "Public roadmap",
   description: "Vote on what NOHO Mailbox builds next. Members can upvote upcoming features to influence the priority order.",
 };
 

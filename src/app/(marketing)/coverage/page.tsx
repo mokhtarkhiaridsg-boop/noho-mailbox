@@ -6,7 +6,7 @@ import { ZIP_PAGES } from "@/lib/delivery-zip-pages";
 export const metadata: Metadata = {
   title: "Same-Day Delivery Coverage — North Hollywood & Greater LA",
   description:
-    "Full list of LA neighborhoods we serve same-day. $5 in NoHo, $9–$28 across the Valley and Greater LA. Check if your address is in zone, see the ETA, and book in 60 seconds.",
+    "LA neighborhoods we cover same-day. $5 in NoHo, $9–$28 across the Valley and Greater LA. Check if your address is in zone and book in 60 seconds.",
   openGraph: {
     title: "Same-Day Delivery Coverage Map — NOHO Mailbox",
     description:
@@ -46,12 +46,13 @@ export default function CoveragePage() {
       },
       telephone: "+1-818-506-7744",
     },
+    // Schema.org Service.areaServed expects AdministrativeArea / GeoShape /
+    // Place / Text — NOT "PostalCodeArea" (not a real schema type — Google
+    // logs it as "Unknown type" in Rich Results). Map each zip page into a
+    // canonical AdministrativeArea with the postal code in the name.
     areaServed: ZIP_PAGES.map((z) => ({
-      "@type": "PostalCodeArea",
-      name: z.neighborhood,
-      postalCode: z.zip,
-      addressRegion: "CA",
-      addressCountry: "US",
+      "@type": "AdministrativeArea",
+      name: `${z.neighborhood}, CA ${z.zip}`,
     })),
   };
 

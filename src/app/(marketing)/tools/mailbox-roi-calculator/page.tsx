@@ -4,7 +4,7 @@ import MailboxROICalculatorClient from "./MailboxROICalculatorClient";
 export const metadata: Metadata = {
   title: "Mailbox ROI Calculator — How Much Is Package Theft Costing You?",
   description:
-    "Free interactive calculator: estimate how much porch piracy and missed packages cost you each year, and compare to a NOHO Mailbox plan. LA averages 13% package theft rate.",
+    "Free calculator: how much porch piracy + missed packages cost you each year, vs a NOHO Mailbox plan. LA averages a 13% package theft rate.",
   openGraph: {
     title: "Free Mailbox ROI Calculator — NOHO Mailbox",
     description:

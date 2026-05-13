@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "NOHO Scanner",
   description: "Tablet-at-counter package scanner with offline queue.",
   manifest: "/scanner-manifest.webmanifest",
+  // Admin-only counter tool — never index. follow:false so crawlers
+  // don't probe the route structure either.
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {

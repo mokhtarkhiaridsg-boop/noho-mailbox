@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Glossary — CMRA, Form 1583, EIN, S-Corp & More | NOHO Mailbox",
+  title: "Glossary — CMRA, Form 1583, EIN, S-Corp & More",
   description:
-    "Plain-English definitions for the technical terms you'll see in mailbox + business formation: CMRA, Form 1583, EIN, S-corp election, registered agent, franchise tax, USPS-CMRA certification.",
+    "Plain-English definitions for mailbox + business-formation terms: CMRA, Form 1583, EIN, S-corp, registered agent, franchise tax, USPS-CMRA certification.",
   openGraph: {
     title: "Glossary — NOHO Mailbox",
     description:

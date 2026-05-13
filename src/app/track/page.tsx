@@ -19,7 +19,7 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Track a shipment · NOHO Mailbox",
+  title: "Track a shipment",
   description: "Look up the status of any shipment by its tracking number.",
   robots: { index: false, follow: false },
 };
@@ -92,6 +92,7 @@ export default async function PublicTrackingRouter({ searchParams }: { searchPar
           <input
             type="text"
             name="n"
+            aria-label="Tracking number"
             placeholder="9400 1118 9922 3397 9812 01"
             autoFocus
             style={{ flex: 1, padding: "10px 12px", borderRadius: 10, border: "1px solid rgba(45,16,15,0.18)", fontSize: 14, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", color: NOHO_INK, background: "white" }}
@@ -171,6 +172,7 @@ export default async function PublicTrackingRouter({ searchParams }: { searchPar
         <input
           type="text"
           name="n"
+          aria-label="Tracking number"
           placeholder="9400 1118 9922 3397 9812 01"
           style={{ flex: 1, padding: "10px 12px", borderRadius: 10, border: "1px solid rgba(45,16,15,0.18)", fontSize: 14, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", color: NOHO_INK, background: "white" }}
         />
@@ -209,7 +211,7 @@ function Frame({ children }: { children: React.ReactNode }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, paddingBottom: 14, borderBottom: "1px solid rgba(45,16,15,0.08)", marginBottom: 14 }}>
-          <Image src="/brand/logo-trans.png" alt="NOHO Mailbox" width={56} height={32} style={{ height: 36, width: "auto", objectFit: "contain" }} />
+          <Image src="/brand/logo-trans.png" alt="NOHO Mailbox" width={63} height={36} style={{ objectFit: "contain" }} />
           <div>
             <p style={{ margin: 0, fontSize: 9.5, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: NOHO_BLUE }}>
               Tracking

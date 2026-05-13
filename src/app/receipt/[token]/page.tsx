@@ -16,7 +16,8 @@ type Props = { params: Promise<{ token: string }> };
 export async function generateMetadata({ params }: Props) {
   const { token } = await params;
   return {
-    title: `Shipment receipt · NOHO Mailbox`,
+    // `absolute` to avoid root template doubling: "Shipment receipt · NOHO Mailbox | NOHO Mailbox".
+    title: { absolute: `Shipment receipt · NOHO Mailbox` },
     description: `Verify a package shipped from NOHO Mailbox. Reference ${token}.`,
   };
 }
@@ -48,6 +49,8 @@ export default async function ReceiptPage({ params }: Props) {
     ? `https://www.ups.com/track?tracknum=${encodeURIComponent(r.trackingNumber)}`
     : r.trackingNumber && r.carrier === "FedEx"
     ? `https://www.fedex.com/fedextrack/?trknbr=${encodeURIComponent(r.trackingNumber)}`
+    : r.trackingNumber && r.carrier === "DHL"
+    ? `https://www.dhl.com/us-en/home/tracking/tracking-express.html?submit=1&tracking-id=${encodeURIComponent(r.trackingNumber)}`
     : null;
 
   return (
@@ -83,10 +86,10 @@ export default async function ReceiptPage({ params }: Props) {
 
         <p style={S.aboutEyebrow}>About NOHO Mailbox</p>
         <p style={S.about}>
-          NOHO Mailbox is a CMRA-licensed virtual mailbox in Studio City, CA. Members receive packages at our suite and forward them to recipients like you. The QR sticker on this package proves the shipment came through us — not a phishing label.
+          NOHO Mailbox is a CMRA-licensed virtual mailbox in North Hollywood, CA. Members receive packages at our suite and forward them to recipients like you. The QR sticker on this package proves the shipment came through us — not a phishing label.
         </p>
         <p style={S.foot}>
-          📍 11288 Ventura Blvd #1006, Studio City, CA 91604 · ☎️ <a href="tel:+18185067744" style={S.link}>(818) 506-7744</a>
+          📍 5062 Lankershim Blvd, North Hollywood, CA 91601 · ☎️ <a href="tel:+18185067744" style={S.link}>(818) 506-7744</a>
         </p>
         <p style={S.scanFoot}>
           Scanned {r.scanCount === 1 ? "once" : `${r.scanCount.toLocaleString()} times`} · Reference {r.verifyToken}

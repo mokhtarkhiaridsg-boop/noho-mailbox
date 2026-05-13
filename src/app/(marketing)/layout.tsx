@@ -25,9 +25,18 @@ export default async function MarketingLayout({
 
   return (
     <>
+      {/* Skip-to-main link — visually hidden until focused, then jumps over the
+          promo banner + Navbar so keyboard users don't have to tab through them
+          on every page. Required for WCAG 2.1 SC 2.4.1 (Bypass Blocks). */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[1000] focus:px-4 focus:py-2 focus:rounded-xl focus:bg-bg-dark focus:text-text-dark focus:font-bold focus:shadow-lg focus:outline focus:outline-2 focus:outline-accent"
+      >
+        Skip to main content
+      </a>
       <PromoBanner config={promoBanner} />
       <Navbar sessionUser={sessionUser} />
-      <main className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1">{children}</main>
       <Footer />
       <ExitIntentPopup />
       <MobileStickyCTA />

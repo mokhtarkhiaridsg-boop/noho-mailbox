@@ -5,7 +5,7 @@ import { POSTS } from "@/lib/blog-posts";
 export const metadata: Metadata = {
   title: "Blog & Guides — California LLC, Mailboxes, Same-Day Delivery",
   description:
-    "Long-form guides on California LLC formation, USPS Form 1583, virtual mailbox vs P.O. Box, same-day delivery, S-corp tax election, and running a business from a real LA address.",
+    "Long-form guides on California LLC formation, USPS Form 1583, virtual mailbox vs P.O. Box, S-corp election, and running a business from a real LA address.",
   openGraph: {
     title: "Blog — NOHO Mailbox",
     description:
@@ -76,7 +76,7 @@ export default function BlogPage() {
         <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
         <div className="max-w-5xl mx-auto text-center relative z-10">
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-text-dark mb-6 animate-scale-in">
-            Resources &amp; Guides
+            Blog &amp; Guides
           </h1>
           <p className="text-text-dark-muted max-w-xl mx-auto text-lg animate-fade-up delay-200">
             Practical guides on same-day delivery, LLC formation, mailbox

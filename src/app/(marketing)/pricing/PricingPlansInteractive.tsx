@@ -6,13 +6,15 @@
  * elevated with a brand-blue ring + amber "Most Popular" pill.
  */
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { PlanTermKey, PricingPlan } from "@/lib/pricing-config";
 
+// `term14` is a "pay for 12, get 14" annual promo — without the "+2 free"
+// hint the lone "14 months" label looks like a typo to first-time visitors.
 const TERMS: { key: PlanTermKey; label: string; months: number }[] = [
   { key: "term3", label: "3 months", months: 3 },
   { key: "term6", label: "6 months", months: 6 },
-  { key: "term14", label: "14 months", months: 14 },
+  { key: "term14", label: "12 mo + 2 free", months: 14 },
 ];
 
 function CheckIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -50,6 +52,7 @@ export function PricingPlansInteractive({ plans }: { plans: PricingPlan[] }) {
             return (
               <button
                 key={t.key}
+                type="button"
                 role="tab"
                 aria-selected={active}
                 onClick={() => setTerm(t.key)}
@@ -183,51 +186,26 @@ export function PricingPlansInteractive({ plans }: { plans: PricingPlan[] }) {
   );
 }
 
-// ─── Animated price ───
-// Counts between previous and new value when `value` changes. Easing:
-// ease-out-cubic. Format: $X with a suffix slot for "/ N mo".
+// ─── Price display ───
+// Used to be a count-up animation that took the previous value, eased
+// toward the new value, and called setDisplay each frame. The animation
+// was broken — after the parent's term state changed, the displayed
+// value stayed stuck at the initial mount value. The fix: drop the
+// useState-managed `display` entirely and render the `value` prop
+// directly. The visual count-up was a nicety, correctness wins.
 function AnimatedPrice({
   value,
-  durationMs = 380,
   className,
   style,
   suffix,
 }: {
   value: number;
-  durationMs?: number;
+  durationMs?: number; // accepted for backward-compat with callsite; unused
   className?: string;
   style?: React.CSSProperties;
   suffix?: React.ReactNode;
 }) {
-  const [display, setDisplay] = useState(value);
-  const fromRef = useRef(value);
-  const startRef = useRef(0);
-  const rafRef = useRef(0);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reduce.matches) {
-      setDisplay(value);
-      fromRef.current = value;
-      return;
-    }
-
-    cancelAnimationFrame(rafRef.current);
-    fromRef.current = display;
-    startRef.current = performance.now();
-    const from = fromRef.current;
-    const to = value;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - startRef.current) / durationMs);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(Math.round(from + (to - from) * eased));
-      if (t < 1) rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, durationMs]);
+  const display = value;
 
   return (
     <span className={className} style={style}>

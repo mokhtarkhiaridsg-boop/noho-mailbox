@@ -21,8 +21,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!meta) return { title: "Comparison not found" };
 
   return {
-    title: `NOHO Mailbox vs ${meta.competitorName} — Honest Side-by-Side`,
-    description: `${meta.competitorName} vs NOHO Mailbox. Real comparison: pricing, features, walk-in, same-day delivery, B2B SaaS. ${meta.ourAngle.slice(0, 100)}`,
+    // `absolute` bypasses the root "%s | NOHO Mailbox" template — the
+    // brand is already in the title; appending it again would render as
+    // "NOHO Mailbox vs X — Honest Side-by-Side | NOHO Mailbox".
+    title: { absolute: `NOHO Mailbox vs ${meta.competitorName} — Honest Side-by-Side` },
+    // Cap the trailing ourAngle excerpt so the full description stays under
+    // Google's ~160-char SERP truncation limit. Competitor names vary 7–25
+    // chars, so 50 chars of angle leaves headroom even for the longest names.
+    description: `${meta.competitorName} vs NOHO Mailbox: pricing, features, walk-in, same-day delivery, B2B SaaS. ${meta.ourAngle.slice(0, 50)}`,
     openGraph: {
       title: `NOHO Mailbox vs ${meta.competitorName}`,
       description: meta.ourAngle.slice(0, 160),

@@ -32,21 +32,29 @@ export async function lookupReferralLanding(input: { code: string }): Promise<Re
   const code = input.code.trim().toUpperCase();
   if (!code) return { ok: false, code, reason: "not_found" };
 
-  const ref = await prisma.referral.findUnique({
-    where: { code },
-    include: { referrer: { select: { name: true, suiteNumber: true } } },
-  });
-  if (!ref) return { ok: false, code, reason: "not_found" };
+  // Wrap in try/catch so DB hiccups (transient connection errors, missing
+  // referral table on a fresh dev DB) degrade gracefully to a "not_found"
+  // landing instead of leaking a 500 to /r/c/<code>. Public token routes
+  // should never expose server errors.
+  try {
+    const ref = await prisma.referral.findUnique({
+      where: { code },
+      include: { referrer: { select: { name: true, suiteNumber: true } } },
+    });
+    if (!ref) return { ok: false, code, reason: "not_found" };
 
-  const firstName = (ref.referrer?.name?.split(/\s+/)[0] ?? "Your friend").slice(0, 30);
-  return {
-    ok: true,
-    code,
-    referrerFirstName: firstName,
-    referrerSuiteNumber: ref.referrer?.suiteNumber ?? null,
-    creditDollars: Math.round(ref.creditCents / 100),
-    visitCount: ref.landingVisits,
-  };
+    const firstName = (ref.referrer?.name?.split(/\s+/)[0] ?? "Your friend").slice(0, 30);
+    return {
+      ok: true,
+      code,
+      referrerFirstName: firstName,
+      referrerSuiteNumber: ref.referrer?.suiteNumber ?? null,
+      creditDollars: Math.round(ref.creditCents / 100),
+      visitCount: ref.landingVisits,
+    };
+  } catch {
+    return { ok: false, code, reason: "not_found" };
+  }
 }
 
 const VISIT_THROTTLE_MS = 60_000;     // dedupe rapid double-fires from React StrictMode etc.

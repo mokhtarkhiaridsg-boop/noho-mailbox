@@ -84,7 +84,7 @@ const useCases = [
 ];
 
 const margin = [
-  { label: "What we charge you", v: "$5 in NoHo · $9.75–$24 across Valley" },
+  { label: "What we charge you", v: "$5 in NoHo · $9–$28 across LA" },
   { label: "What you charge customer", v: "$15–$30 (your call, customer expects it)" },
   { label: "Your margin per run", v: "$10–$20 per delivery" },
   { label: "Your effort", v: "30 seconds to text us the address" },

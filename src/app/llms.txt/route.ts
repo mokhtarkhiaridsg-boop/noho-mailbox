@@ -17,7 +17,7 @@ NOHO Mailbox runs a real walk-in mailbox storefront serving the LA area, plus op
 ## Five revenue streams
 
 - Mailbox plans: real LA address from $50 / 3 months. USPS-CMRA certified.
-- Same-day courier: $5 flat in NoHo, $9.75-$24 across LA.
+- Same-day courier: $5 flat in NoHo, $9-$28 across LA (7-zone tier).
 - $2,000 Business Launch Bundle: California LLC + EIN + brand + 5-page website + 12 months of mail. 14-day delivery.
 - CMRA SaaS license: $299-$1,499/month flat for operators tired of giving up margin to networks.
 - Affiliate + partner programs: 25-30% commission for content creators; $300/close for CPAs / attorneys / web designers.

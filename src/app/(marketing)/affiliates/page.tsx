@@ -3,9 +3,9 @@ import Link from "next/link";
 import AffiliateForm from "./AffiliateForm";
 
 export const metadata: Metadata = {
-  title: "Affiliate Program — Earn 25–30% Per Sale | NOHO Mailbox",
+  title: "Affiliate Program — Earn 25–30% Per Sale",
   description:
-    "Earn 25–30% commission on every NOHO Mailbox customer you refer. Mailbox plans, Same-Day Delivery, $2,000 Business Launch Bundle, and CMRA SaaS — high AOV, 60-day cookie window, monthly payouts.",
+    "Earn 25–30% on every NOHO Mailbox customer you refer — mailbox plans, same-day delivery, $2,000 Business Bundle, CMRA SaaS. 60-day cookie, monthly payouts.",
   openGraph: {
     title: "NOHO Mailbox Affiliate Program",
     description: "25–30% commission · 60-day cookie · Monthly payouts.",
@@ -17,10 +17,10 @@ export const metadata: Metadata = {
 const products = [
   {
     name: "Mailbox plans",
-    avgPrice: "$50–$295 / 3-month term",
+    avgPrice: "$50–$295 / term",
     commission: "25%",
     body:
-      "Earn $12.50–$73.75 per signup. High repeat — most customers renew.",
+      "Earn $12.50–$73.75 per signup, depending on plan + term. High repeat — most customers renew.",
   },
   {
     name: "Same-day delivery",

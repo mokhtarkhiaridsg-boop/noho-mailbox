@@ -3,6 +3,7 @@
 // print this page as legal proof of receipt. Renders revoked status
 // loudly when admin has invalidated it.
 
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getMailingCertificateByToken } from "@/app/actions/mailingCertificate";
@@ -11,6 +12,15 @@ import { formatVerifyToken } from "@/lib/mailing-certificate";
 import PrintButton from "./PrintButton";
 
 export const dynamic = "force-dynamic";
+
+// Token-gated legal proof — should NOT be indexed by search engines.
+// Each URL is a one-shot per-shipment certificate; SERPs leaking these
+// would expose customer mailing patterns.
+export const metadata: Metadata = {
+  title: "Mailing certificate",
+  description: "Verify a mailing certificate issued by NOHO Mailbox.",
+  robots: { index: false, follow: false },
+};
 
 const NOHO_BLUE = "#337485";
 const NOHO_BLUE_DEEP = "#23596A";

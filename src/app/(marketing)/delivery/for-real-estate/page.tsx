@@ -6,7 +6,7 @@ const serviceJsonLd = {
   "@type": "Service",
   name: "Real Estate Courier — Same-Day Delivery for Realtors and Escrow",
   description:
-    "Same-day courier service for real estate agents, escrow officers, and transaction coordinators. $5 flat in NoHo, $9.75–$24 across LA. Lockbox keys, earnest checks, signed addenda, disclosure packets.",
+    "Same-day courier service for real estate agents, escrow officers, and transaction coordinators. $5 flat in NoHo, $9–$28 across LA. Lockbox keys, earnest checks, signed addenda, disclosure packets.",
   serviceType: "Real Estate Document Courier",
   provider: {
     "@type": "LocalBusiness",
@@ -44,11 +44,11 @@ const serviceJsonLd = {
 export const metadata: Metadata = {
   title: "Same-Day Courier for Real Estate Agents — North Hollywood",
   description:
-    "$5 flat key drops, earnest checks, signed contracts, and lockbox runs in NoHo. $9.75–$24 across the Valley. Real human, walk-in storefront. (818) 506-7744.",
+    "$5 flat key drops, earnest checks, signed contracts, and lockbox runs in NoHo. $9–$28 across the Valley. Real human, walk-in storefront. (818) 506-7744.",
   openGraph: {
     title: "Same-Day Courier for Real Estate — NOHO Mailbox",
     description:
-      "Key drops, earnest checks, signed addenda, lockbox swaps. $5 flat in NoHo, $9.75–$24 across the Valley.",
+      "Key drops, earnest checks, signed addenda, lockbox swaps. $5 flat in NoHo, $9–$28 across the Valley.",
     url: "https://nohomailbox.org/delivery/for-real-estate",
   },
   alternates: {
@@ -128,7 +128,7 @@ export default function DeliveryForRealEstatePage() {
           <p className="text-text-dark-muted max-w-2xl mx-auto text-lg animate-fade-up delay-200">
             Real estate agents, escrow officers, transaction coordinators —
             stop sending an assistant on a 90-minute round trip. Five-dollar
-            same-day inside NoHo, $9.75–$24 across the Valley, real human, photo
+            same-day inside NoHo, $9–$28 across the Valley, real human, photo
             proof of delivery.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8 animate-fade-up delay-400">

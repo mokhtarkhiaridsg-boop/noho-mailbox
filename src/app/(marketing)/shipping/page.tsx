@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ShippingQuoteClient } from "./shipping-client";
 
 export const metadata: Metadata = {
-  title: "Shipping Quote — NOHO Mailbox",
+  title: "Shipping Quote",
   description:
     "Compare shipping rates from USPS, UPS, FedEx, and DHL. Get an instant quote with dimensions and weight. Same-day local delivery available.",
   openGraph: {

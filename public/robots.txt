@@ -1,7 +1,40 @@
 User-agent: *
 Allow: /
+
+# Private auth & member dashboards — never indexable.
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /api/
+
+# Counter-side PWAs — bureau-internal, no SEO value, save crawl budget.
+Disallow: /scanner
+Disallow: /driver
+
+# Auth flow — meta noindex is set per page, but block at robots level too
+# so crawlers don't burn budget on every signup/login variant.
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /unauthorized
+Disallow: /forbidden
+
+# Token-shared receipt / certificate / package / referral / dropoff pages.
+# Each has noindex headers, but these are personal one-off URLs that should
+# never be discoverable through search regardless.
+Disallow: /cert/
+Disallow: /receipt/
+Disallow: /r/
+Disallow: /p/
+Disallow: /dropoff/
+Disallow: /feedback/
+Disallow: /suite-info/
+Disallow: /bell
+
+# Member-only or live-data ambient pages — not search content.
+Disallow: /wall
+Disallow: /lobby
+Disallow: /leaderboard
+Disallow: /track
 
 Sitemap: https://nohomailbox.org/sitemap.xml

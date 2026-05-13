@@ -401,8 +401,8 @@ function buildRecipientInviteEmail(args: { primaryName: string; primarySuite: st
           <li>This invitation reference (just mention "${args.primaryName}'s mailbox transfer")</li>
         </ul>
       </div>
-      <p style="font-size: 14px; line-height: 1.6;">Bureau hours: Monday–Friday, 9am–6pm.</p>
-      <p style="font-size: 13px; line-height: 1.6; color: #7A8290;">Questions? Reply to this email or call the bureau directly.</p>
+      <p style="font-size: 14px; line-height: 1.6;">Bureau hours: Mon–Fri 9:30am–5:30pm (lunch 1:30–2pm) · Sat 10am–1:30pm.</p>
+      <p style="font-size: 13px; line-height: 1.6; color: #7A8290;">Questions? Reply to this email or call the bureau at <a href="tel:+18185067744" style="color: #1976FF;">(818) 506-7744</a>.</p>
     </div>
   </div>`;
 }

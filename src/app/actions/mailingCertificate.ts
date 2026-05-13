@@ -156,9 +156,17 @@ async function issueImpl(args: IssueArgs): Promise<{ id?: string; verifyToken?: 
 export async function getMailingCertificateByToken(input: { token: string }): Promise<MailingCertificateRow | null> {
   const t = input.token.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
   if (t.length < 8) return null;
-  const row = await prisma.mailingCertificate.findUnique({ where: { verifyToken: t } });
-  if (!row) return null;
-  return toRow(row);
+  // Wrap in try/catch so DB hiccups (missing table in dev, transient connection
+  // errors) cause /cert/<token> to render the 404 page instead of bubbling a
+  // 500 to the user. Public token pages should always degrade gracefully to
+  // "not found" rather than expose server errors.
+  try {
+    const row = await prisma.mailingCertificate.findUnique({ where: { verifyToken: t } });
+    if (!row) return null;
+    return toRow(row);
+  } catch {
+    return null;
+  }
 }
 
 // ─── Member: list mine ──────────────────────────────────────────────

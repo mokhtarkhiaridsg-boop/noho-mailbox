@@ -25,7 +25,7 @@ const offerJsonLd = {
 export const metadata: Metadata = {
   title: "Open a NOHO Mailbox Franchise — Mailbox + Same-Day Delivery",
   description:
-    "Franchise opportunity: open a NOHO Mailbox storefront in your city. Brand + platform + training + ops manual. $75k initial fee, 6% royalty, $500/mo platform fee. Operator-built, USPS-CMRA compliant.",
+    "Franchise opportunity: open a NOHO Mailbox storefront. Brand + platform + training + ops manual. $75k initial fee, 6% royalty, $500/mo platform. USPS-CMRA compliant.",
   openGraph: {
     title: "Franchise NOHO Mailbox",
     description:

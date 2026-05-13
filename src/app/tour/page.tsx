@@ -6,7 +6,7 @@ import TourForm from "./TourForm";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Book a tour — NOHO Mailbox",
+  title: "Book a tour",
   description: "Drop in for a 15-minute walkthrough of NOHO Mailbox's North Hollywood bureau. See the mailboxes, package room, notary station, and ask anything.",
 };
 

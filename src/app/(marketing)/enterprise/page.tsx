@@ -30,7 +30,7 @@ const serviceJsonLd = {
 export const metadata: Metadata = {
   title: "Enterprise Courier Contracts — Volume Pricing, NET-30, LA Coverage",
   description:
-    "Enterprise same-day courier contracts for LA law firms, hospital systems, banks, and corporate offices. Volume pricing, dedicated dispatch, NET-30 billing, monthly invoices.",
+    "Enterprise same-day courier contracts for LA law firms, hospitals, banks, and corporate offices. Volume pricing, dedicated dispatch, NET-30 billing.",
   openGraph: {
     title: "Enterprise Courier Contracts — NOHO Mailbox",
     description:

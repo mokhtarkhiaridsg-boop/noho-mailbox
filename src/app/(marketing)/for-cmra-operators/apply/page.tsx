@@ -4,7 +4,7 @@ import TenantApplicationForm from "./TenantApplicationForm";
 export const metadata: Metadata = {
   title: "Apply for the NOHO Mailbox CMRA Platform — 30-Day Trial",
   description:
-    "Apply to license the NOHO Mailbox platform for your CMRA. 30-day trial included. We&apos;ll provision a sandbox tenant within 48 hours and walk you through onboarding.",
+    "Apply to license the NOHO Mailbox platform for your CMRA. 30-day trial. Sandbox tenant provisioned within 48 hours, with full onboarding support.",
   openGraph: {
     title: "Apply — NOHO Mailbox CMRA Platform",
     description: "30-day trial. Sandbox tenant provisioned in 48 hours.",

@@ -15,9 +15,17 @@ import {
 
 // Public — anyone can read the current hours (used by marketing footer +
 // member dashboard banners).
+//
+// Wrapped in try/catch so a DB hiccup doesn't tear down every public
+// page's footer (and through it, every marketing route's render).
+// `parseHoursConfig(undefined)` returns sensible defaults.
 export async function getOperatingHours(): Promise<OperatingHoursConfig> {
-  const row = await prisma.siteConfig.findUnique({ where: { key: OPERATING_HOURS_KEY } });
-  return parseHoursConfig(row?.value);
+  try {
+    const row = await prisma.siteConfig.findUnique({ where: { key: OPERATING_HOURS_KEY } });
+    return parseHoursConfig(row?.value);
+  } catch {
+    return parseHoursConfig(undefined);
+  }
 }
 
 // Admin: replace the whole config (typically called by AdminOperatingHoursPanel).

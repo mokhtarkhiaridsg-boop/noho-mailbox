@@ -55,8 +55,11 @@ export function PolicyAccordion({ items }: { items: PolicyItem[] }) {
             }}
           >
             <button
+              type="button"
               onClick={() => toggle(i)}
               aria-expanded={isOpen}
+              aria-controls={`policy-panel-${i}`}
+              id={`policy-trigger-${i}`}
               className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-[#F7E6C2]/30"
               style={{ color: "#2D100F" }}
             >
@@ -71,6 +74,10 @@ export function PolicyAccordion({ items }: { items: PolicyItem[] }) {
               </span>
             </button>
             <div
+              id={`policy-panel-${i}`}
+              role="region"
+              aria-labelledby={`policy-trigger-${i}`}
+              hidden={!isOpen}
               className="grid transition-[grid-template-rows] duration-300 ease-out"
               style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
             >

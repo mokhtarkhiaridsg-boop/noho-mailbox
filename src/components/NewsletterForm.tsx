@@ -34,6 +34,7 @@ export default function NewsletterForm({ source = "footer", variant = "footer" }
               type="email"
               name="email"
               required
+              aria-label="Email address for newsletter"
               placeholder="you@example.com"
               autoComplete="email"
               className="text-sm bg-white/[0.06] border border-white/[0.12] rounded-lg px-3 py-2 text-text-dark placeholder-text-dark-muted/40 focus:outline-none focus:border-accent/60"
@@ -84,6 +85,7 @@ export default function NewsletterForm({ source = "footer", variant = "footer" }
             type="email"
             name="email"
             required
+            aria-label="Email address for newsletter"
             placeholder="you@example.com"
             autoComplete="email"
             className="flex-1 text-sm rounded-xl px-4 py-3 focus:outline-none"

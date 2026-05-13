@@ -44,7 +44,7 @@ const serviceJsonLd = {
 export const metadata: Metadata = {
   title: "Same-Day Courier for Dental & Medical Offices — North Hollywood",
   description:
-    "$5 flat same-day delivery for small dental and medical offices in NoHo. Lab work (non-PHI), supplies, dentures, scripts, equipment between offices. Walk-in storefront.",
+    "$5 flat same-day for dental + medical offices in NoHo. Lab work (non-PHI), supplies, dentures, scripts, equipment between offices. Walk-in storefront.",
   openGraph: {
     title: "Medical / Dental Office Courier — NOHO Mailbox",
     description:
@@ -158,7 +158,7 @@ export default function DeliveryForMedicalOfficesPage() {
         className="py-3 px-4 text-center text-sm font-semibold"
         style={{ background: "#F7E6C2", color: "#6B3F1A" }}
       >
-        $5 NoHo · $9.75–$14 across the Valley · No PHI / no controlled substances
+        $5 NoHo · $9–$13 across the Valley · No PHI / no controlled substances
       </div>
 
       {/* What we run */}
@@ -266,7 +266,7 @@ export default function DeliveryForMedicalOfficesPage() {
             First run is on us.
           </h2>
           <p className="mb-8" style={{ color: "rgba(248,242,234,0.65)" }}>
-            $5 flat inside NoHo, $9.75–$14 across the Valley. No subscription.
+            $5 flat inside NoHo, $9–$13 across the Valley. No subscription.
             Real human, walk-in storefront at 5062 Lankershim.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">

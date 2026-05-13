@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   title:
     "Case Study: How NOHO Mailbox Runs Its Storefront on Our Own Platform",
   description:
-    "An operating CMRA in North Hollywood runs its admin, member dashboard, compliance, dispatch, and billing on the platform we license to other operators. Honest numbers + lessons.",
+    "How an operating CMRA in North Hollywood runs admin, member dashboard, dispatch, and billing on the same platform we license to other operators. Honest numbers.",
   openGraph: {
     title: "Case Study — NOHO Mailbox on Its Own Platform",
     description:

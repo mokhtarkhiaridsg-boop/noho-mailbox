@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ShieldIcon } from "@/components/BrandIcons";
 
 export const metadata: Metadata = {
-  title: "Security & Privacy",
+  title: "Mail Security & Privacy — Surveillance, Encryption",
   description:
     "How NOHO Mailbox protects your mail — secure handling, private suite numbers, 24/7 surveillance, encrypted dashboard, and USPS-compliant ID verification.",
   openGraph: {

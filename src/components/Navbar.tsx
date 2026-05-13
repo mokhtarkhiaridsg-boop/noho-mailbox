@@ -123,6 +123,10 @@ export default function Navbar({ sessionUser }: { sessionUser: SessionUser }) {
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="group flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full transition-all duration-200 hover:bg-[#337485]/8"
                 aria-label="Account menu"
+                aria-expanded={menuOpen}
+                aria-controls="navbar-account-menu"
+                aria-haspopup="menu"
+                type="button"
               >
                 {/* Branded avatar — mini mailbox card with initials. Flap lifts on hover. */}
                 <div
@@ -154,6 +158,8 @@ export default function Navbar({ sessionUser }: { sessionUser: SessionUser }) {
               </button>
               {menuOpen && (
                 <div
+                  id="navbar-account-menu"
+                  role="menu"
                   className="absolute right-0 mt-2 w-56 rounded-2xl overflow-hidden z-50"
                   style={{
                     background: "white",
@@ -249,7 +255,14 @@ export default function Navbar({ sessionUser }: { sessionUser: SessionUser }) {
         </nav>
 
         {/* Mobile hamburger */}
-        <button className="lg:hidden flex flex-col gap-1.5 p-2" onClick={() => setOpen(!open)} aria-label="Toggle menu">
+        <button
+          className="lg:hidden flex flex-col gap-1.5 p-2"
+          onClick={() => setOpen(!open)}
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="navbar-mobile-menu"
+          type="button"
+        >
           <span className={`block w-5 h-[1.5px] transition-all duration-300 ${open ? "rotate-45 translate-y-[7px]" : ""}`} style={{ background: "#2D100F" }} />
           <span className={`block w-5 h-[1.5px] transition-all duration-300 ${open ? "opacity-0" : ""}`} style={{ background: "#2D100F" }} />
           <span className={`block w-5 h-[1.5px] transition-all duration-300 ${open ? "-rotate-45 -translate-y-[7px]" : ""}`} style={{ background: "#2D100F" }} />
@@ -257,7 +270,11 @@ export default function Navbar({ sessionUser }: { sessionUser: SessionUser }) {
       </div>
 
       {/* Mobile menu */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
+      <div
+        id="navbar-mobile-menu"
+        className={`lg:hidden overflow-hidden transition-all duration-300 ${open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}
+        hidden={!open}
+      >
         <nav
           className="px-5 pb-5 pt-3 flex flex-col gap-0.5"
           style={{

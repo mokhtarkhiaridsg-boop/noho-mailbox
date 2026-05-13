@@ -34,7 +34,7 @@ const serviceJsonLd = {
 export const metadata: Metadata = {
   title: "Software Platform for CMRA Operators — License the NOHO Stack",
   description:
-    "License the same software running NOHO Mailbox: admin console, member dashboard, CMRA quarterly reporting, mail scanning, Shippo + Square + Resend integrations. From $299/mo per location.",
+    "License the same software running NOHO Mailbox: admin console, member dashboard, CMRA reporting, scanning, Shippo + Square. From $299/mo per location.",
   openGraph: {
     title: "License the NOHO Mailbox Platform — For CMRA Operators",
     description:

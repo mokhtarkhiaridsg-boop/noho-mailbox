@@ -44,7 +44,7 @@ export default function LobbyWallClient({ entries }: { entries: PublicLobbyWallE
       <header style={S.header}>
         <p style={S.eyebrow}>📬 NOHO Mailbox</p>
         <h1 style={S.headerH1}>The community wall</h1>
-        <p style={S.headerSub}>{entries.length} member{entries.length === 1 ? "" : "s"} · since 2024</p>
+        <p style={S.headerSub}>{entries.length} member{entries.length === 1 ? "" : "s"} strong</p>
       </header>
 
       {/* Spotlight */}

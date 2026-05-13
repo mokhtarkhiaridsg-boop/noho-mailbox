@@ -66,36 +66,36 @@ export default function TourForm() {
       display: "grid", gap: 12,
     }}>
       <div>
-        <label style={LBL}>Your name *</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} placeholder="Sami Khiari" style={INP} />
+        <label htmlFor="tour-name" style={LBL}>Your name *</label>
+        <input id="tour-name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} placeholder="Sami Khiari" style={INP} />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         <div>
-          <label style={LBL}>Email *</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={120} placeholder="you@example.com" style={INP} />
+          <label htmlFor="tour-email" style={LBL}>Email *</label>
+          <input id="tour-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={120} placeholder="you@example.com" style={INP} />
         </div>
         <div>
-          <label style={LBL}>Phone (optional)</label>
-          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} placeholder="(818) 555-1234" style={INP} />
+          <label htmlFor="tour-phone" style={LBL}>Phone (optional)</label>
+          <input id="tour-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} placeholder="(818) 555-1234" style={INP} />
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 110px", gap: 8 }}>
         <div>
-          <label style={LBL}>Date *</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required style={INP} />
+          <label htmlFor="tour-date" style={LBL}>Date *</label>
+          <input id="tour-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required style={INP} />
         </div>
         <div>
-          <label style={LBL}>Time *</label>
-          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required style={INP} />
+          <label htmlFor="tour-time" style={LBL}>Time *</label>
+          <input id="tour-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} required style={INP} />
         </div>
         <div>
-          <label style={LBL}>Party size</label>
-          <input type="number" min={1} max={10} value={partySize} onChange={(e) => setPartySize(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))} style={INP} />
+          <label htmlFor="tour-party" style={LBL}>Party size</label>
+          <input id="tour-party" type="number" min={1} max={10} value={partySize} onChange={(e) => setPartySize(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))} style={INP} />
         </div>
       </div>
       <div>
-        <label style={LBL}>What brings you in? (optional)</label>
-        <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} maxLength={500} placeholder="I'm starting an LLC and need a real street address that's not my apartment." style={{ ...INP, resize: "vertical" }} />
+        <label htmlFor="tour-reason" style={LBL}>What brings you in? (optional)</label>
+        <textarea id="tour-reason" value={reason} onChange={(e) => setReason(e.target.value)} rows={3} maxLength={500} placeholder="I'm starting an LLC and need a real street address that's not my apartment." style={{ ...INP, resize: "vertical" }} />
       </div>
       {error && <p style={{ margin: 0, fontSize: 13, color: "#b91c1c", fontWeight: 700 }}>{error}</p>}
       <button type="submit" disabled={busy} style={{

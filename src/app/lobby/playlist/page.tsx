@@ -6,10 +6,23 @@
  * the public action; no auth (no PII beyond display names + suite #).
  */
 
+import type { Metadata } from "next";
 import { getLobbyPlaylistPublic } from "@/app/actions/lobbyPlaylist";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Lobby Playlist",
+  description: "Top 25 songs voted by NOHO Mailbox members. Now playing in the bureau lobby. Want to add a track? Sign into your dashboard and suggest one.",
+  openGraph: {
+    title: "🎵 NOHO Mailbox · Lobby Playlist",
+    description: "Member-curated top 25 playing in the bureau.",
+    url: "https://nohomailbox.org/lobby/playlist",
+  },
+  alternates: { canonical: "https://nohomailbox.org/lobby/playlist" },
+  robots: { index: false, follow: true },
+};
 
 export default async function LobbyPlaylistPage() {
   const songs = await getLobbyPlaylistPublic({ limit: 25 }).catch(() => []);

@@ -122,10 +122,11 @@ function ResetPasswordForm() {
         <input type="hidden" name="token" value={token} />
 
         <div>
-          <label className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
+          <label htmlFor="reset-password" className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
             New password
           </label>
           <input
+            id="reset-password"
             type="password"
             name="password"
             required
@@ -138,10 +139,11 @@ function ResetPasswordForm() {
         </div>
 
         <div>
-          <label className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
+          <label htmlFor="reset-confirm" className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
             Confirm password
           </label>
           <input
+            id="reset-confirm"
             type="password"
             name="confirm"
             required

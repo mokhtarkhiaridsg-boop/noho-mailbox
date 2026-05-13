@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import LLCQuizClient from "./LLCQuizClient";
 
 export const metadata: Metadata = {
-  title: "Should I Form an LLC? — Free Decision Quiz | NOHO Mailbox",
+  title: "Should I Form an LLC? — Free Decision Quiz",
   description:
     "Free 9-question quiz answers whether you actually need an LLC. Honest framework: revenue thresholds, liability risk, asset protection. No email required.",
   openGraph: {

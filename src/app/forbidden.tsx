@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Forbidden",
+  description: "You don't have permission to access this page.",
+  robots: { index: false, follow: false },
+};
 
 export default function Forbidden() {
   return (

@@ -10,7 +10,7 @@ import { getActiveLobbyWallEntries } from "@/app/actions/lobbyWall";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Member wall · NOHO Mailbox",
+  title: "Member wall",
   description: "Meet the NOHO Mailbox community — the snowbirds, founders, students, and locals who call our suites home.",
 };
 

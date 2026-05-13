@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms of Service",
+  title: "Terms of Service — Mailbox Rental Agreement",
   description:
     "NOHO Mailbox terms of service — mailbox rental agreement terms, CMRA compliance requirements, pricing, fees, cancellation policy, and service conditions.",
   openGraph: {
@@ -63,7 +63,7 @@ export default function TermsOfServicePage() {
             </div>
 
             {/* 3. Account Registration & CMRA */}
-            <div>
+            <div id="cmra">
               <h2 className="text-2xl font-extrabold text-text-light mb-4">3. Account Registration &amp; CMRA Compliance</h2>
               <p className="text-text-light-muted mb-3">
                 NOHO Mailbox operates as a Commercial Mail Receiving Agency (CMRA) under United States
@@ -187,13 +187,16 @@ export default function TermsOfServicePage() {
             <div id="holding">
               <h2 className="text-2xl font-extrabold text-text-light mb-4">7A. Package Holding Policy</h2>
               <p className="text-text-light-muted mb-3">
-                We are not a storage facility. Packages are held free for <strong className="text-text-light">5 days</strong> from
-                delivery date. After 5 days, storage fees apply:
+                We are not a storage facility. Packages are held free for <strong className="text-text-light">3 days</strong> from
+                delivery date. After 3 days, tiered storage fees apply (each tier is charged
+                per-day for days falling in that tier):
               </p>
               <ul className="list-disc pl-6 text-text-light-muted space-y-1.5">
-                <li><strong className="text-text-light">Days 6–10:</strong> $2.60/day per package</li>
-                <li><strong className="text-text-light">Days 11–14:</strong> $5.20/day per package</li>
-                <li><strong className="text-text-light">After 14 days:</strong> Subject to return, disposal, or forced forwarding at customer expense</li>
+                <li><strong className="text-text-light">Days 4–13 (base tier):</strong> $6.50/day per package</li>
+                <li><strong className="text-text-light">Days 14–29 (1.5×):</strong> $9.75/day per package</li>
+                <li><strong className="text-text-light">Days 30–59 (2×):</strong> $13.00/day per package</li>
+                <li><strong className="text-text-light">Days 60+ (3×, final):</strong> $19.50/day per package</li>
+                <li><strong className="text-text-light">After extended holding:</strong> Subject to return, disposal, or forced forwarding at customer expense</li>
               </ul>
               <p className="text-text-light-muted mt-3">
                 Oversized packages may incur immediate or higher daily storage fees. Failure to pick up packages
@@ -284,8 +287,10 @@ export default function TermsOfServicePage() {
                 <li>Delivery is available during business hours, subject to courier availability</li>
                 <li>North Hollywood zone deliveries are a flat $5.00</li>
                 <li>
-                  Deliveries outside the North Hollywood zone start at $9.75 for up to 5 miles, plus
-                  $0.75 per additional mile (maximum 15-mile radius)
+                  Deliveries outside the North Hollywood zone are zone-based, ranging from $9
+                  (Inner Valley, 0–5 miles) to $28 (Far LA, 20–30 miles). Deliveries beyond 30
+                  miles are custom-quoted. See <a href="/delivery" className="underline">/delivery</a>{" "}
+                  for the full 7-zone map and Rush / White Glove tier multipliers.
                 </li>
                 <li>
                   We are not responsible for delays due to traffic, weather, or other circumstances
@@ -464,7 +469,7 @@ export default function TermsOfServicePage() {
                 <p>5062 Lankershim Blvd, North Hollywood, CA 91601</p>
                 <p>
                   Phone:{" "}
-                  <a href="tel:+18187651539" className="text-accent hover:underline">(818) 765-1539</a>
+                  <a href="tel:+18185067744" className="text-accent hover:underline">(818) 506-7744</a>
                 </p>
                 <p>
                   Email:{" "}

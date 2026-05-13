@@ -53,11 +53,15 @@ export default function BellClient() {
         <h1 style={S.h1}>Ring the bell</h1>
         <p style={S.sub}>Type your suite number and tap to let the front desk know you&apos;re here.</p>
 
-        <input value={suite} onChange={(e) => setSuite(e.target.value.replace(/[^\w-]/g, "").slice(0, 12))}
+        <input
+          value={suite}
+          onChange={(e) => setSuite(e.target.value.replace(/[^\w-]/g, "").slice(0, 12))}
+          aria-label="Suite number"
           placeholder="042"
           inputMode="numeric"
           autoFocus
-          style={S.input} />
+          style={S.input}
+        />
 
         {result && !result.ok && (
           <p style={S.error}>
@@ -73,7 +77,7 @@ export default function BellClient() {
           {busy ? "Ringing…" : "🔔 Ring the bell"}
         </button>
 
-        <p style={S.foot}>11288 Ventura Blvd #1006 · Studio City, CA</p>
+        <p style={S.foot}>5062 Lankershim Blvd · North Hollywood, CA</p>
       </div>
     </main>
   );

@@ -407,7 +407,7 @@ function wrapEmail(inner: string): string {
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:white;border-radius:14px;border:1px solid #E8DDD0;padding:28px 32px;">
       <tr><td>${inner}
         <p style="margin:14px 0 0;font-size:11px;color:rgba(45,16,15,.45);line-height:1.4;">
-          📍 11288 Ventura Blvd #1006, Studio City, CA 91604 · ☎️ <a href="tel:+18185067744" style="color:#23596A;">(818) 506-7744</a>
+          📍 5062 Lankershim Blvd, North Hollywood, CA 91601 · ☎️ <a href="tel:+18185067744" style="color:#23596A;">(818) 506-7744</a>
         </p>
       </td></tr>
     </table>

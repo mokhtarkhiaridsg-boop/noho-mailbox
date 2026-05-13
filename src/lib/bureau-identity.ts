@@ -35,10 +35,10 @@ export type BureauIdentity = {
 export const DEFAULT_BUREAU_IDENTITY: BureauIdentity = {
   bureauId: "noho",
   name: "NOHO Mailbox",
-  address: "11288 Ventura Blvd #1006",
-  city: "Studio City",
+  address: "5062 Lankershim Blvd",
+  city: "North Hollywood",
   state: "CA",
-  zip: "91604",
+  zip: "91601",
   timezone: "America/Los_Angeles",
   phone: "+18185067744",
   contactEmail: "nohomailbox@gmail.com",

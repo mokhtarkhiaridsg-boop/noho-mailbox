@@ -19,12 +19,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const meta = getIntlSaasPage(country);
   if (!meta) return { title: "Country not found" };
 
+  // `inCountry` reads naturally after prepositions like "in" / "to" — for
+  // most countries it's the same as `country`, but for entries like the UK
+  // or "Other countries" the data file overrides it ("the United Kingdom",
+  // "any other country") so the rendered copy stays grammatical.
+  const inCountry = meta.countryAfterPrep || meta.country;
   return {
-    title: `CMRA / Mailbox Operator Software for ${meta.country} — NOHO Mailbox SaaS`,
-    description: `License operator-grade CMRA / private-mailbox / virtual-office software in ${meta.country}. Customer dashboard, dispatch, billing, compliance — $299/mo flat. Stripe Connect supports local currency.`,
+    title: `CMRA / Mailbox Operator SaaS for ${meta.country}`,
+    description: `License CMRA / private-mailbox / virtual-office software in ${inCountry}. Dashboard, dispatch, billing, compliance — $299/mo flat. Stripe Connect, local currency.`,
     openGraph: {
       title: `CMRA SaaS for ${meta.country} — NOHO Mailbox`,
-      description: `Operator software for mailbox / private-mailbox / virtual-office businesses in ${meta.country}. $299/mo flat.`,
+      description: `Operator software for mailbox / private-mailbox / virtual-office businesses in ${inCountry}. $299/mo flat.`,
       url: `https://nohomailbox.org/international/${meta.slug}`,
     },
     alternates: {
@@ -75,11 +80,11 @@ export default async function InternationalPage({ params }: Params) {
             CMRA SAAS · {meta.country.toUpperCase()}
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-text-dark mb-6">
-            Operator software for mailbox businesses in {meta.country}
+            Operator software for mailbox businesses in {meta.countryAfterPrep || meta.country}
           </h1>
           <p className="text-text-dark-muted max-w-2xl mx-auto text-lg">
             Same battle-tested software running NOHO Mailbox in Los Angeles —
-            licensed at $299/mo flat to {meta.country} operators.
+            licensed at $299/mo flat to {meta.country === "Other countries" ? "operators worldwide" : `${meta.country} operators`}.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
             <Link

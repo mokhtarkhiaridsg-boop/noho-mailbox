@@ -962,6 +962,8 @@ export async function getMailPublicShareView(mailItemId: string, token: string):
 }> {
   const t = (token ?? "").trim();
   if (!t || t.length < 10) return { error: "Invalid share link" };
+  // try/catch so DB outage on /p/[id] renders the friendly "Package not
+  // found" branch instead of crashing into the global error boundary.
   const item = await prisma.mailItem.findUnique({
     where: { id: mailItemId },
     select: {
@@ -979,7 +981,7 @@ export async function getMailPublicShareView(mailItemId: string, token: string):
       publicShareToken: true,
       user: { select: { name: true, suiteNumber: true } },
     },
-  });
+  }).catch(() => null);
   if (!item) return { error: "Package not found" };
   if (!item.publicShareToken || item.publicShareToken !== t) return { error: "Invalid share link" };
 

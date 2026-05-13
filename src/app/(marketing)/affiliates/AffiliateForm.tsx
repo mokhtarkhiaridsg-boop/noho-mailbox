@@ -68,6 +68,7 @@ export default function AffiliateForm() {
           name="name"
           type="text"
           required
+          aria-label="Your name"
           placeholder="Your name"
           className="text-sm rounded-xl px-3 py-2.5 focus:outline-none"
           style={{ border: "1px solid #D8C8B4", background: "#FFFFFF", color: "#2D100F" }}
@@ -76,6 +77,7 @@ export default function AffiliateForm() {
           name="email"
           type="email"
           required
+          aria-label="Email address"
           placeholder="Email"
           className="text-sm rounded-xl px-3 py-2.5 focus:outline-none"
           style={{ border: "1px solid #D8C8B4", background: "#FFFFFF", color: "#2D100F" }}
@@ -86,6 +88,7 @@ export default function AffiliateForm() {
         name="channel"
         type="text"
         required
+        aria-label="Your channel, site, or handle"
         placeholder="Your channel / site / handle (e.g. youtube.com/@you, yoursite.com)"
         className="w-full text-sm rounded-xl px-3 py-2.5 focus:outline-none"
         style={{ border: "1px solid #D8C8B4", background: "#FFFFFF", color: "#2D100F" }}
@@ -95,6 +98,7 @@ export default function AffiliateForm() {
         <select
           name="audienceSize"
           defaultValue=""
+          aria-label="Audience size"
           className="text-sm rounded-xl px-3 py-2.5 focus:outline-none"
           style={{ border: "1px solid #D8C8B4", background: "#FFFFFF", color: "#2D100F" }}
         >
@@ -108,6 +112,7 @@ export default function AffiliateForm() {
         <select
           name="niche"
           defaultValue=""
+          aria-label="Niche"
           className="text-sm rounded-xl px-3 py-2.5 focus:outline-none"
           style={{ border: "1px solid #D8C8B4", background: "#FFFFFF", color: "#2D100F" }}
         >
@@ -126,6 +131,7 @@ export default function AffiliateForm() {
       <textarea
         name="notes"
         rows={3}
+        aria-label="Tell us about your audience and promotion approach"
         placeholder="Tell us about your audience and how you'd promote NOHO Mailbox"
         className="w-full text-sm rounded-xl px-3 py-2.5 focus:outline-none resize-none"
         style={{ border: "1px solid #D8C8B4", background: "#FFFFFF", color: "#2D100F" }}

@@ -7,7 +7,7 @@ import KioskForm from "./KioskForm";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Drop off a package — NOHO Mailbox",
+  title: "Drop off a package",
   description: "Generate a barcode receipt before you drop off a package at NOHO Mailbox so check-in is instant.",
 };
 

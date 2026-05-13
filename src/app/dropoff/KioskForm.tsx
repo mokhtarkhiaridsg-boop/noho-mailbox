@@ -47,29 +47,29 @@ export default function KioskForm() {
       gap: 12,
     }}>
       <div>
-        <label style={LBL}>Suite # *</label>
-        <input value={suiteNumber} onChange={(e) => setSuiteNumber(e.target.value)} required maxLength={12} placeholder="042" autoComplete="off" inputMode="numeric" style={{ ...INP, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 18 }} />
+        <label htmlFor="dropoff-suite" style={LBL}>Suite # *</label>
+        <input id="dropoff-suite" value={suiteNumber} onChange={(e) => setSuiteNumber(e.target.value)} required maxLength={12} placeholder="042" autoComplete="off" inputMode="numeric" style={{ ...INP, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 18 }} />
       </div>
       <div>
-        <label style={LBL}>Sender *</label>
-        <input value={expectedSender} onChange={(e) => setExpectedSender(e.target.value)} required maxLength={80} placeholder="Acme Coffee Co." style={INP} />
+        <label htmlFor="dropoff-sender" style={LBL}>Sender *</label>
+        <input id="dropoff-sender" value={expectedSender} onChange={(e) => setExpectedSender(e.target.value)} required maxLength={80} placeholder="Acme Coffee Co." style={INP} />
       </div>
       <div>
         <label style={LBL}>Carrier (optional)</label>
-        <div style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 6 }}>
-          <button type="button" onClick={() => setExpectedCarrier("")} style={pillStyle(expectedCarrier === "")}>None</button>
+        <div role="radiogroup" aria-label="Carrier" style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <button type="button" role="radio" aria-checked={expectedCarrier === ""} onClick={() => setExpectedCarrier("")} style={pillStyle(expectedCarrier === "")}>None</button>
           {DROPOFF_CARRIERS.map((c) => (
-            <button key={c} type="button" onClick={() => setExpectedCarrier(c)} style={pillStyle(expectedCarrier === c)}>{c}</button>
+            <button key={c} type="button" role="radio" aria-checked={expectedCarrier === c} onClick={() => setExpectedCarrier(c)} style={pillStyle(expectedCarrier === c)}>{c}</button>
           ))}
         </div>
       </div>
       <div>
-        <label style={LBL}>Tracking # (optional)</label>
-        <input value={expectedTracking} onChange={(e) => setExpectedTracking(e.target.value)} maxLength={80} placeholder="1Z…" style={{ ...INP, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }} />
+        <label htmlFor="dropoff-tracking" style={LBL}>Tracking # (optional)</label>
+        <input id="dropoff-tracking" value={expectedTracking} onChange={(e) => setExpectedTracking(e.target.value)} maxLength={80} placeholder="1Z…" style={{ ...INP, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }} />
       </div>
       <div>
-        <label style={LBL}>Note for staff (optional)</label>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} maxLength={500} placeholder="Fragile — please hold for me, I'll pick up tomorrow." style={{ ...INP, resize: "vertical" }} />
+        <label htmlFor="dropoff-notes" style={LBL}>Note for staff (optional)</label>
+        <textarea id="dropoff-notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} maxLength={500} placeholder="Fragile — please hold for me, I'll pick up tomorrow." style={{ ...INP, resize: "vertical" }} />
       </div>
       {error && <p style={{ margin: 0, fontSize: 13, color: "#b91c1c", fontWeight: 700 }}>{error}</p>}
       <button type="submit" disabled={busy} style={{

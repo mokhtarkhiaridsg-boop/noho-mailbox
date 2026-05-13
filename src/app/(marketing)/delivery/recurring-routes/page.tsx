@@ -38,9 +38,9 @@ const serviceJsonLd = {
 };
 
 export const metadata: Metadata = {
-  title: "Recurring Delivery Routes — Daily, Weekly, Biweekly · NOHO Mailbox",
+  title: "Recurring Delivery Routes — Daily, Weekly, Biweekly",
   description:
-    "Set a recurring courier route once and we run it on schedule. Daily court runs for law firms, weekly lab pickups for dental offices, biweekly escrow drops. From $20/run · prepaid blocks save up to 25%.",
+    "Set a recurring courier route once, we run it on schedule. Daily court runs, weekly dental lab pickups, biweekly escrow drops. From $20/run; save 25% prepaid.",
   openGraph: {
     title: "Recurring Delivery Routes — NOHO Mailbox",
     description:

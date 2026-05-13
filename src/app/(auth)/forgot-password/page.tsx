@@ -164,12 +164,14 @@ export default function ForgotPasswordPage() {
               <form action={formAction} className="space-y-4">
                 <div>
                   <label
+                    htmlFor="forgot-email"
                     className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5"
                     style={{ color: INK_SOFT }}
                   >
                     Email address
                   </label>
                   <input
+                    id="forgot-email"
                     type="email"
                     name="email"
                     required

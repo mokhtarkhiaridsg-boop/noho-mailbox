@@ -403,3 +403,34 @@ body {
     scroll-behavior: auto;
   }
 }
+
+/* ─── Keyboard focus-visible ring ───────────────────────────────────────
+   Tailwind preflight resets the browser's default focus outline on every
+   element, but the codebase doesn't add a replacement on most interactive
+   elements — keyboard users tabbing through the marketing site see no
+   indicator at all. This rule adds a subtle 2-color ring (brand blue with
+   warm cream offset) on any focusable element that doesn't already define
+   its own focus style. `:focus-visible` (vs `:focus`) targets keyboard
+   focus only, so mouse clicks don't trigger an unwanted outline.        */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid #337485;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── iOS Safari zoom-on-focus prevention ───────────────────────────────
+   Mobile Safari auto-zooms when an input has font-size < 16px on focus,
+   then the user has to manually pinch-zoom out. Force inputs to ≥16px on
+   small screens (typography stays compact on desktop). `!important` is
+   necessary to override Tailwind utility classes like `.text-sm` (14px)
+   that are sprinkled across the form components — without it the rule
+   loses on specificity since Tailwind's utility classes load after.
+   Without this every form on the marketing site (signup, login, contact,
+   delivery, etc.) zooms the viewport every time a field is tapped.       */
+@media (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="hidden"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}

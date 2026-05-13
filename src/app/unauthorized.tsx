@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Sign in required",
+  description: "Please sign in to access this page.",
+  robots: { index: false, follow: false },
+};
 
 export default function Unauthorized() {
   return (

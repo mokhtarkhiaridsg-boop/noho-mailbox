@@ -216,12 +216,21 @@ export async function adminRemoveLobbyWallEntry(input: { id: string; reason?: st
 
 // Used by /wall route + iter-195 lobby kiosk. Privacy-tight: no userId,
 // no email, no phone — only display name + suite # + joined year.
+//
+// Wraps the query in try/catch so a missing-table error (dev DB without
+// the iter-207 migration applied, or a Turso outage) renders the
+// empty-state UI instead of crashing the public /wall page into the
+// global error boundary.
 export async function getActiveLobbyWallEntries(): Promise<PublicLobbyWallEntry[]> {
-  const rows = await prisma.lobbyWallEntry.findMany({
-    where: { status: "Approved" },
-    orderBy: { reviewedAt: "desc" },
-    take: 60,
-    select: { id: true, photoUrl: true, displayName: true, suiteNumber: true, joinedYear: true },
-  });
-  return rows;
+  try {
+    const rows = await prisma.lobbyWallEntry.findMany({
+      where: { status: "Approved" },
+      orderBy: { reviewedAt: "desc" },
+      take: 60,
+      select: { id: true, photoUrl: true, displayName: true, suiteNumber: true, joinedYear: true },
+    });
+    return rows;
+  } catch {
+    return [];
+  }
 }

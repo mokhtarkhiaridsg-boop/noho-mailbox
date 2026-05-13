@@ -34,53 +34,61 @@ export async function ensurePickupSurveyToken(input: { mailItemId: string; userI
 
 // Public — fetch a survey by its token. Returns the data needed to
 // render the feedback page (item summary + already-submitted check).
+//
+// Wrapped in try/catch so DB hiccups (missing table in dev, transient
+// connection errors) degrade to "Not found" instead of leaking a 500
+// to /feedback/<token>. Public token routes must never expose errors.
 export async function getSurveyByToken(token: string) {
   if (!token || token.length < 10) return { error: "Invalid token", row: null as null };
-  const row = await prisma.pickupSurvey.findUnique({
-    where: { token },
-    select: {
-      id: true,
-      mailItemId: true,
-      rating: true,
-      comment: true,
-      submittedAt: true,
-      createdAt: true,
-      // Inline the item + customer info so the public page can render
-      // a recognizable summary without exposing more than the customer
-      // already knows about their own pickup.
-    },
-  });
-  if (!row) return { error: "Not found", row: null as null };
+  try {
+    const row = await prisma.pickupSurvey.findUnique({
+      where: { token },
+      select: {
+        id: true,
+        mailItemId: true,
+        rating: true,
+        comment: true,
+        submittedAt: true,
+        createdAt: true,
+        // Inline the item + customer info so the public page can render
+        // a recognizable summary without exposing more than the customer
+        // already knows about their own pickup.
+      },
+    });
+    if (!row) return { error: "Not found", row: null as null };
 
-  const item = await prisma.mailItem.findUnique({
-    where: { id: row.mailItemId },
-    select: {
-      id: true,
-      from: true,
-      carrier: true,
-      trackingNumber: true,
-      user: { select: { name: true, suiteNumber: true } },
-    },
-  });
+    const item = await prisma.mailItem.findUnique({
+      where: { id: row.mailItemId },
+      select: {
+        id: true,
+        from: true,
+        carrier: true,
+        trackingNumber: true,
+        user: { select: { name: true, suiteNumber: true } },
+      },
+    });
 
-  return {
-    row: {
-      id: row.id,
-      submittedAt: row.submittedAt?.toISOString() ?? null,
-      rating: row.rating,
-      comment: row.comment,
-      createdAtIso: row.createdAt.toISOString(),
-    },
-    item: item
-      ? {
-          from: item.from,
-          carrier: item.carrier,
-          trackingNumber: item.trackingNumber,
-          customerName: item.user?.name ?? null,
-          suiteNumber: item.user?.suiteNumber ?? null,
-        }
-      : null,
-  };
+    return {
+      row: {
+        id: row.id,
+        submittedAt: row.submittedAt?.toISOString() ?? null,
+        rating: row.rating,
+        comment: row.comment,
+        createdAtIso: row.createdAt.toISOString(),
+      },
+      item: item
+        ? {
+            from: item.from,
+            carrier: item.carrier,
+            trackingNumber: item.trackingNumber,
+            customerName: item.user?.name ?? null,
+            suiteNumber: item.user?.suiteNumber ?? null,
+          }
+        : null,
+    };
+  } catch {
+    return { error: "Not found", row: null as null };
+  }
 }
 
 // Public — submit a rating + optional comment via the token. Single

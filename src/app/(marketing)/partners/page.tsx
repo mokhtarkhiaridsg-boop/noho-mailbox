@@ -5,7 +5,7 @@ import PartnerForm from "./PartnerForm";
 export const metadata: Metadata = {
   title: "Partner Program — Earn $300 per Referral",
   description:
-    "Refer your clients to NOHO Mailbox for LLC formation, branding, mail, or same-day delivery. We pay 15% on every closed referral — $300 on the bundle, $180/mo on the retainer. Free to join.",
+    "Refer clients to NOHO Mailbox for LLC, branding, mail, or same-day delivery. We pay 15% per closed referral — $300 bundle, $180/mo retainer. Free to join.",
   openGraph: {
     title: "NOHO Mailbox Partner Program — 15% Per Referral",
     description:

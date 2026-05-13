@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+// 404 pages should never be indexed — they have no useful content.
+// Without explicit noindex, Google can crawl + cache 404 URLs from
+// inbound bad links, which then compete with real pages in SERPs.
+export const metadata: Metadata = {
+  title: "Page not found",
+  description: "The page you're looking for doesn't exist.",
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (

@@ -5,7 +5,7 @@ import NewsletterForm from "@/components/NewsletterForm";
 export const metadata: Metadata = {
   title: "Free Resources — Form 1583, LLC Checklist, Mailbox Setup Guide",
   description:
-    "Free downloads for small businesses: USPS Form 1583, California LLC formation checklist, mailbox setup guide, and same-day delivery price calculator. No email required.",
+    "Free small-business downloads: USPS Form 1583, California LLC checklist, mailbox setup guide, same-day delivery price calculator. No email required.",
   openGraph: {
     title: "Free Small Business Resources — NOHO Mailbox",
     description:

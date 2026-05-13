@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "NOHO Mailbox vs ClockWork, California Courier, Jet, Ways Messenger",
   description:
-    "Honest side-by-side comparison of LA same-day courier services for small businesses. Pricing, ETA, walk-in vs dispatch, minimums, and what each one is actually best for.",
+    "Honest side-by-side of LA same-day couriers for small businesses. Pricing, ETA, walk-in vs dispatch, minimums, and what each one is actually best for.",
   openGraph: {
     title: "Best Same-Day Courier in LA — Honest Comparison",
     description:
@@ -34,7 +34,7 @@ const competitors: CompetitorRow[] = [
   {
     name: "NOHO Mailbox",
     url: "https://nohomailbox.org",
-    pricing: "$5 flat NoHo · $9.75–$24 across LA",
+    pricing: "$5 flat NoHo · $9–$28 across LA",
     eta: "30–150 min by zone",
     area: "NoHo · Studio City · Burbank · Sherman Oaks · Toluca Lake · Valley Village · Mid LA",
     minimum: "None · No membership",
@@ -407,7 +407,7 @@ export default function CompareCouriersPage() {
             If we&apos;re the right fit, first run is on us.
           </h2>
           <p className="mb-8" style={{ color: "rgba(248,242,234,0.65)" }}>
-            $5 flat in NoHo, $9.75–$24 across the Valley, no membership.
+            $5 flat in NoHo, $9–$28 across LA (7-zone tier), no membership.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link

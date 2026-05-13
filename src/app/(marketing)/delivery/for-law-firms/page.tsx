@@ -7,7 +7,7 @@ const serviceJsonLd = {
   "@type": "Service",
   name: "Legal Courier — Same-Day Delivery for Law Firms",
   description:
-    "Same-day legal courier service for law firms in North Hollywood, Studio City, Burbank, and the San Fernando Valley. $5 flat in NoHo, $9.75–$24 across LA. Court runs, original signatures, exhibit copies, signed pleadings, lockbox keys.",
+    "Same-day legal courier service for law firms in North Hollywood, Studio City, Burbank, and the San Fernando Valley. $5 flat in NoHo, $9–$28 across LA. Court runs, original signatures, exhibit copies, signed pleadings, lockbox keys.",
   serviceType: "Legal Courier",
   provider: {
     "@type": "LocalBusiness",
@@ -47,7 +47,7 @@ const serviceJsonLd = {
 export const metadata: Metadata = {
   title: "Same-Day Courier for Law Firms — North Hollywood",
   description:
-    "$5 flat same-day delivery inside NoHo for solo and small law firms. Court drops, original signatures, exhibit copies, signed pleadings. Real human, walk-in storefront. (818) 506-7744.",
+    "$5 flat same-day in NoHo for solo + small law firms. Court drops, original signatures, exhibit copies, signed pleadings. Walk-in storefront, real human dispatcher.",
   openGraph: {
     title: "Same-Day Courier for Law Firms — NOHO Mailbox",
     description:
@@ -78,13 +78,13 @@ const useCases = [
   {
     title: "Signed pleadings & retainers",
     body:
-      "Out to clients, back to the firm, signed and stamped. Same day. $5 flat in NoHo, $9.75–$24 across LA.",
+      "Out to clients, back to the firm, signed and stamped. Same day. $5 flat in NoHo, $9–$28 across LA.",
   },
 ];
 
 const compare = [
   { label: "Inside NoHo", us: "$5 flat", them: "$25+ minimum" },
-  { label: "Studio City / Burbank / Sherman Oaks", us: "$9.75 – $14", them: "$35+" },
+  { label: "Studio City / Burbank / Sherman Oaks", us: "$9 – $13", them: "$35+" },
   { label: "Membership required?", us: "No", them: "Often" },
   { label: "Walk-in counter?", us: "Yes — 5062 Lankershim", them: "No" },
   { label: "Real human on the phone?", us: "Yes, Mon–Sat", them: "Phone tree" },

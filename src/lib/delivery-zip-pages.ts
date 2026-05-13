@@ -342,7 +342,7 @@ export const ZIP_PAGES: ZipMeta[] = [
     neighborhood: "Hollywood",
     zoneId: 2,
     searchTerms: ["same day delivery 90028", "Hollywood courier"],
-    hook: "Studio + entertainment corridor — $9.75 flat. Production-adjacent.",
+    hook: "Studio + entertainment corridor — $9 flat. Production-adjacent.",
     useCases: [
       "Production companies moving scripts, hard drives, props",
       "Casting offices handling NDAs and signed releases",
@@ -355,7 +355,7 @@ export const ZIP_PAGES: ZipMeta[] = [
     neighborhood: "Hancock Park / Larchmont Village",
     zoneId: 2,
     searchTerms: ["same day delivery 90004", "Larchmont courier"],
-    hook: "Studio corridor — $9.75 flat. Affluent residential + boutique professional.",
+    hook: "Studio corridor — $9 flat. Affluent residential + boutique professional.",
     useCases: [
       "Boutique real estate agents (high-AOV)",
       "Specialty contractors and designers",

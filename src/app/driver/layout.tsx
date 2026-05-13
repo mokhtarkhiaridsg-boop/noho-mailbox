@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   title: "NOHO Driver",
   description: "Same-day delivery driver app for NOHO Mailbox.",
   manifest: "/driver-manifest.webmanifest",
+  // Driver-only PWA — never index. follow:false stops crawlers from
+  // probing /driver/route/* + /driver/deliver/[id] route structure
+  // (which would 401 but reveal route hierarchy).
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
