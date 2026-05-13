@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Baloo_2, Pacifico } from "next/font/google";
 import "./globals.css";
 import { InteractiveCursor } from "@/components/InteractiveCursor";
 import { ScrollProgress } from "@/components/ScrollProgress";
@@ -12,6 +12,27 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
+});
+
+// Brand display family — used by `var(--font-baloo)` on marketing
+// headlines + iPad-OS admin titles. Was previously referenced in
+// `fontFamily: "var(--font-baloo), 'Baloo 2', sans-serif"` strings but
+// never actually loaded — those headlines fell through to the system
+// fallback. Loading here makes them render as designed.
+const baloo = Baloo_2({
+  variable: "--font-baloo",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+// Brand script accent — used for the small italic-script taglines next
+// to admin H2s ("set the vibe", "spot the bad apples", etc).
+const pacifico = Pacifico({
+  variable: "--font-pacifico",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -115,7 +136,7 @@ export default async function RootLayout({
   const locale = await getServerLocale();
   const dir = LOCALE_META[locale].dir;
   return (
-    <html lang={locale} dir={dir} className={inter.variable}>
+    <html lang={locale} dir={dir} className={`${inter.variable} ${baloo.variable} ${pacifico.variable}`}>
       <body className="min-h-screen flex flex-col font-[family-name:var(--font-inter)] antialiased">
         <LocaleProvider initial={locale}>
           <ScrollProgress />
