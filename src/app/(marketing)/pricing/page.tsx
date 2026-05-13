@@ -79,7 +79,7 @@ export default async function PricingPage() {
       ))}
       {/* ─── Hero ─── */}
       <section
-        className="relative px-5 pt-20 pb-12 text-center"
+        className="relative px-5 sm:px-6 pt-14 pb-10 sm:pt-20 sm:pb-14 text-center"
         style={{ background: "#F7E6C2" }}
       >
         <div
@@ -118,7 +118,7 @@ export default async function PricingPage() {
 
       {/* ─── Plans (interactive: term toggle + animated swap) ─── */}
       <section
-        className="py-16 px-5"
+        className="py-12 sm:py-16 px-5 sm:px-6"
         style={{ background: "#FAFAF8", borderTop: "1px solid rgba(45,16,15,0.08)" }}
       >
         <div className="max-w-6xl mx-auto">
@@ -128,7 +128,7 @@ export default async function PricingPage() {
 
       {/* ─── Comparison table ─── */}
       {config.comparison.length > 0 && (
-        <section className="py-16 px-5" style={{ background: "#F0EDE8" }}>
+        <section className="py-12 sm:py-16 px-5 sm:px-6" style={{ background: "#F0EDE8" }}>
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-10">
               <p
@@ -211,7 +211,7 @@ export default async function PricingPage() {
 
       {/* ─── Fees ─── */}
       {config.fees.length > 0 && (
-        <section id="fees" className="py-16 px-5" style={{ background: "#FAFAF8" }}>
+        <section id="fees" className="py-12 sm:py-16 px-5 sm:px-6" style={{ background: "#FAFAF8" }}>
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10">
               <p
@@ -281,7 +281,7 @@ export default async function PricingPage() {
 
       {/* ─── Policies (interactive accordion) ─── */}
       {config.policies.length > 0 && (
-        <section className="py-16 px-5" style={{ background: "#F0EDE8" }}>
+        <section className="py-12 sm:py-16 px-5 sm:px-6" style={{ background: "#F0EDE8" }}>
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10">
               <p
