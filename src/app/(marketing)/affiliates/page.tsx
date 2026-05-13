@@ -109,32 +109,55 @@ const how = [
 export default function AffiliatesPage() {
   return (
     <div className="perspective-container">
-      <section className="relative py-24 px-5 overflow-hidden bg-bg-dark">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[120px] pointer-events-none bg-accent" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+      <section
+        className="relative px-5 sm:px-6 pt-12 pb-10 sm:pt-20 sm:pb-14 overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse at top, #F7E6C2 0%, #F0DBA9 45%, #E8DDD0 100%)",
+        }}
+      >
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage: "radial-gradient(#2D100F 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
+          }}
+          aria-hidden="true"
+        />
+        <div className="max-w-3xl mx-auto text-center relative z-10">
           <span
-            className="inline-block px-3 py-1 text-[11px] font-bold tracking-wider rounded-full mb-5 animate-fade-up"
+            className="inline-block px-3 py-1 text-[11px] font-bold tracking-wider rounded-full mb-5"
             style={{
-              background: "rgba(245,166,35,0.15)",
-              color: "#F5A623",
-              border: "1px solid rgba(245,166,35,0.3)",
+              background: "rgba(51,116,133,0.10)",
+              color: "#337485",
+              border: "1px solid rgba(51,116,133,0.28)",
             }}
           >
             AFFILIATE PROGRAM · 25–30% COMMISSION
           </span>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-text-dark mb-6 animate-scale-in">
+          <h1
+            className="font-extrabold tracking-tight"
+            style={{
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+              color: "#2D100F",
+              fontSize: "clamp(2rem, 6vw, 3.5rem)",
+              lineHeight: 1.05,
+            }}
+          >
             Earn{" "}
-            <span style={{ color: "#F5A623" }}>$500 per Bundle</span>{" "}
+            <span style={{ color: "#337485" }}>$500 per Bundle</span>{" "}
             you refer.
           </h1>
-          <p className="text-text-dark-muted max-w-2xl mx-auto text-lg animate-fade-up delay-200">
+          <p
+            className="mt-3 sm:mt-4 max-w-2xl mx-auto text-[14.5px] sm:text-base"
+            style={{ color: "#5C4540" }}
+          >
             Content creators, niche site operators, podcasters — promote NOHO
             Mailbox to your audience and earn 25–30% commission on every close.
             Highest-AOV product is our $2,000 Business Launch Bundle ($500/close)
             and our CMRA SaaS ($1,076–$5,400 LTV/close).
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8 animate-fade-up delay-400">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
             <Link
               href="#apply"
               className="text-white font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-1"
@@ -146,9 +169,9 @@ export default function AffiliatesPage() {
               href="#products"
               className="font-bold px-8 py-4 rounded-xl transition-all hover:-translate-y-1"
               style={{
-                background: "rgba(255,255,255,0.06)",
-                color: "#F8F2EA",
-                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(45,16,15,0.06)",
+                color: "#2D100F",
+                border: "1px solid rgba(45,16,15,0.18)",
               }}
             >
               Commission rates

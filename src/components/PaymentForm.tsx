@@ -5,7 +5,12 @@ import { useEffect, useRef, useState } from "react";
 type PaymentFormProps = {
   amount: number; // in cents
   description: string;
-  onSuccess?: (paymentId: string, receiptUrl?: string) => void;
+  // iter-12.2 — When `purpose === "wallet_topup"` the API path atomically
+  // credits the signed-in user's wallet + writes a WalletTransaction +
+  // marks any matching CreditRequest as Paid. Without this prop the API
+  // treats the payment as a one-off charge (e.g. POS / guest checkout).
+  purpose?: "wallet_topup" | "one_off";
+  onSuccess?: (paymentId: string, receiptUrl?: string, newBalanceCents?: number) => void;
   onError?: (error: string) => void;
 };
 
@@ -40,7 +45,7 @@ interface GooglePayRequest {
   total: { amount: string; label: string };
 }
 
-export default function PaymentForm({ amount, description, onSuccess, onError }: PaymentFormProps) {
+export default function PaymentForm({ amount, description, purpose, onSuccess, onError }: PaymentFormProps) {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -153,6 +158,7 @@ export default function PaymentForm({ amount, description, onSuccess, onError }:
           amount,
           currency: "USD",
           note: description,
+          purpose: purpose ?? "one_off",
         }),
       });
 
@@ -163,7 +169,7 @@ export default function PaymentForm({ amount, description, onSuccess, onError }:
         onError?.(data.error);
       } else {
         setSuccess(true);
-        onSuccess?.(data.paymentId, data.receiptUrl);
+        onSuccess?.(data.paymentId, data.receiptUrl, data.newBalanceCents);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Payment failed";

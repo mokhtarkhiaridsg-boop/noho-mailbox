@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { TransitionStartFunction } from "react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { motion, useMotionValue, useTransform, animate } from "motion/react";
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "motion/react";
 import { BRAND, type DashboardUser, type Card, type WalletTxn } from "./types";
 import {
   IconShield,
@@ -19,6 +19,7 @@ import {
   topUpWallet,
   requestDepositRefund,
 } from "@/app/actions/wallet";
+import PaymentForm from "@/components/PaymentForm";
 
 // Animated dollar counter — counts from 0 to value over 700ms with the
 // brand smoothing curve. Used for Wallet Balance + Security Deposit so
@@ -64,6 +65,10 @@ export default function WalletPanel({
   router,
 }: Props) {
   const [showAddCard, setShowAddCard] = useState(false);
+  // iter-12.2 — Web Payments modal lets customers without a saved card
+  // pay on the spot via Apple Pay / Google Pay / card-on-screen. Holds
+  // the selected top-up amount; null means modal closed.
+  const [payAmount, setPayAmount] = useState<number | null>(null);
 
   function refresh(label: string) {
     setToast(label);
@@ -117,18 +122,32 @@ export default function WalletPanel({
         </div>
 
         <div className="mt-5">
-          <p
-            className="text-[10px] font-semibold uppercase tracking-[0.18em] mb-2"
-            style={{ color: "rgba(45,29,15,0.55)" }}
-          >
-            Quick top-up
-          </p>
+          <div className="flex items-baseline justify-between mb-2">
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "rgba(45,29,15,0.55)" }}
+            >
+              Quick top-up
+            </p>
+            <span className="text-[10px] font-medium" style={{ color: "rgba(45,29,15,0.45)" }}>
+              {cards.length > 0 ? "Charges default card" : "Pay with Apple Pay, Google Pay, or card"}
+            </span>
+          </div>
           <div className="flex flex-wrap gap-2">
             {[2500, 5000, 10000, 25000].map((amt, idx) => (
               <motion.button
                 key={amt}
-                disabled={isPending || cards.length === 0}
-                onClick={() =>
+                disabled={isPending}
+                onClick={() => {
+                  // iter-12.2 — When the member has a default Square card on
+                  // file, charge it instantly via the saved-card flow. When
+                  // they don't, open the Web Payments modal so they can pay
+                  // with Apple Pay / Google Pay / a new card without ever
+                  // leaving the dashboard.
+                  if (cards.length === 0) {
+                    setPayAmount(amt);
+                    return;
+                  }
                   startTransition(async () => {
                     const res = await topUpWallet(amt);
                     if (res?.error) {
@@ -136,8 +155,8 @@ export default function WalletPanel({
                       return;
                     }
                     refresh(`Added $${amt / 100} to wallet`);
-                  })
-                }
+                  });
+                }}
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.28, delay: 0.08 + idx * 0.04, ease: [0.22, 1, 0.36, 1] }}
@@ -156,7 +175,7 @@ export default function WalletPanel({
           </div>
           {cards.length === 0 && (
             <p className="mt-3 text-[11.5px]" style={{ color: "rgba(45,29,15,0.55)" }}>
-              Add a card below to enable wallet top-ups.
+              No saved card? Click any amount above to pay with Apple Pay, Google Pay, or a card.
             </p>
           )}
         </div>
@@ -569,6 +588,94 @@ export default function WalletPanel({
           number.
         </p>
       </motion.section>
+
+      {/* ─── Web Payments Modal ───────────────────────────────────────────
+          iter-12.2 — Tokenize a brand-new card / Apple Pay / Google Pay
+          via Square's Web Payments SDK and credit the wallet. Mounted
+          conditionally so the SDK script only loads when the customer
+          actually needs to pay. Closes on success after a brief receipt
+          flash, or on backdrop click / Cancel button. */}
+      <AnimatePresence>
+        {payAmount !== null && (
+          <motion.div
+            key="pay-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+            style={{ background: "rgba(45,29,15,0.55)", backdropFilter: "blur(6px)" }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setPayAmount(null);
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.98 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full sm:max-w-md rounded-3xl p-6 sm:p-7"
+              style={{
+                background: "white",
+                boxShadow:
+                  "0 10px 40px rgba(45,29,15,0.25), 0 1px 0 rgba(255,255,255,0.6) inset",
+              }}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p
+                    className="text-[10px] font-semibold uppercase tracking-[0.22em]"
+                    style={{ color: "#337485" }}
+                  >
+                    Top up wallet
+                  </p>
+                  <p
+                    className="text-2xl tabular-nums mt-1"
+                    style={{
+                      color: "#2D1D0F",
+                      fontFamily: "var(--font-baloo), system-ui, sans-serif",
+                      fontWeight: 800,
+                    }}
+                  >
+                    ${(payAmount / 100).toFixed(2)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPayAmount(null)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[18px] font-bold leading-none transition-colors hover:bg-black/5"
+                  style={{ color: "rgba(45,29,15,0.55)" }}
+                  aria-label="Close payment dialog"
+                >
+                  ×
+                </button>
+              </div>
+
+              <PaymentForm
+                amount={payAmount}
+                description={`NOHO Mailbox wallet top-up · $${(payAmount / 100).toFixed(2)}`}
+                purpose="wallet_topup"
+                onSuccess={() => {
+                  // iter-12.2 — Close the modal, refresh the dashboard
+                  // (which re-fetches walletBalanceCents + transactions),
+                  // and surface a toast. The modal itself shows a success
+                  // state for ~1.5s before unmount so the customer sees
+                  // the receipt confirmation.
+                  setTimeout(() => {
+                    setPayAmount(null);
+                    refresh(`Added $${(payAmount / 100).toFixed(2)} to wallet`);
+                  }, 1500);
+                }}
+                onError={(msg) => {
+                  // Don't auto-close — let the form's inline error stay
+                  // visible so the customer can retry without re-opening.
+                  console.warn("[wallet payment] error", msg);
+                }}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

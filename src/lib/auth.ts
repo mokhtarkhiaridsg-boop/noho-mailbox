@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { verifyToken } from "@/lib/totp";
+import { sendNewSignupAlert, sendSignupConfirmation } from "@/lib/email";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const providers: any[] = [
@@ -104,9 +105,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // (OAuth-only users can never sign in via password)
           const randomSecret = crypto.randomBytes(32).toString("hex");
           const placeholderHash = await bcrypt.hash(randomSecret, 12);
+          const customerName = user.name ?? normalizedEmail.split("@")[0];
           const created = await prisma.user.create({
             data: {
-              name: user.name ?? normalizedEmail.split("@")[0],
+              name: customerName,
               email: normalizedEmail,
               image: user.image ?? null,
               oauthProvider: account.provider,
@@ -117,6 +119,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
           user.id = created.id;
           (user as { role?: string }).role = created.role;
+
+          // Fire the same admin alert + customer welcome email a credentials
+          // signup would. Without this, OAuth signups silently bypassed the
+          // notification pipeline: customer got no welcome email, and admin
+          // (mokhtar + jnscanlon — see EMAIL_VERIFICATION_BCC default in
+          // lib/email.ts) never saw the new lead. Wrap in try/catch so a
+          // transient email failure can't block the sign-in itself — the
+          // User row is already persisted and recoverable.
+          try {
+            await Promise.all([
+              sendNewSignupAlert({
+                name: customerName,
+                email: normalizedEmail,
+                phone: null,
+                plan: null,
+                signupMode: "online",
+                notes: `OAuth signup via ${account.provider}. Plan + phone not yet collected — direct customer to /dashboard/pending for plan picker + onboarding checklist.`,
+                userId: created.id,
+              }),
+              sendSignupConfirmation({
+                name: customerName,
+                email: normalizedEmail,
+                signupMode: "online",
+                userId: created.id,
+              }),
+            ]);
+          } catch (err) {
+            console.error("[oauth signup] email dispatch failed", err);
+          }
         } else {
           user.id = existing.id;
           (user as { role?: string }).role = existing.role;

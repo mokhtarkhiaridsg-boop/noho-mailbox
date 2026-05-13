@@ -36,24 +36,47 @@ export default function MailboxPlanPickerPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
       />
 
-      <section className="relative py-24 px-5 overflow-hidden bg-bg-dark">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[120px] pointer-events-none bg-accent" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
+      <section
+        className="relative px-5 sm:px-6 pt-12 pb-10 sm:pt-20 sm:pb-14 overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse at top, #F7E6C2 0%, #F0DBA9 45%, #E8DDD0 100%)",
+        }}
+      >
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage: "radial-gradient(#2D100F 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
+          }}
+          aria-hidden="true"
+        />
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <span
             className="inline-block px-3 py-1 text-[11px] font-bold tracking-wider rounded-full mb-5"
             style={{
-              background: "rgba(245,166,35,0.15)",
-              color: "#F5A623",
-              border: "1px solid rgba(245,166,35,0.3)",
+              background: "rgba(51,116,133,0.10)",
+              color: "#337485",
+              border: "1px solid rgba(51,116,133,0.28)",
             }}
           >
             FREE PICKER · 60 SECONDS · NO LOGIN
           </span>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-text-dark mb-6">
+          <h1
+            className="font-extrabold tracking-tight"
+            style={{
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+              color: "#2D100F",
+              fontSize: "clamp(2rem, 6vw, 3.5rem)",
+              lineHeight: 1.05,
+            }}
+          >
             Which mailbox plan fits you?
           </h1>
-          <p className="text-text-dark-muted max-w-xl mx-auto text-lg">
+          <p
+            className="mt-3 sm:mt-4 max-w-2xl mx-auto text-[14.5px] sm:text-base"
+            style={{ color: "#5C4540" }}
+          >
             5 quick questions. Honest recommendation — we&apos;ll point you at
             the cheapest plan that actually fits your situation.
           </p>

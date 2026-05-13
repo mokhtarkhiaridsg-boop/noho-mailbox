@@ -4,7 +4,13 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useActionState, useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { requestMailbox, type RequestState } from "@/app/actions/auth";
+import {
+  requestMailbox,
+  type RequestState,
+  googleSignUp,
+  appleSignUp,
+  getOAuthConfig,
+} from "@/app/actions/auth";
 
 const CREAM = "#F7E6C2";
 const CREAM_DEEP = "#F0DBA9";
@@ -42,6 +48,11 @@ function SignUpInner() {
   const [signupMode, setSignupMode] = useState<"in_store" | "online">("online");
   const sp = useSearchParams();
   const [referralCode, setReferralCode] = useState("");
+  // OAuth provider availability is driven by env-var presence at runtime so
+  // we don't render dead buttons when AUTH_GOOGLE_ID / AUTH_APPLE_ID aren't
+  // configured. Matches the pattern already used on /login.
+  const [oauth, setOauth] = useState({ google: false, apple: false });
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   useEffect(() => {
     const ref = sp.get("ref")?.trim().toUpperCase() ?? "";
@@ -56,6 +67,12 @@ function SignUpInner() {
       }
     }
   }, [sp]);
+
+  useEffect(() => {
+    getOAuthConfig()
+      .then((cfg) => setOauth({ google: cfg.isGoogleEnabled, apple: cfg.isAppleEnabled }))
+      .catch(() => setOauth({ google: false, apple: false }));
+  }, []);
 
   return (
     <div
@@ -118,7 +135,9 @@ function SignUpInner() {
                 Got it — we&apos;ll reach out within 1 business day
               </h2>
               <p className="text-sm leading-relaxed mb-5" style={{ color: INK_SOFT }}>
-                We&apos;ll text or call shortly. You can finish everything online or in store — your choice.
+                Check your inbox now for a confirmation from{" "}
+                <strong style={{ color: INK }}>nohomailbox@gmail.com</strong>. We&apos;ll follow up by
+                email and text with the next steps — usually within one business day.
               </p>
 
               <div
@@ -134,7 +153,8 @@ function SignUpInner() {
                 </p>
                 <ol className="text-[12px] leading-relaxed space-y-1.5 list-decimal list-inside" style={{ color: INK_SOFT }}>
                   <li>
-                    We&apos;ll text you a <strong style={{ color: INK }}>secure Square payment link</strong>
+                    We&apos;ll email (and text, if you gave us a number) a{" "}
+                    <strong style={{ color: INK }}>secure Square payment link</strong>
                   </li>
                   <li>
                     Download &amp; complete{" "}
@@ -202,6 +222,89 @@ function SignUpInner() {
                 Takes 30 seconds. No credit card. We&apos;ll text you to set up your mailbox.
               </p>
 
+              {/* OAuth providers — only render when configured. Lives above
+                  the email form so social-signup is the fastest path; users
+                  who picked a plan tile lower down can still scroll to it.
+                  After OAuth completes, the new-user record is created on
+                  the server and routed to /dashboard/pending so the plan +
+                  KYC checklist guides them through the rest. */}
+              {(oauth.google || oauth.apple) && (
+                <div className="space-y-2.5 mb-5">
+                  {oauthError && (
+                    <div
+                      className="text-xs font-bold p-3 rounded-xl"
+                      style={{
+                        background: "var(--color-danger-soft)",
+                        color: "#7F1D1D",
+                        border: "1px solid rgba(239,68,68,0.30)",
+                      }}
+                    >
+                      {oauthError}
+                    </div>
+                  )}
+                  {oauth.google && (
+                    <form
+                      action={async () => {
+                        const result = await googleSignUp();
+                        if (result?.error) setOauthError(result.error);
+                      }}
+                    >
+                      <button
+                        type="submit"
+                        className="w-full flex items-center justify-center gap-3 font-bold py-3 rounded-xl text-sm transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
+                        style={{
+                          background: "white",
+                          color: INK,
+                          border: `1px solid ${BORDER}`,
+                          boxShadow: "var(--shadow-cream-sm)",
+                        }}
+                      >
+                        <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden>
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z" />
+                        </svg>
+                        Sign up with Google
+                      </button>
+                    </form>
+                  )}
+                  {oauth.apple && (
+                    <form
+                      action={async () => {
+                        const result = await appleSignUp();
+                        if (result?.error) setOauthError(result.error);
+                      }}
+                    >
+                      <button
+                        type="submit"
+                        className="w-full flex items-center justify-center gap-3 font-bold py-3 rounded-xl text-sm transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
+                        style={{
+                          background: INK,
+                          color: CREAM,
+                          boxShadow: "0 4px 14px rgba(45,16,15,0.28)",
+                        }}
+                      >
+                        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor" aria-hidden>
+                          <path d="M17.05 12.04c-.03-3.18 2.59-4.7 2.71-4.78-1.48-2.16-3.78-2.46-4.6-2.49-1.96-.2-3.82 1.15-4.81 1.15-.99 0-2.52-1.12-4.14-1.09-2.13.03-4.1 1.24-5.19 3.14-2.21 3.83-.56 9.5 1.59 12.61 1.05 1.52 2.3 3.23 3.93 3.17 1.58-.06 2.18-1.02 4.09-1.02 1.91 0 2.45 1.02 4.13.99 1.71-.03 2.79-1.55 3.83-3.08 1.21-1.77 1.71-3.49 1.74-3.58-.04-.02-3.34-1.28-3.38-5.07zM14.04 3.04c.87-1.05 1.45-2.51 1.29-3.96-1.25.05-2.76.83-3.66 1.88-.81.93-1.51 2.42-1.32 3.84 1.39.11 2.81-.71 3.69-1.76z" />
+                        </svg>
+                        Sign up with Apple
+                      </button>
+                    </form>
+                  )}
+                  <div className="flex items-center gap-3 my-1">
+                    <div className="flex-1 h-px" style={{ background: BORDER }} />
+                    <span
+                      className="text-[10px] font-black uppercase tracking-[0.18em]"
+                      style={{ color: INK_FAINT }}
+                    >
+                      or with email
+                    </span>
+                    <div className="flex-1 h-px" style={{ background: BORDER }} />
+                  </div>
+                </div>
+              )}
+
               {state.error && (
                 <div
                   className="mb-4 text-xs font-bold p-3 rounded-xl"
@@ -250,12 +353,24 @@ function SignUpInner() {
 
                 <div>
                   <label htmlFor="signup-phone" className="block text-[11px] font-black uppercase tracking-[0.16em] mb-1.5" style={{ color: INK_SOFT }}>
-                    Phone <span className="font-normal" style={{ color: INK_FAINT }}>(we&apos;ll text you)</span>
+                    Phone{" "}
+                    <span className="font-normal" style={{ color: INK_FAINT }}>
+                      {signupMode === "online"
+                        ? "(we'll text the Square payment link here)"
+                        : "(optional)"}
+                    </span>
                   </label>
                   <input
                     id="signup-phone"
                     type="tel"
                     name="phone"
+                    // Online signups depend on us being able to SMS the Square
+                    // payment link — without a phone we can't complete that
+                    // step. In-store signups can come in cold, so phone stays
+                    // optional there. Server-side validation in requestMailbox
+                    // (auth.ts) also enforces this in case the field is
+                    // tampered with client-side.
+                    required={signupMode === "online"}
                     autoComplete="tel"
                     placeholder="(818) 555-1234"
                     className="w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all"

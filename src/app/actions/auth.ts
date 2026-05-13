@@ -90,6 +90,19 @@ export async function requestMailbox(
 
   const { name, email, phone, plan, notes, signupMode, referralCode } = result.data;
 
+  // Online-mode signups require a phone — the success screen promises a
+  // texted Square payment link, and without a number the customer dead-ends.
+  // (In-store signups can skip the phone because we'll see them at the
+  // counter.) HTML `required={signupMode === "online"}` mirrors this on the
+  // client; this server-side guard catches direct API submissions or older
+  // tabs that loaded the page before the JS bundle updated.
+  if (signupMode === "online" && !phone) {
+    return {
+      error:
+        "We need a phone number to text you the Square payment link. Add one above, or switch to In-store signup.",
+    };
+  }
+
   // Idempotent: if this email already exists, succeed silently — admin sees it.
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -323,7 +336,83 @@ export async function appleSignIn() {
   }
 }
 
+// Signup variants — same OAuth flow, but route brand-new users to the
+// onboarding "pending" page (which renders the "Pick a plan → pay deposit →
+// upload 1583 + IDs → wait for suite #" checklist) instead of the bare
+// dashboard. Existing users with an active mailbox still land on /dashboard
+// per the verifyActiveMember pass-through. The signIn callback in lib/auth.ts
+// fires the admin alert + customer welcome emails on first OAuth sign-in so
+// you and Jess both get notified for OAuth signups too — not just the
+// credentials form.
+export async function googleSignUp() {
+  try {
+    await signIn("google", { redirectTo: "/dashboard/pending" });
+  } catch (error) {
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
+    if (error && typeof error === "object" && "digest" in error) throw error;
+    return { error: "Google signup is not available right now. Please use the email form below." };
+  }
+}
+
+export async function appleSignUp() {
+  try {
+    await signIn("apple", { redirectTo: "/dashboard/pending" });
+  } catch (error) {
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
+    if (error && typeof error === "object" && "digest" in error) throw error;
+    return { error: "Apple signup is not available right now. Please use the email form below." };
+  }
+}
+
 export async function getOAuthConfig() {
   const { isGoogleEnabled, isAppleEnabled } = await import("@/lib/auth");
   return { isGoogleEnabled, isAppleEnabled };
+}
+
+// Self-serve plan picker for signed-in members who haven't picked a tier yet.
+// Used by /dashboard/pending — solves the OAuth dead-end where a Google/Apple
+// signup lands on the dashboard with `plan: null`, clicks "Pick a plan" → goes
+// to /pricing → clicks a tile → bounces to /signup?plan=basic → form silently
+// returns success for the existing-email path WITHOUT actually updating the
+// plan, so the user is permanently stuck at "Pick a plan" no matter how many
+// times they click. This action lets the pending page update the current
+// user's plan directly without re-running the public signup intake.
+type SelectPlanState = { error?: string; success?: boolean };
+
+export async function selectMyPlan(
+  prevState: SelectPlanState,
+  formData: FormData
+): Promise<SelectPlanState> {
+  const { auth: authFn } = await import("@/lib/auth");
+  const session = await authFn();
+  if (!session?.user?.id) {
+    return { error: "You need to be signed in to pick a plan." };
+  }
+
+  const planRaw = ((formData.get("plan") as string) ?? "").trim().toLowerCase();
+  // Same canonical list the signup form uses (kept in sync at the type level
+  // via the VALID_PLAN_IDS const above, but duplicated here as a lowercase
+  // capitalized-name table because the DB stores the capitalized form).
+  const PLAN_NAMES: Record<string, string> = {
+    basic: "Basic",
+    business: "Business",
+    premium: "Premium",
+    virtual: "Virtual",
+  };
+  const planName = PLAN_NAMES[planRaw];
+  if (!planName) {
+    return { error: "Pick one of Basic, Business, Premium, or Virtual." };
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { plan: planName },
+    });
+  } catch (err) {
+    console.error("[selectMyPlan] update failed", err);
+    return { error: "Couldn't save your plan. Please try again or call (818) 506-7744." };
+  }
+
+  return { success: true };
 }

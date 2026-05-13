@@ -2,6 +2,7 @@ import { verifySession } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { PendingPlanPicker } from "./PendingPlanPicker";
 
 export default async function PendingPage() {
   const sessionUser = await verifySession();
@@ -148,8 +149,15 @@ export default async function PendingPage() {
             ))}
           </ol>
 
+          {/* Inline plan picker for plan-less users — replaces the previous
+              dead-end loop where "Pick a plan" sent OAuth signups to /pricing
+              → /signup?plan=X → silent no-op because their email already
+              existed. The picker calls selectMyPlan() which updates the
+              current user's plan directly. */}
+          {!hasPlan && <PendingPlanPicker />}
+
           <div className="mt-10 flex flex-wrap items-center gap-3">
-            {hasPlan ? (
+            {hasPlan && (
               <Link
                 href="/dashboard/onboarding"
                 className="rounded-2xl px-6 py-3 text-sm font-black uppercase tracking-[0.06em] transition-transform hover:-translate-y-0.5"
@@ -160,18 +168,6 @@ export default async function PendingPage() {
                 }}
               >
                 Upload Form 1583 + ID
-              </Link>
-            ) : (
-              <Link
-                href="/pricing"
-                className="rounded-2xl px-6 py-3 text-sm font-black uppercase tracking-[0.06em] transition-transform hover:-translate-y-0.5"
-                style={{
-                  background: "linear-gradient(135deg, #2D100F 0%, #1F0807 100%)",
-                  color: "#F7E6C2",
-                  boxShadow: "0 6px 20px rgba(45,16,15,0.28)",
-                }}
-              >
-                Pick a plan
               </Link>
             )}
             <Link

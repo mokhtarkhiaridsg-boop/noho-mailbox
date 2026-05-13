@@ -347,19 +347,45 @@ export function ShippingQuoteClient() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden py-24 px-5 bg-bg-dark">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[120px] pointer-events-none bg-accent" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[350px] h-[350px] rounded-full opacity-10 blur-[100px] pointer-events-none bg-accent" />
+      <section
+        className="relative px-5 sm:px-6 pt-12 pb-10 sm:pt-20 sm:pb-14 overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse at top, #F7E6C2 0%, #F0DBA9 45%, #E8DDD0 100%)",
+        }}
+      >
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage: "radial-gradient(#2D100F 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
+          }}
+          aria-hidden="true"
+        />
 
         <div className="max-w-3xl mx-auto text-center relative z-10">
-          <p className="font-semibold text-xs uppercase tracking-[0.2em] mb-4 animate-fade-up" style={{ color: "#93C4FF" }}>
+          <p
+            className="font-semibold text-xs uppercase tracking-[0.2em] mb-4"
+            style={{ color: "#337485" }}
+          >
             Ship with Confidence
           </p>
-          <h1 className="text-[clamp(2rem,5vw,3.5rem)] font-extrabold text-text-dark leading-tight tracking-tight mb-5 animate-fade-up delay-100">
+          <h1
+            className="font-extrabold tracking-tight"
+            style={{
+              fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+              color: "#2D100F",
+              fontSize: "clamp(2rem, 6vw, 3.5rem)",
+              lineHeight: 1.05,
+            }}
+          >
             Get an Instant<br />
-            <span className="gradient-text">Shipping Quote</span>
+            <span style={{ color: "#337485" }}>Shipping Quote</span>
           </h1>
-          <p className="text-text-dark-muted text-lg max-w-md mx-auto leading-relaxed animate-fade-up delay-200">
+          <p
+            className="mt-3 sm:mt-4 max-w-2xl mx-auto text-[14.5px] sm:text-base"
+            style={{ color: "#5C4540" }}
+          >
             Live rates from USPS, UPS, FedEx, and DHL — plus a one-tap pre-pay flow so you can drop and dash.
           </p>
 
@@ -369,15 +395,18 @@ export function ShippingQuoteClient() {
           <form
             method="get"
             action="/track"
-            className="mt-8 max-w-md mx-auto flex items-center gap-2 rounded-2xl px-2 py-2 animate-fade-up delay-300"
+            className="mt-8 max-w-md mx-auto flex items-center gap-2 rounded-2xl px-2 py-2"
             style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(255,255,255,0.55)",
+              border: "1px solid rgba(45,16,15,0.18)",
               backdropFilter: "saturate(140%) blur(8px)",
               WebkitBackdropFilter: "saturate(140%) blur(8px)",
             }}
           >
-            <span className="pl-3 pr-1 text-[10.5px] font-bold uppercase tracking-wider hidden sm:inline" style={{ color: "#93C4FF" }}>
+            <span
+              className="pl-3 pr-1 text-[10.5px] font-bold uppercase tracking-wider hidden sm:inline"
+              style={{ color: "#337485" }}
+            >
               Track
             </span>
             <input
@@ -385,7 +414,8 @@ export function ShippingQuoteClient() {
               name="n"
               placeholder="Paste a tracking number…"
               autoComplete="off"
-              className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm text-text-dark placeholder:text-text-dark-muted/60 px-2 py-1.5 font-mono"
+              className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm px-2 py-1.5 font-mono"
+              style={{ color: "#2D100F" }}
               aria-label="Tracking number"
             />
             <button
