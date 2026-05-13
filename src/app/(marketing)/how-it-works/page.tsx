@@ -140,7 +140,7 @@ export default async function HowItWorksPage() {
   return (
     <div className="perspective-container">
       {/* Hero */}
-      <section className="relative py-20 px-5 overflow-hidden" style={{ background: "#F7E6C2" }}>
+      <section className="relative px-5 sm:px-6 pt-12 pb-10 sm:pt-20 sm:pb-14 overflow-hidden" style={{ background: "#F7E6C2" }}>
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{
           backgroundImage: "radial-gradient(circle, rgba(45,16,15,0.08) 1.5px, transparent 1.5px)",
           backgroundSize: "26px 26px",
@@ -178,7 +178,7 @@ export default async function HowItWorksPage() {
       </section>
 
       {/* Steps */}
-      <section className="py-20 px-5" style={{ background: "white" }}>
+      <section className="px-5 sm:px-6 py-12 sm:py-16 md:py-20" style={{ background: "white" }}>
         <div className="max-w-4xl mx-auto space-y-16">
           {steps.map((s, i) => (
             <div key={s.n} className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-6 md:gap-10 items-start">
@@ -245,7 +245,7 @@ export default async function HowItWorksPage() {
       </section>
 
       {/* Required Documents Callout */}
-      <section className="py-16 px-5" style={{ background: "#F7E6C2" }}>
+      <section className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#F7E6C2" }}>
         <div className="max-w-4xl mx-auto">
           <div
             className="rounded-3xl p-8 md:p-12"
@@ -301,7 +301,7 @@ export default async function HowItWorksPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-20 px-5" style={{ background: "white" }}>
+      <section className="px-5 sm:px-6 py-12 sm:py-16 md:py-20" style={{ background: "white" }}>
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <p className="font-black mb-2" style={{ fontFamily: "var(--font-pacifico), cursive", fontSize: "1.1rem", color: "#337485" }}>
@@ -350,7 +350,7 @@ export default async function HowItWorksPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-5 relative overflow-hidden" style={{ background: "#2D100F" }}>
+      <section className="px-5 sm:px-6 py-12 sm:py-16 relative overflow-hidden" style={{ background: "#2D100F" }}>
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{
           backgroundImage: "radial-gradient(circle, rgba(247,230,194,0.06) 1.5px, transparent 1.5px)",
           backgroundSize: "30px 30px",
