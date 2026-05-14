@@ -59,6 +59,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/how-it-works", priority: 0.6 },
     { path: "/privacy", priority: 0.3 },
     { path: "/terms", priority: 0.3 },
+    // Spanish-language landing pages. LA is 50% Hispanic — these target
+    // the "buzón postal", "buzón virtual", "formar LLC" Spanish queries
+    // we were invisible for before. Bidirectional hreflang on each.
+    { path: "/es", priority: 0.85 },
+    { path: "/es/buzon-virtual", priority: 0.85 },
+    { path: "/es/negocios", priority: 0.85 },
+    { path: "/es/contacto", priority: 0.85 },
   ];
 
   // Dynamic blog posts.

@@ -24,7 +24,13 @@ export const metadata: Metadata = {
       "Real street address, mail scanning, forwarding, notary & business formation in North Hollywood.",
     url: "https://nohomailbox.org",
   },
-  alternates: { canonical: "https://nohomailbox.org" },
+  alternates: {
+    canonical: "https://nohomailbox.org",
+    languages: {
+      "en-US": "https://nohomailbox.org",
+      "es-US": "https://nohomailbox.org/es",
+    },
+  },
 };
 
 const localBusinessJsonLd = {

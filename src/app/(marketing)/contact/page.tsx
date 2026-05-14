@@ -16,7 +16,13 @@ export const metadata: Metadata = {
       "Reach out about getting a mailbox, booking notary, or starting your business. Walk in Mon–Sat or send a message — we respond within 24 hours.",
     url: "https://nohomailbox.org/contact",
   },
-  alternates: { canonical: "https://nohomailbox.org/contact" },
+  alternates: {
+    canonical: "https://nohomailbox.org/contact",
+    languages: {
+      "en-US": "https://nohomailbox.org/contact",
+      "es-US": "https://nohomailbox.org/es/contacto",
+    },
+  },
 };
 
 const contactJsonLd = {

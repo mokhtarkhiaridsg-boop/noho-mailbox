@@ -10,7 +10,13 @@ export const metadata: Metadata = {
       "California LLC + EIN + brand book + 5-page website + 12 months of mail at our LA address — $2,000 flat. Walk in for a 20-min consult.",
     url: "https://nohomailbox.org/business-solutions",
   },
-  alternates: { canonical: "https://nohomailbox.org/business-solutions" },
+  alternates: {
+    canonical: "https://nohomailbox.org/business-solutions",
+    languages: {
+      "en-US": "https://nohomailbox.org/business-solutions",
+      "es-US": "https://nohomailbox.org/es/negocios",
+    },
+  },
 };
 
 const serviceJsonLd = {

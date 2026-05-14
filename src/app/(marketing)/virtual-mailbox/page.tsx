@@ -34,7 +34,13 @@ export const metadata: Metadata = {
   },
   // Without an explicit canonical the root layout's `https://nohomailbox.org`
   // wins and search engines collapse this page into the homepage.
-  alternates: { canonical: "https://nohomailbox.org/virtual-mailbox" },
+  alternates: {
+    canonical: "https://nohomailbox.org/virtual-mailbox",
+    languages: {
+      "en-US": "https://nohomailbox.org/virtual-mailbox",
+      "es-US": "https://nohomailbox.org/es/buzon-virtual",
+    },
+  },
 };
 
 // Service + ItemList JSON-LD. ItemList tells Google we have state-by-state

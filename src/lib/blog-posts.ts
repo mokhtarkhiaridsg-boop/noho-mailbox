@@ -1594,6 +1594,574 @@ export const POSTS: BlogPost[] = [
       label: "Real estate plans",
     },
   },
+
+  {
+    slug: "virtual-mailbox-vs-po-box",
+    title: "Virtual Mailbox vs. PO Box: Which Is Right for You in 2026?",
+    dek: "PO Boxes are cheap and they work — until a FedEx package needs to land or a bank rejects your address. Here&apos;s how the two stack up on real-world use cases.",
+    category: "Mailbox Plans",
+    readTime: "6 min read",
+    publishedAt: "2026-05-13",
+    metaDescription:
+      "Virtual mailbox vs PO Box in 2026: package acceptance, mail scanning, total cost over 3 years, and which one banks, the IRS, Amazon, and Stripe actually accept. Side-by-side comparison.",
+    sections: [
+      {
+        paragraphs: [
+          "If you&apos;ve been comparing a PO Box at your local post office to a <a href=\"/virtual-mailbox\">virtual mailbox</a>, you&apos;ve already noticed the prices look similar — $20–$30 a month either way. The right answer isn&apos;t about cost. It&apos;s about what each one can actually do.",
+          "We rent both kinds of services to our customers (well — we rent the mailbox; the post office rents the PO Box across the street). Here&apos;s the honest breakdown.",
+        ],
+      },
+      {
+        heading: "1. Package acceptance — the big one",
+        paragraphs: [
+          "A PO Box will not accept anything that isn&apos;t USPS. FedEx, UPS, DHL, Amazon Logistics, OnTrac — none of them deliver to a PO Box, full stop. Their software literally rejects the address format.",
+          "A virtual mailbox at a CMRA (Commercial Mail Receiving Agency, what we are) accepts everything. UPS pulls up, hands the package to the counter, we sign for it, you get a scan. Same with FedEx, DHL, Amazon, even the random regional carriers that show up with the occasional eBay purchase.",
+          "If you sell anything online, get vendor samples shipped, run a Shopify store, or just buy from Amazon — the PO Box leaves you scrambling every time something doesn&apos;t ship USPS.",
+        ],
+        callout:
+          "Roughly 40% of US e-commerce now ships via a non-USPS carrier. A PO Box silently misses that entire 40%.",
+      },
+      {
+        heading: "2. Mail scanning and remote access",
+        paragraphs: [
+          "A PO Box is a literal metal box. You drive to the post office, open it with a key, take out the contents, drive home. There is no online dashboard, no scanning, no forwarding.",
+          "A virtual mailbox scans every envelope when it arrives. You see the front of the envelope in your dashboard within hours. You decide: open and scan the contents, forward it to wherever you are, shred it, or hold it for pickup. From your phone, from anywhere.",
+          "For anyone traveling, living abroad, or just not driving to the post office twice a week — this is the whole game.",
+        ],
+      },
+      {
+        heading: "3. What you can use the address for",
+        paragraphs: [
+          "PO Boxes get rejected by:",
+        ],
+        bullets: [
+          "Business bank accounts (Chase, Wells Fargo, B of A — all require a street address)",
+          "California LLC and corporation filings",
+          "Amazon Seller Central, Stripe, PayPal Business",
+          "USPTO trademark applications (need a real domicile)",
+          "DMV business vehicle registration",
+          "Wholesale supplier accounts and D&amp;B listings",
+          "Most state professional licenses",
+        ],
+      },
+      {
+        paragraphs: [
+          "A virtual mailbox at a CMRA gives you a real street address (ours is 5062 Lankershim Blvd, North Hollywood, CA 91601). That works everywhere a residential or commercial address works — because it <em>is</em> a real commercial address. See <a href=\"/business-solutions\">business solutions</a> for the LLC and Stripe use cases specifically.",
+        ],
+      },
+      {
+        heading: "4. Cost over 3 years",
+        bullets: [
+          "PO Box: ~$25/month at most LA post offices = $900 over 3 years. No package acceptance, no scanning, no forwarding.",
+          "NOHO virtual mailbox: $50 for 3 months (~$17/month, our Starter rate). $612 over 3 years on the Starter plan. Includes scanning, package acceptance, forwarding.",
+          "Verdict: virtual mailbox is cheaper <em>and</em> does more. See <a href=\"/pricing\">all plans</a>.",
+        ],
+      },
+      {
+        heading: "5. Who each one is best for",
+        paragraphs: [
+          "<strong>PO Box wins for:</strong> someone who only receives personal USPS mail, never gets packages from anyone, doesn&apos;t need an address for legal or banking purposes, and prefers driving to the post office over using an app. Genuinely a small slice of people.",
+          "<strong>Virtual mailbox wins for:</strong> anyone running a business, anyone who orders online, anyone who travels, anyone living abroad, anyone who needs an address that banks and the IRS will accept. Most people, in other words.",
+        ],
+      },
+      {
+        heading: "The PO box alternative most people actually want",
+        paragraphs: [
+          "If you&apos;ve been searching &quot;PO box alternative&quot;, you almost certainly want a virtual mailbox — you just didn&apos;t know the name. Real street address, package acceptance from any carrier, scan-on-arrival, forward-anywhere. We <a href=\"/notary\">notarize your Form 1583</a> free on Business and Premium plans, and set up takes 10 minutes once you walk in with your ID.",
+        ],
+      },
+    ],
+    cta: {
+      headline: "Get a NOHO Mailbox",
+      body: "Real LA street address, package acceptance from every carrier, scanning, and forwarding. Plans start at $50 for 3 months. Walk in or sign up online.",
+      href: "/signup",
+      label: "Get a NOHO Mailbox",
+    },
+  },
+
+  {
+    slug: "form-1583-step-by-step-guide",
+    title: "USPS Form 1583 Explained: The Form Behind Every Virtual Mailbox",
+    dek: "Every CMRA in the US requires a notarized Form 1583 before they can hand you a key. Here&apos;s exactly what it is, who needs it, what to bring, and the mistakes that get it rejected.",
+    category: "Mailbox Plans",
+    readTime: "7 min read",
+    publishedAt: "2026-05-13",
+    metaDescription:
+      "USPS Form 1583 is the form you sign to authorize a CMRA to receive your mail. Here&apos;s a step-by-step guide: what each box means, the 2 IDs you need, how digital signing works, and the common mistakes that get the form rejected.",
+    sections: [
+      {
+        paragraphs: [
+          "If you&apos;ve looked at signing up for any <a href=\"/virtual-mailbox\">virtual mailbox</a>, an <a href=\"/business-solutions\">LLC address</a>, or even a regular PMB at the UPS Store, you&apos;ve run into the same gate: a notarized Form 1583.",
+          "It&apos;s a one-page USPS document. It takes about five minutes to fill out. And roughly a third of them get rejected on first submission because of the same handful of mistakes. Let&apos;s fix that.",
+        ],
+      },
+      {
+        heading: "What Form 1583 is, in plain English",
+        paragraphs: [
+          "USPS Form 1583, officially titled <em>Application for Delivery of Mail Through Agent</em>, is your written permission for a Commercial Mail Receiving Agency (CMRA) — that&apos;s us, the UPS Store, Mail Boxes Etc., PostalAnnex, Anytime Mailbox, iPostal1, and every other private mailbox provider — to accept mail on your behalf.",
+          "Without a 1583 on file, the post office will not deliver mail to a CMRA address for you. It&apos;s federal: 39 CFR § 265.6(d). No exceptions.",
+        ],
+      },
+      {
+        heading: "Who needs to sign one",
+        paragraphs: [
+          "Everyone who rents a mailbox at a CMRA. Personal account, business account, doesn&apos;t matter. If it&apos;s a business mailbox, you also need a 1583-A (the business version) listing the entity&apos;s formation document, EIN, and authorized recipients.",
+          "Each person who will receive mail at the address needs their own 1583. A husband-and-wife mailbox? Two forms. An LLC with two members both receiving mail? Two forms plus the 1583-A.",
+        ],
+      },
+      {
+        heading: "What to bring: the two-ID rule",
+        paragraphs: [
+          "USPS requires <strong>two forms of identification</strong> in front of the notary. One must be a government-issued photo ID. The second can be a non-photo document that proves your residential address.",
+        ],
+        bullets: [
+          "<strong>Photo ID (one of these):</strong> US driver&apos;s license, state ID card, US passport, military ID, foreign passport with US visa, permanent resident card",
+          "<strong>Address proof (one of these):</strong> utility bill (electric, gas, water — not a phone bill), current lease or mortgage statement, voter registration card, vehicle registration, current homeowner&apos;s insurance policy, recent IRS notice",
+        ],
+        callout:
+          "The address on the second document must match Box 7 (your home address) on Form 1583. Different addresses = rejection.",
+      },
+      {
+        heading: "How digital signing works at NOHO",
+        paragraphs: [
+          "Federal rules now allow remote online notarization for Form 1583 (since the 2020 PS-Form revision). At NOHO we offer two paths:",
+          "<strong>In-person:</strong> walk into our North Hollywood storefront with your two IDs. We have a notary on-site. The whole thing takes about 15 minutes — including filling out the form, signing in front of the notary, and us filing it with the local postmaster. Free on Business and Premium plans. See <a href=\"/notary\">notary services</a> for pricing.",
+          "<strong>Remote:</strong> for customers who can&apos;t come in, we partner with an online notary (NotaryCam, Notarize). You video-call them with your IDs, sign electronically, and they email us the signed PDF. Adds about $25 to the setup.",
+        ],
+      },
+      {
+        heading: "The four mistakes that get forms rejected",
+        bullets: [
+          "<strong>Box 7 (Home Address) is a PO Box.</strong> USPS rejects this every time. Use a real residential address, even if it&apos;s not where you receive mail.",
+          "<strong>Box 7 matches the CMRA address.</strong> You can&apos;t list our address as both your home AND your CMRA. The post office sees that as circular.",
+          "<strong>Name on form doesn&apos;t match name on ID.</strong> If your driver&apos;s license says &quot;Michael&quot; and you signed as &quot;Mike&quot;, the form gets rejected. Use your legal name exactly.",
+          "<strong>Business box (1583-A) without business formation docs.</strong> If you list an LLC or corporation, you must attach the Articles of Organization / Incorporation and your EIN letter.",
+        ],
+      },
+      {
+        heading: "How long it takes after notarization",
+        paragraphs: [
+          "Once we have a complete, notarized form, we file it with the local postmaster. Most approve within 1–3 business days. Mail can be delivered to your box the day they approve.",
+          "While you wait, you can still use the address — just know that mail received before the 1583 is approved sometimes gets returned to sender. We hold our customers&apos; pre-approval mail and re-deliver internally once the form clears.",
+        ],
+      },
+      {
+        heading: "The short version",
+        paragraphs: [
+          "Form 1583 is the one piece of paperwork between you and a working CMRA address. Bring two IDs (one photo, one address proof), use your legal name, put a real residential address in Box 7, and don&apos;t list a PO Box anywhere on the form. Do that and you&apos;re live in a couple of days.",
+        ],
+      },
+    ],
+    cta: {
+      headline: "Get a NOHO Mailbox",
+      body: "Walk in with two IDs. We notarize Form 1583 on Business and Premium plans free, file with the postmaster, and you walk out with a working LA address.",
+      href: "/signup",
+      label: "Get a NOHO Mailbox",
+    },
+  },
+
+  {
+    slug: "amazon-fba-address",
+    title: "The Best Address Setup for Amazon FBA Sellers (Without Using Your Home)",
+    dek: "Amazon needs a real business address for Seller Central, FBA returns, and 1099-K reporting. Here&apos;s what they actually accept — and why your home address is a bad idea.",
+    category: "E-commerce",
+    readTime: "7 min read",
+    publishedAt: "2026-05-13",
+    metaDescription:
+      "Amazon FBA sellers need a real business address for Seller Central verification, tax reporting, and FBA returns. Here&apos;s why your home is risky, what Amazon requires, and how a CMRA address solves the verification + returns workflow.",
+    sections: [
+      {
+        paragraphs: [
+          "If you sell on Amazon FBA, you&apos;ve already filled out the address fields three times — Seller Central registration, your tax 1099-K profile, and the returns address that ships with every order. And if you&apos;re like most new sellers, you put your home address in all three.",
+          "It works. Until it doesn&apos;t. Let&apos;s walk through what Amazon actually requires, why the home setup is risky, and what we see successful FBA sellers do instead.",
+        ],
+      },
+      {
+        heading: "Why your home address is a bad idea",
+        paragraphs: [
+          "Three reasons, in order of how often they bite people:",
+        ],
+        bullets: [
+          "<strong>Public exposure.</strong> Your Seller Central returns address appears on every shipping label and in your buyer-facing profile under certain settings. Anyone who buys from you can see where you live. Customer disputes (and FBA returns shipped directly to you) end up at your house.",
+          "<strong>Tax & legal commingling.</strong> If you&apos;ve formed an LLC for your store, the IRS, the state, and Amazon all expect a business address that isn&apos;t your residence. Mixing them weakens the LLC&apos;s liability protection (look up &quot;piercing the corporate veil&quot;).",
+          "<strong>Address verification failures.</strong> Amazon&apos;s automated risk system flags accounts that share an address with another seller&apos;s recently-suspended account, or where the address looks residential when the business claims to be commercial. Home addresses cluster more, get flagged more.",
+        ],
+      },
+      {
+        heading: "What Amazon actually requires",
+        paragraphs: [
+          "Seller Central wants three address fields, and they don&apos;t all have to be the same:",
+        ],
+        bullets: [
+          "<strong>Business address:</strong> the legal address of the entity selling. This needs to be a real street address that matches your tax documents (W-9, EIN letter, LLC formation docs).",
+          "<strong>Returns address:</strong> where Amazon sends FBA returns and where buyers send self-fulfilled returns. Can be different from the business address.",
+          "<strong>Address on file for 1099-K:</strong> where Amazon mails tax forms each January. Often the same as the business address.",
+        ],
+      },
+      {
+        heading: "Why a CMRA address solves all three",
+        paragraphs: [
+          "A Commercial Mail Receiving Agency (CMRA) like ours is a real commercial building registered with USPS as authorized to receive mail on behalf of multiple businesses. From Amazon&apos;s perspective it looks exactly like an office: real street address, real ZIP, real business zoning.",
+          "Specifically, what NOHO Mailbox gives an FBA seller:",
+        ],
+        bullets: [
+          "Real street address: 5062 Lankershim Blvd, North Hollywood, CA 91601",
+          "Accepts FBA returns from all carriers (UPS, FedEx, USPS) — your returns don&apos;t pile up at your house",
+          "Mail scanning — Amazon&apos;s tax forms, supplier checks, vendor mail all visible online",
+          "We forward physical returns to your fulfillment partner or warehouse, or hold them for you to pick up",
+          "California address — useful for state tax registration if you&apos;re a non-CA resident",
+        ],
+      },
+      {
+        heading: "The FBA returns workflow we recommend",
+        paragraphs: [
+          "Most FBA sellers we work with run this setup:",
+        ],
+        bullets: [
+          "1. Set NOHO as your business address in Seller Central.",
+          "2. Set NOHO as your returns address. Returns from FBA pile up at our shop, we scan and notify you.",
+          "3. Once a week (or whenever you have 5+ returns), you tell us what to do: forward batch to your 3PL warehouse, ship back to a supplier, donate, or trash. We invoice the shipping at cost.",
+          "4. Tax forms (1099-K) arrive at NOHO each January, we scan them to you the day they arrive.",
+        ],
+        callout:
+          "This workflow alone saves most sellers 2-3 hours a week — the returns triage that used to happen at their kitchen table now happens once and asynchronously.",
+      },
+      {
+        heading: "What about brand registry and trademark?",
+        paragraphs: [
+          "Amazon Brand Registry requires a USPTO-registered trademark, and USPTO requires a real domicile address on the application. PO Boxes are explicitly rejected by USPTO. A CMRA address works as your business mailing address but you still need a real domicile listed separately — if you live abroad or are between addresses, plan for this gap.",
+          "We have a separate <a href=\"/blog/anonymous-llc-how-it-works\">guide on anonymous LLC structures</a> that walks through the domicile question for international sellers.",
+        ],
+      },
+      {
+        heading: "Pricing for FBA sellers",
+        paragraphs: [
+          "Our <a href=\"/pricing\">Business plan</a> ($25/month) is what most FBA sellers pick — it includes unlimited scanning, package acceptance from all carriers, free Form 1583 notarization, and forwarding at cost. Premium ($45/month) adds same-day forwarding and 5 free outbound shipments per month, which pencils out for sellers with high return volume.",
+        ],
+      },
+    ],
+    cta: {
+      headline: "Get a NOHO Mailbox",
+      body: "Real LA address for Amazon Seller Central, returns handling, tax forms, and supplier mail. Business plan from $25/month includes notary on Form 1583.",
+      href: "/signup",
+      label: "Get a NOHO Mailbox",
+    },
+  },
+
+  {
+    slug: "best-state-llc-non-resident",
+    title: "Best US State to Form an LLC if You Live Abroad",
+    dek: "Non-residents have a different math problem than US residents — no home state to default to, no franchise tax conflicts. Here&apos;s the honest comparison between Wyoming, Delaware, and New Mexico for foreign founders.",
+    category: "LLC Formation",
+    readTime: "9 min read",
+    publishedAt: "2026-05-12",
+    metaDescription:
+      "Best US state to form an LLC as a non-resident or foreign national in 2026: Wyoming vs Delaware vs New Mexico compared on cost, anonymity, banking, and case law. Plus why a real US business address matters even more for non-residents.",
+    sections: [
+      {
+        paragraphs: [
+          "If you live outside the US and you&apos;re forming an LLC to sell on Amazon, run a SaaS, hold real estate, or just open a Stripe account — congrats, you have an unusual advantage: no home state to default to.",
+          "US residents usually have to register in their home state (where they actually operate) and possibly form somewhere else for asset protection. Non-residents skip that complication entirely. The cheapest, most flexible state wins.",
+          "Three states get 95% of the non-resident LLC market: Wyoming, Delaware, and New Mexico. Here&apos;s how they actually compare.",
+        ],
+      },
+      {
+        heading: "Wyoming: the default answer for most non-residents",
+        bullets: [
+          "<strong>Filing fee:</strong> $100",
+          "<strong>Annual report:</strong> $60 minimum (scales with Wyoming assets — for non-resident LLCs with no WY assets, you pay the minimum)",
+          "<strong>Anonymity:</strong> members not on public filings. Your name is invisible to anyone Googling the LLC.",
+          "<strong>Asset protection:</strong> charging order is the sole remedy for creditors. Among the strongest LLC protections in the US.",
+          "<strong>State income tax:</strong> none",
+          "<strong>Best for:</strong> general-purpose non-resident LLC. E-commerce, SaaS, holding companies, real estate.",
+        ],
+      },
+      {
+        heading: "Delaware: only if you need the case law",
+        bullets: [
+          "<strong>Filing fee:</strong> $110",
+          "<strong>Annual franchise tax:</strong> $300/yr flat",
+          "<strong>Anonymity:</strong> members not on public filings",
+          "<strong>Court of Chancery:</strong> the most developed business case law in the US. Predictable rulings on LLC disputes, fiduciary duties, dissolution.",
+          "<strong>Best for:</strong> entities raising US venture capital (VCs almost always want Delaware), large holding structures, situations where you expect litigation.",
+        ],
+        callout:
+          "If you&apos;re forming a startup that will eventually raise from US VCs, they will require Delaware. But almost certainly as a C-corp, not an LLC. Get advice from a startup attorney before you form anything.",
+      },
+      {
+        heading: "New Mexico: the cheapest, but watch the tradeoffs",
+        bullets: [
+          "<strong>Filing fee:</strong> $50 (cheapest in the US)",
+          "<strong>Annual report:</strong> not required",
+          "<strong>Franchise tax:</strong> none",
+          "<strong>Anonymity:</strong> members not on public filings — and unlike Wyoming, even the manager doesn&apos;t have to be public",
+          "<strong>Case law:</strong> less developed than DE or WY. If you get sued, the outcome is less predictable.",
+          "<strong>Best for:</strong> holding LLCs where you just need anonymous ownership and minimal ongoing cost. Skip for operating businesses with real liability exposure.",
+        ],
+      },
+      {
+        heading: "Quick comparison table",
+        bullets: [
+          "<strong>Year 1 total cost (filing + agent + annual):</strong> NM ~$200 · WY ~$260 · DE ~$510",
+          "<strong>Ongoing annual cost:</strong> NM ~$100 · WY ~$160 · DE ~$410",
+          "<strong>Anonymity:</strong> all three offer it. NM is the most anonymous (no manager required on filing).",
+          "<strong>Asset protection:</strong> WY &gt; DE &gt; NM (case law strength)",
+          "<strong>Banking acceptance:</strong> all three work with most US business banks. DE has the longest history, so older banks may know it best.",
+          "<strong>Stripe / Mercury / Wise acceptance:</strong> all three work.",
+        ],
+      },
+      {
+        heading: "Why a real US address matters even more for non-residents",
+        paragraphs: [
+          "Wherever you form, you&apos;ll need a registered agent in that state (a $50–$150/yr service). But that&apos;s a legal address only — it&apos;s not where your actual business mail goes.",
+          "For day-to-day operations, you need a <em>real US business address</em> separate from your registered agent. This is where almost every non-resident gets blocked:",
+        ],
+        bullets: [
+          "<strong>Stripe</strong> wants a US business address that isn&apos;t a registered agent or PO Box",
+          "<strong>Mercury, Relay, Brex</strong> all require a real street address on the application",
+          "<strong>Amazon Seller Central</strong> verifies the address against postal databases",
+          "<strong>USPTO trademarks</strong> require a real domicile address that isn&apos;t a PO Box",
+          "<strong>State tax registrations</strong> often need a physical presence address",
+        ],
+      },
+      {
+        paragraphs: [
+          "Our LA address (<a href=\"/business-solutions\">5062 Lankershim Blvd</a>) is the operating address for a few hundred non-resident LLCs. We forward mail internationally, scan IRS notices the day they arrive, and notarize Form 1583 remotely so you don&apos;t have to fly to LA.",
+        ],
+      },
+      {
+        heading: "The decision tree, simplified",
+        bullets: [
+          "<strong>You want the cheapest, least-paperwork setup for a holding LLC:</strong> New Mexico",
+          "<strong>You want general-purpose anonymous LLC for an active business:</strong> Wyoming",
+          "<strong>You expect to raise US venture capital:</strong> Delaware (and you&apos;ll probably need a C-corp, not an LLC)",
+          "<strong>You&apos;re a foreign real-estate investor:</strong> Wyoming for the parent, then a state-specific LLC for each property",
+          "<strong>You sell on Amazon FBA from abroad:</strong> Wyoming + a real US business address (see our <a href=\"/blog/amazon-fba-address\">Amazon FBA address guide</a>)",
+        ],
+      },
+      {
+        heading: "What you still need after filing",
+        paragraphs: [
+          "Forming the LLC is the easy part. The full non-resident setup is: form LLC → get EIN (yes, non-residents can get one — Form SS-4 by fax, takes 2-4 weeks) → open US bank account (Mercury and Wise both bank non-resident LLCs) → set up a real US address for operations (us) → register for state sales tax if you sell physical goods. None of these require a Social Security number.",
+        ],
+      },
+    ],
+    cta: {
+      headline: "Get a NOHO Mailbox",
+      body: "Real LA address for your Wyoming/Delaware/NM LLC. Required by Stripe, Mercury, Amazon, and the IRS. Free Form 1583 notary, international mail forwarding.",
+      href: "/signup",
+      label: "Get a NOHO Mailbox",
+    },
+  },
+
+  {
+    slug: "mail-forwarding-international",
+    title: "How to Forward US Mail to Any Country (Without It Getting Lost)",
+    dek: "International mail forwarding works — but only if you batch correctly, declare honestly, and stay away from a short list of prohibited items. Here&apos;s the playbook we use.",
+    category: "How-To",
+    readTime: "7 min read",
+    publishedAt: "2026-05-12",
+    metaDescription:
+      "Complete guide to forwarding US mail internationally in 2026: USPS vs FedEx vs DHL pricing, customs declarations, batching strategy to cut costs in half, and what you can&apos;t legally forward (lithium batteries, certain meds). Forward to Canada, Europe, anywhere.",
+    sections: [
+      {
+        paragraphs: [
+          "If you have a US address but live somewhere else — expat, traveling founder, foreign LLC owner — international mail forwarding is the actual product you&apos;re paying for. Everything else (scanning, notary, package acceptance) is upstream of getting the physical thing to where you are.",
+          "Done right, it&apos;s fast and cheap. Done wrong, packages disappear in customs for six weeks or come back to the sender. Here&apos;s the playbook we use for a few hundred customers a month forwarding to roughly 60 countries.",
+        ],
+      },
+      {
+        heading: "Step 1: Pick the right carrier for the destination",
+        paragraphs: [
+          "Carrier choice changes by destination, package value, and time sensitivity. Rough rules:",
+        ],
+        bullets: [
+          "<strong>USPS Priority Mail International:</strong> cheapest for envelopes and small packages under 2 lbs. 6–10 business days to most countries. Limited tracking after it leaves the US. Best for non-urgent documents, books, low-value items.",
+          "<strong>USPS Priority Mail Express International:</strong> 3–5 business days, full tracking, ~$60-$120 for a 2-lb package depending on country. Good middle ground.",
+          "<strong>FedEx International Priority:</strong> 2–3 business days, full tracking, customs handling included. ~$80-$200 for 2 lbs. Best for valuable items, time-sensitive paperwork, or destinations USPS struggles with (parts of Latin America, Africa).",
+          "<strong>DHL Express International:</strong> 1–3 business days, the most reliable customs clearance for items that might raise eyebrows (electronics, samples, medical). Similar pricing to FedEx, sometimes faster to Europe and Asia.",
+        ],
+      },
+      {
+        heading: "Step 2: Batch aggressively",
+        paragraphs: [
+          "International shipping costs are mostly fixed — the base fee is huge and the per-pound cost is small. Sending 5 envelopes separately to Tunisia costs about 5x what sending them in one box costs.",
+          "Our standard batching advice for international customers:",
+        ],
+        bullets: [
+          "Hold mail for 4 weeks, then forward in one batch. Cuts shipping costs roughly 60-70%.",
+          "Set a value threshold: anything urgent (IRS notice, court filing, bank document) gets scanned immediately, originals forwarded with the next batch unless you specifically request rush.",
+          "Strip junk before shipping. We open and scan suspected junk, you tell us shred or include. Saves weight and customs hassle.",
+          "Use a flat-rate box if the contents fit. USPS Priority International flat-rate boxes ($30-$80 depending on size and destination) often beat per-weight pricing.",
+        ],
+        callout:
+          "Batching is the single biggest lever for international forwarding cost. Forwarding $20-50/month works. Forwarding $200/month means you forgot to batch.",
+      },
+      {
+        heading: "Step 3: Customs declarations — get them right",
+        paragraphs: [
+          "Every international package needs a customs declaration (CN22 for items under $400, CN23 for higher value). The carrier handles the form, but you (or we, on your behalf) have to specify three things:",
+        ],
+        bullets: [
+          "<strong>Contents description:</strong> &quot;personal documents&quot;, &quot;used books&quot;, &quot;clothing&quot;, etc. Be specific but not flowery. &quot;Gift&quot; alone is not enough — many countries tax gifts now anyway.",
+          "<strong>Declared value:</strong> the actual value of the contents. Under-declaring to dodge customs fees is fraud — don&apos;t.",
+          "<strong>Category:</strong> gift, documents, commercial sample, returned goods, etc. Picking the right one affects whether the recipient owes duty.",
+        ],
+      },
+      {
+        heading: "Step 4: Know what you can NOT forward internationally",
+        paragraphs: [
+          "There are real restrictions, not just paranoia. Common items that will get a package stopped, confiscated, or returned:",
+        ],
+        bullets: [
+          "<strong>Lithium batteries (loose):</strong> banned on most international carriers. Lithium batteries installed in a device are usually OK with declaration.",
+          "<strong>Aerosols, perfume, nail polish:</strong> banned via air freight. Most international shipping is air.",
+          "<strong>Prescription medication:</strong> varies by country and carrier. Many countries restrict importing personal-use medication even with a prescription. Check destination rules before shipping.",
+          "<strong>Cannabis products including CBD:</strong> illegal in many countries regardless of US legal status",
+          "<strong>Cash and unsealed checks:</strong> against most carriers&apos; terms of service",
+          "<strong>Most plant material, seeds, soil:</strong> agricultural import controls in essentially every country",
+          "<strong>Magnets, drones, firearms accessories:</strong> destination-dependent",
+        ],
+      },
+      {
+        heading: "Step 5: Track and follow up",
+        paragraphs: [
+          "USPS international tracking is unreliable once the package leaves the US — sometimes it shows up, sometimes it doesn&apos;t. FedEx and DHL track every leg.",
+          "If a package is stuck in customs for more than 7 business days, the destination postal service usually has a customs broker you can call. We send the tracking number plus carrier customs-support contact in every forwarding confirmation, so you have what you need to follow up directly.",
+        ],
+      },
+      {
+        heading: "How NOHO handles international forwarding",
+        paragraphs: [
+          "Customers on any <a href=\"/pricing\">paid plan</a> can request forwarding to anywhere in the world. The workflow:",
+        ],
+        bullets: [
+          "1. Tell us your preferred batching cadence (weekly, monthly, on-demand).",
+          "2. We hold and consolidate mail into a box.",
+          "3. You confirm the batch via dashboard. We weigh, price the options (USPS / FedEx / DHL), and you pick.",
+          "4. We file customs paperwork, ship, and email you the tracking number plus customs-broker contact for the destination country.",
+          "5. Shipping is billed at our cost — we don&apos;t mark up international postage.",
+        ],
+      },
+    ],
+    cta: {
+      headline: "Get a NOHO Mailbox",
+      body: "Real LA address with international forwarding to any country. We batch, customs-declare, and ship at cost. Mail to anywhere in the world for the price of postage.",
+      href: "/signup",
+      label: "Get a NOHO Mailbox",
+    },
+  },
+
+  {
+    slug: "expat-us-address-requirements",
+    title: "American Expats: A Complete Guide to Keeping a US Mailing Address",
+    dek: "Living abroad doesn&apos;t erase your US obligations. Here&apos;s exactly which agencies still need to send you mail, which ones won&apos;t accept a foreign address, and how to set up a US address that works for all of them.",
+    category: "Guides",
+    readTime: "8 min read",
+    publishedAt: "2026-05-12",
+    metaDescription:
+      "American expats living abroad still need a US mailing address for SSA/Medicare, voter registration, IRS notices, banking, and brokerage accounts. Complete 2026 guide: which type of address works for what, and how to keep one without owning property in the US.",
+    sections: [
+      {
+        paragraphs: [
+          "If you&apos;re a US citizen living abroad — short term, long term, or permanently — you&apos;ve probably already discovered that &quot;just use my address in [country]&quot; doesn&apos;t work for several important things. The IRS, the Social Security Administration, your bank, your brokerage, and your home state&apos;s elections office all expect a US address.",
+          "Here&apos;s the actual list of who needs what, and how to set up a US address that works across all of them.",
+        ],
+      },
+      {
+        heading: "1. Social Security and Medicare",
+        paragraphs: [
+          "The Social Security Administration will mail your benefits and notices to a foreign address — they have to, by law. But there&apos;s a catch: SSA payments can only direct-deposit to a US bank account, and US banks won&apos;t open accounts for customers without a US address.",
+          "Medicare is stricter. If you live outside the US for more than 6 months and you&apos;re on Medicare Part B, you can suspend coverage to avoid premiums — but you generally need a US mailing address to re-enroll without a late penalty when you move back.",
+          "<strong>What works:</strong> a real US street address (CMRA like us, friend or family&apos;s address, or your own US property if you have one). PO Boxes work for SSA notices but not for US bank accounts.",
+        ],
+      },
+      {
+        heading: "2. Voter registration",
+        paragraphs: [
+          "Federal Voting Assistance Program (FVAP) lets US citizens abroad vote in federal elections via absentee ballot. You register in the state where you <em>last had domicile</em> before leaving the US — not where you currently live. Most states require a US address on the registration, usually your last US residential address.",
+          "Several states (Florida, Texas, Washington, others) have specific rules for &quot;permanent expats&quot; — you can keep voting using your last US address forever, as long as you intend to return. Other states (California, New York) get stricter after a few years.",
+          "<strong>What works:</strong> for federal elections, your last US residential address is fine. For state and local elections, rules vary — check your specific state&apos;s expat voter rules.",
+        ],
+      },
+      {
+        heading: "3. IRS notices and tax forms",
+        paragraphs: [
+          "US citizens owe US tax on worldwide income, period. The IRS will mail you correspondence — audit notices, refund inquiries, CP2000 notices, 1099 confusion — regardless of where you live. They&apos;ll mail to a foreign address if that&apos;s what you give them, but two things go wrong:",
+        ],
+        bullets: [
+          "International postal delays mean a 30-day IRS response deadline can arrive at your mailbox 25 days late. By the time you respond, the IRS has already assessed penalties.",
+          "Several IRS notices require a physical US response address on file. You can still respond from abroad, but the notice system assumes you receive mail at a US address.",
+        ],
+      },
+      {
+        paragraphs: [
+          "<strong>What works:</strong> a CMRA address that scans mail. The day the IRS notice arrives, you see it in your dashboard. You have 28 days to respond instead of 3. See our <a href=\"/virtual-mailbox\">virtual mailbox</a> for the scanning workflow.",
+        ],
+      },
+      {
+        heading: "4. US banking and brokerage",
+        paragraphs: [
+          "The strictest of all. US banks are required by federal &quot;Know Your Customer&quot; rules (Patriot Act + FinCEN) to verify customer addresses. A foreign address triggers FATCA reporting complications, and many banks (including most big retail banks — Chase, Wells, BofA) will close your account if you update to a foreign address.",
+          "Brokerages are stricter still. Schwab, Fidelity, and Vanguard all have policies on non-US-resident customers. Fidelity will not let an account holder change to a foreign address for tax-advantaged accounts (Roth IRA, 401k rollovers). Schwab International is the workaround if you want to be fully transparent — but they have a $25,000 minimum.",
+          "<strong>What works:</strong> keep a US address on your bank and brokerage accounts. Use scanning to read statements remotely. This is the single most important reason most expats keep a CMRA address.",
+        ],
+        callout:
+          "If you&apos;ve told your bank you live abroad and they haven&apos;t closed your account yet — they will. Keep a working US address before they discover the mismatch.",
+      },
+      {
+        heading: "5. State driver&apos;s license and identification",
+        paragraphs: [
+          "If you let your US state ID expire while abroad, getting a new one when you visit can take weeks (some states require multiple in-person visits, address proof, and a wait). Most expats renew online while abroad — but renewal requires a current US address on file.",
+          "<strong>What works:</strong> A real US street address (not PO Box) on your state ID. CMRAs work for most states. California, Florida, and Texas specifically accept CMRA addresses on driver&apos;s licenses.",
+        ],
+      },
+      {
+        heading: "6. Credit cards and credit score",
+        paragraphs: [
+          "Your US credit score depends on US credit accounts staying open and active. If you close your US cards when you move abroad, your score craters within a year. If you keep them, your statements still arrive at a US address.",
+          "Most expats keep 2-3 US credit cards open with autopay from their US bank. Statements go to a CMRA address. This is how you keep a 750+ score while living abroad and still qualify for a mortgage if you eventually move back.",
+        ],
+      },
+      {
+        heading: "What type of address works for what",
+        bullets: [
+          "<strong>SSA / Medicare:</strong> any US address including PO Box",
+          "<strong>IRS:</strong> any US address. CMRA strongly recommended for scanning.",
+          "<strong>US bank accounts:</strong> real street address required, NOT a PO Box. CMRA works.",
+          "<strong>Brokerage accounts:</strong> real street address. CMRA usually works — varies by broker.",
+          "<strong>State ID / driver&apos;s license:</strong> real street address. CMRA accepted in CA, FL, TX, most other states.",
+          "<strong>Voter registration:</strong> US residential address (last domicile). Your CMRA does not work for this — use your actual last residential address.",
+          "<strong>Credit cards:</strong> any US address. CMRA recommended.",
+          "<strong>Trademark (USPTO):</strong> requires a real domicile address that is not a CMRA or PO Box. This is the one place a CMRA doesn&apos;t solve the problem.",
+        ],
+      },
+      {
+        heading: "The expat address setup we recommend",
+        paragraphs: [
+          "Most expat customers we work with set up:",
+        ],
+        bullets: [
+          "1. NOHO address as the mailing address on every US bank, brokerage, credit card, IRS file, and state ID.",
+          "2. Scanning enabled — every piece of mail is visible from anywhere within hours.",
+          "3. Forwarding configured to your foreign address monthly (or on-demand for anything urgent).",
+          "4. Voter registration kept at the last US residential address (not the CMRA — see above).",
+          "5. Domicile maintained in a no-state-tax state (FL, TX, WA, NV, etc.) if you have flexibility — saves state income tax on US-source income.",
+        ],
+      },
+      {
+        paragraphs: [
+          "Costs around $25-$45/month depending on plan. Saves you from the bank closures, missed IRS notices, and brokerage transfers that are the actual expensive parts of expat life. See <a href=\"/pricing\">all plans</a>.",
+        ],
+      },
+    ],
+    cta: {
+      headline: "Get a NOHO Mailbox",
+      body: "Keep a working US address while you live abroad. Real California street address, scanning, international forwarding, and Form 1583 notary on Business plans.",
+      href: "/signup",
+      label: "Get a NOHO Mailbox",
+    },
+  },
 ];
 
 export const POSTS_BY_SLUG: Record<string, BlogPost> = Object.fromEntries(
