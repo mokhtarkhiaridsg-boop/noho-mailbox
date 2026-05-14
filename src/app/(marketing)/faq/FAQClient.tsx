@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { FaqEntry } from "./faq-data";
 
 type Props = { faqs: FaqEntry[]; categories: string[] };
@@ -9,6 +10,16 @@ export default function FAQClient({ faqs, categories }: Props) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [query, setQuery] = useState("");
+
+  // Read `?q=` from URL so the sitelinks search box on Google brand SERPs
+  // lands users in a pre-filtered FAQ (the WebSite/SearchAction schema on
+  // the homepage points search queries here). Same pattern as the FAQ
+  // hub search input — just gives us a deep-link entry point.
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q && q.trim().length > 0) setQuery(q.trim());
+  }, [searchParams]);
 
   const filtered = (activeCategory === "all" ? faqs : faqs.filter((f) => f.category === activeCategory))
     .filter((f) =>
@@ -103,7 +114,8 @@ export default function FAQClient({ faqs, categories }: Props) {
             <button
               type="button"
               onClick={() => { setActiveCategory("all"); setOpenIndex(null); }}
-              className="shrink-0 px-3.5 sm:px-4 py-2 rounded-full text-[11.5px] sm:text-[12px] font-bold uppercase tracking-wider transition-colors"
+              aria-pressed={activeCategory === "all"}
+              className="shrink-0 px-3.5 sm:px-4 py-2 rounded-full text-[11.5px] sm:text-[12px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
               style={
                 activeCategory === "all"
                   ? { background: "#2D100F", color: "#F7E6C2", border: "1px solid #2D100F" }
@@ -117,7 +129,8 @@ export default function FAQClient({ faqs, categories }: Props) {
                 type="button"
                 key={cat}
                 onClick={() => { setActiveCategory(cat); setOpenIndex(null); }}
-                className="shrink-0 px-3.5 sm:px-4 py-2 rounded-full text-[11.5px] sm:text-[12px] font-bold uppercase tracking-wider transition-colors"
+                aria-pressed={activeCategory === cat}
+                className="shrink-0 px-3.5 sm:px-4 py-2 rounded-full text-[11.5px] sm:text-[12px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
                 style={
                   activeCategory === cat
                     ? { background: "#2D100F", color: "#F7E6C2", border: "1px solid #2D100F" }
@@ -168,7 +181,7 @@ export default function FAQClient({ faqs, categories }: Props) {
                     aria-expanded={isOpen}
                     aria-controls={`faq-answer-${i}`}
                     id={`faq-question-${i}`}
-                    className="w-full text-left px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-4 transition-colors"
+                    className="w-full text-left px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-4 transition-colors cursor-pointer"
                     style={{ minHeight: 56 }}
                   >
                     <div className="min-w-0">

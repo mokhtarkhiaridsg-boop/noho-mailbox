@@ -479,11 +479,38 @@ export default async function Home() {
   const satHours = hours.weekly[6]?.hours ?? "10:00am–1:30pm";
   const weekdaySummary = `Mon–Fri ${monHours} · Sat ${satHours}`;
 
+  // WebSite + SearchAction schema — unlocks the sitelinks search box that
+  // Google renders directly inside the brand SERP for queries like
+  // "noho mailbox". We don't have a public search yet, but pointing the
+  // SearchAction at /faq (which now has its own search input) gives users
+  // a single-click jump from Google straight into our content.
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://nohomailbox.org#website",
+    name: "NOHO Mailbox",
+    url: "https://nohomailbox.org",
+    publisher: { "@id": "https://nohomailbox.org#localbusiness" },
+    inLanguage: ["en-US", "es-US"],
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: "https://nohomailbox.org/faq?q={search_term_string}",
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
       {/* Page-scoped keyframes for subject-relevant animations */}
       <style

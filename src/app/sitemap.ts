@@ -66,6 +66,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/es/buzon-virtual", priority: 0.85 },
     { path: "/es/negocios", priority: 0.85 },
     { path: "/es/contacto", priority: 0.85 },
+    // iter-228 — hyperlocal "mailbox <geo>" pages. Targets realistic
+    // local-intent SERPs we can credibly rank for: "mailbox near me",
+    // "mailbox 91601", "mailbox los angeles", "mailbox north hollywood",
+    // "mailbox hollywood". Flat static pages — not /[slug] routes.
+    { path: "/mailbox-near-me", priority: 0.85 },
+    { path: "/mailbox-91601", priority: 0.85 },
+    { path: "/mailbox-los-angeles", priority: 0.85 },
+    { path: "/mailbox-north-hollywood", priority: 0.85 },
+    { path: "/mailbox-hollywood", priority: 0.85 },
   ];
 
   // Dynamic blog posts.
