@@ -131,8 +131,15 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    // Add real verification codes here when available
-    // google: "your-google-site-verification",
+    // Google Search Console — URL-prefix property `https://nohomailbox.org/`
+    // owned by nohomailbox@gmail.com. Click "Verify" in GSC after the next
+    // deploy.
+    google: "cdZkiAwBi6Uh1cufvdfLk00H7kLDrwGPkYg3jBX9gp8",
+    // Bing Webmaster Tools — site `https://nohomailbox.org` added via the
+    // same nohomailbox@gmail.com OAuth.
+    other: {
+      "msvalidate.01": "0EFF08D2DDC5AB7B73626DAC827E403D",
+    },
   },
   formatDetection: {
     email: false,
