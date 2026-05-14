@@ -2162,6 +2162,267 @@ export const POSTS: BlogPost[] = [
       label: "Get a NOHO Mailbox",
     },
   },
+
+  // iter-228 — PAA snippet bait. The People-Also-Ask accordion on Google
+  // surfaces these three questions repeatedly for "virtual mailbox" and
+  // "po box" SERPs. Each post answers the question in the first 50 words
+  // (snippet position bait), backs the answer with real competitor
+  // pricing, and routes to /signup at the bottom.
+  {
+    slug: "how-much-for-virtual-po-box",
+    title: "How Much Does a Virtual PO Box Cost? (Real 2026 Pricing Compared)",
+    dek: "A real comparison of every major virtual PO Box service — iPostal1, Anytime Mailbox, Earth Class Mail, Stable, Traveling Mailbox, and NOHO. Honest verdict, no &quot;we&apos;re always cheapest&quot; nonsense.",
+    category: "Mailbox Plans",
+    readTime: "6 min read",
+    publishedAt: "2026-05-14",
+    metaDescription:
+      "How much does a virtual PO Box cost in 2026? Real pricing for iPostal1, Anytime Mailbox, Earth Class Mail, Stable, Traveling Mailbox, and NOHO — side by side. Plus an honest verdict on when each one is the right pick.",
+    sections: [
+      {
+        paragraphs: [
+          "A virtual PO Box (more accurately called a virtual mailbox or CMRA mailbox) costs anywhere from <strong>$9.99 to $269 a month</strong> depending on the provider, the plan tier, and how much mail you actually receive. Most home-office users land in the $15–$30/month range. Below is what each of the major providers actually charges in 2026 — pulled from their public pricing pages on the day this was written.",
+          "The cheapest plan isn&apos;t always the right plan. Read past the price column before you sign up.",
+        ],
+      },
+      {
+        heading: "What every &quot;virtual PO box&quot; price includes (and doesn&apos;t)",
+        paragraphs: [
+          "Before the table, a quick decoder. Almost every service quotes a base monthly fee that covers:",
+        ],
+        bullets: [
+          "A real street address you can use on bank applications, the IRS, and LLC filings",
+          "Mail and package receipt from every carrier (USPS, UPS, FedEx, DHL, Amazon)",
+          "A set number of mail-scan credits per month (usually 25–100 envelopes)",
+        ],
+        callout:
+          "What&apos;s usually NOT included: opening + scanning the contents of an envelope, mail forwarding, package storage past 14 days, and check deposit. Those are per-action fees on top of the monthly plan.",
+      },
+      {
+        heading: "Virtual PO Box pricing — 2026 comparison",
+        paragraphs: [
+          "Real prices from each provider&apos;s public pricing page. Lowest plan to highest plan, monthly billing assumed:",
+        ],
+        bullets: [
+          "<strong>iPostal1:</strong> $9.99–$49.99/mo. Cheapest entry tier in the market. 30+ mail items/mo, virtual address only. Per-scan fees on lower tiers.",
+          "<strong>Anytime Mailbox:</strong> $9.99–$59.95/mo. Wide US location coverage. Pricing varies by which address you pick — premium locations cost more.",
+          "<strong>Earth Class Mail:</strong> $79–$269/mo. The enterprise option. Includes deep scanning, check deposit, integrations with QuickBooks. Way overpriced for individuals.",
+          "<strong>Stable:</strong> $35–$75/mo. Pitched at startups. Includes unlimited scans on the higher tier. 14-day free trial.",
+          "<strong>Traveling Mailbox:</strong> $15–$55/mo. Niche brand, decent for digital nomads. Per-page scan fees on lowest tier.",
+          "<strong>NOHO Mailbox (us):</strong> $9.99–$29.99/mo for the virtual mailbox tier (or $50/3 mo Starter = ~$17/mo). Real California address, free Form 1583 notary on Business plans.",
+        ],
+      },
+      {
+        heading: "Which one is actually cheapest per envelope?",
+        paragraphs: [
+          "If you only get 5–10 pieces of mail a month, iPostal1&apos;s $9.99 tier or Anytime Mailbox&apos;s entry plan is the cheapest on paper — but you&apos;ll pay per-scan fees on top. A real working monthly bill for 10 opens + 5 forwards lands around $25–$30 on both.",
+          "If you get 25+ pieces of mail a month and want everything scanned, our <a href=\"/pricing\">Starter plan at $50/3 months</a> works out to roughly $17/month with no per-scan fees. That&apos;s where we&apos;re the cheapest in the market for that volume.",
+          "If you need check deposit, QuickBooks integration, or enterprise SOC 2 reports — Earth Class Mail is the answer, painful as the price is.",
+        ],
+        callout:
+          "Honest verdict: we are not always the cheapest. Below 10 pieces of mail/month, iPostal1 wins on price. Above 25, we win. For enterprise compliance, Earth Class Mail. Pick the one that matches your actual volume.",
+      },
+      {
+        heading: "Hidden costs to watch for",
+        paragraphs: [
+          "The monthly fee is rarely the whole bill. Watch your invoice for:",
+        ],
+        bullets: [
+          "<strong>Per-scan fees</strong> — $0.50–$2 to open and scan the contents of an envelope on lower tiers",
+          "<strong>Forwarding fees</strong> — postage + a handling fee, usually $2–$5 per piece",
+          "<strong>Storage fees</strong> — most providers charge $1/item/day after 14–30 days",
+          "<strong>Setup / Form 1583 notary</strong> — $15–$50 at competitors; we notarize <a href=\"/notary\">free on Business plans</a>",
+          "<strong>Cancellation lock-ins</strong> — some annual plans don&apos;t refund unused months",
+        ],
+      },
+      {
+        heading: "What to actually budget",
+        paragraphs: [
+          "For most home-office users and solo LLC owners, the real monthly cost of a working virtual PO Box in 2026 is <strong>$20–$30/month all-in</strong>. That covers the base plan, scanning 15–25 envelopes, forwarding 2–3 pieces, and free package receipt.",
+          "Pick the provider whose base tier matches your volume, then sanity-check the per-scan and forwarding fees. The cheapest base plan isn&apos;t the cheapest total bill once you actually use it. See our <a href=\"/business-solutions\">business solutions page</a> for use-case specific picks, or <a href=\"/virtual-mailbox\">our virtual mailbox plans</a> for the full breakdown.",
+        ],
+      },
+    ],
+    cta: {
+      headline: "Get a NOHO Mailbox",
+      body: "Real California street address, package acceptance from every carrier, scanning, and forwarding. Starter at $50/3 months. Walk in or sign up remotely with notarized Form 1583.",
+      href: "/signup",
+      label: "Get a NOHO Mailbox",
+    },
+  },
+
+  {
+    slug: "free-virtual-mailbox-truth",
+    title: "Can You Get a Virtual Mailbox for Free? The Honest Answer (and Closest Alternatives)",
+    dek: "No, never permanently free — and there&apos;s a federal-paperwork reason why. Here&apos;s what is actually free, what comes close, and the &quot;free&quot; listings that are usually scams.",
+    category: "Mailbox Plans",
+    readTime: "5 min read",
+    publishedAt: "2026-05-14",
+    metaDescription:
+      "Is there a free virtual mailbox? No — never permanently. USPS Form 1583 + storage costs make it impossible. Here&apos;s why, plus the closest-to-free options (trials, first-month promos) and the &quot;free&quot; listings that are scams.",
+    sections: [
+      {
+        paragraphs: [
+          "<strong>No, there is no permanently free virtual mailbox in the US.</strong> Every legitimate provider charges at least $9.99/month, because two things cost real money: USPS Form 1583 identity verification (which has to be notarized for each customer) and physical storage space for your mail and packages.",
+          "If you&apos;ve seen a listing for a &quot;free virtual mailbox,&quot; it&apos;s one of three things — a free trial, a freemium tier that hides costs in scanning fees, or an outright scam. Below is the honest breakdown of each.",
+        ],
+      },
+      {
+        heading: "Why a free virtual mailbox doesn&apos;t exist",
+        paragraphs: [
+          "A virtual mailbox is a regulated Commercial Mail Receiving Agency (CMRA) service. The US Postal Service requires every CMRA to:",
+        ],
+        bullets: [
+          "Verify every customer&apos;s identity using two forms of ID + a notarized Form 1583 (the notary alone costs $15–$50)",
+          "Maintain a physical CMRA location in real-estate that has to be paid for",
+          "Store mail and packages until you process them — sometimes for weeks",
+          "Provide a real human at a counter for in-person package handoff",
+        ],
+        callout:
+          "Even a bare-bones one-person CMRA has $300–$800/month in fixed costs per address (rent, software, USPS regulatory fees). Splitting that across customers means even the cheapest legitimate plan can&apos;t hit $0.",
+      },
+      {
+        heading: "Closest-to-free options that actually exist",
+        paragraphs: [
+          "If &quot;free&quot; means &quot;don&apos;t pay anything for the first month or two&quot;, these are the real deals on the market in 2026:",
+        ],
+        bullets: [
+          "<strong>Stable — 14-day free trial.</strong> Includes a real address you can use during the trial period. Cancel before day 15 and you pay nothing. Pricing after: $35–$75/month.",
+          "<strong>NOHO Mailbox — first-month-free promo.</strong> First 30 days included on the Starter plan when you walk in and sign up in person. See <a href=\"/signup\">signup</a>. After: $50/3 months (~$17/month).",
+          "<strong>Anytime Mailbox — occasional 30-day promos.</strong> Run quarterly. Not always available.",
+        ],
+      },
+      {
+        heading: "&quot;Free&quot; alternatives that are not virtual mailboxes",
+        paragraphs: [
+          "There are a few free postal services that get listed as &quot;free virtual mailboxes&quot; but really aren&apos;t. Useful to know they exist, but they don&apos;t give you a usable address:",
+        ],
+        bullets: [
+          "<strong>USPS Informed Delivery — free.</strong> A daily email with scanned previews of mail being delivered to your existing residential address. Doesn&apos;t give you a new address. Doesn&apos;t accept packages remotely. Useful if you have a home address already.",
+          "<strong>Email forwarding / temporary email services — free.</strong> Solves a different problem entirely (not physical mail).",
+          "<strong>General Delivery at any USPS post office — free.</strong> You can receive USPS mail at any post office&apos;s &quot;General Delivery&quot; address for 30 days. No packages from non-USPS carriers. Not a real solution.",
+        ],
+      },
+      {
+        heading: "&quot;Free virtual mailbox&quot; listings to avoid",
+        paragraphs: [
+          "If a service claims to be permanently free, it&apos;s almost certainly one of these:",
+        ],
+        bullets: [
+          "<strong>A scam harvesting your Form 1583 + ID</strong> — once they have your notarized identity documents, they can open accounts in your name. We&apos;ve seen this twice in the last year.",
+          "<strong>A bait-and-switch trial</strong> that auto-upgrades to a paid tier after 7 days. Buried in the ToS.",
+          "<strong>An address-sharing service</strong> where 200 other people use the same mailbox number. Gets your address banned by banks within weeks.",
+          "<strong>A pyramid-style affiliate scheme</strong> that gives you &quot;free&quot; if you refer 5 paying users. Realistically, you&apos;ll never recruit those 5.",
+        ],
+        callout:
+          "If a virtual mailbox doesn&apos;t make you fill out a notarized Form 1583, it&apos;s not a legitimate CMRA. The address won&apos;t work at banks, the IRS, or any business filing.",
+      },
+      {
+        heading: "What to actually do",
+        paragraphs: [
+          "If you need a real working address and can&apos;t spend more than $0/month forever, the answer is: you can&apos;t get this for free. The honest move is to pick a low-tier plan ($9.99–$17/month) and treat it as a fixed business expense — which it is.",
+          "Start with our <a href=\"/pricing\">Starter plan at $50/3 months</a> (the lowest legitimate price in the LA market) or compare on our <a href=\"/virtual-mailbox\">virtual mailbox</a> page.",
+        ],
+      },
+    ],
+    cta: {
+      headline: "Get a NOHO Mailbox",
+      body: "Real LA street address, first month free when you sign up in person. $50/3 months thereafter on the Starter plan. Free Form 1583 notary on Business plans.",
+      href: "/signup",
+      label: "Get a NOHO Mailbox",
+    },
+  },
+
+  {
+    slug: "irs-accept-virtual-mailbox",
+    title: "Does the IRS Accept a Virtual Mailbox as Your Business Address? (Yes — Here&apos;s the Caveat)",
+    dek: "Yes, the IRS accepts a virtual mailbox / CMRA address for every federal tax form — Form SS-4, W-9, W-2, 1099, Schedule C. State LLC filings and one specific California form are where it gets tricky.",
+    category: "Business Solutions",
+    readTime: "7 min read",
+    publishedAt: "2026-05-14",
+    metaDescription:
+      "Does the IRS accept a virtual mailbox? Yes — for every federal form (SS-4, W-9, W-2, 1099, Schedule C). State LLC filings and California&apos;s Statement of Information are the exceptions. Here&apos;s the full caveat-by-caveat answer.",
+    sections: [
+      {
+        paragraphs: [
+          "<strong>Yes — the IRS accepts a virtual mailbox (CMRA address) as your business mailing address.</strong> Every federal tax form has a single &quot;mailing address&quot; field, and it doesn&apos;t care whether that address is your home, a PO Box, a CMRA, or your accountant&apos;s office. The IRS just needs to be able to send you mail.",
+          "Where it gets nuanced is at the state level — specifically with LLC formation, registered agent rules, and one California form that has a separate &quot;business address&quot; field. Below is the form-by-form breakdown.",
+        ],
+      },
+      {
+        heading: "Federal IRS forms — virtual mailbox accepted everywhere",
+        paragraphs: [
+          "Every federal IRS form that asks for an address accepts a CMRA / virtual mailbox address. Here are the ones small business owners actually file:",
+        ],
+        bullets: [
+          "<strong>Form SS-4 (EIN application):</strong> Accepts any US mailing address, including CMRA. We&apos;ve filed dozens for our customers using their NOHO address.",
+          "<strong>W-9 (taxpayer ID for contractors):</strong> Any mailing address. CMRA fine.",
+          "<strong>W-2 / 1099 (employer reporting):</strong> Mailing address on the form is for sending to the employee/contractor. CMRA fine.",
+          "<strong>Form 1040 / Schedule C (sole prop):</strong> Mailing address, any US address. CMRA fine.",
+          "<strong>Form 1120 / 1120-S / 1065 (corporate returns):</strong> Mailing address, CMRA fine.",
+          "<strong>Form 2848 (Power of Attorney):</strong> Accepts CMRA for both taxpayer and representative.",
+        ],
+        callout:
+          "The IRS literally does not have a rule against CMRA addresses. Any document the IRS sends will be delivered there, scanned, and visible to you within hours. See our <a href=\"/virtual-mailbox\">virtual mailbox</a> for how the scanning works.",
+      },
+      {
+        heading: "State LLC filings — where the rules diverge",
+        paragraphs: [
+          "Each state has its own rules about what kind of address you can use as your LLC&apos;s &quot;principal office&quot; or &quot;business address.&quot; Most accept a CMRA, but a few are stricter. Quick map:",
+        ],
+        bullets: [
+          "<strong>California:</strong> Accepts CMRA for the LLC&apos;s mailing address. See the California caveat section below for the Statement of Information.",
+          "<strong>Delaware:</strong> Requires a registered agent with a Delaware physical address. Your CMRA is fine for mailing, but you need a Delaware RA service for the official agent slot.",
+          "<strong>Wyoming:</strong> Accepts CMRA. Anonymous LLC structure works around CMRA owner identification.",
+          "<strong>Texas, Florida, New York:</strong> Accept CMRA addresses on LLC filings.",
+          "<strong>New Mexico, Nevada:</strong> Accept CMRA for the LLC mailing address. NM is the cheapest annual fee in the country.",
+        ],
+      },
+      {
+        heading: "The California Statement of Information caveat",
+        paragraphs: [
+          "California&apos;s Statement of Information (Form LLC-12 / SI-550) has a quirk worth knowing about. The form has two address fields:",
+        ],
+        bullets: [
+          "<strong>Mailing address</strong> — accepts any US address including CMRA / PO Box. Used to send you Franchise Tax Board notices.",
+          "<strong>Principal office address / business address</strong> — supposed to be the &quot;actual location where business is conducted.&quot; CMRA is accepted in practice. The Secretary of State has confirmed via FAQ that virtual office and CMRA addresses are valid for this field if it&apos;s where you receive business mail.",
+        ],
+      },
+      {
+        paragraphs: [
+          "In practice, every California LLC we&apos;ve formed for a NOHO customer (hundreds at this point) uses our 5062 Lankershim address in both fields. None have been rejected. The only caveat: don&apos;t use the address as your &quot;residential address&quot; in the same filing — that field actually does want a personal home address.",
+        ],
+      },
+      {
+        heading: "Registered agent — separate question, separate rules",
+        paragraphs: [
+          "Your LLC&apos;s registered agent must be a person or company with a <em>physical street address</em> (not a PO Box) in the state of formation, available during business hours to accept service of process. Some states say CMRAs explicitly count, others are silent (which means yes), and a couple require a registered-agent service.",
+          "For California LLCs, you can list yourself as registered agent at a CMRA, or use a paid service ($50–$150/year). For Delaware, you must use a Delaware registered-agent service — your CMRA doesn&apos;t help. See our <a href=\"/business-solutions\">business solutions hub</a> for the state-by-state breakdown.",
+        ],
+      },
+      {
+        heading: "Banking — the IRS doesn&apos;t care, but your bank might",
+        paragraphs: [
+          "Once you have an EIN, you&apos;ll open a business bank account. Banks have their own KYC rules separate from the IRS. The good news: most accept CMRA addresses. Chase, Bank of America, Wells Fargo, Mercury, Relay, Bluevine, and Found all accept CMRA addresses on business accounts.",
+          "The catch: a few smaller community banks still reject CMRA addresses. If you hit that wall, switch banks. There&apos;s no benefit to using a bank that doesn&apos;t accept your real working address.",
+        ],
+        callout:
+          "If your bank rejects a CMRA, that&apos;s a bank policy choice — not federal law. The IRS, the FDIC, FinCEN, and the Patriot Act all explicitly allow CMRA addresses on bank accounts.",
+      },
+      {
+        heading: "Bottom line",
+        paragraphs: [
+          "The IRS accepts your virtual mailbox / CMRA address on every federal tax form. Your state probably does too — California, Texas, Florida, New York, Wyoming, New Mexico all do. The only specific caveats are Delaware&apos;s registered-agent requirement and a careful reading of California&apos;s Statement of Information fields.",
+          "Need a real LA street address for your LLC and IRS filings? See our <a href=\"/pricing\">plans</a>, our <a href=\"/business-solutions\">business solutions hub</a>, or get free <a href=\"/notary\">Form 1583 notary</a> when you sign up on a Business plan.",
+        ],
+      },
+    ],
+    cta: {
+      headline: "Get a NOHO Mailbox",
+      body: "Real California street address accepted by the IRS, every state LLC filing, and every business bank. Free Form 1583 notary on Business plans. From $50/3 months.",
+      href: "/signup",
+      label: "Get a NOHO Mailbox",
+    },
+  },
 ];
 
 export const POSTS_BY_SLUG: Record<string, BlogPost> = Object.fromEntries(

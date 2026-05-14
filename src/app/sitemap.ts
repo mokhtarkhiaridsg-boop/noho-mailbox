@@ -75,6 +75,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/mailbox-los-angeles", priority: 0.85 },
     { path: "/mailbox-north-hollywood", priority: 0.85 },
     { path: "/mailbox-hollywood", priority: 0.85 },
+    // iter-228 — "po box" comparison query intercept. Targets
+    // "noho po box" + "north hollywood po box" (LOW competition,
+    // 150-250 searches/mo combined). Angle: real address that
+    // accepts UPS/FedEx/Amazon (a USPS PO Box rejects all of them).
+    { path: "/po-box-north-hollywood", priority: 0.85 },
   ];
 
   // Dynamic blog posts.
