@@ -15,6 +15,64 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://nohomailbox.org/how-it-works" },
 };
 
+// HowTo JSON-LD — Google renders an expandable step-by-step card for
+// "how to get a private mailbox" queries when this is present. Pairs
+// with the visible 5-step rail below; same content, machine-readable.
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: "How to get a NOHO Mailbox in 15 minutes",
+  description:
+    "Pick a plan, create your account, verify ID with USPS Form 1583, and get your real LA street address suite number.",
+  totalTime: "PT15M",
+  estimatedCost: { "@type": "MonetaryAmount", currency: "USD", value: "50" },
+  supply: [
+    { "@type": "HowToSupply", name: "Government-issued photo ID" },
+    { "@type": "HowToSupply", name: "Secondary ID (utility bill / lease / voter card / vehicle registration)" },
+  ],
+  step: [
+    {
+      "@type": "HowToStep",
+      position: 1,
+      name: "Pick your plan",
+      text: "Choose Basic ($50/3mo), Business ($80/3mo), or Premium ($95/3mo). All include a real street address, unlimited mail intake, package alerts, and dashboard access.",
+    },
+    {
+      "@type": "HowToStep",
+      position: 2,
+      name: "Create your account",
+      text: "Fill out a short online form. No credit check, no SSN, no deposit beyond a one-time $15 key fee. Pay securely with Visa, MC, Amex, Apple Pay, or Google Pay.",
+    },
+    {
+      "@type": "HowToStep",
+      position: 3,
+      name: "Verify your identity (USPS Form 1583)",
+      text: "Upload one primary ID + one secondary ID. We sign as the CMRA agent; you e-sign as the addressee. Processed digitally within 1 business hour.",
+    },
+    {
+      "@type": "HowToStep",
+      position: 4,
+      name: "Get your suite number + key",
+      text: "Once approved, your mailbox is live with a real street address (5062 Lankershim Blvd, Suite #__). Pick up your physical key in-store anytime during business hours.",
+    },
+    {
+      "@type": "HowToStep",
+      position: 5,
+      name: "Manage mail from the dashboard",
+      text: "Every piece of mail and every package is logged on arrival with an instant SMS or email notification. Request scans, forwarding, same-day delivery, or walk in for pickup.",
+    },
+  ],
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://nohomailbox.org" },
+    { "@type": "ListItem", position: 2, name: "How It Works", item: "https://nohomailbox.org/how-it-works" },
+  ],
+};
+
 const steps = [
   {
     n: "01",
@@ -139,6 +197,14 @@ export default async function HowItWorksPage() {
 
   return (
     <div className="perspective-container">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Hero */}
       <section className="relative px-5 sm:px-6 pt-12 pb-10 sm:pt-20 sm:pb-14 overflow-hidden" style={{ background: "#F7E6C2" }}>
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{

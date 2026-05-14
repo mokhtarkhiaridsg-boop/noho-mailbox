@@ -6,20 +6,84 @@ import {
   type VirtualMailboxPlan,
 } from "@/lib/virtual-mailbox-config";
 import VirtualMailboxPlansInteractive from "./VirtualMailboxPlansInteractive";
+import { STATE_LLC_PAGES } from "@/lib/state-llc-pages";
 
 export const metadata: Metadata = {
-  title: "Virtual Mailbox",
+  // Geo-broadened title: "United States" instead of just NoHo so we surface
+  // for "virtual mailbox usa" / "virtual mailbox america" / generic queries.
+  title: "Virtual Mailbox — Real US Street Address Online (All 50 States)",
   description:
-    "Get a real Lankershim Blvd street address, an online dashboard, and unlimited mail forwarding — without ever leaving home. From $9.99/mo.",
+    "Real LA street address, online mail scanning dashboard, and weekly forwarding to any state. From $9.99/mo. Used by digital nomads, remote workers, expats, and foreign LLC owners across all 50 states.",
+  keywords: [
+    "virtual mailbox",
+    "virtual mailbox usa",
+    "online mailbox",
+    "virtual po box",
+    "us mail forwarding",
+    "virtual mailbox for digital nomads",
+    "virtual mailbox for expats",
+    "virtual mailbox for foreign llc",
+    "virtual address",
+    "remote mail scanning",
+  ],
   openGraph: {
-    title: "Virtual Mailbox — NOHO Mailbox",
+    title: "Virtual Mailbox — Real US Address, Forwarded Anywhere",
     description:
-      "Real LA street address, mail scanning dashboard, and unlimited forwarding for remote workers, travelers, and digital nomads. From $9.99/mo.",
+      "Real LA street address, mail scanning dashboard, and forwarding to any of all 50 states. From $9.99/mo.",
     url: "https://nohomailbox.org/virtual-mailbox",
   },
   // Without an explicit canonical the root layout's `https://nohomailbox.org`
   // wins and search engines collapse this page into the homepage.
   alternates: { canonical: "https://nohomailbox.org/virtual-mailbox" },
+};
+
+// Service + ItemList JSON-LD. ItemList tells Google we have state-by-state
+// landing pages and helps surface the right one for "virtual mailbox <state>"
+// queries.
+const serviceJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": "https://nohomailbox.org/virtual-mailbox#service",
+  serviceType: "Virtual Mailbox",
+  name: "Virtual Mailbox — Real US Address",
+  description:
+    "Real California street address with online mail scanning dashboard and forwarding to any US state. Used by digital nomads, remote workers, expats, foreign LLC owners.",
+  url: "https://nohomailbox.org/virtual-mailbox",
+  provider: {
+    "@type": "LocalBusiness",
+    "@id": "https://nohomailbox.org#localbusiness",
+    name: "NOHO Mailbox",
+    telephone: "+1-818-506-7744",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "5062 Lankershim Blvd",
+      addressLocality: "North Hollywood",
+      addressRegion: "CA",
+      postalCode: "91601",
+      addressCountry: "US",
+    },
+  },
+  areaServed: [
+    { "@type": "Country", name: "United States" },
+    { "@type": "AdministrativeArea", name: "All 50 US states + DC + territories" },
+  ],
+  offers: {
+    "@type": "AggregateOffer",
+    priceCurrency: "USD",
+    lowPrice: "9.99",
+    highPrice: "29.99",
+    offerCount: 3,
+    availability: "https://schema.org/InStock",
+  },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://nohomailbox.org" },
+    { "@type": "ListItem", position: 2, name: "Virtual Mailbox", item: "https://nohomailbox.org/virtual-mailbox" },
+  ],
 };
 
 const CREAM = "#F7E6C2";
@@ -70,6 +134,14 @@ export default async function VirtualMailboxPage() {
 
   return (
     <main className="min-h-screen" style={{ background: BG_LIGHT, color: INK }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Hero */}
       <section
         className="px-6 pt-16 pb-12 sm:pt-20 sm:pb-16"
@@ -99,7 +171,7 @@ export default async function VirtualMailboxPage() {
           <div className="mt-7 flex items-center justify-center gap-3 flex-wrap">
             <a
               href="#plans"
-              className="rounded-2xl px-6 h-12 inline-flex items-center text-[13px] font-black uppercase tracking-[0.06em] transition-transform hover:-translate-y-0.5"
+              className="rounded-2xl px-6 h-12 inline-flex items-center text-[13px] font-black uppercase tracking-[0.06em] transition-transform hover:-translate-y-0.5 cursor-pointer"
               style={{
                 background: `linear-gradient(135deg, ${INK} 0%, #1F0807 100%)`,
                 color: CREAM,
@@ -110,11 +182,16 @@ export default async function VirtualMailboxPage() {
             </a>
             <Link
               href="/signup?plan=virtual"
-              className="rounded-2xl px-6 h-12 inline-flex items-center text-[13px] font-black uppercase tracking-[0.06em]"
+              // Was background:CREAM on a cream-gradient hero — basically
+              // invisible (no border-contrast). Switched to white + a stronger
+              // ink border so the secondary CTA stands out from the warm
+              // background. Cursor-pointer added so the affordance is clear.
+              className="rounded-2xl px-6 h-12 inline-flex items-center text-[13px] font-black uppercase tracking-[0.06em] transition-transform hover:-translate-y-0.5 cursor-pointer"
               style={{
-                background: CREAM,
+                background: "white",
                 color: INK,
-                border: `1px solid ${BORDER}`,
+                border: `1.5px solid ${INK}`,
+                boxShadow: "0 4px 14px rgba(45,16,15,0.10)",
               }}
             >
               Get started
@@ -301,6 +378,63 @@ export default async function VirtualMailboxPage() {
           </Link>
           <p className="mt-4 text-[11px]" style={{ color: INK_FAINT }}>
             No credit-card required to browse. Cancel anytime.
+          </p>
+        </div>
+      </section>
+
+      {/* ─── STATE FINDER — internal links to /virtual-mailbox/[state] pages ─── */}
+      {/* Big topical-authority signal: 53 outbound links from the hub to
+          state-targeted landing pages. Each state link is a buying-intent
+          query target ("virtual mailbox texas" etc). */}
+      <section className="px-5 sm:px-6 py-12 sm:py-16" style={{ background: "#FFF9F3" }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8 sm:mb-10">
+            <h2
+              className="font-extrabold tracking-tight"
+              style={{
+                fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+                color: INK,
+                fontSize: "clamp(1.5rem, 4.5vw, 2.25rem)",
+              }}
+            >
+              Virtual mailbox by state
+            </h2>
+            <p className="mt-2 max-w-xl mx-auto text-[14.5px] sm:text-base" style={{ color: INK_SOFT }}>
+              Same real LA address, same scanning dashboard. Picking your home
+              state lets us tailor forwarding cost + delivery time on the next page.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+            {STATE_LLC_PAGES.map((s) => (
+              <Link
+                key={s.slug}
+                href={`/virtual-mailbox/${s.slug}`}
+                className="group flex items-center justify-between gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-colors"
+                style={{
+                  background: "#FFFFFF",
+                  color: INK,
+                  border: `1px solid ${BORDER}`,
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                }}
+              >
+                <span className="text-[13px] font-semibold truncate">{s.name}</span>
+                <span
+                  className="text-[10.5px] font-bold uppercase tracking-wider shrink-0"
+                  style={{ color: BLUE }}
+                >
+                  {s.abbr}
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          <p className="text-center text-[12.5px] mt-8" style={{ color: INK_SOFT }}>
+            Not in the US? We also serve international customers —{" "}
+            <Link href="/contact" className="font-bold underline" style={{ color: BLUE }}>
+              contact us
+            </Link>{" "}
+            to set up.
           </p>
         </div>
       </section>

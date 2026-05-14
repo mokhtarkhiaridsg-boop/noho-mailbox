@@ -28,13 +28,20 @@ export const metadata: Metadata = {
 
 const localBusinessJsonLd = {
   "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "@id": "https://nohomailbox.org",
+  // PostalAndShippingService is more specific than plain LocalBusiness and
+  // tells Google we're a CMRA-style business, not a generic storefront.
+  "@type": ["LocalBusiness", "PostalAndShippingService"],
+  "@id": "https://nohomailbox.org#localbusiness",
   name: "NOHO Mailbox",
+  alternateName: "NOHO Mailbox · North Hollywood CMRA",
   image: "https://nohomailbox.org/icon.svg",
+  logo: "https://nohomailbox.org/icon.svg",
   url: "https://nohomailbox.org",
   telephone: "+1-818-506-7744",
+  email: "hello@nohomailbox.org",
   priceRange: "$",
+  paymentAccepted: "Cash, Credit Card, Apple Pay, Google Pay, Square",
+  currenciesAccepted: "USD",
   address: {
     "@type": "PostalAddress",
     streetAddress: "5062 Lankershim Blvd",
@@ -44,6 +51,12 @@ const localBusinessJsonLd = {
     addressCountry: "US",
   },
   geo: { "@type": "GeoCoordinates", latitude: 34.1664, longitude: -118.3776 },
+  hasMap: "https://www.google.com/maps/place/NOHO+Mailbox",
+  areaServed: [
+    { "@type": "City", name: "North Hollywood" },
+    { "@type": "City", name: "Los Angeles" },
+    { "@type": "AdministrativeArea", name: "San Fernando Valley" },
+  ],
   openingHoursSpecification: [
     {
       "@type": "OpeningHoursSpecification",
@@ -64,8 +77,24 @@ const localBusinessJsonLd = {
       closes: "13:30",
     },
   ],
+  sameAs: [
+    "https://www.facebook.com/nohomailbox",
+    "https://www.instagram.com/nohomailbox",
+    "https://twitter.com/nohomailbox",
+    "https://www.google.com/maps/place/NOHO+Mailbox",
+    "https://www.yelp.com/biz/noho-mailbox",
+  ],
   description:
-    "Private mailbox rental, mail scanning, package handling, same-day delivery, notary, and business formation in North Hollywood, CA.",
+    "Private mailbox rental, mail scanning, package handling, same-day delivery, walk-in notary, and full business formation in North Hollywood, CA. Real LA street address. Plans from $50.",
+  // Trusted-knowledge: list the catalog of services so the rich-result
+  // card surfaces all 5 service lines, not just "mailbox rental."
+  makesOffer: [
+    { "@type": "Offer", itemOffered: { "@type": "Service", name: "Private mailbox rental" }, priceCurrency: "USD", price: "50" },
+    { "@type": "Offer", itemOffered: { "@type": "Service", name: "Mail scanning & forwarding" } },
+    { "@type": "Offer", itemOffered: { "@type": "Service", name: "Same-day local courier delivery" }, priceCurrency: "USD", price: "5" },
+    { "@type": "Offer", itemOffered: { "@type": "Service", name: "Walk-in notary public" }, priceCurrency: "USD", price: "15" },
+    { "@type": "Offer", itemOffered: { "@type": "Service", name: "LLC formation + brand bundle" }, priceCurrency: "USD", price: "2000" },
+  ],
 };
 
 // ──────────────────────────────────────────────────────────────────────────

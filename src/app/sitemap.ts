@@ -77,6 +77,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  // Dynamic state-by-state VIRTUAL MAILBOX pages. iter-226 — targets
+  // "virtual mailbox <state>" queries (not just "private mailbox NoHo")
+  // so out-of-state digital nomads, remote workers, and foreign LLC
+  // owners can find us. Highest non-static priority because mailbox is
+  // our core product.
+  const virtualMailboxStatePages = getAllStateSlugs().map((slug) => ({
+    path: `/virtual-mailbox/${slug}`,
+    priority: 0.8,
+  }));
+
   // Competitor-comparison pages.
   const vsPages = getAllCompetitorSlugs().map((slug) => ({
     path: `/vs/${slug}`,
@@ -101,7 +111,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     freq?: "weekly" | "monthly";
   };
 
-  const all: SitemapPage[] = [...staticPages, ...blogPosts, ...zipPages, ...statePages, ...vsPages, ...useCasePages, ...intlPages];
+  const all: SitemapPage[] = [
+    ...staticPages,
+    ...blogPosts,
+    ...zipPages,
+    ...statePages,
+    ...virtualMailboxStatePages,
+    ...vsPages,
+    ...useCasePages,
+    ...intlPages,
+  ];
 
   return all.map((page) => ({
     url: `${baseUrl}${page.path}`,

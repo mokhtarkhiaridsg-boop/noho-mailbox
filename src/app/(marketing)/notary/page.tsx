@@ -13,6 +13,51 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://nohomailbox.org/notary" },
 };
 
+// Google Service rich-result schema. Lets the SERP card show
+// "Walk-in notary, Mon–Sat, 5062 Lankershim, $15/signature" instead of
+// just a plain blue link. Backed by the LocalBusiness on the homepage.
+const serviceJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": "https://nohomailbox.org/notary#service",
+  serviceType: "Notary Public",
+  name: "Walk-In Notary Public — North Hollywood",
+  description:
+    "Certified in-store notary for legal documents, real estate, affidavits, POA, contracts, and loans. Walk-ins welcome based on availability; book online to guarantee a slot.",
+  url: "https://nohomailbox.org/notary",
+  areaServed: { "@type": "City", name: "North Hollywood", sameAs: "https://www.wikidata.org/wiki/Q494078" },
+  provider: {
+    "@type": "LocalBusiness",
+    "@id": "https://nohomailbox.org#localbusiness",
+    name: "NOHO Mailbox",
+    telephone: "+1-818-506-7744",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "5062 Lankershim Blvd",
+      addressLocality: "North Hollywood",
+      addressRegion: "CA",
+      postalCode: "91601",
+      addressCountry: "US",
+    },
+  },
+  offers: {
+    "@type": "Offer",
+    price: "15.00",
+    priceCurrency: "USD",
+    description: "Per notarized signature. Free Form 1583 for Business + Premium Box members.",
+    availability: "https://schema.org/InStock",
+  },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://nohomailbox.org" },
+    { "@type": "ListItem", position: 2, name: "Notary", item: "https://nohomailbox.org/notary" },
+  ],
+};
+
 const services = [
   "Legal documents",
   "Real estate transactions",
@@ -27,6 +72,14 @@ const services = [
 export default function NotaryPage() {
   return (
     <div className="perspective-container" style={{ background: "#FFFDF8" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Hero — cream + brown iPad-OS style */}
       <section
         className="relative px-5 sm:px-6 pt-12 pb-10 sm:pt-20 sm:pb-14 overflow-hidden"
@@ -175,14 +228,38 @@ export default function NotaryPage() {
           <p className="mt-2 sm:mt-3 text-[14px] sm:text-base" style={{ color: "#F0DBA9" }}>
             Confirmation email with document-prep instructions. No surprises at the counter.
           </p>
-          <Link
-            href="/contact"
-            className="mt-6 inline-flex items-center gap-2 font-bold px-6 py-3.5 rounded-xl transition-colors"
-            style={{ background: "#F7E6C2", color: "#2D100F", minHeight: 48 }}
-          >
-            Book now
-            <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none"><path d="M4 10 H16 M12 6 L16 10 L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </Link>
+          {/* Two CTAs: members go straight to the booking calendar in their
+              dashboard; everyone else uses the contact form (and the middleware
+              prompts unauthenticated users to sign in / create an account
+              before reaching the dashboard). The single "Book now" → /contact
+              we had before was misleading — customers tapped expecting a
+              calendar and got a generic message form. */}
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center gap-2 font-bold px-6 py-3.5 rounded-xl transition-colors"
+              style={{ background: "#F7E6C2", color: "#2D100F", minHeight: 48 }}
+            >
+              Book online (members)
+              <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none" aria-hidden="true"><path d="M4 10 H16 M12 6 L16 10 L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </Link>
+            <Link
+              href="/contact?service=notary"
+              className="inline-flex items-center justify-center gap-2 font-bold px-6 py-3.5 rounded-xl transition-colors"
+              style={{
+                background: "rgba(247,230,194,0.10)",
+                color: "#F7E6C2",
+                border: "1px solid rgba(247,230,194,0.30)",
+                minHeight: 48,
+              }}
+            >
+              Or send a notary inquiry
+            </Link>
+          </div>
+          <p className="mt-3 text-[12px]" style={{ color: "rgba(247,230,194,0.55)" }}>
+            Members can pick a slot from the dashboard calendar. Walk-ins
+            welcome based on availability — call <a href="tel:+18185067744" style={{ color: "#F7E6C2", fontWeight: 700 }}>(818) 506-7744</a>.
+          </p>
         </div>
       </section>
     </div>

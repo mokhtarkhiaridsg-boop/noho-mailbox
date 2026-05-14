@@ -14,6 +14,55 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://nohomailbox.org/about" },
 };
 
+// Organization JSON-LD — drives the brand panel + sitelinks block in
+// Google. Re-asserts the LocalBusiness anchor from the homepage so
+// search engines connect the about-page to the storefront.
+const orgJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://nohomailbox.org#organization",
+  name: "NOHO Mailbox",
+  legalName: "NOHO Mailbox LLC",
+  url: "https://nohomailbox.org",
+  logo: "https://nohomailbox.org/icon.svg",
+  foundingDate: "2022",
+  founders: [{ "@type": "Person", name: "Mokhtar Khiari" }],
+  description:
+    "Independent operating CMRA in North Hollywood, CA. ~500 active mailboxes, same-day delivery across LA, walk-in notary, and a B2B SaaS platform licensed to other CMRA operators.",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "5062 Lankershim Blvd",
+    addressLocality: "North Hollywood",
+    addressRegion: "CA",
+    postalCode: "91601",
+    addressCountry: "US",
+  },
+  contactPoint: [
+    {
+      "@type": "ContactPoint",
+      telephone: "+1-818-506-7744",
+      contactType: "customer service",
+      areaServed: "US",
+      availableLanguage: ["en"],
+    },
+  ],
+  sameAs: [
+    "https://www.facebook.com/nohomailbox",
+    "https://www.instagram.com/nohomailbox",
+    "https://twitter.com/nohomailbox",
+    "https://www.google.com/maps/place/NOHO+Mailbox",
+  ],
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://nohomailbox.org" },
+    { "@type": "ListItem", position: 2, name: "About", item: "https://nohomailbox.org/about" },
+  ],
+};
+
 const milestones = [
   {
     year: "2022",
@@ -59,6 +108,14 @@ const numbers = [
 export default function AboutPage() {
   return (
     <div className="perspective-container" style={{ background: "#FFFDF8" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Hero — cream + brown iPad-OS */}
       <section
         className="relative px-5 sm:px-6 pt-12 pb-10 sm:pt-20 sm:pb-14 overflow-hidden"
