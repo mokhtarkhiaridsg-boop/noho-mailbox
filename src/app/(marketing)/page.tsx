@@ -632,18 +632,24 @@ export default async function Home() {
             <span>Locally owned</span>
           </div>
 
-          {/* Floating animated envelope — interactive, opens on hover */}
-          <div
-            aria-hidden="true"
-            className="hidden md:block absolute top-24 right-[8%] envelope-rock"
-          >
-            <AnimatedEnvelope />
-          </div>
+        </div>
 
-          {/* Mini mailbox — flag flicks every ~7s, hover holds it up */}
-          <div className="hidden lg:block absolute bottom-32 left-[6%]">
-            <HeroMailbox />
-          </div>
+        {/* Floating decorative pieces — moved OUTSIDE the max-w-2xl content
+            column so their right/left percentages are relative to the
+            full-width <section> instead of the 672px-wide centered text
+            column (which was making them land directly on top of the
+            "Request a Mailbox" CTA at desktop widths). */}
+        <div
+          aria-hidden="true"
+          className="hidden md:block absolute top-24 right-[8%] envelope-rock z-0 pointer-events-none"
+        >
+          <AnimatedEnvelope />
+        </div>
+        <div
+          aria-hidden="true"
+          className="hidden lg:block absolute bottom-32 left-[6%] z-0 pointer-events-none"
+        >
+          <HeroMailbox />
         </div>
 
         {/* Wave into stats */}
@@ -1433,44 +1439,10 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── STICKY MOBILE CTA ─── */}
-      <div
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 px-3 pb-3 pt-2"
-        style={{
-          background:
-            "linear-gradient(to top, #F7E6C2 0%, #F7E6C2 60%, transparent 100%)",
-        }}
-      >
-        <div
-          className="flex gap-2 rounded-2xl p-2"
-          style={{
-            background: "white",
-            border: "1.5px solid rgba(45,16,15,0.1)",
-            boxShadow: "0 18px 40px rgba(45,16,15,0.18)",
-          }}
-        >
-          <Link
-            href="/signup" data-ripple="true"
-            className="flex-1 inline-flex items-center justify-center font-black rounded-xl text-[14px] active:scale-[0.98] cursor-pointer"
-            style={{ background: "#2D100F", color: "#F7E6C2", height: 46 }}
-          >
-            Request a Mailbox
-          </Link>
-          <a
-            href="tel:+18185067744"
-            aria-label="Call NOHO Mailbox"
-            className="grid place-items-center rounded-xl active:scale-[0.98] cursor-pointer"
-            style={{
-              border: "1.5px solid rgba(45,16,15,0.18)",
-              color: "#2D100F",
-              height: 46,
-              width: 46,
-            }}
-          >
-            <PhoneIcon className="w-5 h-5" />
-          </a>
-        </div>
-      </div>
+      {/* Mobile sticky CTA lives in the marketing layout's <MobileStickyCTA />
+          so it appears across every public page, not just the homepage. The
+          old inline duplicate that used to live here was removed to prevent
+          stacking two sticky bars on mobile. */}
 
       <HomepageClient />
       <OpenClosedSign hours={hours} />
