@@ -10,6 +10,7 @@ import { AiShield, AiBolt, AiTruck, AiClock, AiPin, AiEnvelope, AiHeart } from "
 import { prisma } from "@/lib/prisma";
 import { laStartOfToday, laEndOfToday } from "@/lib/laDay";
 import { getOperatingHours } from "@/app/actions/operatingHours";
+import { aggregateRatingSchema } from "@/lib/reviews-config";
 
 export const metadata: Metadata = {
   // `absolute` bypasses the root layout's "%s | NOHO Mailbox" template
@@ -95,6 +96,10 @@ const localBusinessJsonLd = {
     { "@type": "Offer", itemOffered: { "@type": "Service", name: "Walk-in notary public" }, priceCurrency: "USD", price: "15" },
     { "@type": "Offer", itemOffered: { "@type": "Service", name: "LLC formation + brand bundle" }, priceCurrency: "USD", price: "2000" },
   ],
+  // aggregateRating is only attached when REVIEWS_CONFIG.count >= 5 —
+  // we never emit a fake 0.0 baseline. Update src/lib/reviews-config.ts
+  // as Google/Yelp reviews accumulate.
+  ...(aggregateRatingSchema() ? { aggregateRating: aggregateRatingSchema() } : {}),
 };
 
 // ──────────────────────────────────────────────────────────────────────────

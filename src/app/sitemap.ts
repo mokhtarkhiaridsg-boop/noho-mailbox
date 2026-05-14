@@ -5,6 +5,8 @@ import { getAllStateSlugs } from "@/lib/state-llc-pages";
 import { getAllCompetitorSlugs } from "@/lib/competitor-pages";
 import { getAllUseCaseSlugs } from "@/lib/use-case-pages";
 import { getAllIntlSaasSlugs } from "@/lib/international-saas-pages";
+import { getAllNeighborhoodSlugs } from "@/lib/neighborhood-pages";
+import { getAllPersonaSlugs } from "@/lib/persona-pages";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://nohomailbox.org";
@@ -87,6 +89,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
+  // Persona-keyed virtual mailbox pages (iter-227) — targets buyer-intent
+  // queries like "virtual mailbox for amazon seller", "for digital nomad",
+  // "for foreign llc". Intent is strongest at the persona layer so we
+  // give these equal priority to the state pages.
+  const virtualMailboxPersonaPages = getAllPersonaSlugs().map((slug) => ({
+    path: `/virtual-mailbox/for/${slug}`,
+    priority: 0.8,
+  }));
+
   // Competitor-comparison pages.
   const vsPages = getAllCompetitorSlugs().map((slug) => ({
     path: `/vs/${slug}`,
@@ -105,6 +116,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
+  // Hyper-local neighborhood landing pages (iter-227) — targets
+  // low-competition phrases like "private mailbox burbank" /
+  // "mailbox rental studio city". One static page per LA/SFV
+  // neighborhood adjacent to our 5062 Lankershim storefront.
+  const neighborhoodPages = getAllNeighborhoodSlugs().map((slug) => ({
+    path: `/private-mailbox/${slug}`,
+    priority: 0.75,
+  }));
+
   type SitemapPage = {
     path: string;
     priority: number;
@@ -117,9 +137,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...zipPages,
     ...statePages,
     ...virtualMailboxStatePages,
+    ...virtualMailboxPersonaPages,
     ...vsPages,
     ...useCasePages,
     ...intlPages,
+    ...neighborhoodPages,
   ];
 
   return all.map((page) => ({

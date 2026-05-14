@@ -113,31 +113,54 @@ function ExitIntentDialog({ onDismiss }: { onDismiss: () => void }) {
         </button>
 
         <div
-          className="inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full mb-4"
+          className="inline-flex items-center gap-1.5 px-3 py-1 text-[10.5px] font-bold uppercase tracking-[0.18em] rounded-full mb-4"
           style={{
-            background: "rgba(245,166,35,0.15)",
-            color: "#F5A623",
-            border: "1px solid rgba(245,166,35,0.3)",
+            background: "rgba(51,116,133,0.10)",
+            color: "#337485",
+            border: "1px solid rgba(51,116,133,0.28)",
           }}
         >
-          One last thing
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#337485" }} />
+          Limited-time offer
         </div>
 
         <h2
           id="exit-intent-heading"
-          className="text-2xl md:text-3xl font-extrabold tracking-tight mb-3"
-          style={{ color: "#2D100F" }}
+          className="font-extrabold tracking-tight mb-3"
+          style={{
+            color: "#2D100F",
+            fontFamily: "var(--font-baloo), 'Baloo 2', system-ui, sans-serif",
+            fontSize: "clamp(1.5rem, 4vw, 1.875rem)",
+            lineHeight: 1.1,
+          }}
         >
-          Before you go — get $5 off your first delivery
+          Before you go —{" "}
+          <span style={{ fontFamily: "var(--font-pacifico), 'Pacifico', cursive", color: "#337485", fontWeight: 400 }}>
+            first month free
+          </span>
         </h2>
         <p
-          className="text-sm leading-relaxed mb-5"
-          style={{ color: "#7A6050" }}
+          className="text-[14.5px] leading-relaxed mb-4"
+          style={{ color: "#5C4540" }}
         >
-          Drop your email and we&apos;ll send you a $5 credit you can apply to any
-          same-day delivery, plus our monthly small-business newsletter (1 email,
-          no spam).
+          Drop your email and we&apos;ll send a one-time code for your first month free on any virtual mailbox plan.
+          Real LA address, scanning, forwarding — try it without paying a cent.
         </p>
+
+        <ul className="space-y-1.5 mb-5">
+          {[
+            "Real California street address (not a P.O. Box)",
+            "Unlimited mail scanning + dashboard",
+            "Cancel anytime — no commitment, no card hold",
+          ].map((b) => (
+            <li key={b} className="flex items-start gap-2 text-[13px]" style={{ color: "#2D100F" }}>
+              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 8 L7 12 L13 4" />
+              </svg>
+              {b}
+            </li>
+          ))}
+        </ul>
 
         {state.success ? (
           <div
@@ -182,10 +205,15 @@ function ExitIntentDialog({ onDismiss }: { onDismiss: () => void }) {
             <button
               type="submit"
               disabled={pending}
-              className="w-full text-white font-bold py-3 rounded-xl transition-all hover:-translate-y-0.5 disabled:opacity-50"
-              style={{ background: "#337485" }}
+              className="w-full font-bold py-3.5 rounded-xl transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              style={{ background: "#2D100F", color: "#F7E6C2", minHeight: 48 }}
             >
-              {pending ? "Subscribing…" : "Send me the $5 credit"}
+              {pending ? "Sending…" : "Claim my first month free"}
+              {!pending && (
+                <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none">
+                  <path d="M4 10 H16 M12 6 L16 10 L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
             </button>
             {state.error && (
               <p className="text-xs" style={{ color: "#dc2626" }}>{state.error}</p>

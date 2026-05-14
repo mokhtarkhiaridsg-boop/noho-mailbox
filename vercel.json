@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/square-sync",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/onboarding-nudge",
+      "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron/indexnow-ping",
+      "schedule": "0 7 * * *"
     }
   ]
 }
